@@ -94,6 +94,7 @@ model User {
   subscriptions Subscription[]
   auditEvents AuditEvent[] @relation("AuditActor")
   sessions RefreshSession[]
+  notifications Notification[]
 
   @@index([role, disabledAt])
   @@map("users")
@@ -364,4 +365,21 @@ model NewsletterSubscriber {
 
   @@index([confirmedAt, unsubscribedAt])
   @@map("newsletter_subscribers")
+}
+
+model Notification {
+  id String @id @default(cuid())
+  userId String
+  type String
+  title String
+  message String @db.Text
+  entityType String?
+  entityId String?
+  readAt DateTime?
+  createdAt DateTime @default(now())
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt, createdAt(sort: Desc)])
+  @@index([entityType, entityId])
+  @@map("notifications")
 }
