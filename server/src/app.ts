@@ -1,0 +1,18 @@
+import express, { type ErrorRequestHandler } from "express";
+import cors from "cors";
+import helmet from "helmet";
+import { randomUUID } from "node:crypto";
+import { env } from "./config/env.js";
+import { prisma } from "./db/prisma.js";
+export const app = express();
+if (env.trustProxy) app.set("trust proxy", 1);
+app.disable("x-powered-by");
+app.use((req,res,next)=>{res.setHeader("x-request-id",req.header("x-request-id") || randomUUID());next();});
+app.use(helmet());
+app.use(cors({origin(origin,cb){if(!origin || env.corsOrigins.includes(origin)) return cb(null,true); return cb(new Error("Origin not allowed by CORS"));},credentials:true}));
+app.use(express.json({limit:"1mb",strict:true}));
+app.get("/health/live",(_req,res)=>res.status(200).json({status:"ok"}));
+app.get("/health/ready",async(_req,res)=>{try{await prisma.$queryRawUnsafe("SELECT 1");res.status(200).json({status:"ready",dependencies:{postgres:"ok"}});}catch{res.status(503).json({status:"not_ready",dependencies:{postgres:"unavailable"}});}});
+app.use((_req,res)=>res.status(404).json({error:{code:"NOT_FOUND",message:"Route not found"}}));
+const errors:ErrorRequestHandler=(err,_req,res,_next)=>{const requestId=res.getHeader("x-request-id");console.error(JSON.stringify({level:"error",requestId,message:err instanceof Error?err.message:"Unknown error"}));res.status(500).json({error:{code:"INTERNAL_ERROR",message:"Internal server error",requestId}});};
+app.use(errors);
