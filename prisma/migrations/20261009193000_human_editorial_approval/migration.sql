@@ -2,6 +2,8 @@
 -- Apply only after backup and validation against a disposable Neon branch.
 ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'REVIEWER';
 ALTER TYPE "UserRole" ADD VALUE IF NOT EXISTS 'CHIEF_EDITOR';
+ALTER TYPE "ArticleStatus" ADD VALUE IF NOT EXISTS 'CHANGES_REQUESTED';
+ALTER TYPE "ArticleStatus" ADD VALUE IF NOT EXISTS 'REJECTED';
 
 CREATE TYPE "EditorialRiskLevel" AS ENUM ('LOW', 'MEDIUM', 'HIGH', 'CRITICAL');
 
