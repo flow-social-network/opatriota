@@ -5,6 +5,7 @@ import { EditorialGrid } from './components/EditorialGrid';
 import { FactCheckRibbon } from './components/FactCheckRibbon';
 import { BrandPillarsFooter } from './components/BrandPillarsFooter';
 import { Footer } from './components/Footer';
+import { LiveSourceNews } from './components/LiveSourceNews';
 import { ArticleView } from './components/ArticleView';
 import { FactCheckHub } from './components/FactCheckHub';
 import { AdminDashboard } from './components/AdminDashboard';
@@ -444,6 +445,8 @@ export default function App() {
               articles={articles}
               onSelectArticle={handleSelectArticle}
             />
+
+            <LiveSourceNews />
 
             <EditorialGrid
               articles={articles}
