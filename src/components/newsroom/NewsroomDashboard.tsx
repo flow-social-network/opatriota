@@ -12,7 +12,7 @@ import {
   CategoryDetail,
   SiteMenuConfig
 } from '../../types';
-import { DEMO_USERS, INITIAL_MEDIA_ITEMS } from '../../data/mockData';
+import { api } from '../../services/apiClient';
 import { PagesManager } from '../admin/PagesManager';
 import { CategoriesManager } from '../admin/CategoriesManager';
 import { MenusManager } from '../admin/MenusManager';
@@ -136,7 +136,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   const [aiLoading, setAiLoading] = useState(false);
 
   // Media Library state
-  const [mediaList, setMediaList] = useState<MediaItem[]>(INITIAL_MEDIA_ITEMS);
+  const [mediaList, setMediaList] = useState<MediaItem[]>([]);
   const [mediaUploadModal, setMediaUploadModal] = useState(false);
   const [newMediaName, setNewMediaName] = useState('');
   const [newMediaCredits, setNewMediaCredits] = useState('');
@@ -467,58 +467,38 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     showFeedback(`Matéria "${art.title.substring(0, 30)}..." PUBLICADA no portal!`);
   };
 
-  // AI Assistant trigger
-  const handleRunAiAssistant = () => {
-    if (!formTitle && !formContent) {
-      showFeedback('Digite ao menos o título e uma prévia do texto para acionar o assistente.', 'error');
+  // AI suggestions come from the configured backend provider; never fabricate editorial analysis.
+  const handleRunAiAssistant = async () => {
+    if (!formTitle.trim() && !formContent.trim()) {
+      showFeedback('Digite ao menos o título e o texto para acionar o assistente.', 'error');
       return;
     }
-
     setAiLoading(true);
-    setTimeout(() => {
-      setAiSuggestions({
-        titles: [
-          `${formTitle}: Entenda o impacto fiscal e legislativo no Congresso`,
-          `Modernização e empregabilidade: Os pilares da nova proposição em Brasília`,
-          `Comissão avança com pacote de reformas: O que muda para trabalhadores e setor produtivo`
-        ],
-        clarityScore: '94/100 (Excelente legibilidade editorial)',
-        clarityFeedback: 'Estrutura gramatical formal e concisa. Tom objetivo em conformidade com o Manual de Redação de O Patriota.',
-        missingSources: [
-          'No parágrafo 2: Recomenda-se citar o número do Projeto de Lei ou a página do Diário Oficial da União correspondente.',
-          'No parágrafo 4: Mencione a entidade patronal que emitiu a nota referida.'
-        ],
-        suggestedTags: ['Congresso Nacional', 'Economia Brasileira', 'Legislação', 'Reforma Estrutural', 'Trabalho'],
-        summary: formSubtitle || 'Resumo analítico dos principais desdobramentos da votação.'
+    try {
+      const suggestions = await api.post<{
+        titles?: string[];
+        clarityScore?: string;
+        clarityFeedback?: string;
+        missingSources?: string[];
+        suggestedTags?: string[];
+        summary?: string;
+      }>('/editorial/ai-review', {
+        title: formTitle, subtitle: formSubtitle, content: formContent,
+        category: formCategory, sources: formSources.split('\n').filter(Boolean)
       });
+      setAiSuggestions(suggestions);
+      showFeedback('Sugestões reais do assistente editorial carregadas.');
+    } catch (error) {
+      showFeedback(error instanceof Error ? error.message : 'Assistente editorial indisponível; nenhuma sugestão fictícia foi apresentada.', 'error');
+    } finally {
       setAiLoading(false);
-      showFeedback('Auditoria e sugestões de redação geradas pela IA!');
-    }, 1200);
+    }
   };
 
-  // Media upload simulation
+  // A metadata-only form must not pretend to upload an image file.
   const handleMediaUpload = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMediaName.trim()) return;
-
-    const newItem: MediaItem = {
-      id: 'med-' + Date.now(),
-      name: newMediaName.endsWith('.jpg') ? newMediaName : `${newMediaName}.jpg`,
-      url: '/src/assets/images/hero_congresso.jpg',
-      uploadedAt: new Date().toLocaleDateString('pt-BR'),
-      uploadedBy: currentUser.name,
-      fileType: 'image/jpeg',
-      sizeBytes: 850000,
-      caption: newMediaCaption,
-      credits: newMediaCredits || 'Redação O Patriota'
-    };
-
-    setMediaList([newItem, ...mediaList]);
-    setNewMediaName('');
-    setNewMediaCaption('');
-    setNewMediaCredits('');
-    setMediaUploadModal(false);
-    showFeedback('Imagem adicionada à Biblioteca de Mídia!');
+    showFeedback('O envio de ficheiros ainda não está ligado a um armazenamento de mídia. Nenhum ficheiro foi enviado.', 'error');
   };
 
   // Filtered articles list
