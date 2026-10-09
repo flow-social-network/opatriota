@@ -16,7 +16,9 @@ export default async function handler(req: IncomingMessage & { method?: string; 
     if(!validEmail(email) || !name) return json(res,400,{error:'CUSTOMER_DATA_REQUIRED',message:'Informe nome e e-mail válidos.'});
     if(amount<=0) return json(res,400,{error:'FREE_PLAN_NOT_PAYABLE',message:'O plano gratuito não deve gerar cobrança.'});
     if(!['pix','card'].includes(body.paymentMethod)) return json(res,400,{error:'INVALID_PAYMENT_METHOD'});
-    const siteUrl=(process.env.PUBLIC_SITE_URL||'https://opatriota.com.br').replace(/\/$/,'');
+    const configuredSiteUrl = process.env.PUBLIC_SITE_URL || (process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : '');
+    if (!configuredSiteUrl || !configuredSiteUrl.startsWith('https://')) return json(res,503,{error:'PUBLIC_SITE_URL_NOT_CONFIGURED',message:'Configure a URL HTTPS pública do jornal nas variáveis de ambiente.'});
+    const siteUrl=configuredSiteUrl.replace(/\/$/,'');
     const orderId=newId();
     const order={orderId,uid:user?.localId||null,customerName:name,customerEmail:email,planId,planName:plan.name,cycle,amount,status:'pending',paymentProvider:'mercadopago',createdAt:new Date().toISOString(),paymentMethod:body.paymentMethod};
     await firestoreWrite('checkoutOrders',orderId,order,false);
@@ -28,6 +30,7 @@ export default async function handler(req: IncomingMessage & { method?: string; 
       back_urls:{success:siteUrl+'/?checkout=success&order='+encodeURIComponent(orderId),pending:siteUrl+'/?checkout=pending&order='+encodeURIComponent(orderId),failure:siteUrl+'/?checkout=failure&order='+encodeURIComponent(orderId)},
       auto_return:'approved',
       statement_descriptor:'O PATRIOTA',
+      payment_methods:{excluded_payment_types:body.paymentMethod==='pix'?[{id:'credit_card'},{id:'debit_card'},{id:'ticket'}]:[{id:'bank_transfer'},{id:'ticket'}]},
       metadata:{order_id:orderId,uid:user?.localId||'',plan_id:planId,billing_cycle:cycle,payment_method:body.paymentMethod}
     };
     const response=await mpRequest('/checkout/preferences',{method:'POST',headers:{'X-Idempotency-Key':orderId},body:JSON.stringify(preference)});
