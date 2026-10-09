@@ -143,6 +143,50 @@ paths:
         "403": { $ref: "#/components/responses/Forbidden" }
         "404": { $ref: "#/components/responses/NotFound" }
         "409": { description: Conflito de versão }
+  /api/notifications:
+    get:
+      summary: Listar notificações do utilizador autenticado
+      responses:
+        "200":
+          description: Até 50 notificações mais recentes e contador de não lidas
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, unreadCount]
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, type, title, message, readAt, createdAt]
+                      properties:
+                        id: { type: string }
+                        type: { type: string }
+                        title: { type: string }
+                        message: { type: string }
+                        entityType: { type: [string, "null"] }
+                        entityId: { type: [string, "null"] }
+                        readAt: { type: [string, "null"], format: date-time }
+                        createdAt: { type: string, format: date-time }
+                  unreadCount: { type: integer, minimum: 0 }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/notifications/{id}/read:
+    patch:
+      summary: Marcar notificação própria como lida
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Notificação marcada como lida }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/notifications/read-all:
+    post:
+      summary: Marcar notificações próprias como lidas
+      responses:
+        "200": { description: Número de notificações atualizadas }
   /api/articles/{id}/submit:
     post:
       summary: Submeter matéria para revisão
