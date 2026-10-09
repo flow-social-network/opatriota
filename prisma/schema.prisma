@@ -83,7 +83,9 @@ model User {
   subscriptions Subscription[]
   auditEvents AuditEvent[] @relation("AuditActor")
   sessions RefreshSession[]
-  @@index([role, disabledAt]) @@map("users")
+
+  @@index([role, disabledAt])
+  @@map("users")
 }
 model RefreshSession {
   id String @id @default(cuid())
@@ -95,7 +97,9 @@ model RefreshSession {
   ipHash String?
   createdAt DateTime @default(now())
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  @@index([userId, expiresAt]) @@map("refresh_sessions")
+
+  @@index([userId, expiresAt])
+  @@map("refresh_sessions")
 }
 model Category {
   id String @id @default(cuid())
@@ -105,6 +109,7 @@ model Category {
   articles Article[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
   @@map("categories")
 }
 model Article {
@@ -131,7 +136,11 @@ model Article {
   sources ArticleSource[]
   reviews ArticleReview[]
   factChecks FactCheck[]
-  @@index([status, publishedAt(sort: Desc)]) @@index([categoryId, status, publishedAt(sort: Desc)]) @@index([authorId, updatedAt(sort: Desc)]) @@map("articles")
+
+  @@index([status, publishedAt(sort: Desc)])
+  @@index([categoryId, status, publishedAt(sort: Desc)])
+  @@index([authorId, updatedAt(sort: Desc)])
+  @@map("articles")
 }
 model ArticleReview {
   id String @id @default(cuid())
@@ -142,7 +151,9 @@ model ArticleReview {
   createdAt DateTime @default(now())
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
   reviewer User @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
-  @@index([articleId, createdAt]) @@map("article_reviews")
+
+  @@index([articleId, createdAt])
+  @@map("article_reviews")
 }
 model Source {
   id String @id @default(cuid())
@@ -160,7 +171,9 @@ model Source {
   updatedAt DateTime @updatedAt
   items IngestionItem[]
   articles ArticleSource[]
-  @@index([status, lastFetchedAt]) @@map("sources")
+
+  @@index([status, lastFetchedAt])
+  @@map("sources")
 }
 model IngestionItem {
   id String @id @default(cuid())
@@ -175,7 +188,11 @@ model IngestionItem {
   status IngestionStatus @default(QUEUED)
   errorMessage String?
   source Source @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  @@unique([sourceId, contentHash]) @@index([status, fetchedAt]) @@index([canonicalUrl]) @@map("ingestion_items")
+
+  @@unique([sourceId, contentHash])
+  @@index([status, fetchedAt])
+  @@index([canonicalUrl])
+  @@map("ingestion_items")
 }
 model ArticleSource {
   articleId String
@@ -184,7 +201,9 @@ model ArticleSource {
   createdAt DateTime @default(now())
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
   source Source @relation(fields: [sourceId], references: [id], onDelete: Restrict)
-  @@id([articleId, sourceId]) @@map("article_sources")
+
+  @@id([articleId, sourceId])
+  @@map("article_sources")
 }
 model FactCheck {
   id String @id @default(cuid())
@@ -197,7 +216,9 @@ model FactCheck {
   createdAt DateTime @default(now())
   article Article? @relation(fields: [articleId], references: [id], onDelete: SetNull)
   evidence FactCheckEvidence[]
-  @@index([verdict, createdAt]) @@map("fact_checks")
+
+  @@index([verdict, createdAt])
+  @@map("fact_checks")
 }
 model FactCheckEvidence {
   id String @id @default(cuid())
@@ -208,7 +229,9 @@ model FactCheckEvidence {
   sourceDate DateTime?
   capturedAt DateTime @default(now())
   factCheck FactCheck @relation(fields: [factCheckId], references: [id], onDelete: Cascade)
-  @@index([factCheckId, capturedAt]) @@map("fact_check_evidence")
+
+  @@index([factCheckId, capturedAt])
+  @@map("fact_check_evidence")
 }
 model SubscriptionPlan {
   id String @id @default(cuid())
@@ -221,6 +244,7 @@ model SubscriptionPlan {
   active Boolean @default(true)
   createdAt DateTime @default(now())
   subscriptions Subscription[]
+
   @@map("subscription_plans")
 }
 model Subscription {
@@ -239,7 +263,10 @@ model Subscription {
   user User @relation(fields: [userId], references: [id], onDelete: Restrict)
   plan SubscriptionPlan @relation(fields: [planId], references: [id], onDelete: Restrict)
   payments Payment[]
-  @@index([userId, status]) @@index([status, currentPeriodEnd]) @@map("subscriptions")
+
+  @@index([userId, status])
+  @@index([status, currentPeriodEnd])
+  @@map("subscriptions")
 }
 model Payment {
   id String @id @default(cuid())
@@ -259,7 +286,10 @@ model Payment {
   updatedAt DateTime @updatedAt
   subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Restrict)
   events PaymentEvent[]
-  @@index([subscriptionId, createdAt(sort: Desc)]) @@index([status, createdAt]) @@map("payments")
+
+  @@index([subscriptionId, createdAt(sort: Desc)])
+  @@index([status, createdAt])
+  @@map("payments")
 }
 model PaymentEvent {
   id String @id @default(cuid())
@@ -271,7 +301,9 @@ model PaymentEvent {
   processingError String?
   receivedAt DateTime @default(now())
   payment Payment @relation(fields: [paymentId], references: [id], onDelete: Restrict)
-  @@index([paymentId, receivedAt]) @@map("payment_events")
+
+  @@index([paymentId, receivedAt])
+  @@map("payment_events")
 }
 model AuditEvent {
   id String @id @default(cuid())
@@ -283,7 +315,10 @@ model AuditEvent {
   metadata Json?
   createdAt DateTime @default(now())
   actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull)
-  @@index([entityType, entityId, createdAt]) @@index([actorId, createdAt]) @@map("audit_events")
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+  @@map("audit_events")
 }
 model NewsletterSubscriber {
   id String @id @default(cuid())
@@ -292,5 +327,7 @@ model NewsletterSubscriber {
   unsubscribedAt DateTime?
   source String?
   createdAt DateTime @default(now())
-  @@index([confirmedAt, unsubscribedAt]) @@map("newsletter_subscribers")
+
+  @@index([confirmedAt, unsubscribedAt])
+  @@map("newsletter_subscribers")
 }
