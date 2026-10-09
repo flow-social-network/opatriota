@@ -4,7 +4,6 @@ import { X, ShieldCheck, Newspaper } from 'lucide-react';
 type AuthModalProps = {
   onClose: () => void;
   onGoogleLogin: () => Promise<void> | void;
-  onFacebookLogin?: () => Promise<void> | void;
   errorMessage?: string | null;
 };
 
