@@ -351,8 +351,8 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* O ticker fica logo abaixo da barra fixa e recolhe visualmente ao rolar. */}
-      <div className="fixed left-0 right-0 top-[38px] z-50"><BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} /></div>
+      {/* Segunda faixa fixa: mercados ao vivo, logo abaixo da barra cinza. */}
+      <div className="fixed left-0 right-0 top-[38px] z-[55]"><BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} /></div>
 
       {/* 2. GRAND BRANDING BANNER */}
       <div className="py-2 sm:py-2.5 px-4 bg-white border-b border-[#D9DEE7]">
