@@ -119,9 +119,9 @@ export default function App() {
       return;
     }
     let active = true;
-    const load = async <T,>(path: string, setter: (value: T) => void) => {
+    const load = async <T,>(path: string, setter: (value: T) => void, auth = false) => {
       try {
-        const result = await api.get<T>(path, { auth: false });
+        const result = await api.get<T>(path, { auth });
         if (active) setter(result);
       } catch (error) {
         console.error('Falha ao carregar ' + path, error);
@@ -131,8 +131,8 @@ export default function App() {
       load<import('./types').SubscriptionPlan[]>('/plans', setSubscriptionPlans),
       load<Article[]>('/articles', setArticles),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
-      load<RssSource[]>('/editorial/sources', setSources),
-      load<EditorialQueueItem[]>('/editorial/queue', setQueueItems),
+      load<RssSource[]>('/editorial/sources', setSources, true),
+      load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),
       load<InstitutionalPage[]>('/pages', setPages),
       load<CategoryDetail[]>('/categories', setCategories),
       load<AuthorDetail[]>('/authors', setAuthors),
@@ -155,8 +155,8 @@ export default function App() {
   }, []);
 
   const handleSavePortalSettings = async (newSettings: PortalSettings) => {
-    setPortalSettings(newSettings);
     const res = await savePortalSettings(newSettings);
+    if (res.success) setPortalSettings(newSettings);
     showToast(res.message);
   };
 
