@@ -11,6 +11,28 @@
 - Não introduzir Supabase, MongoDB ou Firestore como segundo banco por suposição. O repositório documenta Neon/PostgreSQL + Prisma. O outro provedor referido precisa ser nomeado antes de ser adotado.
 - O artigo completo permanece gratuito; a publicação social gera uma prévia fiel e não substitui a matéria.
 
+
+## Política editorial obrigatória — aprovação humana antes da publicação
+
+Esta regra é obrigatória para todo o conteúdo novo, independentemente de quem o escreveu ou de como foi produzido.
+
+1. **Nada vai ao ar antes da aprovação humana explícita.** Matérias de colunistas, jornalistas, colaboradores, fontes RSS/API e conteúdo assistido por IA permanecem privadas no painel enquanto aguardam triagem, análise de risco e aprovação.
+2. A IA pode preparar rascunho, resumir fontes, detectar duplicidade/contradições, apontar alegações sensíveis e recomendar um nível de risco. A IA não é a aprovadora final e não pode, sozinha, publicar ou agendar publicação pública.
+3. A aprovação pendente gera uma notificação para o responsável editorial designado. O painel deve apresentar o texto, fontes, autoria, histórico, sinais de risco e análise da IA para revisão humana.
+4. O responsável analisa o material e escolhe Aprovar, Solicitar alterações ou Rejeitar, registrando decisão, data, identidade do revisor e notas. A aprovação deve ser uma ação explícita, não inferida pela abertura da matéria ou por uma pontuação automática.
+5. Para matérias de terceiros, o autor não pode aprovar a própria matéria. A aprovação cabe ao responsável editorial autorizado.
+6. Para conteúdo escrito pelo proprietário/editor-chefe designado, o próprio responsável pode analisar e aprovar a sua matéria, com registo explícito de autoaprovação (isSelfApproval=true) e trilha de auditoria. A autoaprovação não pode ser acionada automaticamente pela IA.
+7. Níveis HIGH/CRITICAL, acusações graves, crime, eleições, saúde, finanças, dados pessoais, contradições relevantes ou risco jurídico exigem análise humana reforçada. A IA deve sinalizar, não decidir que o risco é aceitável.
+8. Aprovar não significa publicar imediatamente. A aprovação transita para APPROVED; publicação/agendamento é um passo separado, executado por pessoa autorizada ou por agendador após a aprovação já registada.
+9. APIs públicas só podem devolver artigos efetivamente PUBLISHED com publishedAt válido. Rascunhos, em revisão, reprovados ou apenas aprovados nunca aparecem em homepage, feed, busca pública, RSS público ou redes sociais.
+10. A publicação em redes sociais obedece à mesma barreira: só artigos aprovados e com autorização de publicação podem ser enviados. Repetições devem ser idempotentes.
+
+Estados editoriais previstos:
+DRAFT -> IN_REVIEW -> APPROVED -> SCHEDULED -> PUBLISHED
+Ramos de revisão: IN_REVIEW -> CHANGES_REQUESTED -> IN_REVIEW ou IN_REVIEW -> REJECTED. Estados novos precisam ser harmonizados no enum Prisma e nos contratos antes de aplicar a migração final.
+
+**Atenção à implementação atual:** a rota de publicação já filtra conteúdo por estado publicado nos endpoints públicos, mas o fluxo completo de notificação, avaliação de risco, aprovação humana, autoaprovação autorizada e integração Firebase ainda precisa ser implementado e testado no backend. A migração SQL preparada não foi aplicada ao Neon.
+
 ## Firebase Authentication
 1. No Firebase Console, habilitar Google em Authentication > Sign-in method e cadastrar domínios de dev/produção em Authorized domains.
 2. Preencher VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID e VITE_FIREBASE_APP_ID no ambiente do frontend.
