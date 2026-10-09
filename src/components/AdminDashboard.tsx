@@ -1,3 +1,4 @@
+import { api } from '../services/apiClient';
 import React, { useState } from 'react';
 import { RssSource, EditorialQueueItem, DedupStatus, EditorialStatus, PortalSettings } from '../types';
 import { OfficialSourcesHub } from './admin/OfficialSourcesHub';
@@ -78,40 +79,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [zipSuccess, setZipSuccess] = useState<string | null>(null);
   const [zipError, setZipError] = useState<string | null>(null);
 
-  // Sync handler
-  const handleSyncAll = () => {
+  // The backend performs the actual RSS fetch and persists source/queue updates.
+  const handleSyncAll = async () => {
     setIsSyncing(true);
-    setSyncMessage('Consultando feeds RSS e verificando fontes oficiais...');
-
-    setTimeout(() => {
-      const updatedSources = sources.map((s) => ({
-        ...s,
-        lastPolled: 'Agora mesmo',
-        lastSuccess: 'Agora mesmo',
-        itemsReceived: s.itemsReceived + Math.floor(Math.random() * 3) + 1
-      }));
-      onUpdateSource(updatedSources);
-
-      // Add a simulated fresh item to the editorial queue
-      const newItem: EditorialQueueItem = {
-        id: Date.now(),
-        title: 'Tribunal Superior regulamenta uso de identificação biométrica nas eleições suplementares',
-        summary: 'Resolução aprovada por unanimidade estabelece regras para validação de título eleitoral via aplicativo oficial.',
-        originalUrl: 'https://www.tse.jus.br/comunicacao/noticias/exemplo-novo',
-        canonicalUrl: 'https://tse.jus.br/comunicacao/noticias/exemplo-novo',
-        sourceName: 'Supremo Tribunal Federal / TSE',
-        category: 'politica',
-        capturedAt: 'Agora mesmo',
-        dedupStatus: 'NOVO',
-        dedupReason: 'Camada 5: Inédito após verificação nas 5 camadas.',
-        editorialStatus: 'RECEBIDA'
-      };
-
-      onUpdateQueue([newItem, ...queueItems]);
-      setIsSyncing(false);
-      setSyncMessage('Sincronização concluída com sucesso! 1 nova pauta encaminhada para a triagem.');
+    setSyncMessage('Consultando feeds RSS reais e persistindo as pautas...');
+    try {
+      const result = await api.post<{
+        sources: RssSource[];
+        queueItems: EditorialQueueItem[];
+        importedCount: number;
+        checkedSources: number;
+      }>('/editorial/sources/sync', {});
+      onUpdateSource(result.sources);
+      if (result.queueItems.length) onUpdateQueue([...result.queueItems, ...queueItems]);
+      setSyncMessage(`Sincronização concluída: ${result.checkedSources} fontes consultadas; ${result.importedCount} pautas novas.`);
       setTimeout(() => setSyncMessage(null), 5000);
-    }, 1500);
+    } catch (error) {
+      setSyncMessage(error instanceof Error ? error.message : 'Falha na sincronização. Nenhuma pauta fictícia foi criada.');
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   // Add source handler
