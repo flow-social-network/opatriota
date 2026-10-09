@@ -12,6 +12,7 @@ import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
 import { SupportModal } from './components/SupportModal';
 import { observeAuth, signInWithGoogle, signOutFromFirebase } from './services/firebaseAuthService';
+import { api, isApiConfigured } from './services/apiClient';
 
 // Model Pages Components
 import { InstitutionalPageView } from './components/pages/InstitutionalPageView';
@@ -27,21 +28,11 @@ import { NotFoundPageView } from './components/pages/NotFoundPageView';
 import { CustomPageView } from './components/pages/CustomPageView';
 
 import { 
-  INITIAL_ARTICLES, 
-  INITIAL_FACT_CHECKS, 
-  INITIAL_RSS_SOURCES, 
-  INITIAL_EDITORIAL_QUEUE,
-  DEMO_USERS,
   SUBSCRIPTION_PLANS
 } from './data/mockData';
 
 import { 
-  INITIAL_PAGES, 
-  INITIAL_CATEGORIES, 
-  INITIAL_AUTHORS, 
-  INITIAL_MENU_CONFIG,
-  INITIAL_CONTACT_SUBMISSIONS,
-  INITIAL_LGPD_REQUESTS
+  INITIAL_MENU_CONFIG
 } from './data/pagesData';
 
 import { 
@@ -97,18 +88,18 @@ export default function App() {
   const [selectedCheckoutPlanId, setSelectedCheckoutPlanId] = useState<string>('digital');
   
   // Data States
-  const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
-  const [factChecks, setFactChecks] = useState<FactCheckItem[]>(INITIAL_FACT_CHECKS);
-  const [sources, setSources] = useState<RssSource[]>(INITIAL_RSS_SOURCES);
-  const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>(INITIAL_EDITORIAL_QUEUE);
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [factChecks, setFactChecks] = useState<FactCheckItem[]>([]);
+  const [sources, setSources] = useState<RssSource[]>([]);
+  const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>([]);
   
   // Pages & Navigation Data
-  const [pages, setPages] = useState<InstitutionalPage[]>(INITIAL_PAGES);
-  const [categories, setCategories] = useState<CategoryDetail[]>(INITIAL_CATEGORIES);
-  const [authors, setAuthors] = useState<AuthorDetail[]>(INITIAL_AUTHORS);
-  const [menuConfig, setMenuConfig] = useState<SiteMenuConfig>(INITIAL_MENU_CONFIG);
-  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>(INITIAL_CONTACT_SUBMISSIONS);
-  const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>(INITIAL_LGPD_REQUESTS);
+  const [pages, setPages] = useState<InstitutionalPage[]>([]);
+  const [categories, setCategories] = useState<CategoryDetail[]>([]);
+  const [authors, setAuthors] = useState<AuthorDetail[]>([]);
+  const [menuConfig, setMenuConfig] = useState<SiteMenuConfig>({ mainNav: [], topBar: [], footerCol1: [], footerCol2: [], footerCol3: [] });
+  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
+  const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>([]);
 
   // A sessão real é restaurada pelo Firebase; enquanto isso, o visitante permanece sem identidade.
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
@@ -128,7 +119,7 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // Load persistent settings from the centralized portal service on mount
+  // Carrega dados reais da API. Se a API falhar, a interface permanece vazia e não inventa conteúdo.\n  useEffect(() => {\n    if (!isApiConfigured()) {\n      setToastMessage('API não configurada: defina VITE_API_BASE_URL para carregar conteúdo real.');\n      return;\n    }\n    let active = true;\n    const load = async <T,>(path: string, setter: (value: T) => void) => {\n      try {\n        const result = await api.get<T>(path, { auth: false });\n        if (active) setter(result);\n      } catch (error) {\n        console.error('Falha ao carregar ' + path, error);\n      }\n    };\n    void Promise.all([\n      load<Article[]>('/articles', setArticles),\n      load<FactCheckItem[]>('/fact-checks', setFactChecks),\n      load<RssSource[]>('/editorial/sources', setSources),\n      load<EditorialQueueItem[]>('/editorial/queue', setQueueItems),\n      load<InstitutionalPage[]>('/pages', setPages),\n      load<CategoryDetail[]>('/categories', setCategories),\n      load<AuthorDetail[]>('/authors', setAuthors),\n      load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),\n    ]);\n    return () => { active = false; };\n  }, []);\n\n  // Load persistent settings from the centralized portal service on mount
   useEffect(() => {
     let isMounted = true;
     loadPortalSettings().then((loaded) => {
@@ -546,7 +537,7 @@ export default function App() {
       {currentView === 'plans' && (
         <main className="flex-1">
           <PlansPageView
-            plans={SUBSCRIPTION_PLANS}
+            plans={[]}
             currentUser={currentUser}
             onSelectPlan={(planId) => {
               setSelectedCheckoutPlanId(planId);
