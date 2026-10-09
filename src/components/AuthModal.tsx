@@ -4,10 +4,11 @@ import { X, ShieldCheck, Newspaper } from 'lucide-react';
 type AuthModalProps = {
   onClose: () => void;
   onGoogleLogin: () => Promise<void> | void;
+  onFacebookLogin: () => Promise<void> | void;
   errorMessage?: string | null;
 };
 
-export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onGoogleLogin, errorMessage }) => {
+export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onGoogleLogin, onFacebookLogin, errorMessage }) => {
   const [mode, setMode] = useState<'login' | 'register'>('login');
   const [loading, setLoading] = useState(false);
 
@@ -24,10 +25,11 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onGoogleLogin, er
     };
   }, [onClose]);
 
-  const handleGoogle = async () => {
+  const handleProviderLogin = async (provider: 'google' | 'facebook') => {
     setLoading(true);
     try {
-      await onGoogleLogin();
+      if (provider === 'google') await onGoogleLogin();
+      else await onFacebookLogin();
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onGoogleLogin, er
             </button>
           </div>
           {errorMessage && <p role="alert" className="mb-4 rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700">{errorMessage}</p>}
-          <button type="button" onClick={handleGoogle} disabled={loading}
+          <button type="button" onClick={() => handleProviderLogin('google')} disabled={loading}
             className="flex w-full items-center justify-center gap-3 rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50 disabled:cursor-wait disabled:opacity-60">
             <svg aria-hidden="true" viewBox="0 0 48 48" className="h-5 w-5">
               <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.01 13.22l7.98 6.19C11.93 13.72 17.47 9.5 24 9.5Z" transform="translate(0 4)"/>
@@ -75,6 +77,13 @@ export const AuthModal: React.FC<AuthModalProps> = ({ onClose, onGoogleLogin, er
               <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.91-5.8l-7.73-6c-2.14 1.44-4.89 2.3-8.18 2.3-6.53 0-12.07-4.22-14.01-10.09l-8.06 6.19C6.51 42.62 14.62 48 24 48Z"/>
             </svg>
             {loading ? 'Conectando com o Google…' : mode === 'login' ? 'Continuar com Google' : 'Cadastrar com Google'}
+          </button>
+          <button type="button" onClick={() => handleProviderLogin('facebook')} disabled={loading}
+            className="mt-3 flex w-full items-center justify-center gap-3 rounded-lg bg-[#1877F2] px-4 py-3 text-sm font-bold text-white transition hover:bg-[#166FE5] disabled:cursor-wait disabled:opacity-60">
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
+              <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.098 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047V9.413c0-3.025 1.792-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.49 0-1.955.93-1.955 1.886v2.265h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.098 24 12.073Z"/>
+            </svg>
+            {loading ? 'Conectando…' : mode === 'login' ? 'Continuar com Facebook' : 'Cadastrar com Facebook'}
           </button>
           <div className="mt-5 flex items-start gap-2 text-xs leading-relaxed text-slate-500">
             <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#16803C]" />
