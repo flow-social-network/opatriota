@@ -5,7 +5,8 @@ import {
   SubscriptionPlan, 
   PaymentRecord 
 } from '../../types';
-import { SUBSCRIPTION_PLANS, DEMO_USERS, INITIAL_PAYMENTS } from '../../data/mockData';
+import { api } from '../../services/apiClient';
+import { signInWithEmail, registerWithEmail, requestPasswordReset } from '../../services/firebaseAuthService';
 import { 
   User, 
   CreditCard, 
@@ -93,123 +94,70 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
   const [notifSaved, setNotifSaved] = useState(false);
 
   // Payments
-  const [payments, setPayments] = useState<PaymentRecord[]>(INITIAL_PAYMENTS);
+  const [payments, setPayments] = useState<PaymentRecord[]>([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
 
   // LGPD Privacy
   const [deletionRequested, setDeletionRequested] = useState(false);
 
-  // Login handler with brute force protection
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  React.useEffect(() => {
+    void api.get<SubscriptionPlan[]>('/plans', { auth: false }).then(setSubscriptionPlans).catch(error => {
+      console.error('Falha ao carregar planos reais:', error);
+    });
+  }, []);
+
+  // Authentication and registration are delegated to Firebase; no browser-created sessions.
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError(null);
-
     if (loginAttempts >= 5) {
-      setLoginError('Muitas tentativas consecutivas incorretas. Por motivos de segurança (proteção contra força bruta), aguarde 15 minutos.');
+      setLoginError('Muitas tentativas consecutivas. Aguarde antes de tentar novamente.');
       return;
     }
-
-    // Match demo users
-    const foundUser = Object.values(DEMO_USERS).find(
-      u => u.email.toLowerCase() === loginEmail.trim().toLowerCase()
-    );
-
-    if (foundUser) {
-      onLogin(foundUser);
+    try {
+      const user = await signInWithEmail(loginEmail, loginPassword);
+      onLogin(user);
       setCurrentSubpage('dashboard');
       setLoginAttempts(0);
-    } else if (loginEmail.trim() && loginPassword.length >= 6) {
-      // Create user session dynamically
-      const newUser: UserSession = {
-        id: 'usr-' + Date.now(),
-        name: loginEmail.split('@')[0],
-        email: loginEmail,
-        role: 'leitor_gratuito',
-        subscription: {
-          plan: 'gratuito',
-          status: 'ativo',
-          autoRenew: false
-        },
-        bookmarks: [],
-        notificationPrefs: {
-          breakingNews: true,
-          dailyBrief: false,
-          factChecks: true,
-          weeklyDigest: true
-        },
-        createdAt: new Date().toLocaleDateString('pt-BR')
-      };
-      onLogin(newUser);
-      setCurrentSubpage('dashboard');
-      setLoginAttempts(0);
-    } else {
-      const newAttempts = loginAttempts + 1;
-      setLoginAttempts(newAttempts);
-      setLoginError(`Credenciais incorretas. Tentativa ${newAttempts} de 5.`);
+    } catch (error) {
+      const attempts = loginAttempts + 1;
+      setLoginAttempts(attempts);
+      setLoginError(error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED'
+        ? 'Autenticação ainda não configurada neste ambiente.'
+        : `Não foi possível entrar com estas credenciais (tentativa ${attempts} de 5).`);
     }
   };
 
-  // Quick switch demo user for testing
-  const handleQuickDemoLogin = (demoKey: keyof typeof DEMO_USERS) => {
-    const user = DEMO_USERS[demoKey];
-    onLogin(user);
-    setActivePlanId(user.subscription.plan);
-    setProfileName(user.name);
-    setProfilePhone(user.phone || '');
-    setProfileBio(user.bio || '');
-    setCurrentSubpage('dashboard');
-  };
-
-  // Registration handler
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setRegError(null);
-
-    if (!regName.trim() || !regEmail.trim()) {
-      setRegError('Preencha todos os campos obrigatórios.');
-      return;
-    }
-
-    if (regPassword.length < 6) {
-      setRegError('A senha deve possuir no mínimo 6 caracteres.');
-      return;
-    }
-
-    if (regPassword !== regPasswordConfirm) {
-      setRegError('A confirmação de senha não confere.');
-      return;
-    }
-
-    if (!regTermsAccepted) {
-      setRegError('É necessário aceitar os Termos de Uso e a Política de Privacidade.');
-      return;
-    }
-
-    const created: UserSession = {
-      id: 'usr-' + Date.now(),
-      name: regName,
-      email: regEmail,
-      role: 'leitor_gratuito',
-      subscription: {
-        plan: 'gratuito',
-        status: 'ativo',
-        autoRenew: false
-      },
-      bookmarks: [],
-      notificationPrefs: {
-        breakingNews: true,
-        dailyBrief: true,
-        factChecks: true,
-        weeklyDigest: true
-      },
-      createdAt: new Date().toLocaleDateString('pt-BR')
-    };
-
-    setRegSuccess(true);
-    setTimeout(() => {
-      onLogin(created);
+    if (!regName.trim() || !regEmail.trim()) { setRegError('Preencha todos os campos obrigatórios.'); return; }
+    if (regPassword.length < 8) { setRegError('A senha deve possuir no mínimo 8 caracteres.'); return; }
+    if (regPassword !== regPasswordConfirm) { setRegError('A confirmação de senha não confere.'); return; }
+    if (!regTermsAccepted) { setRegError('É necessário aceitar os Termos de Uso e a Política de Privacidade.'); return; }
+    try {
+      const user = await registerWithEmail(regName, regEmail, regPassword);
+      onLogin(user);
       setCurrentSubpage('dashboard');
-      setRegSuccess(false);
-    }, 1500);
+      setRegSuccess(true);
+    } catch (error) {
+      setRegError(error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED'
+        ? 'Autenticação ainda não configurada neste ambiente.'
+        : 'Não foi possível criar a conta. Verifique se o e-mail já está cadastrado e tente novamente.');
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginError(null);
+    try {
+      await requestPasswordReset(resetEmail);
+      setResetSent(true);
+    } catch (error) {
+      setLoginError(error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED'
+        ? 'Autenticação ainda não configurada neste ambiente.'
+        : 'Não foi possível enviar o link. Verifique o e-mail informado.');
+    }
   };
 
   // Profile save
@@ -383,35 +331,6 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                   </button>
                 </form>
 
-                {/* Quick Testing Accounts */}
-                <div className="mt-8 pt-6 border-t border-[#D9DEE7] text-xs">
-                  <div className="text-[11px] font-bold text-[#5D6673] uppercase mb-2 text-center">
-                    Acessar Rapidamente para Testes:
-                  </div>
-                  <div className="grid grid-cols-3 gap-2 text-center text-[10px]">
-                    <button
-                      onClick={() => handleQuickDemoLogin('gratuito')}
-                      className="p-2 border border-[#D9DEE7] hover:border-[#0B2345] rounded bg-[#F7F8FA] cursor-pointer"
-                    >
-                      <div className="font-bold text-[#0B2345]">Leitor Grátis</div>
-                      <div className="text-[9px] text-[#5D6673]">Acesso Aberto</div>
-                    </button>
-                    <button
-                      onClick={() => handleQuickDemoLogin('digital')}
-                      className="p-2 border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded bg-[#F7F8FA] cursor-pointer font-bold"
-                    >
-                      <div>Assinante Digital</div>
-                      <div className="text-[9px]">Acesso Exclusivo</div>
-                    </button>
-                    <button
-                      onClick={() => handleQuickDemoLogin('premium')}
-                      className="p-2 border border-[#16803C] text-[#16803C] hover:bg-[#16803C] hover:text-white rounded bg-[#F7F8FA] cursor-pointer font-bold"
-                    >
-                      <div>Patriota Premium</div>
-                      <div className="text-[9px]">Acesso Irrestrito</div>
-                    </button>
-                  </div>
-                </div>
               </div>
             )}
 
@@ -538,7 +457,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                     </button>
                   </div>
                 ) : (
-                  <form onSubmit={(e) => { e.preventDefault(); if (resetEmail) setResetSent(true); }} className="space-y-4 text-xs">
+                  <form onSubmit={handlePasswordReset} className="space-y-4 text-xs">
                     <div>
                       <label className="block font-semibold mb-1">Seu E-mail Cadastrado:</label>
                       <input
@@ -780,7 +699,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
 
                   {/* Plan Cards Grid */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                    {SUBSCRIPTION_PLANS.map((plan) => {
+                    {subscriptionPlans.map((plan) => {
                       const isCurrent = activePlanId === plan.id;
                       return (
                         <div
