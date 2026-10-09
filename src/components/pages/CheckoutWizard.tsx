@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, ShieldCheck, LockKeyhole, CreditCard, QrCode, UserRound, CircleCheck, Newspaper } from 'lucide-react';
 import type { SubscriptionPlan, UserSession } from '../../types';
+import { getFirebaseIdToken } from '../../services/firebaseAuthService';
 
 type CheckoutStep = 1 | 2 | 3;
 type PaymentMethod = 'pix' | 'card';
@@ -31,6 +32,7 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   const [notice, setNotice] = useState('');
+  const [submittingPayment, setSubmittingPayment] = useState(false);
 
   const selectedPlan = useMemo(
     () => plans.find((plan) => plan.id === planId) ?? plans[0],
@@ -66,6 +68,57 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
         return;
       }
       setStep(3);
+    }
+  };
+
+  const startPayment = async () => {
+    setNotice('');
+    if (isFree) {
+      setNotice('O plano gratuito não gera cobrança. Entre ou crie sua conta para ativar o acesso livre.');
+      return;
+    }
+    if (!acceptedTerms) {
+      setNotice('Aceite os Termos de Uso e a Política de Privacidade para continuar.');
+      setStep(2);
+      return;
+    }
+    if (!currentUser && (!name.trim() || !email.trim())) {
+      setNotice('Informe seu nome e e-mail antes de continuar.');
+      setStep(2);
+      return;
+    }
+    setSubmittingPayment(true);
+    try {
+      const token = await getFirebaseIdToken();
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: 'Bearer ' + token } : {}),
+        },
+        body: JSON.stringify({
+          planId,
+          cycle,
+          paymentMethod,
+          name: currentUser?.name || name.trim(),
+          email: currentUser?.email || email.trim(),
+        }),
+      });
+      const result = await response.json();
+      if (!response.ok) {
+        setNotice(result.message || 'Não foi possível iniciar o pagamento. Tente novamente.');
+        return;
+      }
+      if (typeof result.checkoutUrl !== 'string' || !result.checkoutUrl.startsWith('https://')) {
+        setNotice('O provedor não retornou um endereço de pagamento válido.');
+        return;
+      }
+      window.location.assign(result.checkoutUrl);
+    } catch (error) {
+      console.error('Erro ao iniciar checkout:', error);
+      setNotice('Não foi possível conectar ao serviço de pagamento. Tente novamente.');
+    } finally {
+      setSubmittingPayment(false);
     }
   };
 
@@ -175,7 +228,7 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
                 </div>
                 <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
                   <button type="button" onClick={() => setStep(2)} className="min-h-12 rounded-xl border border-[#D9DEE7] px-4 py-3 text-sm font-bold text-[#0B2345]">Voltar</button>
-                  <button type="button" onClick={() => setNotice('A interface do checkout está pronta para integração. O pagamento ainda não foi iniciado: é necessário conectar o provedor no backend e confirmar a transação por webhook.')} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#16803C] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#116B31]"><LockKeyhole size={17} /> {isFree ? 'Concluir cadastro' : 'Continuar para pagamento'}</button>
+                  <button type="button" onClick={startPayment} disabled={submittingPayment} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#16803C] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#116B31] disabled:cursor-wait disabled:opacity-60"><LockKeyhole size={17} /> {submittingPayment ? 'Preparando pagamento…' : isFree ? 'Ativar acesso livre' : 'Pagar com segurança'}</button>
                 </div>
                 {notice && <p role="status" className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm leading-5 text-amber-900">{notice}</p>}
               </div>
