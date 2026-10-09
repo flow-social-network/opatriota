@@ -10,6 +10,7 @@ import { ArticleView } from './components/ArticleView';
 import { FactCheckHub } from './components/FactCheckHub';
 import { FactCheckSubmissionPage } from './components/FactCheckSubmissionPage';
 import { AdminDashboard } from './components/AdminDashboard';
+import { AdminConsole } from './components/admin/AdminConsole';
 import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
@@ -661,17 +662,7 @@ export default function App() {
       {/* VIEW: WORDPRESS BACKOFFICE / FONTES & DEDUPLICAÇÃO */}
       {currentView === 'admin' && (
         currentUser && (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((email: string) => email.trim().toLowerCase()).filter(Boolean).includes(currentUser.email.toLowerCase()) ? (
-          <main className="flex-1">
-            <AdminDashboard
-              sources={sources}
-              queueItems={queueItems}
-              onBack={handleNavigateHome}
-              onUpdateSource={setSources}
-              onUpdateQueue={setQueueItems}
-              portalSettings={portalSettings}
-              onSavePortalSettings={handleSavePortalSettings}
-            />
-          </main>
+          <AdminConsole onBack={handleNavigateHome} onLogout={handleGoogleLogout} />
         ) : currentUser ? (
           <main className="flex flex-1 items-center justify-center px-4 py-16">
             <section className="max-w-lg rounded-xl border border-red-200 bg-white p-8 text-center shadow-sm">
