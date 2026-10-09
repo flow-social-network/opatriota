@@ -41,10 +41,10 @@ if ! grep -q '^DATABASE_URL=' .env || grep -q '^DATABASE_URL=postgresql://USER:P
   export DATABASE_URL='postgresql://placeholder:placeholder@localhost:5432/opatriota?schema=public'
   log "DATABASE_URL ainda é um placeholder; validação do schema não conecta a um banco real."
 else
-  set -a
-  # shellcheck disable=SC1091
-  source .env
-  set +a
+  DATABASE_URL_VALUE="$(grep -m1 '^DATABASE_URL=' .env | cut -d= -f2-)"
+  DATABASE_URL_VALUE="${DATABASE_URL_VALUE%\"}"
+  DATABASE_URL_VALUE="${DATABASE_URL_VALUE#\"}"
+  export DATABASE_URL="$DATABASE_URL_VALUE"
 fi
 
 pnpm exec prisma validate --schema prisma/schema.prisma
