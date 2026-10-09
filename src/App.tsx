@@ -119,7 +119,35 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // Carrega dados reais da API. Se a API falhar, a interface permanece vazia e não inventa conteúdo.\n  useEffect(() => {\n    if (!isApiConfigured()) {\n      setToastMessage('API não configurada: defina VITE_API_BASE_URL para carregar conteúdo real.');\n      return;\n    }\n    let active = true;\n    const load = async <T,>(path: string, setter: (value: T) => void) => {\n      try {\n        const result = await api.get<T>(path, { auth: false });\n        if (active) setter(result);\n      } catch (error) {\n        console.error('Falha ao carregar ' + path, error);\n      }\n    };\n    void Promise.all([\n      load<Article[]>('/articles', setArticles),\n      load<FactCheckItem[]>('/fact-checks', setFactChecks),\n      load<RssSource[]>('/editorial/sources', setSources),\n      load<EditorialQueueItem[]>('/editorial/queue', setQueueItems),\n      load<InstitutionalPage[]>('/pages', setPages),\n      load<CategoryDetail[]>('/categories', setCategories),\n      load<AuthorDetail[]>('/authors', setAuthors),\n      load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),\n    ]);\n    return () => { active = false; };\n  }, []);\n\n  // Load persistent settings from the centralized portal service on mount
+  // Carrega dados reais da API sem preencher a interface com conteúdo fictício.
+  useEffect(() => {
+    if (!isApiConfigured()) {
+      setToastMessage('API não configurada: defina VITE_API_BASE_URL para carregar conteúdo real.');
+      return;
+    }
+    let active = true;
+    const load = async <T,>(path: string, setter: (value: T) => void) => {
+      try {
+        const result = await api.get<T>(path, { auth: false });
+        if (active) setter(result);
+      } catch (error) {
+        console.error('Falha ao carregar ' + path, error);
+      }
+    };
+    void Promise.all([
+      load<Article[]>('/articles', setArticles),
+      load<FactCheckItem[]>('/fact-checks', setFactChecks),
+      load<RssSource[]>('/editorial/sources', setSources),
+      load<EditorialQueueItem[]>('/editorial/queue', setQueueItems),
+      load<InstitutionalPage[]>('/pages', setPages),
+      load<CategoryDetail[]>('/categories', setCategories),
+      load<AuthorDetail[]>('/authors', setAuthors),
+      load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),
+    ]);
+    return () => { active = false; };
+  }, []);
+
+  // Load persistent settings from the centralized portal service on mount
   useEffect(() => {
     let isMounted = true;
     loadPortalSettings().then((loaded) => {
@@ -326,10 +354,9 @@ export default function App() {
       ? currentBookmarks.filter(id => id !== artId)
       : [...currentBookmarks, artId];
 
-    setCurrentUser({
-      ...currentUser,
-      bookmarks: updatedBookmarks
-    });
+    void api.put('/me/bookmarks', { bookmarks: updatedBookmarks }).then(() => {
+      setCurrentUser({ ...currentUser, bookmarks: updatedBookmarks });
+    }).catch(() => showToast('Não foi possível guardar os favoritos no servidor.'));
   };
 
   const handleOpenSubscriberArea = (subpage: string = 'dashboard') => {
@@ -370,28 +397,45 @@ export default function App() {
   };
 
   // CMS Pages management handlers
-  const handleSavePage = (savedPage: InstitutionalPage) => {
-    const exists = pages.some(p => p.id === savedPage.id);
-    const updated = exists
-      ? pages.map(p => p.id === savedPage.id ? savedPage : p)
-      : [savedPage, ...pages];
-    setPages(updated);
-    showToast(`Página "${savedPage.title}" salva com sucesso no portal!`);
+  const handleSavePage = async (savedPage: InstitutionalPage) => {
+    try {
+      const exists = pages.some(p => p.id === savedPage.id);
+      const persisted = exists
+        ? await api.patch<InstitutionalPage>(`/pages/${encodeURIComponent(savedPage.id)}`, savedPage)
+        : await api.post<InstitutionalPage>('/pages', savedPage);
+      setPages(current => exists
+        ? current.map(p => p.id === persisted.id ? persisted : p)
+        : [persisted, ...current]);
+      showToast(`Página "${persisted.title}" salva no servidor.`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Falha ao salvar página. Nenhuma alteração foi confirmada.');
+    }
   };
 
-  const handleDeletePage = (pageId: string) => {
-    setPages(pages.filter(p => p.id !== pageId));
-    showToast('Página excluída do sistema com sucesso.');
+  const handleDeletePage = async (pageId: string) => {
+    try {
+      await api.delete(`/pages/${encodeURIComponent(pageId)}`);
+      setPages(current => current.filter(p => p.id !== pageId));
+      showToast('Página excluída no servidor.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Falha ao excluir página.');
+    }
   };
 
   // CMS Category management handlers
-  const handleSaveCategory = (savedCategory: CategoryDetail) => {
-    const exists = categories.some(c => c.id === savedCategory.id || c.slug === savedCategory.slug);
-    const updated = exists
-      ? categories.map(c => c.slug === savedCategory.slug ? savedCategory : c)
-      : [...categories, savedCategory];
-    setCategories(updated);
-    showToast(`Editoria "${savedCategory.name}" salva! Página /categoria/${savedCategory.slug}/ atualizada.`);
+  const handleSaveCategory = async (savedCategory: CategoryDetail) => {
+    try {
+      const exists = categories.some(c => c.id === savedCategory.id || c.slug === savedCategory.slug);
+      const persisted = exists
+        ? await api.patch<CategoryDetail>(`/categories/${encodeURIComponent(savedCategory.id)}`, savedCategory)
+        : await api.post<CategoryDetail>('/categories', savedCategory);
+      setCategories(current => exists
+        ? current.map(c => c.id === persisted.id ? persisted : c)
+        : [...current, persisted]);
+      showToast(`Editoria "${persisted.name}" salva no servidor.`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Falha ao salvar editoria.');
+    }
   };
 
   return (
