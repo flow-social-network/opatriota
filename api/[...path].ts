@@ -121,6 +121,12 @@ export default async function handler(req: Req, res: Res) {
       const profile = await firestoreGet('userSubscriptions', identity.uid);
       return json(res, 200, profile || { plan: 'gratuito', status: 'inativo', autoRenew: false });
     }
+    if (path === 'admin/push-campaigns' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const campaigns = await firestoreList('pushCampaigns');
+      campaigns.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+      return json(res, 200, campaigns.slice(0, 100));
+    }
     if (path === 'admin/push-campaigns' && method === 'POST') {
       if (!requireRole(identity, ADMINS, res)) return;
       const body = cleanObject(await readBody(req));
