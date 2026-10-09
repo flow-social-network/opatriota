@@ -86,6 +86,45 @@ export default async function handler(req: Req, res: Res) {
       const profile = await firestoreGet('userSubscriptions', identity.uid);
       return json(res, 200, profile || { plan: 'gratuito', status: 'inativo', autoRenew: false });
     }
+    if (path === 'editorial/ai-review' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
+      const apiKey = process.env.GEMINI_API_KEY;
+      if (!apiKey) return json(res, 503, { error: 'AI_NOT_CONFIGURED', message: 'O assistente editorial não está configurado no servidor.' });
+      const body = cleanObject(await readBody(req));
+      const title = String(body.title || '').slice(0, 500);
+      const subtitle = String(body.subtitle || '').slice(0, 1000);
+      const content = String(body.content || '').slice(0, 24000);
+      if (!title.trim() && !content.trim()) return json(res, 400, { error: 'EDITORIAL_CONTENT_REQUIRED', message: 'Informe título ou conteúdo para análise.' });
+      const prompt = [
+        'Você é um assistente editorial. Analise o material sem inventar fatos, fontes ou citações.',
+        'Devolva somente JSON válido com as chaves titles (3 sugestões), clarityScore (texto qualitativo, sem nota numérica inventada), clarityFeedback, missingSources (lista de lacunas a verificar), suggestedTags (lista) e summary.',
+        'Se faltar evidência, diga explicitamente que precisa de confirmação. Não afirme que verificou fontes externas.',
+        'Título: ' + title, 'Subtítulo: ' + subtitle, 'Conteúdo: ' + content,
+        'Fontes informadas pelo jornalista: ' + JSON.stringify(Array.isArray(body.sources) ? body.sources.slice(0, 30) : [])
+      ].join('\n\n');
+      const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + encodeURIComponent(apiKey), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ role: 'user', parts: [{ text: prompt }] }], generationConfig: { responseMimeType: 'application/json', temperature: 0.2 } })
+      });
+      const payload: any = await response.json();
+      if (!response.ok) {
+        console.error('Gemini editorial review failed:', response.status);
+        return json(res, 502, { error: 'AI_PROVIDER_FAILED', message: 'O provedor de IA não conseguiu analisar o conteúdo.' });
+      }
+      const raw = payload.candidates?.[0]?.content?.parts?.map((part: any) => part.text || '').join('').trim();
+      if (!raw) return json(res, 502, { error: 'AI_EMPTY_RESPONSE', message: 'O assistente não devolveu uma análise utilizável.' });
+      let result: any;
+      try { result = JSON.parse(raw); } catch { return json(res, 502, { error: 'AI_INVALID_RESPONSE', message: 'A resposta do assistente não passou na validação.' }); }
+      return json(res, 200, {
+        titles: Array.isArray(result.titles) ? result.titles.slice(0, 3).map((v: unknown) => String(v).slice(0, 300)) : [],
+        clarityScore: String(result.clarityScore || 'Não avaliado'),
+        clarityFeedback: String(result.clarityFeedback || ''),
+        missingSources: Array.isArray(result.missingSources) ? result.missingSources.slice(0, 20).map((v: unknown) => String(v).slice(0, 500)) : [],
+        suggestedTags: Array.isArray(result.suggestedTags) ? result.suggestedTags.slice(0, 15).map((v: unknown) => String(v).slice(0, 80)) : [],
+        summary: String(result.summary || '').slice(0, 1500)
+      });
+    }
     if (path === 'newsletter/subscriptions' && method === 'POST') {
       const body = cleanObject(await readBody(req));
       const email = String(body.email || '').trim().toLowerCase();
