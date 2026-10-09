@@ -21,7 +21,7 @@ export const FactCheckSubmissionPage: React.FC<Props> = ({ onBack }) => {
     setReport(null);
     if (!text.trim() && !file) { setError('Cole o texto da alegação ou envie uma captura de tela.'); return; }
     if (file && !file.type.startsWith('image/')) { setError('Envie uma imagem PNG, JPG ou WEBP.'); return; }
-    if (file && file.size > 8 * 1024 * 1024) { setError('A imagem deve ter no máximo 8 MB.'); return; }
+    if (file && file.size > 3 * 1024 * 1024) { setError('A imagem deve ter no máximo 3 MB.'); return; }
     setLoading(true);
     try {
       let image: { mimeType: string; data: string } | undefined;
