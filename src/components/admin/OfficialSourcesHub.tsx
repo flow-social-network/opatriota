@@ -3,8 +3,14 @@ import {
   RssSource, 
   OfficialSourceCategory, 
   SourceIntegrationType, 
-  SourceValidationStatus 
+  SourceValidationStatus,
+  EditorialPolicyStatus
 } from '../../types';
+import {
+  EDITORIAL_POLICY_CONFIG,
+  isGloboSource,
+  isSourceAllowedForCitation
+} from '../../utils/editorialPolicy';
 import { 
   Rss, 
   Search, 
@@ -23,7 +29,9 @@ import {
   Edit3,
   MapPin,
   Check,
-  FileText
+  FileText,
+  ShieldAlert,
+  ShieldX
 } from 'lucide-react';
 
 interface OfficialSourcesHubProps {
@@ -68,6 +76,7 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
   const [selectedUf, setSelectedUf] = useState<string>('TODAS');
   const [selectedIntegration, setSelectedIntegration] = useState<string>('TODOS');
   const [selectedStatus, setSelectedStatus] = useState<string>('TODOS');
+  const [selectedPolicy, setSelectedPolicy] = useState<string>('TODAS');
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
 
   // Modal State for adding/editing
@@ -83,6 +92,8 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
   const [formRssUrl, setFormRssUrl] = useState('');
   const [formIntegrationType, setFormIntegrationType] = useState<SourceIntegrationType>('Monitoramento Editorial');
   const [formValidationStatus, setFormValidationStatus] = useState<SourceValidationStatus>('VALIDADO');
+  const [formEditorialPolicy, setFormEditorialPolicy] = useState<EditorialPolicyStatus>('APROVADA_CONSULTA_CITACAO');
+  const [formEditorialReason, setFormEditorialReason] = useState('');
   const [formFrequencyMin, setFormFrequencyMin] = useState(60);
   const [formNotes, setFormNotes] = useState('');
 
@@ -122,9 +133,15 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
         if (src.validationStatus !== selectedStatus) return false;
       }
 
+      // 6. Editorial Policy
+      if (selectedPolicy !== 'TODAS') {
+        const effectivePolicy = src.editorialPolicy || 'APROVADA_CONSULTA_CITACAO';
+        if (effectivePolicy !== selectedPolicy) return false;
+      }
+
       return true;
     });
-  }, [sources, search, selectedCategory, selectedUf, selectedIntegration, selectedStatus]);
+  }, [sources, search, selectedCategory, selectedUf, selectedIntegration, selectedStatus, selectedPolicy]);
 
   // Statistics
   const stats = useMemo(() => {
@@ -132,11 +149,11 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
     const rssFeeds = sources.filter(s => s.integrationType === 'RSS Feed' && s.rssUrl).length;
     const manualMonitoring = sources.filter(s => s.integrationType === 'Monitoramento Editorial').length;
     const validated = sources.filter(s => s.validationStatus === 'VALIDADO').length;
-    const federal = sources.filter(s => s.uf === 'BR').length;
-    const rs = sources.filter(s => s.uf === 'RS').length;
+    const approvedForCitation = sources.filter(s => isSourceAllowedForCitation(s)).length;
+    const excludedByPolicy = sources.filter(s => s.editorialPolicy === 'EXCLUIDA_POLITICA_EDITORIAL' || isGloboSource(s)).length;
     const totalColected = sources.reduce((acc, curr) => acc + (curr.itemsReceived || 0), 0);
 
-    return { total, rssFeeds, manualMonitoring, validated, federal, rs, totalColected };
+    return { total, rssFeeds, manualMonitoring, validated, approvedForCitation, excludedByPolicy, totalColected };
   }, [sources]);
 
   // Handlers
@@ -150,6 +167,8 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
     setFormRssUrl('');
     setFormIntegrationType('Monitoramento Editorial');
     setFormValidationStatus('VALIDADO');
+    setFormEditorialPolicy('APROVADA_CONSULTA_CITACAO');
+    setFormEditorialReason('');
     setFormFrequencyMin(60);
     setFormNotes('');
     setModalOpen(true);
@@ -165,6 +184,8 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
     setFormRssUrl(src.rssUrl || '');
     setFormIntegrationType(src.integrationType || 'Monitoramento Editorial');
     setFormValidationStatus(src.validationStatus || 'VALIDADO');
+    setFormEditorialPolicy(src.editorialPolicy || (isGloboSource(src) ? 'EXCLUIDA_POLITICA_EDITORIAL' : 'APROVADA_CONSULTA_CITACAO'));
+    setFormEditorialReason(src.editorialPolicyReason || '');
     setFormFrequencyMin(src.pollFrequencyMin || 60);
     setFormNotes(src.notes || '');
     setModalOpen(true);
@@ -173,6 +194,13 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
   const handleSaveSource = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formName.trim() || !formOfficialUrl.trim()) return;
+
+    // Se detectado como veículo do Grupo Globo, força restrição estatutária
+    const isGlobo = isGloboSource(formName) || isGloboSource(formOfficialUrl) || isGloboSource(formRssUrl);
+    const finalPolicy = isGlobo ? 'EXCLUIDA_POLITICA_EDITORIAL' : formEditorialPolicy;
+    const finalPolicyReason = isGlobo 
+      ? 'Diretriz O PATRIOTA: veículos da Rede Globo não podem ser utilizados como fonte de sustentação editorial.' 
+      : formEditorialReason;
 
     if (editingId) {
       const updated = sources.map(s => {
@@ -187,6 +215,8 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
             rssUrl: formRssUrl.trim(),
             integrationType: formIntegrationType,
             validationStatus: formValidationStatus,
+            editorialPolicy: finalPolicy,
+            editorialPolicyReason: finalPolicyReason,
             pollFrequencyMin: formFrequencyMin,
             notes: formNotes.trim(),
             lastVerified: 'Agora mesmo'
@@ -209,18 +239,19 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
         category: 'brasil',
         integrationType: formIntegrationType,
         validationStatus: formValidationStatus,
-        isActive: true,
+        editorialPolicy: finalPolicy,
+        editorialPolicyReason: finalPolicyReason,
+        isActive: !isGlobo,
         pollFrequencyMin: formFrequencyMin,
-        lastPolled: 'Hoje às 16:30',
-        lastSuccess: 'Hoje às 16:30',
-        lastError: null,
+        lastPolled: 'Pendente',
+        lastSuccess: 'Pendente',
+        lastError: isGlobo ? 'Bloqueada por diretriz editorial (Manual de Fontes)' : null,
         lastVerified: 'Agora mesmo',
-        lastImported: 'Hoje às 15:00',
         itemsReceived: 0,
         notes: formNotes.trim()
       };
       onUpdateSources([newSource, ...sources]);
-      setFeedback(`Fonte oficial "${formName}" cadastrada com sucesso!`);
+      setFeedback(`Fonte "${formName}" cadastrada com sucesso na Central Nacional.`);
     }
 
     setModalOpen(false);
@@ -312,6 +343,12 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
         </div>
 
         <div className="bg-white p-3.5 rounded-xl border border-[#D9DEE7] shadow-xs">
+          <div className="text-[10px] font-bold text-[#5D6673] uppercase tracking-wider">Aprovadas p/ Citação</div>
+          <div className="text-2xl font-black text-[#16803C] mt-0.5">{stats.approvedForCitation}</div>
+          <div className="text-[10px] text-[#16803C] font-semibold mt-1">Sustentação Direta</div>
+        </div>
+
+        <div className="bg-white p-3.5 rounded-xl border border-[#D9DEE7] shadow-xs">
           <div className="text-[10px] font-bold text-[#5D6673] uppercase tracking-wider">Feeds RSS Ativos</div>
           <div className="text-2xl font-black text-[#0B5FFF] mt-0.5">{stats.rssFeeds}</div>
           <div className="text-[10px] text-[#5D6673] mt-1">Ingestão automatizada</div>
@@ -324,15 +361,9 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
         </div>
 
         <div className="bg-white p-3.5 rounded-xl border border-[#D9DEE7] shadow-xs">
-          <div className="text-[10px] font-bold text-[#5D6673] uppercase tracking-wider">Fontes Validadas</div>
-          <div className="text-2xl font-black text-[#16803C] mt-0.5">{stats.validated}</div>
-          <div className="text-[10px] text-[#16803C] font-semibold mt-1">Anti-SSRF auditado</div>
-        </div>
-
-        <div className="bg-white p-3.5 rounded-xl border border-[#D9DEE7] shadow-xs">
-          <div className="text-[10px] font-bold text-[#5D6673] uppercase tracking-wider">Âmbito RS / Estados</div>
-          <div className="text-2xl font-black text-[#0B2345] mt-0.5">{stats.rs}</div>
-          <div className="text-[10px] text-[#5D6673] mt-1">Rio Grande do Sul</div>
+          <div className="text-[10px] font-bold text-[#5D6673] uppercase tracking-wider">Restrição Editorial</div>
+          <div className="text-2xl font-black text-rose-600 mt-0.5">{stats.excludedByPolicy}</div>
+          <div className="text-[10px] text-rose-600 font-semibold mt-1">Grupo Globo / Vedadas</div>
         </div>
 
         <div className="bg-white p-3.5 rounded-xl border border-[#D9DEE7] shadow-xs">
@@ -401,8 +432,24 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
             </select>
           </div>
 
+          {/* Editorial Policy Filter */}
+          <div className="lg:col-span-3">
+            <select
+              value={selectedPolicy}
+              onChange={(e) => setSelectedPolicy(e.target.value)}
+              className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg px-2.5 py-2 text-xs text-[#0B2345] font-semibold focus:outline-hidden"
+            >
+              <option value="TODAS">Política Editorial: Todas</option>
+              <option value="APROVADA_CONSULTA_CITACAO">Aprovadas para Citação</option>
+              <option value="CONSULTA_EXIGE_CONFIRMACAO">Exigem Confirmação Independente</option>
+              <option value="OPINIAO_ANALISE">Opinião / Análise</option>
+              <option value="EXCLUIDA_POLITICA_EDITORIAL">Excluídas por Política Editorial (Globo)</option>
+              <option value="DESATIVADA_OPERACIONAL">Desativadas Operacionais</option>
+            </select>
+          </div>
+
           {/* View toggle */}
-          <div className="lg:col-span-1 flex items-center justify-end gap-1">
+          <div className="lg:col-span-2 flex items-center justify-end gap-1">
             <button
               onClick={() => setViewMode('cards')}
               className={`p-2 rounded border cursor-pointer ${
@@ -458,6 +505,31 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
                       {hasRss ? 'RSS ATIVO' : 'MANUAL'}
                     </span>
                   </div>
+
+                  {/* Editorial Policy Badge */}
+                  {(() => {
+                    const policyKey = src.editorialPolicy || (isGloboSource(src) ? 'EXCLUIDA_POLITICA_EDITORIAL' : 'APROVADA_CONSULTA_CITACAO');
+                    const policyMeta = EDITORIAL_POLICY_CONFIG[policyKey];
+                    const isGlobo = isGloboSource(src) || policyKey === 'EXCLUIDA_POLITICA_EDITORIAL';
+
+                    return (
+                      <div className={`mb-2.5 p-2 rounded-lg border text-[11px] flex items-center justify-between ${
+                        isGlobo ? 'bg-rose-50 border-rose-200 text-rose-800' : 'bg-slate-50 border-slate-200 text-[#0B2345]'
+                      }`}>
+                        <div className="flex items-center gap-1.5 font-semibold">
+                          {isGlobo ? (
+                            <ShieldX className="w-3.5 h-3.5 text-rose-600 shrink-0" />
+                          ) : (
+                            <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          )}
+                          <span>{policyMeta.shortLabel}</span>
+                        </div>
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider ${policyMeta.badgeClass}`}>
+                          {isGlobo ? 'Vedada' : 'Autorizada'}
+                        </span>
+                      </div>
+                    );
+                  })()}
 
                   {/* Institution Name */}
                   <h3 className="font-serif font-black text-base text-[#0B2345] leading-snug mb-1.5">
@@ -571,6 +643,7 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
                 <th className="py-3 px-4">UF</th>
                 <th className="py-3 px-4">Instituição / Órgão</th>
                 <th className="py-3 px-4">Categoria Oficial</th>
+                <th className="py-3 px-4">Política Editorial</th>
                 <th className="py-3 px-4">Integração</th>
                 <th className="py-3 px-4">Links Oficiais</th>
                 <th className="py-3 px-4">Última Verificação</th>
@@ -581,9 +654,12 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
             <tbody className="divide-y divide-[#EAECEF]">
               {filteredSources.map((src) => {
                 const hasRss = Boolean(src.rssUrl && src.rssUrl.trim().length > 0);
+                const policyKey = src.editorialPolicy || (isGloboSource(src) ? 'EXCLUIDA_POLITICA_EDITORIAL' : 'APROVADA_CONSULTA_CITACAO');
+                const policyMeta = EDITORIAL_POLICY_CONFIG[policyKey];
+                const isGlobo = isGloboSource(src) || policyKey === 'EXCLUIDA_POLITICA_EDITORIAL';
 
                 return (
-                  <tr key={src.id} className="hover:bg-slate-50 transition">
+                  <tr key={src.id} className={`hover:bg-slate-50 transition ${isGlobo ? 'bg-rose-50/40' : ''}`}>
                     <td className="py-3 px-4">
                       <span className="bg-[#0B2345] text-white text-[10px] font-black px-2 py-0.5 rounded">
                         {src.uf || 'BR'}
@@ -595,6 +671,11 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
                     </td>
                     <td className="py-3 px-4 font-semibold text-[#16803C]">
                       {src.sourceCategory || 'Órgão Público'}
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${policyMeta.badgeClass}`}>
+                        {policyMeta.shortLabel}
+                      </span>
                     </td>
                     <td className="py-3 px-4">
                       <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
@@ -799,6 +880,52 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
                     className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg p-2 text-xs"
                   />
                 </div>
+              </div>
+
+              {/* Real-time Globo restriction alert */}
+              {(isGloboSource(formName) || isGloboSource(formOfficialUrl) || isGloboSource(formRssUrl) || isGloboSource(formNewsUrl)) && (
+                <div className="bg-rose-50 border border-rose-300 p-3 rounded-lg text-rose-900 text-xs flex items-start gap-2.5">
+                  <ShieldAlert className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="block font-bold text-rose-800">
+                      RESTRIÇÃO EDITORIAL OBRIGATÓRIA — GRUPO GLOBO DETECTADO
+                    </strong>
+                    <p className="mt-0.5 text-[11px] text-rose-700 leading-relaxed">
+                      Conforme o Adendo ao Manual Editorial de O PATRIOTA, veículos da Rede Globo não podem ser utilizados como fonte de referência para fundamentar reportagens. A fonte será registrada como <strong>Excluída por política editorial</strong> para auditoria histórica, bloqueando sua seleção automática.
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Editorial Policy Selector */}
+              <div className="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+                <label className="block font-bold text-[#0B2345] text-xs">
+                  Classificação da Política Editorial (Adendo ao Manual):
+                </label>
+                <select
+                  value={formEditorialPolicy}
+                  onChange={(e) => setFormEditorialPolicy(e.target.value as EditorialPolicyStatus)}
+                  className="w-full bg-white border border-[#CBD5E1] rounded-lg p-2 text-xs font-semibold text-[#0B2345] focus:ring-1 focus:ring-[#0B2345]"
+                >
+                  <option value="APROVADA_CONSULTA_CITACAO">
+                    Aprovada para consulta e citação (Sustentação Direta)
+                  </option>
+                  <option value="CONSULTA_EXIGE_CONFIRMACAO">
+                    Consulta permitida, mas exige confirmação independente
+                  </option>
+                  <option value="OPINIAO_ANALISE">
+                    Opinião ou análise, não equivalente a fonte factual primária
+                  </option>
+                  <option value="EXCLUIDA_POLITICA_EDITORIAL">
+                    Excluída por política editorial (Restrição Globo / Estatutária)
+                  </option>
+                  <option value="DESATIVADA_OPERACIONAL">
+                    Desativada por indisponibilidade operacional
+                  </option>
+                </select>
+                <p className="text-[11px] text-[#5D6673]">
+                  {EDITORIAL_POLICY_CONFIG[formEditorialPolicy]?.description}
+                </p>
               </div>
 
               <div>

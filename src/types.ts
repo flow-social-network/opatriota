@@ -152,6 +152,28 @@ export type SourceValidationStatus =
   | 'SEM RSS (MONITORAMENTO MANUAL)' 
   | 'PENDENTE';
 
+/**
+ * Adendo ao Manual Editorial — Política de Fontes
+ * Classificação mandatória para integridade editorial de O PATRIOTA
+ */
+export type EditorialPolicyStatus = 
+  | 'APROVADA_CONSULTA_CITACAO'       // Aprovada para consulta e citação
+  | 'CONSULTA_EXIGE_CONFIRMACAO'      // Consulta permitida, mas exige confirmação independente
+  | 'OPINIAO_ANALISE'                 // Opinião ou análise, não equivalente a fonte factual primária
+  | 'EXCLUIDA_POLITICA_EDITORIAL'     // Excluída por política editorial (ex.: Rede Globo / restrições estatutárias)
+  | 'DESATIVADA_OPERACIONAL';         // Desativada por indisponibilidade ou outra razão operacional
+
+/**
+ * Classificação factual de alegações e manchetes
+ * Distingue fato documentado de especulações e hipóteses
+ */
+export type FactualClassification = 
+  | 'fato_confirmado'         // Fato confirmado por documentação ou evidências verificáveis
+  | 'informacao_atribuida'    // Informação atribuída a uma fonte identificada
+  | 'analise_opiniao'         // Análise ou opinião de comentarista
+  | 'especulacao_hipotese'    // Especulação sem confirmação suficiente
+  | 'inconclusivo';           // Informação inconclusiva
+
 export interface RssSource {
   id: number;
   name: string;
@@ -164,6 +186,8 @@ export interface RssSource {
   category: CategorySlug;
   integrationType?: SourceIntegrationType;
   validationStatus?: SourceValidationStatus;
+  editorialPolicy?: EditorialPolicyStatus;
+  editorialPolicyReason?: string;
   isActive: boolean;
   pollFrequencyMin: number;
   lastPolled: string;
@@ -188,6 +212,11 @@ export interface EditorialQueueItem {
   dedupReason: string;
   editorialStatus: EditorialStatus;
   assignedTo?: string;
+  editorialPolicy?: EditorialPolicyStatus;
+  factualClassification?: FactualClassification;
+  factualVerificationNotes?: string;
+  independentConfirmationRequired?: boolean;
+  confirmedSources?: string[];
   convertedPostId?: number;
 }
 

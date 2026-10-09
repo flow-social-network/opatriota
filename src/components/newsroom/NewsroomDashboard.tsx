@@ -18,6 +18,11 @@ import { CategoriesManager } from '../admin/CategoriesManager';
 import { MenusManager } from '../admin/MenusManager';
 import { OfficialSourcesHub } from '../admin/OfficialSourcesHub';
 import { 
+  classifyLeadFactualStatus, 
+  isGloboSource, 
+  EDITORIAL_POLICY_CONFIG 
+} from '../../utils/editorialPolicy';
+import { 
   FileText, 
   Plus, 
   Edit3, 
@@ -281,6 +286,24 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   // Submit to Review (EM REVISÃO)
   const handleSubmitToReview = () => {
     if (!editingArticle) return;
+
+    // Checagem de fontes da matéria: se for sustentada exclusivamente por veículos da Globo, rejeita
+    const allSourcesText = [
+      editingArticle.sourceName || '',
+      ...(editingArticle.sourcesConsulted || []),
+      formSources
+    ].join(' ');
+
+    if (isGloboSource(allSourcesText)) {
+      const otherOfficialSources = (editingArticle.sourcesConsulted || [])
+        .filter(s => !isGloboSource(s) && s.trim().length > 0);
+
+      if (otherOfficialSources.length === 0) {
+        showFeedback('RESTRIÇÃO EDITORIAL (MANUAL DE FONTES): Veículos da Rede Globo não podem fundamentar reportagens de O PATRIOTA. Obtenha confirmação em documentos oficiais ou fontes autorizadas antes do envio para revisão.', 'error');
+        return;
+      }
+    }
+
     const updated = articles.map((a) => {
       if (a.id === editingArticle.id) {
         return {
@@ -315,7 +338,17 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
       return;
     }
 
-    // 2. Role permission check
+    // 2. Strict Globo source restriction check
+    const sourcesStr = [art.sourceName || '', ...(art.sourcesConsulted || [])].join(' ');
+    if (isGloboSource(sourcesStr)) {
+      const validSecondary = (art.sourcesConsulted || []).filter(s => !isGloboSource(s));
+      if (validSecondary.length === 0) {
+        showFeedback('APROVAÇÃO BLOQUEADA (DIRETRIZ GLOBO): Matéria não possui fontes primárias válidas além de veículo com restrição editorial. Apure confirmação oficial antes de aprovar.', 'error');
+        return;
+      }
+    }
+
+    // 3. Role permission check
     const allowedRoles: UserRole[] = ['revisor', 'editor', 'editor_chefe', 'administrador'];
     if (!allowedRoles.includes(currentUser.role)) {
       showFeedback('Você não possui permissão de Revisor ou Editor para aprovar matérias.', 'error');
@@ -911,6 +944,24 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
                   className="w-full border border-[#D9DEE7] p-2.5 rounded font-serif text-sm font-bold text-[#0B2345] focus:outline-none focus:border-[#0B5FFF]"
                   required
                 />
+
+                {/* Real-time Factual Status Evaluation */}
+                {formTitle.trim().length > 5 && (() => {
+                  const leadAnalysis = classifyLeadFactualStatus(formTitle, formSubtitle);
+                  return (
+                    <div className="mt-2 p-2 rounded-lg border text-[11px] flex items-center justify-between gap-2 bg-slate-50 border-slate-200">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold text-[#0B2345]">Classificação Factual:</span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${leadAnalysis.badgeClass}`}>
+                          {leadAnalysis.label}
+                        </span>
+                      </div>
+                      <span className="text-[10px] text-[#5D6673] hidden sm:inline">
+                        {leadAnalysis.recommendation}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div>
@@ -948,6 +999,21 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
                     onChange={(e) => setFormSources(e.target.value)}
                     className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
                   />
+
+                  {/* Real-time Globo Restriction Alert */}
+                  {isGloboSource(formSources) && (
+                    <div className="mt-2 p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-rose-900 text-[11px] flex items-start gap-2">
+                      <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
+                      <div>
+                        <strong className="block text-rose-800 font-bold">
+                          RESTRIÇÃO EDITORIAL — GRUPO GLOBO
+                        </strong>
+                        <p className="mt-0.5 text-[10px] text-rose-700 leading-snug">
+                          Conforme o Adendo ao Manual de Fontes de O PATRIOTA, publicações da Rede Globo não podem ser utilizadas como sustentação factual. A matéria deve citar documentos originais ou fontes primárias oficiais.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>

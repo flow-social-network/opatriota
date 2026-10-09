@@ -31,6 +31,8 @@ class O_Patriota_Activator {
 			category_slug varchar(100) NOT NULL DEFAULT 'brasil',
 			integration_type varchar(50) NOT NULL DEFAULT 'Monitoramento Editorial',
 			validation_status varchar(50) NOT NULL DEFAULT 'VALIDADO',
+			editorial_policy varchar(50) NOT NULL DEFAULT 'APROVADA_CONSULTA_CITACAO',
+			editorial_policy_reason text NULL,
 			is_active tinyint(1) NOT NULL DEFAULT 1,
 			poll_frequency_min int(11) NOT NULL DEFAULT 60,
 			last_polled datetime NULL,

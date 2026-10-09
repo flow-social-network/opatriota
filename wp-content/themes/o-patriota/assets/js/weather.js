@@ -269,8 +269,22 @@
           '</div>' +
 
           '<div>' +
-            '<h4 class="font-serif font-bold text-sm text-[#0B2345] mb-2 uppercase">Todas as 27 Capitais</h4>' +
+            '<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">' +
+              '<h4 class="font-serif font-bold text-sm text-[#0B2345] uppercase">Todas as 27 Capitais</h4>' +
+              '<div class="flex flex-wrap items-center gap-2">' +
+                '<input id="modal-weather-search" type="text" placeholder="Buscar por cidade ou UF..." class="border border-[#D9DEE7] rounded px-2.5 py-1 text-xs w-full sm:w-48 focus:outline-none focus:border-[#0B5FFF]" />' +
+              '</div>' +
+            '</div>' +
+            '<div id="modal-region-filters" class="flex flex-wrap gap-1.5 mb-3 text-xs">' +
+              '<button class="region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-[#0B2345] text-white cursor-pointer" data-region="TODAS">Todas</button>' +
+              '<button class="region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-[#5D6673] hover:bg-gray-200 cursor-pointer" data-region="Centro-Oeste">Centro-Oeste</button>' +
+              '<button class="region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-[#5D6673] hover:bg-gray-200 cursor-pointer" data-region="Sudeste">Sudeste</button>' +
+              '<button class="region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-[#5D6673] hover:bg-gray-200 cursor-pointer" data-region="Sul">Sul</button>' +
+              '<button class="region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-[#5D6673] hover:bg-gray-200 cursor-pointer" data-region="Nordeste">Nordeste</button>' +
+              '<button class="region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-[#5D6673] hover:bg-gray-200 cursor-pointer" data-region="Norte">Norte</button>' +
+            '</div>' +
             '<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2" id="modal-capitals-grid"></div>' +
+            '<div id="modal-empty-message" class="hidden text-center py-8 text-xs text-gray-500">Nenhuma capital encontrada para o filtro selecionado.</div>' +
           '</div>' +
         '</div>' +
 
@@ -309,10 +323,34 @@
 
     updateActiveDisplay(initialCapital);
 
-    // Populate 27 capitals grid
+    // Populate 27 capitals grid with dynamic search and region filtering
     var grid = document.getElementById('modal-capitals-grid');
-    if (grid) {
-      CAPITALS_DATA.forEach(function (c) {
+    var searchInput = document.getElementById('modal-weather-search');
+    var filterBtns = modalRoot.querySelectorAll('.region-filter-btn');
+    var emptyMsg = document.getElementById('modal-empty-message');
+    var currentRegion = 'TODAS';
+    var currentQuery = '';
+
+    function renderFilteredGrid() {
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      var filtered = CAPITALS_DATA.filter(function (c) {
+        var matchesRegion = (currentRegion === 'TODAS' || c.region === currentRegion);
+        var q = currentQuery.trim().toLowerCase();
+        var matchesQuery = !q || c.name.toLowerCase().includes(q) || c.uf.toLowerCase().includes(q) || c.station.toLowerCase().includes(q);
+        return matchesRegion && matchesQuery;
+      });
+
+      if (emptyMsg) {
+        if (filtered.length === 0) {
+          emptyMsg.classList.remove('hidden');
+        } else {
+          emptyMsg.classList.add('hidden');
+        }
+      }
+
+      filtered.forEach(function (c) {
         var btn = document.createElement('button');
         btn.className = 'text-left p-2 rounded border border-[#EAECEF] bg-white hover:border-[#0B5FFF] hover:bg-[#F0F5FF] transition cursor-pointer text-xs flex justify-between items-center';
         btn.innerHTML = '<div><div class="font-bold text-[#0B2345]">' + c.name + '</div><div class="text-[10px] text-[#5D6673]">' + c.uf + ' • ' + c.station + '</div></div><span class="cap-t font-black text-sm">--</span>';
@@ -329,6 +367,26 @@
         });
       });
     }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', function (e) {
+        currentQuery = e.target.value;
+        renderFilteredGrid();
+      });
+    }
+
+    filterBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        filterBtns.forEach(function (b) {
+          b.className = 'region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-gray-100 text-[#5D6673] hover:bg-gray-200 cursor-pointer';
+        });
+        btn.className = 'region-filter-btn px-2.5 py-1 rounded text-xs font-semibold bg-[#0B2345] text-white cursor-pointer';
+        currentRegion = btn.getAttribute('data-region') || 'TODAS';
+        renderFilteredGrid();
+      });
+    });
+
+    renderFilteredGrid();
 
     // Close handlers
     var closeBtn = document.getElementById('close-weather-modal-btn');

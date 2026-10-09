@@ -1306,6 +1306,31 @@ export const INITIAL_RSS_SOURCES: RssSource[] = [
     lastImported: 'Hoje às 15:45',
     itemsReceived: 57,
     notes: 'Alertas hidrológicos, avisos meteorológicos e relatórios de resgate no RS.'
+  },
+
+  // CATALOGAÇÃO HISTÓRICA E RESTRIÇÃO EDITORIAL — GRUPO GLOBO
+  {
+    id: 99,
+    name: 'Grupo Globo (G1 / O Globo / GloboNews)',
+    sourceCategory: 'Outras fontes oficiais',
+    uf: 'BR',
+    officialUrl: 'https://g1.globo.com/',
+    newsUrl: 'https://oglobo.globo.com/',
+    rssUrl: 'https://g1.globo.com/rss/g1/',
+    sourceType: 'veículo',
+    category: 'brasil',
+    integrationType: 'RSS Feed',
+    validationStatus: 'VALIDADO',
+    editorialPolicy: 'EXCLUIDA_POLITICA_EDITORIAL',
+    editorialPolicyReason: 'Diretriz O PATRIOTA: veículos do Grupo Globo não podem ser utilizados como fonte de sustentação editorial. Exige busca de confirmação em fontes oficiais ou independentes autorizadas.',
+    isActive: false,
+    pollFrequencyMin: 180,
+    lastPolled: 'Hoje às 12:00',
+    lastSuccess: 'Hoje às 12:00',
+    lastError: 'Bloqueado para sustentação automática por política editorial (Manual de Fontes)',
+    lastVerified: 'Hoje às 12:00',
+    itemsReceived: 0,
+    notes: 'CATALOGAÇÃO HISTÓRICA: Bloqueada para seleção automática e citação direta. Não apaga registro histórico mas impede utilização como fonte de referência factual.'
   }
 ];
 
@@ -1322,7 +1347,10 @@ export const INITIAL_EDITORIAL_QUEUE: EditorialQueueItem[] = [
     dedupStatus: 'NOVO',
     dedupReason: 'Camada 5: Nenhuma correspondência prévia encontrada.',
     editorialStatus: 'EM APURAÇÃO',
-    assignedTo: 'Thiago Vasconcellos (Jornalista)'
+    assignedTo: 'Thiago Vasconcellos (Jornalista)',
+    editorialPolicy: 'APROVADA_CONSULTA_CITACAO',
+    factualClassification: 'fato_confirmado',
+    factualVerificationNotes: 'Texto do projeto de lei verificado no portal oficial da Câmara dos Deputados.'
   },
   {
     id: 102,
@@ -1337,7 +1365,10 @@ export const INITIAL_EDITORIAL_QUEUE: EditorialQueueItem[] = [
     dedupReason: 'Camada 5: Inédito nas últimas 72h.',
     editorialStatus: 'EM REDAÇÃO',
     assignedTo: 'Mariana Duarte (Repórter)',
-    convertedPostId: 489
+    convertedPostId: 489,
+    editorialPolicy: 'APROVADA_CONSULTA_CITACAO',
+    factualClassification: 'fato_confirmado',
+    factualVerificationNotes: 'Dados da Companhia Nacional de Abastecimento (Conab) e Antaq confirmados.'
   },
   {
     id: 103,
@@ -1350,7 +1381,9 @@ export const INITIAL_EDITORIAL_QUEUE: EditorialQueueItem[] = [
     capturedAt: 'Hoje às 13:50',
     dedupStatus: 'POSSÍVEL DUPLICADO',
     dedupReason: 'Camada 4: Similaridade textual de 86.4% com matéria #art-2',
-    editorialStatus: 'EM TRIAGEM'
+    editorialStatus: 'EM TRIAGEM',
+    editorialPolicy: 'APROVADA_CONSULTA_CITACAO',
+    factualClassification: 'fato_confirmado'
   },
   {
     id: 104,
@@ -1363,6 +1396,25 @@ export const INITIAL_EDITORIAL_QUEUE: EditorialQueueItem[] = [
     capturedAt: 'Hoje às 12:20',
     dedupStatus: 'NOVO',
     dedupReason: 'Camada 5: Inédito.',
-    editorialStatus: 'RECEBIDA'
+    editorialStatus: 'RECEBIDA',
+    editorialPolicy: 'APROVADA_CONSULTA_CITACAO',
+    factualClassification: 'fato_confirmado'
+  },
+  {
+    id: 105,
+    title: 'Governo pode anunciar nova reformulação fiscal em novembro, apontam interlocutores',
+    summary: 'Especulação em coluna política de veículo comercial sugerindo possível ajuste orçamentário ainda em discussão interna.',
+    originalUrl: 'https://g1.globo.com/economia/noticia/exemplo-especulacao-105.ghtml',
+    canonicalUrl: 'https://g1.globo.com/economia/noticia/exemplo-especulacao-105',
+    sourceName: 'G1 (Veículo Externo)',
+    category: 'economia',
+    capturedAt: 'Hoje às 11:30',
+    dedupStatus: 'NOVO',
+    dedupReason: 'Camada 5: Inédito.',
+    editorialStatus: 'EM TRIAGEM',
+    editorialPolicy: 'EXCLUIDA_POLITICA_EDITORIAL',
+    factualClassification: 'especulacao_hipotese',
+    independentConfirmationRequired: true,
+    factualVerificationNotes: '⚠️ RESTRIÇÃO EDITORIAL (Grupo Globo): Vedado como sustentação editorial. A alegação é especulativa ("pode anunciar", "apontam interlocutores"). Exige confirmação em documentos oficiais do Ministério da Fazenda ou declarações on the record de autoridades antes de publicação.'
   }
 ];
