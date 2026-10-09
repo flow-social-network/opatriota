@@ -2,7 +2,6 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
-  FacebookAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
   signOut,
@@ -26,8 +25,6 @@ const firebaseApp = hasFirebaseConfig
   : null;
 const auth = firebaseApp ? getAuth(firebaseApp) : null;
 const googleProvider = new GoogleAuthProvider();
-const facebookProvider = new FacebookAuthProvider();
-facebookProvider.addScope('email');
 
 export function isFirebaseAuthConfigured() {
   return Boolean(auth);
@@ -44,12 +41,6 @@ export function observeAuth(callback: (user: UserSession | null) => void): Unsub
 export async function signInWithGoogle() {
   if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
   const result = await signInWithPopup(auth, googleProvider);
-  return mapFirebaseUser(result.user);
-}
-
-export async function signInWithFacebook() {
-  if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
-  const result = await signInWithPopup(auth, facebookProvider);
   return mapFirebaseUser(result.user);
 }
 
