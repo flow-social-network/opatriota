@@ -11,6 +11,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
 import { SupportModal } from './components/SupportModal';
+import { AuthModal } from './components/AuthModal';
 import { observeAuth, signInWithGoogle, signOutFromFirebase } from './services/firebaseAuthService';
 
 // Model Pages Components
@@ -121,6 +122,7 @@ export default function App() {
     const unsubscribe = observeAuth((user) => {
       setCurrentUser(user);
       setAuthLoading(false);
+      if (user) setAuthModalOpen(false);
     });
     return unsubscribe;
   }, []);
@@ -146,6 +148,7 @@ export default function App() {
 
   // Modals & Notifications
   const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (message: string) => {
@@ -411,6 +414,7 @@ export default function App() {
         onOpenSubscriberArea={handleOpenSubscriberArea}
         onOpenNewsroom={handleOpenNewsroom}
         onGoogleLogin={handleGoogleLogin}
+        onOpenAuthModal={() => setAuthModalOpen(true)}
         onGoogleLogout={handleGoogleLogout}
         onNavigatePage={handleNavigatePage}
         currentUser={currentUser}
@@ -665,6 +669,11 @@ export default function App() {
         onNavigatePage={handleNavigatePage}
         menuConfig={menuConfig}
       />
+
+      {/* Login/cadastro em janela modal, sem abandonar a página atual. */}
+      {authModalOpen && !currentUser && (
+        <AuthModal onClose={() => setAuthModalOpen(false)} onGoogleLogin={handleGoogleLogin} />
+      )}
 
       {/* Support Modal */}
       <SupportModal
