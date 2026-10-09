@@ -88,5 +88,6 @@ A integração Efí existente em `server/` permanece legado não conectado às r
 ## Integrações e migração manual
 
 - Arquitetura, configuração Firebase/Neon/Meta, requisitos de segurança e checklist de migração: [docs/INTEGRATIONS_AND_MIGRATION.md](docs/INTEGRATIONS_AND_MIGRATION.md).
+- Configuração operacional da redação, login Google, conexão Facebook para publicação e prévias com marca do jornal: [docs/NEWSROOM_SOCIAL_PUBLISHING.md](docs/NEWSROOM_SOCIAL_PUBLISHING.md).
 - Contrato OpenAPI preliminar: [docs/contracts/openapi.yaml](docs/contracts/openapi.yaml). As rotas documentadas são contratos-alvo; não significam que todas estejam implementadas.
 - O arquivo .env.example contém somente nomes/placeholders. Não inserir credenciais reais no repositório.
