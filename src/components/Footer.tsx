@@ -187,6 +187,11 @@ export const Footer: React.FC<FooterProps> = ({
                   Área do Assinante
                 </button>
               </li>
+              <li>
+                <button onClick={() => onNavigatePage('nossas-fontes')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Nossas Fontes
+                </button>
+              </li>
             </ul>
           </div>
 
