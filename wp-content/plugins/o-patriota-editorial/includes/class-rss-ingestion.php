@@ -89,6 +89,26 @@ class O_Patriota_Rss_Ingestion {
 			$desc  = wp_strip_all_tags( (string) ( isset( $entry->description ) ? $entry->description : ( isset( $entry->summary ) ? $entry->summary : '' ) ) );
 			$pub   = ! empty( $entry->pubDate ) ? date( 'Y-m-d H:i:s', strtotime( (string) $entry->pubDate ) ) : current_time( 'mysql' );
 
+			// Preservar a URL da imagem original para triagem; não baixar nem republicar automaticamente.
+			$image_url = '';
+			$media = $entry->children( 'http://search.yahoo.com/mrss/' );
+			if ( isset( $media->content ) ) {
+				foreach ( $media->content as $media_item ) {
+					$attrs = $media_item->attributes();
+					if ( ! empty( $attrs['url'] ) ) { $image_url = esc_url_raw( (string) $attrs['url'] ); break; }
+				}
+			}
+			if ( empty( $image_url ) && isset( $entry->enclosure ) ) {
+				$enclosure_attrs = $entry->enclosure->attributes();
+				if ( ! empty( $enclosure_attrs['url'] ) && 0 === strpos( (string) $enclosure_attrs['type'], 'image/' ) ) {
+					$image_url = esc_url_raw( (string) $enclosure_attrs['url'] );
+				}
+			}
+			if ( empty( $image_url ) && isset( $media->thumbnail ) ) {
+				$thumbnail_attrs = $media->thumbnail->attributes();
+				if ( ! empty( $thumbnail_attrs['url'] ) ) { $image_url = esc_url_raw( (string) $thumbnail_attrs['url'] ); }
+			}
+
 			if ( empty( $title ) || empty( $link ) ) {
 				continue;
 			}
@@ -110,6 +130,7 @@ class O_Patriota_Rss_Ingestion {
 					'title'                 => $title,
 					'title_hash'            => $title_hash,
 					'summary'               => $desc,
+					'source_image_url'      => $image_url,
 					'original_published_at' => $pub,
 					'category_suggested'    => $source->category_slug,
 					'dedup_status'          => $eval['status'],
