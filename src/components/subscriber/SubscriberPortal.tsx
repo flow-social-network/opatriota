@@ -271,11 +271,11 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#17202A] select-none py-8">
-      <div className="max-w-[1360px] mx-auto px-4">
+    <div className="min-h-screen bg-[#F7F8FA] text-[#17202A] select-none py-4 sm:py-6">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
         
         {/* Top Breadcrumb & Return to Portal */}
-        <div className="flex items-center justify-between mb-8 pb-4 border-b border-[#D9DEE7]">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-[#D9DEE7]">
           <button
             onClick={onBackToHome}
             className="flex items-center gap-2 text-xs font-bold text-[#0B2345] hover:text-[#0B5FFF] transition cursor-pointer"
@@ -574,10 +574,10 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
           </div>
         ) : (
           /* IF USER IS LOGGED IN: SHOW DASHBOARD WITH SIDEBAR NAVIGATION */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
             
             {/* LEFT SIDEBAR: PROFILE SUMMARY & NAVIGATION */}
-            <aside className="lg:col-span-3 bg-white p-5 rounded border border-[#D9DEE7] shadow-xs space-y-6">
+            <aside className="lg:col-span-3 bg-white p-4 sm:p-5 rounded border border-[#D9DEE7] shadow-xs space-y-5">
               {/* User Avatar & Name */}
               <div className="flex items-center gap-3 pb-4 border-b border-[#D9DEE7]">
                 <img
@@ -643,13 +643,13 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
             </aside>
 
             {/* RIGHT CONTENT: SELECTED SUBPAGE */}
-            <main className="lg:col-span-9 bg-white p-6 sm:p-8 rounded border border-[#D9DEE7] shadow-xs">
+            <main className="lg:col-span-9 bg-white p-4 sm:p-6 rounded border border-[#D9DEE7] shadow-xs">
               
               {/* SUBPAGE: DASHBOARD GERAL */}
               {currentSubpage === 'dashboard' && (
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {/* Greeting Box */}
-                  <div className="p-6 bg-[#0B2345] text-white rounded border border-[#07172E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="p-5 bg-[#0B2345] text-white rounded border border-[#07172E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                       <span className="text-[10px] font-bold text-[#FFCC29] uppercase tracking-wider block mb-1">
                         ÁREA DO LEITOR O PATRIOTA
@@ -670,7 +670,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                   </div>
 
                   {/* Quick Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
                     <div className="p-4 rounded border border-[#D9DEE7] bg-[#F7F8FA]">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-xs font-bold text-[#5D6673]">Plano Atual</span>
