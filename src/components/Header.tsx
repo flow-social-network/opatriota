@@ -46,6 +46,7 @@ interface HeaderProps {
   onOpenSubscriberArea: (subpage?: string) => void;
   onOpenNewsroom: () => void;
   onGoogleLogin: () => void;
+  onOpenAuthModal: () => void;
   onGoogleLogout: () => void;
   onNavigatePage?: (slug: string) => void;
   currentUser: UserSession | null;
@@ -63,6 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenSubscriberArea,
   onOpenNewsroom,
   onGoogleLogin,
+  onOpenAuthModal,
   onGoogleLogout,
   onNavigatePage,
   currentUser,
@@ -309,7 +311,7 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             ) : (
               <button
-                onClick={onGoogleLogin}
+                onClick={onOpenAuthModal}
                 className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
                 title="Entrar com Google"
               >
