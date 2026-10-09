@@ -14,7 +14,7 @@ import {
 
 interface LgpdPageViewProps {
   onNavigateHome: () => void;
-  onSubmitLgpd: (request: LgpdRequest) => void;
+  onSubmitLgpd: (request: LgpdRequest) => Promise<{ id: string; protocol: string }>;
 }
 
 export const LgpdPageView: React.FC<LgpdPageViewProps> = ({
@@ -31,45 +31,34 @@ export const LgpdPageView: React.FC<LgpdPageViewProps> = ({
   const [submittedProtocol, setSubmittedProtocol] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-
     if (!name.trim() || name.trim().length < 3) {
       setErrorMessage('Informe seu nome completo cadastrado.');
       return;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMessage('Informe um e-mail válido para comprovação de titularidade.');
       return;
     }
-
     if (!details.trim() || details.trim().length < 10) {
       setErrorMessage('Por favor, especifique o detalhe da sua solicitação com clareza.');
       return;
     }
-
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      const protocol = `LGPD-${Date.now().toString().slice(-6)}`;
-      const req: LgpdRequest = {
-        id: `req-${Date.now()}`,
-        date: new Date().toLocaleDateString('pt-BR'),
-        name: name.trim(),
-        email: email.trim(),
-        documentId: documentId.trim() || undefined,
-        requestType,
-        details: details.trim(),
-        status: 'recebido'
-      };
-
-      onSubmitLgpd(req);
+    try {
+      const result = await onSubmitLgpd({
+        id: '', date: new Date().toISOString(), name: name.trim(), email: email.trim(),
+        documentId: documentId.trim() || undefined, requestType, details: details.trim(), status: 'recebido'
+      });
+      setSubmittedProtocol(result.protocol);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível registrar a solicitação. Tente novamente.');
+    } finally {
       setIsSubmitting(false);
-      setSubmittedProtocol(protocol);
-    }, 600);
+    }
   };
 
   return (
