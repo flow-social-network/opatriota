@@ -9,7 +9,6 @@ import { LiveSourceNews } from './components/LiveSourceNews';
 import { ArticleView } from './components/ArticleView';
 import { FactCheckHub } from './components/FactCheckHub';
 import { FactCheckSubmissionPage } from './components/FactCheckSubmissionPage';
-import { AdminDashboard } from './components/AdminDashboard';
 import { AdminConsole } from './components/admin/AdminConsole';
 import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
