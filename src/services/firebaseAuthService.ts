@@ -55,7 +55,7 @@ function mapFirebaseUser(user: FirebaseUser): UserSession {
     email: user.email || '',
     avatarUrl: user.photoURL || undefined,
     role: 'leitor_gratuito',
-    subscription: { plan: 'gratuito', status: 'inativo', autoRenew: false },
+    subscription: { plan: 'gratuito', status: 'ativo', autoRenew: false },
     bookmarks: [],
     notificationPrefs: { breakingNews: true, dailyBrief: true, factChecks: true, weeklyDigest: true },
     createdAt: user.metadata.creationTime || new Date().toISOString(),
