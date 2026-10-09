@@ -11,6 +11,7 @@ import { AdminDashboard } from './components/AdminDashboard';
 import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
 import { SupportModal } from './components/SupportModal';
+import { observeAuth, signInWithGoogle, signOutFromFirebase } from './services/firebaseAuthService';
 
 // Model Pages Components
 import { InstitutionalPageView } from './components/pages/InstitutionalPageView';
@@ -106,8 +107,9 @@ export default function App() {
   const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>(INITIAL_CONTACT_SUBMISSIONS);
   const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>(INITIAL_LGPD_REQUESTS);
 
-  // Authenticated User Session (Defaults to Mariana Duarte - Assinante Digital for immediate access)
-  const [currentUser, setCurrentUser] = useState<UserSession | null>(DEMO_USERS['digital']);
+  // A sessão real é restaurada pelo Firebase; enquanto isso, o visitante permanece sem identidade.
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
+  const [authLoading, setAuthLoading] = useState(true);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -115,7 +117,15 @@ export default function App() {
   // Portal Settings (Identity, Logos, Social Networks, Ad Slots, AdSense)
   const [portalSettings, setPortalSettings] = useState<PortalSettings>(DEFAULT_PORTAL_SETTINGS);
 
-  // Load persistent settings from Firebase / local storage on mount
+  useEffect(() => {
+    const unsubscribe = observeAuth((user) => {
+      setCurrentUser(user);
+      setAuthLoading(false);
+    });
+    return unsubscribe;
+  }, []);
+
+  // Load persistent settings from the centralized portal service on mount
   useEffect(() => {
     let isMounted = true;
     loadPortalSettings().then((loaded) => {
@@ -336,10 +346,27 @@ export default function App() {
 
   const handleOpenNewsroom = () => {
     if (!currentUser || !['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(currentUser.role)) {
-      setCurrentUser(DEMO_USERS['jornalista']);
+      showToast('Acesso restrito à equipe editorial autorizada.');
+      return;
     }
     setCurrentView('newsroom');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await signInWithGoogle();
+    } catch (error) {
+      showToast(error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED'
+        ? 'Autenticação Google ainda não configurada neste ambiente.'
+        : 'Não foi possível concluir o acesso com Google.');
+    }
+  };
+
+  const handleGoogleLogout = async () => {
+    await signOutFromFirebase();
+    setCurrentUser(null);
+    handleNavigateHome();
   };
 
   const handleSwitchStaffRole = (roleKey: string) => {
@@ -383,6 +410,8 @@ export default function App() {
         onOpenAdmin={() => setCurrentView('admin')}
         onOpenSubscriberArea={handleOpenSubscriberArea}
         onOpenNewsroom={handleOpenNewsroom}
+        onGoogleLogin={handleGoogleLogin}
+        onGoogleLogout={handleGoogleLogout}
         onNavigatePage={handleNavigatePage}
         currentUser={currentUser}
         searchQuery={searchQuery}
@@ -460,7 +489,7 @@ export default function App() {
         </main>
       )}
 
-      {/* VIEW: SEARCH PAGE (MODELO 5 — PÁGINA DE PESQUISA) */}
+      {/* VIEW: SEARCH PAGE (MODELO 5 ��� PÁGINA DE PESQUISA) */}
       {currentView === 'search' && (
         <main className="flex-1">
           <SearchPageView

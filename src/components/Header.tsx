@@ -45,6 +45,8 @@ interface HeaderProps {
   onOpenAdmin: () => void;
   onOpenSubscriberArea: (subpage?: string) => void;
   onOpenNewsroom: () => void;
+  onGoogleLogin: () => void;
+  onGoogleLogout: () => void;
   onNavigatePage?: (slug: string) => void;
   currentUser: UserSession | null;
   searchQuery: string;
@@ -60,6 +62,8 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenAdmin,
   onOpenSubscriberArea,
   onOpenNewsroom,
+  onGoogleLogin,
+  onGoogleLogout,
   onNavigatePage,
   currentUser,
   searchQuery,
@@ -278,17 +282,27 @@ export const Header: React.FC<HeaderProps> = ({
               <span>{pushStatus === 'granted' ? 'ALERTAS ATIVOS' : 'RECEBER ALERTAS'}</span>
             </button>
 
-            {/* BUTTON 1: ÁREA DO ASSINANTE */}
-            <button
-              onClick={() => onOpenSubscriberArea('dashboard')}
-              className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
-              title="Acessar Área do Assinante"
-            >
-              <User className="w-3 h-3" />
-              <span className="truncate max-w-[130px]">
-                {currentUser ? currentUser.name.split(' ')[0] : 'ÁREA DO ASSINANTE'}
-              </span>
-            </button>
+            {/* Estado de conta: nunca apresenta uma identidade ou assinatura fictícia. */}
+            {currentUser ? (
+              <button
+                onClick={() => onOpenSubscriberArea('dashboard')}
+                className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
+                title="Abrir minha conta"
+              >
+                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover" /> : <User className="w-3 h-3" />}
+                <span className="truncate max-w-[100px]">{currentUser.name.split(' ')[0]}</span>
+                <ChevronDown className="w-3 h-3" />
+              </button>
+            ) : (
+              <button
+                onClick={onGoogleLogin}
+                className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
+                title="Entrar com Google"
+              >
+                <User className="w-3 h-3" />
+                <span>ENTRAR</span>
+              </button>
+            )}
 
             {/* BUTTONS PRIVADOS DA REDAÇÃO E ADMIN (Apenas para equipe autorizada autenticada) */}
             {currentUser && ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(currentUser.role) && (
