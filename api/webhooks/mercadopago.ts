@@ -20,19 +20,29 @@ export default async function handler(req: IncomingMessage & { method?:string; h
     const paymentResponse=await mpRequest('/v1/payments/'+encodeURIComponent(paymentId));
     const payment:any=await paymentResponse.json();
     if(!paymentResponse.ok) return json(res,502,{error:'PAYMENT_LOOKUP_FAILED'});
-    const orderId=String(payment.external_reference||'');
-    if(!orderId) return json(res,200,{received:true,ignored:true});
+    const externalReference=String(payment.external_reference||'');
+    if(!externalReference) return json(res,200,{received:true,ignored:true});
+    const nextStatus=payment.status==='approved'?'paid':payment.status==='rejected'?'rejected':payment.status==='cancelled'?'cancelled':payment.status==='refunded'?'refunded':'pending';
+    if(externalReference.startsWith('donation:')) {
+      const donationId=externalReference.slice('donation:'.length);
+      const donation=await firestoreGet('donations',donationId);
+      if(!donation) return json(res,404,{error:'DONATION_NOT_FOUND'});
+      const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(donation.amount) && payment.currency_id==='BRL';
+      const donationStatus=approved?'paid':nextStatus;
+      await firestoreWrite('donations',donationId,{status:donationStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),paidAt:approved?new Date().toISOString():null,updatedAt:new Date().toISOString()});
+      return json(res,200,{received:true,type:'donation',status:donationStatus});
+    }
+    const orderId=externalReference;
     const order=await firestoreGet('checkoutOrders',orderId);
     if(!order) return json(res,404,{error:'ORDER_NOT_FOUND'});
     const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(order.amount) && payment.currency_id==='BRL';
-    const nextStatus=approved?'paid':payment.status==='rejected'?'rejected':payment.status==='cancelled'?'cancelled':payment.status==='refunded'?'refunded':'pending';
-    // Idempotent status reconciliation; subscription entitlement is a separate, explicit record.
-    await firestoreWrite('checkoutOrders',orderId,{status:nextStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),updatedAt:new Date().toISOString()});
+    const orderStatus=approved?'paid':nextStatus;
+    await firestoreWrite('checkoutOrders',orderId,{status:orderStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),updatedAt:new Date().toISOString()});
     if(approved && order.uid) {
       const subscriptionId=String(order.uid);
       await firestoreWrite('subscriptions',subscriptionId,{uid:order.uid,orderId,planId:order.planId,planName:order.planName,billingCycle:order.cycle,status:'active',amount:order.amount,currency:'BRL',provider:'mercadopago',providerPaymentId:String(payment.id),activatedAt:new Date().toISOString()});
     }
-    return json(res,200,{received:true,status:nextStatus});
+    return json(res,200,{received:true,status:orderStatus});
   } catch(error:any) {
     console.error('mercadopago.webhook failed:',String(error?.message||error));
     return json(res,500,{error:'WEBHOOK_PROCESSING_FAILED'});
