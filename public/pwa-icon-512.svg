@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="88" fill="#FFFFFF"/>
+  <path d="M64 147 Q256 13 448 147 Q256 99 64 147Z" fill="#16803C"/>
+  <path d="M91 155 Q256 72 421 155 Q256 120 91 155Z" fill="#FFCC29"/>
+  <circle cx="256" cy="132" r="42" fill="#0B2345" stroke="#FFFFFF" stroke-width="5"/>
+  <path d="M222 124 Q256 107 290 124 M224 143 Q256 160 288 143" fill="none" stroke="#FFFFFF" stroke-width="4"/>
+  <text x="256" y="300" text-anchor="middle" font-family="Georgia,serif" font-size="92" font-weight="bold" fill="#0B2345">O</text>
+  <text x="256" y="375" text-anchor="middle" font-family="Georgia,serif" font-size="66" font-weight="bold" fill="#0B2345">PATRIOTA</text>
+  <rect x="120" y="415" width="90" height="14" rx="7" fill="#16803C"/>
+  <rect x="210" y="415" width="92" height="14" fill="#FFCC29"/>
+  <rect x="302" y="415" width="90" height="14" rx="7" fill="#0B5FFF"/>
+</svg>
