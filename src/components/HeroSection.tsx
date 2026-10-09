@@ -1,6 +1,7 @@
 import React from 'react';
 import { Article } from '../types';
 import { ArrowRight } from 'lucide-react';
+import { ArticleImage } from './ArticleImage';
 
 interface HeroSectionProps {
   articles: Article[];
@@ -51,7 +52,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         {/* COLUMN 2: Central Hero Photo (5 cols on lg) */}
         <div 
           onClick={() => onSelectArticle(leadArticle)}
-          className="lg:col-span-5 relative group overflow-hidden rounded border border-[#D9DEE7] bg-black cursor-pointer shadow-xs min-h-[340px] flex flex-col justify-end"
+          className="lg:col-span-5 relative group overflow-hidden rounded border border-[#D9DEE7] bg-[#0B2345] cursor-pointer shadow-xs min-h-[340px] lg:min-h-[420px] flex flex-col justify-end"
         >
           {/* Green Category Badge */}
           <div className="absolute top-3 left-3 z-10 bg-[#16803C] text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider rounded-xs shadow-xs">
@@ -59,7 +60,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
 
           {/* Hero Image */}
-          <img
+          <ArticleImage
             src={leadArticle.imageUrl}
             alt="Congresso Nacional em Brasília"
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-95"
@@ -94,7 +95,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
 
               <div className="w-20 h-16 rounded overflow-hidden shrink-0 border border-[#D9DEE7] bg-slate-100">
-                <img
+                <ArticleImage
                   src={article.imageUrl}
                   alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
