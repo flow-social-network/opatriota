@@ -17,7 +17,7 @@ import {
 
 interface ContactPageViewProps {
   onNavigateHome: () => void;
-  onSubmitContact: (submission: ContactSubmission) => void;
+  onSubmitContact: (submission: ContactSubmission) => Promise<{ id: string; protocol: string }>;
 }
 
 export const ContactPageView: React.FC<ContactPageViewProps> = ({
@@ -39,53 +39,36 @@ export const ContactPageView: React.FC<ContactPageViewProps> = ({
   const [submittedProtocol, setSubmittedProtocol] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-
-    // Spam honeypot detection
-    if (honeypot) {
-      console.warn('Spam submission detected and blocked.');
-      return;
-    }
-
-    // Validations
+    if (honeypot) return;
     if (!name.trim() || name.trim().length < 3) {
       setErrorMessage('Por favor, informe seu nome completo (mínimo de 3 caracteres).');
       return;
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
     if (!emailRegex.test(email)) {
       setErrorMessage('Por favor, informe um endereço de e-mail válido.');
       return;
     }
-
     if (!message.trim() || message.trim().length < 15) {
       setErrorMessage('Por favor, detalhe sua mensagem com no mínimo 15 caracteres.');
       return;
     }
-
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      const generatedProtocol = `OP-${Date.now().toString().slice(-6)}`;
-      const submission: ContactSubmission = {
-        id: `contato-${Date.now()}`,
-        date: new Date().toLocaleDateString('pt-BR') + ' às ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim() || undefined,
-        subject,
-        articleRef: articleRef.trim() || undefined,
-        message: message.trim(),
-        status: 'recebido'
-      };
-
-      onSubmitContact(submission);
+    try {
+      const result = await onSubmitContact({
+        id: '', date: new Date().toISOString(), name: name.trim(), email: email.trim(),
+        phone: phone.trim() || undefined, subject, articleRef: articleRef.trim() || undefined,
+        message: message.trim(), status: 'recebido'
+      });
+      setSubmittedProtocol(result.protocol);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível enviar a mensagem. Tente novamente.');
+    } finally {
       setIsSubmitting(false);
-      setSubmittedProtocol(generatedProtocol);
-    }, 600);
+    }
   };
 
   const handleResetForm = () => {
