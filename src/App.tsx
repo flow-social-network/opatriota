@@ -10,6 +10,7 @@ import { ArticleView } from './components/ArticleView';
 import { FactCheckHub } from './components/FactCheckHub';
 import { FactCheckSubmissionPage } from './components/FactCheckSubmissionPage';
 import { AdminDashboard } from './components/AdminDashboard';
+import { AdminLoginPage } from './components/admin/AdminLoginPage';
 import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
 import { SupportModal } from './components/SupportModal';
@@ -675,17 +676,29 @@ export default function App() {
 
       {/* VIEW: WORDPRESS BACKOFFICE / FONTES & DEDUPLICAÇÃO */}
       {currentView === 'admin' && (
-        <main className="flex-1">
-          <AdminDashboard
-            sources={sources}
-            queueItems={queueItems}
-            onBack={handleNavigateHome}
-            onUpdateSource={setSources}
-            onUpdateQueue={setQueueItems}
-            portalSettings={portalSettings}
-            onSavePortalSettings={handleSavePortalSettings}
-          />
-        </main>
+        currentUser && (import.meta.env.VITE_ADMIN_EMAILS || '').split(',').map((email: string) => email.trim().toLowerCase()).filter(Boolean).includes(currentUser.email.toLowerCase()) ? (
+          <main className="flex-1">
+            <AdminDashboard
+              sources={sources}
+              queueItems={queueItems}
+              onBack={handleNavigateHome}
+              onUpdateSource={setSources}
+              onUpdateQueue={setQueueItems}
+              portalSettings={portalSettings}
+              onSavePortalSettings={handleSavePortalSettings}
+            />
+          </main>
+        ) : currentUser ? (
+          <main className="flex flex-1 items-center justify-center px-4 py-16">
+            <section className="max-w-lg rounded-xl border border-red-200 bg-white p-8 text-center shadow-sm">
+              <h1 className="text-2xl font-bold text-[#0B2345]">Acesso não autorizado</h1>
+              <p className="mt-3 text-sm leading-6 text-slate-600">Esta conta Google não está autorizada para administrar O Patriota Brasil. Solicite ao responsável que inclua o e-mail institucional na lista de administradores.</p>
+              <button type="button" onClick={handleGoogleLogout} className="mt-6 rounded-lg bg-[#0B2345] px-5 py-3 font-semibold text-white">Sair da conta</button>
+            </section>
+          </main>
+        ) : (
+          <AdminLoginPage onGoogleLogin={handleGoogleLogin} onBack={handleNavigateHome} error={toastMessage} />
+        )
       )}
 
       {/* 4. Brazilian Brand Pillars Banner Ribbon */}
