@@ -76,7 +76,7 @@ export default async function handler(req: Req, res: Res) {
         const record = await firestoreGet('userBookmarks', identity.uid);
         return json(res, 200, record || { bookmarks: [] });
       }
-      const body = cleanObject(await readBody(req));
+      const body = cleanObject(req.body || await readBody(req));
       const bookmarks = Array.isArray(body.bookmarks) ? [...new Set(body.bookmarks.filter((id: unknown) => typeof id === 'string').slice(0, 2000))] : [];
       await firestoreWrite('userBookmarks', identity.uid, { bookmarks, updatedAt: new Date().toISOString() });
       return json(res, 200, { bookmarks });
@@ -114,7 +114,7 @@ export default async function handler(req: Req, res: Res) {
     const resource = collectionFor(path);
     if (!resource) return json(res, 404, { error: 'NOT_FOUND', message: 'Rota da API não encontrada.' });
     const isEditorial = resource.collection.startsWith('editorial');
-    const required = isEditorial ? STAFF : resource.collection === 'articles' || resource.collection === 'pages' || resource.collection === 'categories' ? EDITORS : ADMINS;
+    const required = isEditorial ? STAFF : resource.collection === 'articles' ? STAFF : resource.collection === 'pages' || resource.collection === 'categories' ? EDITORS : ADMINS;
 
     if (method === 'GET' && !resource.id) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;
