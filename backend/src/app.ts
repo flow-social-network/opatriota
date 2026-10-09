@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.js";
 import articleRoutes from "./routes/articles.js";
 import categoryRoutes from "./routes/categories.js";
 import pushRoutes from "./routes/push.js";
+import notificationRoutes from "./routes/notifications.js";
 
 export const app = express();
 
@@ -43,6 +44,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/push", pushRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: { code: "NOT_FOUND", message: "Route not found" } }));
 
