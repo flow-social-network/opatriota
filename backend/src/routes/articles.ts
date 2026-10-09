@@ -124,9 +124,23 @@ router.post("/:id/submit", requireAuth, requireRole(...editorialRoles), asyncHan
     await tx.auditEvent.create({
       data: { actorId: user.id, action: "ARTICLE_SUBMITTED_FOR_REVIEW", entityType: "Article", entityId: article.id, metadata: { fromStatus: article.status, toStatus: ArticleStatus.IN_REVIEW } },
     });
-    return result;
+    const approvers = await tx.user.findMany({
+      where: { role: { in: approverRoles }, disabledAt: null },
+      select: { id: true },
+    });
+    await Promise.all(approvers.map((approver) => tx.notification.create({
+      data: {
+        userId: approver.id,
+        type: "ARTICLE_REVIEW_REQUIRED",
+        title: "Matéria aguarda aprovação humana",
+        message: `A matéria "${article.title}" foi enviada para análise editorial.`,
+        entityType: "Article",
+        entityId: article.id,
+      },
+    })));
+    return { article: result, notifiedApprovers: approvers.length };
   });
-  res.status(200).json({ data: updated, notification: { required: true, recipient: "EDITORIAL_APPROVER", delivery: "NOT_CONFIGURED" } });
+  res.status(200).json({ data: updated.article, notification: { required: true, recipients: updated.notifiedApprovers, channel: "IN_APP" } });
 }));
 
 router.post("/:id/approve", requireAuth, requireRole(...approverRoles), asyncHandler(async (req, res) => {
