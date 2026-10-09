@@ -28,3 +28,19 @@ ALTER TABLE "article_reviews"
 -- Existing records are not automatically marked as human-approved.
 -- Historical published articles remain published, but all new submissions
 -- must pass the explicit approval workflow before publication.
+
+CREATE TABLE "notifications" (
+  "id" TEXT NOT NULL,
+  "userId" TEXT NOT NULL,
+  "type" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "message" TEXT NOT NULL,
+  "entityType" TEXT,
+  "entityId" TEXT,
+  "readAt" TIMESTAMP(3),
+  "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "notifications_pkey" PRIMARY KEY ("id"),
+  CONSTRAINT "notifications_userId_fkey" FOREIGN KEY ("userId") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX "notifications_userId_readAt_createdAt_idx" ON "notifications"("userId", "readAt", "createdAt" DESC);
+CREATE INDEX "notifications_entityType_entityId_idx" ON "notifications"("entityType", "entityId");
