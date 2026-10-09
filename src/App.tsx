@@ -22,6 +22,7 @@ import { ArchivePageView } from './components/pages/ArchivePageView';
 import { ContactPageView } from './components/pages/ContactPageView';
 import { LgpdPageView } from './components/pages/LgpdPageView';
 import { PlansPageView } from './components/pages/PlansPageView';
+import { CheckoutWizard } from './components/pages/CheckoutWizard';
 import { NotFoundPageView } from './components/pages/NotFoundPageView';
 import { CustomPageView } from './components/pages/CustomPageView';
 
@@ -77,6 +78,7 @@ export default function App() {
     'contact' | 
     'lgpd' | 
     'plans' | 
+    'checkout' | 
     'notfound' | 
     'institutional' | 
     'custom' | 
@@ -92,6 +94,7 @@ export default function App() {
   const [selectedCategoryDetail, setSelectedCategoryDetail] = useState<CategoryDetail | null>(null);
   const [selectedAuthor, setSelectedAuthor] = useState<AuthorDetail | null>(null);
   const [subscriberSubpage, setSubscriberSubpage] = useState<string>('dashboard');
+  const [selectedCheckoutPlanId, setSelectedCheckoutPlanId] = useState<string>('digital');
   
   // Data States
   const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
@@ -546,11 +549,24 @@ export default function App() {
             plans={SUBSCRIPTION_PLANS}
             currentUser={currentUser}
             onSelectPlan={(planId) => {
-              handleOpenSubscriberArea(currentUser ? 'assinatura' : 'cadastro');
+              setSelectedCheckoutPlanId(planId);
+              setCurrentView('checkout');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             onNavigateHome={handleNavigateHome}
           />
         </main>
+      )}
+
+      {/* VIEW: THREE-STEP SUBSCRIPTION CHECKOUT */}
+      {currentView === 'checkout' && (
+        <CheckoutWizard
+          plans={SUBSCRIPTION_PLANS}
+          selectedPlanId={selectedCheckoutPlanId}
+          currentUser={currentUser}
+          onBack={() => setCurrentView('plans')}
+          onOpenAccount={handleOpenSubscriberArea}
+        />
       )}
 
       {/* VIEW: INSTITUTIONAL PAGE (MODELO 1 — PÁGINA INSTITUCIONAL) */}
