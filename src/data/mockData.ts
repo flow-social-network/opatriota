@@ -1435,6 +1435,28 @@ export const INITIAL_RSS_SOURCES: RssSource[] = [
     lastVerified: 'Hoje às 12:00',
     itemsReceived: 0,
     notes: 'CATALOGAÇÃO HISTÓRICA: Bloqueada para seleção automática e citação direta. Não apaga registro histórico mas impede utilização como fonte de referência factual.'
+  },
+  {
+    id: 1001,
+    name: 'Agência Brasil — Feed de últimas notícias',
+    sourceCategory: 'Outras fontes oficiais',
+    uf: 'BR',
+    officialUrl: 'https://agenciabrasil.ebc.com.br/',
+    newsUrl: 'https://agenciabrasil.ebc.com.br/ultimas',
+    rssUrl: 'https://agenciabrasil.ebc.com.br/feed/',
+    sourceType: 'agência pública',
+    category: 'brasil',
+    integrationType: 'RSS Feed',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: '',
+    lastSuccess: '',
+    lastError: null,
+    lastVerified: '09 de outubro de 2026 — URL do feed verificada',
+    lastImported: '',
+    itemsReceived: 0,
+    notes: 'Feed público de últimas notícias. Importar títulos, resumo, data, URL canônica e metadados de imagem para a fila editorial; não republicar automaticamente. Crédito e licença da imagem devem ser confirmados por item.'
   }
 ];
 
