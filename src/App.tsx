@@ -614,6 +614,7 @@ export default function App() {
             factChecks={factChecks}
             onBack={handleNavigateHome}
             onOpenItem={handleOpenFactCheck}
+            onStartCheck={() => setCurrentView('factcheck-submit')}
           />
         </main>
       )}
