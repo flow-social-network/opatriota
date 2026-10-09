@@ -323,30 +323,21 @@ export async function savePortalSettings(settings: PortalSettings): Promise<{ su
  */
 export async function subscribeToNewsletter(email: string, name?: string): Promise<{ success: boolean; message: string }> {
   const cleanEmail = email.trim().toLowerCase();
-  if (!cleanEmail || !cleanEmail.includes('@') || !cleanEmail.includes('.')) {
+  if (!cleanEmail || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) {
     return { success: false, message: 'Por favor, insira um endereço de e-mail válido.' };
   }
 
-  const subscriber: NewsletterSubscriber = {
-    id: `sub-${Date.now()}`,
-    email: cleanEmail,
-    name: name?.trim() || '',
-    subscribedAt: new Date().toLocaleDateString('pt-BR'),
-    source: 'rodapé_institucional',
-    consentLgpd: true
-  };
-
-  // Save to local subscribers list
   try {
-    const raw = localStorage.getItem('o_patriota_subscribers_v1');
-    const list: NewsletterSubscriber[] = raw ? JSON.parse(raw) : [];
-    if (!list.some(s => s.email === cleanEmail)) {
-      list.push(subscriber);
-      localStorage.setItem('o_patriota_subscribers_v1', JSON.stringify(list));
-    }
-  } catch (e) {}
-
-  // A tabela de newsletter pode ser habilitada depois sem bloquear a inscrição local.
-
-  return { success: true, message: 'Inscrição na newsletter confirmada com sucesso!' };
+    const { api } = await import('./apiClient');
+    await api.post('/newsletter/subscriptions', {
+      email: cleanEmail,
+      name: name?.trim() || undefined,
+      consent: true,
+      source: 'rodape_institucional',
+    }, { auth: false });
+    return { success: true, message: 'Inscrição na newsletter confirmada.' };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Não foi possível confirmar a inscrição.';
+    return { success: false, message };
+  }
 }
