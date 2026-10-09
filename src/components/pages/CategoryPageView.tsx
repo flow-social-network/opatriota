@@ -29,6 +29,75 @@ interface CategoryPageViewProps {
 
 const ITEMS_PER_PAGE = 6;
 
+const EDITORIAL_SECTIONS: Record<string, { title: string; description: string }[]> = {
+  politica: [
+    { title: 'Congresso Nacional', description: 'Projetos de lei, comissões, votações e decisões legislativas, com referência aos documentos oficiais.' },
+    { title: 'Presidência e Governo', description: 'Atos, anúncios, políticas públicas e decisões do Poder Executivo, distinguindo anúncio de medida efetivamente implementada.' },
+    { title: 'Partidos e eleições', description: 'Atuação partidária, calendário eleitoral e informações eleitorais verificáveis.' },
+    { title: 'Instituições da República', description: 'Decisões institucionais e seus efeitos, com links para documentos e comunicados originais.' },
+  ],
+  brasil: [
+    { title: 'Estados e municípios', description: 'Decisões estaduais e municipais, serviços públicos e acontecimentos regionais.' },
+    { title: 'Infraestrutura', description: 'Obras, transportes, logística e investimentos com dados de órgãos responsáveis.' },
+    { title: 'Educação e cidadania', description: 'Políticas educacionais, serviços e programas públicos com informações de origem identificada.' },
+    { title: 'Gestão pública', description: 'Medidas administrativas, prestação de serviços e indicadores oficiais.' },
+  ],
+  economia: [
+    { title: 'Indicadores econômicos', description: 'PIB, inflação, juros, câmbio e outros indicadores com fonte, período de referência e data de atualização.' },
+    { title: 'Emprego e renda', description: 'Mercado de trabalho, salários e estatísticas divulgadas por instituições responsáveis.' },
+    { title: 'Empresas e agronegócio', description: 'Negócios, produção, exportações e atividade económica com dados atribuídos às fontes.' },
+    { title: 'Tributos e contas públicas', description: 'Impostos, orçamento, dívida e decisões fiscais explicados com base em documentos públicos.' },
+  ],
+  seguranca: [
+    { title: 'Operações policiais', description: 'Informações divulgadas pelas autoridades, com distinção entre investigação, suspeita, denúncia e condenação.' },
+    { title: 'Segurança nas rodovias', description: 'Ocorrências, prevenção, fiscalização e estatísticas das autoridades rodoviárias.' },
+    { title: 'Defesa Civil', description: 'Alertas, riscos, orientações e comunicados oficiais de emergência.' },
+    { title: 'Legislação e Justiça', description: 'Leis, decisões judiciais e procedimentos apresentados com contexto e fontes documentais.' },
+  ],
+  saude: [
+    { title: 'Saúde pública', description: 'Programas, serviços do SUS e decisões de gestão sanitária.' },
+    { title: 'Vacinação e prevenção', description: 'Campanhas e orientações de prevenção baseadas em autoridades sanitárias.' },
+    { title: 'Pesquisa científica', description: 'Estudos e avanços científicos com identificação da instituição e dos limites das evidências.' },
+    { title: 'Vigilância sanitária', description: 'Alertas, registros e comunicados de autoridades competentes.' },
+  ],
+  opiniao: [
+    { title: 'Editorial do jornal', description: 'Posicionamentos institucionais identificados como editoriais, distintos de notícias factuais.' },
+    { title: 'Colunistas', description: 'Artigos assinados com autoria e credenciais apresentadas quando disponíveis.' },
+    { title: 'Análises', description: 'Interpretações fundamentadas em dados e documentos, identificadas como análise.' },
+    { title: 'Participação dos leitores', description: 'Espaço para propostas de artigos, sujeito a avaliação editorial antes de eventual publicação.' },
+  ],
+  checagem: [
+    { title: 'Envie uma alegação', description: 'Cole um texto ou envie uma captura para iniciar uma verificação preliminar com pesquisa de evidências.' },
+    { title: 'Checagens publicadas', description: 'Consulte verificações revisadas pela redação, com alegação, metodologia e fontes identificadas.' },
+    { title: 'Evidências e fontes', description: 'Acesse documentos e páginas originais usados na análise, incluindo limitações e divergências.' },
+    { title: 'Correções e metodologia', description: 'Conheça os critérios de classificação e como solicitar revisão de uma checagem.' },
+  ],
+  tecnologia: [
+    { title: 'Inteligência artificial', description: 'Desenvolvimentos, aplicações, limitações e impactos da IA.' },
+    { title: 'Cibersegurança', description: 'Alertas de segurança digital, privacidade e recomendações de fontes identificadas.' },
+    { title: 'Ciência e inovação', description: 'Pesquisas, startups e novas tecnologias com referência às instituições envolvidas.' },
+    { title: 'Governo digital', description: 'Serviços digitais, políticas de tecnologia e transformação de serviços públicos.' },
+  ],
+  mundo: [
+    { title: 'América Latina', description: 'Política, economia e relações regionais com contexto e fontes identificadas.' },
+    { title: 'Estados Unidos e Europa', description: 'Decisões políticas e económicas e seus possíveis reflexos no Brasil.' },
+    { title: 'Ásia e comércio global', description: 'Mercados, cadeias produtivas e relações internacionais.' },
+    { title: 'Geopolítica', description: 'Análise de acontecimentos internacionais distinguindo fatos confirmados de avaliações.' },
+  ],
+  cultura: [
+    { title: 'História e património', description: 'Memória, preservação histórica e património cultural brasileiro.' },
+    { title: 'Literatura e artes', description: 'Livros, exposições, artes visuais e produção cultural.' },
+    { title: 'Música e audiovisual', description: 'Música, cinema, televisão e produção independente.' },
+    { title: 'Cultura regional', description: 'Tradições, manifestações e iniciativas culturais das regiões brasileiras.' },
+  ],
+  esportes: [
+    { title: 'Futebol', description: 'Clubes, competições, seleções e notícias com datas e fontes identificadas.' },
+    { title: 'Competições nacionais', description: 'Calendários, resultados e classificações somente quando houver dados atualizados e verificáveis.' },
+    { title: 'Esportes olímpicos', description: 'Atletas, modalidades e preparação para competições.' },
+    { title: 'Desporto de base', description: 'Formação de atletas, projetos comunitários e desenvolvimento desportivo.' },
+  ],
+};
+
 export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
   category,
   articles,
@@ -118,13 +187,33 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
         </div>
       </header>
 
+      <section className="mx-auto max-w-[1360px] px-4 pt-7" aria-label={`Áreas de cobertura de ${category.name}`}>
+        <div className="mb-4 flex items-end justify-between gap-3">
+          <div><p className="text-[10px] font-bold uppercase tracking-[.18em] text-[#16803C]">Explore a editoria</p><h2 className="mt-1 font-serif text-2xl font-black text-[#0B2345]">Temas e cobertura</h2></div>
+          <span className="hidden text-xs text-slate-500 sm:inline">Conteúdo sujeito à disponibilidade de apuração</span>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {(EDITORIAL_SECTIONS[category.slug] || []).map((section) => (
+            <article key={section.title} className="rounded-lg border border-[#D9DEE7] bg-white p-4 transition hover:border-[#0B5FFF] hover:shadow-sm">
+              <h3 className="font-bold text-[#0B2345]">{section.title}</h3>
+              <p className="mt-2 text-xs leading-5 text-[#5D6673]">{section.description}</p>
+              {category.slug === 'checagem' && section.title === 'Envie uma alegação' ? (
+                <button onClick={() => { window.dispatchEvent(new CustomEvent('opatriota:open-fact-check-submit')); }} className="mt-3 text-xs font-bold text-[#0B5FFF] underline">Enviar para checagem →</button>
+              ) : (
+                <button onClick={() => { document.getElementById('noticias-editoria')?.scrollIntoView({ behavior: 'smooth' }); }} className="mt-3 text-xs font-bold text-[#0B5FFF] underline">Ver cobertura →</button>
+              )}
+            </article>
+          ))}
+        </div>
+      </section>
+
       {/* Notícias externas atualizadas também nas páginas de editoria */}
       <div className="max-w-[1360px] mx-auto px-4">
         <LiveSourceNews />
       </div>
 
       {/* 3. Main Content Grid */}
-      <div className="max-w-[1360px] mx-auto px-4 py-8">
+      <div id="noticias-editoria" className="max-w-[1360px] mx-auto px-4 py-8">
         {categoryArticles.length === 0 ? (
           /* Empty State */
           <div className="bg-white border border-[#D9DEE7] rounded-lg p-12 text-center max-w-2xl mx-auto shadow-xs my-8">
