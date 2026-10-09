@@ -1,3 +1,4 @@
+import { api } from '../../services/apiClient';
 import React, { useState, useEffect } from 'react';
 import { 
   Bell, 
@@ -20,8 +21,6 @@ import { WebPushConfig, PushNotificationCampaign, PushSubscriber } from '../../t
 import { 
   subscribeToWebPush, 
   getStoredPushToken, 
-  getPushCampaigns, 
-  recordPushCampaign, 
   showLocalPushNotification,
   getPushPermissionStatus,
   isPushNotificationSupported
@@ -62,7 +61,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
     isPushNotificationSupported().then(setIsSupportedState);
     setPermissionState(getPushPermissionStatus());
     setStoredToken(getStoredPushToken());
-    setCampaigns(getPushCampaigns());
+    void api.get<PushNotificationCampaign[]>('/admin/push-campaigns').then(setCampaigns).catch(error => {\n      console.error('Falha ao carregar campanhas persistidas:', error);\n    });
   }, []);
 
   const handleSaveConfig = (e: React.FormEvent) => {
@@ -104,32 +103,18 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
     setFeedback(null);
 
     try {
-      // 1. Record campaign to storage
-      const newCampaign = recordPushCampaign({
+      const campaign = await api.post<PushNotificationCampaign>('/admin/push-campaigns', {
         title: campaignTitle.trim(),
         body: campaignBody.trim(),
-        url: campaignUrl.trim() || '/',
-        recipientCount: Math.floor(Math.random() * 80) + 1400,
-        status: 'enviado'
+        url: campaignUrl.trim() || '/'
       });
-
-      // 2. Trigger native visual local notification if permission is granted
-      if (Notification.permission === 'granted') {
-        await showLocalPushNotification(newCampaign.title, {
-          body: newCampaign.body,
-          data: { url: newCampaign.url }
-        });
-      }
-
-      setCampaigns(getPushCampaigns());
+      setCampaigns(current => [campaign, ...current]);
       setCampaignTitle('');
       setCampaignBody('');
       setCampaignUrl('/');
-      setFeedback({ 
-        type: 'success', 
-        message: `Notificação push transmitida com sucesso para a base de inscritos (${newCampaign.recipientCount} destinatários)!` 
-      });
-      if (onShowToast) onShowToast('Disparo Web Push concluído com sucesso.');
+      const message = `Notificação processada pelo Firebase: ${campaign.sentCount ?? 0} enviada(s), ${campaign.failedCount ?? 0} falha(s).`;
+      setFeedback({ type: campaign.failedCount ? 'error' : 'success', message });
+      if (onShowToast) onShowToast(message);
     } catch (err: any) {
       setFeedback({ type: 'error', message: 'Falha no disparo do alerta push.' });
     } finally {
