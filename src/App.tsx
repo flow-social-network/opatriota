@@ -403,6 +403,10 @@ export default function App() {
     void persistCollectionChanges('/editorial/sources', sources, next, setSources);
   };
 
+  const handleUpdateQueue = (next: EditorialQueueItem[]) => {
+    void persistCollectionChanges('/editorial/queue', queueItems, next, setQueueItems);
+  };
+
   const handleSaveMenuConfig = async (config: SiteMenuConfig) => {
     try {
       const saved = await api.patch<SiteMenuConfig>('/site-settings/menu', config);
@@ -725,8 +729,9 @@ export default function App() {
             sources={sources}
             queueItems={queueItems}
             onBack={handleNavigateHome}
-            onUpdateSource={setSources}
-            onUpdateQueue={setQueueItems}
+            onUpdateSource={handleUpdateSources}
+            onUpdateQueue={handleUpdateQueue}
+            onSyncResult={(updatedSources, updatedQueue) => { setSources(updatedSources); setQueueItems(updatedQueue); }}
             portalSettings={portalSettings}
             onSavePortalSettings={handleSavePortalSettings}
           />
