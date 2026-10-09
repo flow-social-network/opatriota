@@ -388,6 +388,49 @@ export default function App() {
     showToast('A função da equipa é atribuída pelo backend; não é possível alterná-la no navegador.');
   };
 
+  const persistCollectionChanges = async <T extends { id: string | number }>(
+    collectionPath: string,
+    previous: T[],
+    next: T[],
+    setter: React.Dispatch<React.SetStateAction<T[]>>,
+  ) => {
+    try {
+      const previousById = new Map(previous.map(item => [String(item.id), item]));
+      const nextById = new Map(next.map(item => [String(item.id), item]));
+      for (const [id, item] of nextById) {
+        const before = previousById.get(id);
+        if (!before) await api.post(collectionPath, item);
+        else if (JSON.stringify(before) !== JSON.stringify(item)) {
+          await api.patch(`${collectionPath}/${encodeURIComponent(id)}`, item);
+        }
+      }
+      for (const id of previousById.keys()) {
+        if (!nextById.has(id)) await api.delete(`${collectionPath}/${encodeURIComponent(id)}`);
+      }
+      setter(next);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'A API não confirmou as alterações; os dados locais foram mantidos.');
+    }
+  };
+
+  const handleUpdateArticles = (next: Article[]) => {
+    void persistCollectionChanges('/articles', articles, next, setArticles);
+  };
+
+  const handleUpdateSources = (next: RssSource[]) => {
+    void persistCollectionChanges('/editorial/sources', sources, next, setSources);
+  };
+
+  const handleSaveMenuConfig = async (config: SiteMenuConfig) => {
+    try {
+      const saved = await api.patch<SiteMenuConfig>('/site-settings/menu', config);
+      setMenuConfig(saved);
+      showToast('Menus gravados no servidor.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Não foi possível gravar os menus.');
+    }
+  };
+
   // CMS Pages management handlers
   const handleSavePage = async (savedPage: InstitutionalPage) => {
     try {
@@ -675,9 +718,9 @@ export default function App() {
           <NewsroomDashboard
             articles={articles}
             sources={sources}
-            onUpdateSources={setSources}
+            onUpdateSources={handleUpdateSources}
             currentUser={currentUser}
-            onUpdateArticles={setArticles}
+            onUpdateArticles={handleUpdateArticles}
             onBackToHome={handleNavigateHome}
             onSwitchStaffRole={handleSwitchStaffRole}
             pages={pages}
@@ -688,7 +731,7 @@ export default function App() {
             onSaveCategory={handleSaveCategory}
             onPreviewCategory={handleSelectCategory}
             menuConfig={menuConfig}
-            onSaveMenuConfig={setMenuConfig}
+            onSaveMenuConfig={handleSaveMenuConfig}
           />
         </main>
       )}
