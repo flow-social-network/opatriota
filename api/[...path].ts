@@ -121,6 +121,46 @@ export default async function handler(req: Req, res: Res) {
       const profile = await firestoreGet('userSubscriptions', identity.uid);
       return json(res, 200, profile || { plan: 'gratuito', status: 'inativo', autoRenew: false });
     }
+    if (path === 'admin/push-campaigns' && method === 'POST') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const body = cleanObject(await readBody(req));
+      const title = String(body.title || '').trim().slice(0, 120);
+      const message = String(body.body || '').trim().slice(0, 1000);
+      let targetUrl = String(body.url || '/').trim();
+      if (!title || !message) return json(res, 400, { error: 'INVALID_PUSH_CAMPAIGN', message: 'Título e mensagem são obrigatórios.' });
+      if (!targetUrl.startsWith('/') && !/^https:\/\//i.test(targetUrl)) return json(res, 400, { error: 'INVALID_PUSH_URL', message: 'O destino deve ser uma rota local ou URL HTTPS.' });
+      const account = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '{}');
+      if (!account.project_id) return json(res, 503, { error: 'PUSH_NOT_CONFIGURED', message: 'O Firebase Admin precisa ser configurado no servidor.' });
+      const subscriptions = await firestoreList('pushSubscriptions');
+      const tokens = [...new Set(subscriptions.filter(item => item.active !== false && typeof item.token === 'string' && item.token.length > 20).map(item => item.token))];
+      if (!tokens.length) return json(res, 409, { error: 'NO_PUSH_SUBSCRIBERS', message: 'Não existem dispositivos inscritos e persistidos para receber notificações.' });
+      const accessToken = await (async () => {
+        const now = Math.floor(Date.now() / 1000);
+        const enc = (v: unknown) => Buffer.from(JSON.stringify(v)).toString('base64url');
+        const unsigned = enc({ alg: 'RS256', typ: 'JWT' }) + '.' + enc({ iss: account.client_email, scope: 'https://www.googleapis.com/auth/firebase.messaging', aud: 'https://oauth2.googleapis.com/token', iat: now, exp: now + 3600 });
+        const { createSign } = await import('node:crypto');
+        const signer = createSign('RSA-SHA256'); signer.update(unsigned); signer.end();
+        const assertion = unsigned + '.' + signer.sign(account.private_key).toString('base64url');
+        const tokenResponse = await fetch('https://oauth2.googleapis.com/token', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams({ grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer', assertion }) });
+        const tokenData: any = await tokenResponse.json();
+        if (!tokenResponse.ok || !tokenData.access_token) throw new Error('FCM access token unavailable');
+        return String(tokenData.access_token);
+      })();
+      const results = await Promise.all(tokens.map(async token => {
+        const response = await fetch('https://fcm.googleapis.com/v1/projects/' + encodeURIComponent(account.project_id) + '/messages:send', {
+          method: 'POST',
+          headers: { Authorization: 'Bearer ' + accessToken, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: { token, notification: { title, body: message }, data: { url: targetUrl } } })
+        });
+        return { ok: response.ok, status: response.status };
+      }));
+      const sentCount = results.filter(item => item.ok).length;
+      const failedCount = results.length - sentCount;
+      const id = newId();
+      const campaign = { id, title, body: message, url: targetUrl, recipientCount: tokens.length, sentCount, failedCount, status: failedCount ? 'partial' : 'sent', createdAt: new Date().toISOString(), createdBy: identity!.uid };
+      await firestoreWrite('pushCampaigns', id, campaign, false);
+      return json(res, failedCount ? 207 : 201, campaign);
+    }
     if (path === 'editorial/sources/sync' && method === 'POST') {
       if (!requireRole(identity, STAFF, res)) return;
       const sources = await firestoreList('editorialSources');
