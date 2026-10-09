@@ -99,12 +99,20 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
 
   // LGPD Privacy
   const [deletionRequested, setDeletionRequested] = useState(false);
+  const [deletionProtocol, setDeletionProtocol] = useState<string | null>(null);
 
   React.useEffect(() => {
     void api.get<SubscriptionPlan[]>('/plans', { auth: false }).then(setSubscriptionPlans).catch(error => {
       console.error('Falha ao carregar planos reais:', error);
     });
   }, []);
+
+  React.useEffect(() => {
+    if (!currentUser) return;
+    void api.get<PaymentRecord[]>('/me/payments').then(setPayments).catch(error => {
+      console.error('Falha ao carregar histórico real de pagamentos:', error);
+    });
+  }, [currentUser?.id]);
 
   // Authentication and registration are delegated to Firebase; no browser-created sessions.
   const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -1064,13 +1072,22 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
 
                     {deletionRequested ? (
                       <div className="p-3 bg-white border border-[#B42318] text-[#B42318] font-bold rounded">
-                        ✓ Solicitação de exclusão protocolada sob o código LGPD-{Date.now().toString().slice(-6)}. Nossa equipe de privacidade concluirá o expurgo em até 48 horas úteis.
+                        ✓ Solicitação de exclusão protocolada sob o código {deletionProtocol}. O prazo será informado pela equipe após análise.
                       </div>
                     ) : (
                       <button
                         onClick={() => {
                           if (confirm('Tem certeza de que deseja solicitar a exclusão de sua conta? Esta ação é irreversível.')) {
-                            setDeletionRequested(true);
+                            void api.post<{ protocol: string }>('/privacy-requests', {
+                              name: currentUser?.name, email: currentUser?.email,
+                              requestType: 'exclusao',
+                              details: 'Solicitação de exclusão de conta, perfil e dados pessoais vinculados ao utilizador autenticado.'
+                            }, { auth: false }).then(result => {
+                              setDeletionProtocol(result.protocol);
+                              setDeletionRequested(true);
+                            }).catch(error => {
+                              setLoginError(error instanceof Error ? error.message : 'Não foi possível registrar o pedido de exclusão.');
+                            });
                           }
                         }}
                         className="bg-[#B42318] hover:bg-red-700 text-white font-bold px-3.5 py-2 rounded transition cursor-pointer"
