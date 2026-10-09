@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { LiveSourceNews } from '../LiveSourceNews';
 import { Article, CategorySlug } from '../../types';
 import { CategoryDetail } from '../../types';
 import { Breadcrumbs } from './Breadcrumbs';
@@ -116,6 +117,11 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
           )}
         </div>
       </header>
+
+      {/* Notícias externas atualizadas também nas páginas de editoria */}
+      <div className="max-w-[1360px] mx-auto px-4">
+        <LiveSourceNews />
+      </div>
 
       {/* 3. Main Content Grid */}
       <div className="max-w-[1360px] mx-auto px-4 py-8">
