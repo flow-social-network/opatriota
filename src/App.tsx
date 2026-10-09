@@ -570,7 +570,7 @@ export default function App() {
             plans={SUBSCRIPTION_PLANS}
             currentUser={currentUser}
             onSelectPlan={(planId) => {
-              handleOpenSubscriberArea(currentUser ? 'assinatura' : 'cadastro');
+              handleOpenSubscriberArea(currentUser ? 'assinatura' : 'entrar');
             }}
             onNavigateHome={handleNavigateHome}
           />
