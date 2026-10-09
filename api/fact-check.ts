@@ -57,7 +57,7 @@ export default async function handler(req: any, res: any) {
     const image = body.image && typeof body.image.data === "string" && typeof body.image.mimeType === "string"
       ? { mimeType: body.image.mimeType, data: body.image.data } : undefined;
     if (!text && !image) return res.status(400).json({ error: "Envie texto ou uma imagem." });
-    if (image && (!["image/png", "image/jpeg", "image/webp"].includes(image.mimeType) || image.data.length > 11_200_000)) {
+    if (image && (!["image/png", "image/jpeg", "image/webp"].includes(image.mimeType) || image.data.length > 4_200_000)) {
       return res.status(400).json({ error: "Imagem inválida ou acima do limite permitido." });
     }
     const trustedOnly = body.trustedOnly !== false;
