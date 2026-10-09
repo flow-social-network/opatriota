@@ -193,16 +193,8 @@ export default function App() {
       if (foundCat) {
         setSelectedCategoryDetail(foundCat);
       } else {
-        // Fallback detail if newly created
-        setSelectedCategoryDetail({
-          id: `cat-${cat}`,
-          slug: cat,
-          name: cat.charAt(0).toUpperCase() + cat.slice(1),
-          description: `Cobertura de ${cat} no portal O Patriota.`,
-          introText: `Notícias e análises de ${cat}.`,
-          active: true,
-          order: 99
-        });
+        showToast('Esta editoria ainda não existe no conteúdo publicado.');
+        return;
       }
       setSelectedCategory(cat);
       setCurrentView('category');
@@ -230,18 +222,8 @@ export default function App() {
       setSelectedAuthor(found);
       setCurrentView('author');
     } else {
-      // Dynamic profile creation for journalist if not in initial list
-      const dynamicAuthor: AuthorDetail = {
-        id: `usr-${Date.now()}`,
-        slug: authorNameOrId.toLowerCase().replace(/\s+/g, '-'),
-        name: authorNameOrId,
-        role: 'Repórter da Redação O Patriota',
-        bio: `${authorNameOrId} integra o corpo jornalístico de O Patriota com atuação na apuração de fatos nacionais e defesa da liberdade de informação.`,
-        avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=240&q=80',
-        credentials: 'DRT/DF • Membro da Equipe de Redação'
-      };
-      setSelectedAuthor(dynamicAuthor);
-      setCurrentView('author');
+      showToast('O perfil deste autor ainda não está cadastrado no servidor.');
+      return;
     }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
