@@ -83,3 +83,10 @@ pnpm dev
 Esta é uma implementação inicial, não uma declaração de prontidão para produção. Antes de produção, validar schema e migrations, testar todos os fluxos, acrescentar rate limiting e proteção contra CSRF conforme o deployment, implementar autorização de assinaturas antes de habilitar conteúdo pago, concluir integração Efí com webhooks idempotentes, adicionar testes de integração, revisar logging/privacidade, configurar backups, monitorização, secrets, IAM e CI/CD.
 
 A integração Efí existente em `server/` permanece legado não conectado às rotas atuais. Não processe pagamentos reais por esse código até a integração ser reimplementada e auditada.
+
+
+## Integrações e migração manual
+
+- Arquitetura, configuração Firebase/Neon/Meta, requisitos de segurança e checklist de migração: [docs/INTEGRATIONS_AND_MIGRATION.md](docs/INTEGRATIONS_AND_MIGRATION.md).
+- Contrato OpenAPI preliminar: [docs/contracts/openapi.yaml](docs/contracts/openapi.yaml). As rotas documentadas são contratos-alvo; não significam que todas estejam implementadas.
+- O arquivo .env.example contém somente nomes/placeholders. Não inserir credenciais reais no repositório.
