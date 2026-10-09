@@ -212,3 +212,87 @@
     display: none !important;
   }
 }
+
+
+/* Cabeçalho do FRONTEND REAL (React/Vite) — alinhado à referência editorial */
+.site-utility-bar {
+  position: relative;
+  z-index: 50;
+  background: #f1f3f5;
+}
+.site-utility-bar > div {
+  width: min(100% - 24px, 1360px);
+  min-height: 32px;
+  padding-top: 3px;
+  padding-bottom: 3px;
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+.site-utility-bar > div > div:first-child {
+  flex: 1 1 auto;
+  min-width: 0;
+  flex-wrap: nowrap;
+  gap: 10px;
+}
+.site-utility-bar > div > div:first-child > span:first-child {
+  white-space: nowrap;
+  font-size: 10px;
+}
+.site-utility-bar > div > div:first-child > button {
+  flex: 0 1 auto;
+  min-width: 0;
+  white-space: nowrap;
+  padding: 3px 7px;
+  gap: 5px;
+}
+.site-utility-bar > div > div:first-child > button > span:nth-last-child(2) {
+  max-width: 100px;
+}
+.site-utility-bar > div > div:first-child > div {
+  gap: 9px;
+}
+.site-utility-bar > div > div:first-child > div button {
+  white-space: nowrap;
+  font-size: 10px;
+}
+.site-utility-bar > div > div:last-child {
+  flex: 0 0 auto;
+  gap: 8px;
+}
+.site-utility-bar form {
+  flex: 0 0 auto;
+}
+.site-utility-bar form input {
+  width: 135px;
+}
+.site-utility-bar button,
+.site-utility-bar a,
+.site-utility-bar input {
+  min-height: 26px;
+}
+.site-utility-bar button { line-height: 1.15; }
+.site-utility-bar .social-icons,
+.site-utility-bar .mr-1 { flex: 0 0 auto; }
+@media (max-width: 1180px) {
+  .site-utility-bar > div { flex-wrap: wrap; }
+  .site-utility-bar > div > div:first-child { flex-wrap: wrap; }
+  .site-utility-bar > div > div:first-child > div { display: none; }
+}
+@media (max-width: 767px) {
+  .site-utility-bar > div { width: calc(100% - 16px); }
+  .site-utility-bar > div > div:first-child > span:first-child {
+    white-space: normal;
+    max-width: 100%;
+  }
+  .site-utility-bar > div > div:last-child { flex-wrap: wrap; }
+  .site-utility-bar form input { width: 115px; }
+}
+
+/* Faixas da identidade editorial: citação, marca central e pilares */
+.site-utility-bar + .market-ticker { margin: 0; }
+.market-ticker__inner {
+  width: min(100%, 1360px);
+  min-height: 28px;
+}
+.market-ticker__label { font-size: 9px; }
+.market-ticker__item { font-size: 10px; }
