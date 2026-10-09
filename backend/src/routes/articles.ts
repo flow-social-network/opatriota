@@ -6,7 +6,9 @@ import { requireAuth, requireRole, type AuthUser } from "../middleware/auth.js";
 
 const router = Router();
 const editorialRoles = [UserRole.JOURNALIST, UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN];
-const approverRoles = [UserRole.REVIEWER, UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN];
+const approverRoles: UserRole[] = [UserRole.REVIEWER, UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN];
+const submitAllowedStatuses = new Set<ArticleStatus>([ArticleStatus.DRAFT, ArticleStatus.PITCH, ArticleStatus.CHANGES_REQUESTED]);
+const approvalInvalidatingStatuses = new Set<ArticleStatus>([ArticleStatus.APPROVED, ArticleStatus.SCHEDULED, ArticleStatus.PUBLISHED]);
 
 router.get("/", asyncHandler(async (req, res) => {
   const page = Math.max(1, Math.min(10000, Number.parseInt(String(req.query.page ?? "1"), 10) || 1));
@@ -87,7 +89,7 @@ router.patch("/:id", requireAuth, requireRole(...editorialRoles), asyncHandler(a
   if (req.body?.categoryId !== undefined) data.categoryId = req.body.categoryId || null;
 
   const contentChanged = ["title", "body", "excerpt", "categoryId"].some((key) => req.body?.[key] !== undefined);
-  if (contentChanged && [ArticleStatus.APPROVED, ArticleStatus.SCHEDULED, ArticleStatus.PUBLISHED].includes(existing.status)) {
+  if (contentChanged && approvalInvalidatingStatuses.has(existing.status)) {
     // Any content edit invalidates approval and removes the old public version until re-review.
     data.status = ArticleStatus.DRAFT;
     data.publishedAt = null;
@@ -111,7 +113,7 @@ router.post("/:id/submit", requireAuth, requireRole(...editorialRoles), asyncHan
   if (user.role === UserRole.JOURNALIST && article.authorId !== user.id) {
     throw new HttpError(403, "FORBIDDEN", "Journalists may submit only their own articles");
   }
-  if (![ArticleStatus.DRAFT, ArticleStatus.PITCH, ArticleStatus.CHANGES_REQUESTED].includes(article.status)) {
+  if (!submitAllowedStatuses.has(article.status)) {
     throw new HttpError(409, "INVALID_EDITORIAL_STATE", "Only drafts or articles requiring changes can be submitted");
   }
 
