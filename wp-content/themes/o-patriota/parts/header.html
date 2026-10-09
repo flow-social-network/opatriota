@@ -1,89 +1,79 @@
 <!-- wp:group {"tagName":"header","className":"site-header","layout":{"type":"constrained"}} -->
 <header class="wp-block-group site-header">
-  <!-- Top bar -->
-  <div class="top-bar bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs py-2 px-4 text-[#5D6673]">
-    <div class="max-w-[1360px] mx-auto flex items-center justify-between">
-      <div class="flex items-center gap-4">
+  <!-- FAIXA SUPERIOR CINZA -->
+  <div class="top-bar">
+    <div class="patriota-header-inner top-bar-inner">
+      <div class="top-bar-left">
         <!-- wp:shortcode -->[o_patriota_data_atual]<!-- /wp:shortcode -->
-        <span>•</span>
-        <!-- Dynamic Weather Bar Widget (FSE & REST API) -->
-        <div id="patriota-weather-widget" class="patriota-weather-widget flex items-center gap-2" data-source="open-meteo" data-reference="inmet">
-          <a href="https://portal.inmet.gov.br/" target="_blank" rel="noopener noreferrer" class="weather-inmet-badge bg-[#16803C] hover:bg-[#22A447] text-white text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider flex items-center gap-1" title="Portal Oficial INMET — Referência Institucional de Estações">
-            <span>INMET</span>
-            <span class="text-[8px]">↗</span>
-          </a>
-          <button id="patriota-weather-pill" class="patriota-weather-pill flex items-center gap-1.5 bg-white hover:bg-[#F0F5FF] border border-[#D9DEE7] hover:border-[#0B5FFF] px-2 py-0.5 rounded text-xs text-[#17202A] transition cursor-pointer" title="Clique para ver previsão completa das 27 capitais">
-            <span id="weather-status-dot" class="w-1.5 h-1.5 rounded-full bg-amber-400" title="Sincronizando..."></span>
-            <span id="weather-city-label" class="font-bold">Brasília (DF)</span>
-            <span id="weather-temp-label" class="font-black text-[#0B2345]">--°C</span>
-            <span id="weather-condition-label" class="text-[#5D6673] hidden sm:inline text-[11px]">Sincronizando...</span>
+        <span class="header-divider" aria-hidden="true"></span>
+        <div id="patriota-weather-widget" class="patriota-weather-widget" data-source="open-meteo" data-reference="inmet">
+          <button id="patriota-weather-pill" class="patriota-weather-pill" type="button" title="Ver previsão do tempo das capitais">
+            <span id="weather-status-dot" class="weather-status-dot" title="Sincronizando"></span>
+            <span id="weather-city-label">Brasília (DF)</span>
+            <span aria-hidden="true">☀</span>
+            <strong id="weather-temp-label">--°C</strong>
+            <span id="weather-condition-label" class="weather-condition-label">Consultando previsão...</span>
+            <span class="weather-inmet-badge">INMET</span>
           </button>
         </div>
       </div>
-      <div class="flex items-center gap-6">
-        <div class="social-icons flex items-center gap-3">
-          <a href="#" aria-label="Facebook">FB</a>
-          <a href="#" aria-label="X Twitter">X</a>
-          <a href="#" aria-label="Instagram">IG</a>
-          <a href="#" aria-label="YouTube">YT</a>
+      <div class="top-bar-right">
+        <nav class="institutional-links" aria-label="Links institucionais">
+          <a href="/sobre-o-patriota/">Sobre</a>
+          <a href="/principios-editoriais/">Princípios</a>
+          <a href="/expediente/">Expediente</a>
+          <a class="institutional-plans" href="/planos/">Planos</a>
+          <a href="/contato/">Contato</a>
+        </nav>
+        <div class="social-icons" aria-label="Redes sociais">
+          <a href="#" aria-label="Facebook">f</a>
+          <a href="#" aria-label="Instagram">◎</a>
+          <a href="#" aria-label="YouTube">▶</a>
+          <a href="#" aria-label="X">𝕏</a>
+          <a href="#" aria-label="RSS">◔</a>
         </div>
-        <!-- wp:search {"label":"Buscar notícias...","showLabel":false,"buttonText":"Buscar","buttonPosition":"button-inside"} /-->
+        <form class="header-search" role="search" method="get" action="/">
+          <label class="screen-reader-text" for="patriota-header-search">Buscar notícias</label>
+          <input id="patriota-header-search" type="search" name="s" placeholder="Buscar notícias, análises, vídeos..." />
+          <button type="submit" aria-label="Buscar">⌕</button>
+        </form>
+        <a class="header-login" href="/entrar/">♙ <span>ENTRAR</span></a>
       </div>
     </div>
   </div>
 
-  <!-- Branding Banner -->
-  <div class="branding-bar py-6 px-4 bg-white border-b border-[#D9DEE7]">
-    <div class="max-w-[1360px] mx-auto flex items-center justify-between">
-      <div class="hidden lg:block max-w-[260px] text-xs italic text-[#5D6673]">
-        “Um jornal livre ajuda a construir um país mais forte.”
+  <!-- FAIXA DE MERCADOS / INDICADORES -->
+  <div id="patriota-weather-ticker-bar" class="weather-ticker-bar">
+    <div class="patriota-header-inner ticker-inner">
+      <strong class="ticker-label">● MERCADOS AO VIVO</strong>
+      <div id="weather-ticker-list" class="ticker-list" aria-live="polite">
+        <span>Carregando indicadores e previsão das capitais...</span>
       </div>
-      <div class="logo-center text-center">
-        <!-- wp:site-logo {"width":320} /-->
-        <!-- wp:site-title {"level":1,"style":{"typography":{"fontFamily":"Georgia, serif","fontSize":"2.75rem","fontWeight":"800"}}} /-->
-        <!-- wp:site-tagline {"style":{"typography":{"fontSize":"0.75rem","letterSpacing":"2px","textTransform":"uppercase"}}} /-->
+      <button id="weather-ticker-title-btn" class="ticker-more" type="button">Mais cotações ›</button>
+      <button id="weather-view-all-modal-btn" class="ticker-view-all" type="button">Todas as capitais ↗</button>
+    </div>
+  </div>
+
+  <!-- MARCA CENTRAL E PILARES EDITORIAIS -->
+  <div class="branding-bar">
+    <div class="patriota-header-inner branding-inner">
+      <div class="branding-quote">“Um jornal livre ajuda a construir<br>um país mais forte.”</div>
+      <div class="logo-center">
+        <!-- wp:site-logo {"width":300} /-->
+        <!-- wp:site-title {"level":1} /-->
+        <!-- wp:site-tagline /-->
       </div>
-      <div class="hidden lg:block text-right text-xs font-semibold tracking-wider text-[#0B2345] leading-relaxed">
-        FATOS<br>IDEIAS<br>PESSOAS<br>SOLUÇÕES<br>PELO BRASIL
+      <div class="editorial-pillars">
+        <span>FATOS</span><span>IDEIAS</span><span>PESSOAS</span><span>SOLUÇÕES</span><strong>PELO BRASIL</strong>
       </div>
     </div>
   </div>
 
-  <!-- Navigation -->
-  <div class="main-navigation bg-[#0B2345] text-white">
-    <div class="max-w-[1360px] mx-auto flex items-center justify-between px-4">
+  <!-- NAVEGAÇÃO PRINCIPAL -->
+  <div class="main-navigation">
+    <div class="patriota-header-inner navigation-inner">
       <!-- wp:navigation {"layout":{"type":"flex","justifyContent":"left","orientation":"horizontal"}} /-->
-      <div class="py-2">
-        <a href="/apoie-o-jornal/" class="bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded transition-colors inline-block">
-          APOIE O JORNAL
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Weather Bar Ticker for 27 Capitals (Dynamic FSE Integration) -->
-  <div id="patriota-weather-ticker-bar" class="weather-ticker-bar bg-[#0B2345] text-white text-xs py-1.5 px-4 border-b border-[#07172E]">
-    <div class="max-w-[1360px] mx-auto flex items-center justify-between gap-3 overflow-hidden">
-      <div class="flex items-center gap-2 shrink-0">
-        <a href="https://portal.inmet.gov.br/" target="_blank" rel="noopener noreferrer" class="bg-[#16803C] hover:bg-[#22A447] text-white font-black text-[10px] px-2 py-0.5 rounded flex items-center gap-1" title="Portal Oficial do INMET — Referência Institucional">
-          <span>INMET</span>
-          <span class="text-[8px]">↗</span>
-        </a>
-        <button id="weather-ticker-title-btn" class="text-[11px] font-bold text-[#FFCC29] hover:underline cursor-pointer">
-          PREVISÃO DAS CAPITAIS:
-        </button>
-        <span id="weather-ticker-sync-badge" class="hidden md:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-[#FFCC29]">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#22A447] animate-pulse"></span>
-          <span>Tempo Real (Open-Meteo)</span>
-        </span>
-      </div>
-      <div id="weather-ticker-list" class="flex items-center gap-3.5 overflow-x-auto no-scrollbar text-[11px] py-0.5">
-        <span class="text-white/60">Carregando previsão das 27 capitais...</span>
-      </div>
-      <button id="weather-view-all-modal-btn" class="shrink-0 text-[11px] font-bold text-white/90 hover:underline flex items-center gap-1 pl-2 border-l border-white/20 hidden sm:flex cursor-pointer">
-        <span>Todas as 27</span>
-        <span class="text-[10px]">↗</span>
-      </button>
+      <a class="support-journal-button" href="/apoie-o-jornal/">♡ APOIE O JORNAL</a>
     </div>
   </div>
 </header>
