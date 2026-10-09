@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AuthModal } from '../AuthModal';
 import { 
   UserSession, 
   Article, 
@@ -30,6 +31,7 @@ import {
 interface SubscriberPortalProps {
   currentUser: UserSession | null;
   onLogin: (user: UserSession) => void;
+  onGoogleLogin: () => Promise<void> | void;
   onLogout: () => void;
   onBackToHome: () => void;
   articles: Article[];
@@ -40,6 +42,7 @@ interface SubscriberPortalProps {
 export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
   currentUser,
   onLogin,
+  onGoogleLogin,
   onLogout,
   onBackToHome,
   articles,
@@ -269,6 +272,23 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
     downloadAnchor.click();
     downloadAnchor.remove();
   };
+
+  if (!currentUser) {
+    return (
+      <div className="min-h-screen bg-[#F7F8FA] text-[#17202A]">
+        <div className="mx-auto max-w-3xl px-4 py-10 text-center">
+          <button onClick={onBackToHome} className="mb-8 text-sm font-semibold text-[#0B2345] hover:underline">
+            ← Voltar para as notícias
+          </button>
+          <h1 className="font-serif text-3xl font-bold text-[#0B2345]">Área do Leitor</h1>
+          <p className="mx-auto mt-3 max-w-lg text-sm leading-relaxed text-slate-600">
+            Entre gratuitamente com sua conta Google para salvar matérias e acessar os conteúdos disponíveis. Você poderá escolher um plano depois.
+          </p>
+        </div>
+        <AuthModal onClose={onBackToHome} onGoogleLogin={onGoogleLogin} />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#17202A] select-none py-4 sm:py-6">
