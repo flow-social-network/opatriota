@@ -72,6 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
   portalSettings
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(BRAZIL_CAPITALS_WEATHER[0]);
   const [pushStatus, setPushStatus] = useState<string>('default');
@@ -80,6 +81,19 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     setPushStatus(getPushPermissionStatus());
   }, []);
+
+  // Atualiza a data de Brasília automaticamente, inclusive após a meia-noite.
+  useEffect(() => {
+    const updateDate = () => setCurrentDate(new Date());
+    updateDate();
+    const interval = window.setInterval(updateDate, 60_000);
+    return () => window.clearInterval(interval);
+  }, []);
+
+  const formattedCurrentDate = new Intl.DateTimeFormat('pt-BR', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+    timeZone: 'America/Sao_Paulo',
+  }).format(currentDate);
 
   useEffect(() => {
     if (!mobileMenuOpen) return;
@@ -188,7 +202,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1">
           {/* Left: Date & Dynamic Weather from INMET */}
           <div className="flex items-center gap-4 text-[11px] sm:text-xs">
-            <span className="font-semibold text-[#17202A]">Brasília, 8 de outubro de 2026</span>
+            <span className="font-semibold text-[#17202A]">Brasília, {formattedCurrentDate}</span>
             <span className="text-[#D9DEE7] hidden sm:inline">|</span>
 
             {/* DYNAMIC WEATHER PILL (Open-Meteo live / INMET stations reference) */}

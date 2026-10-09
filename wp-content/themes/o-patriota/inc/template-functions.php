@@ -107,3 +107,16 @@ function o_patriota_output_schema_jsonld() {
 	}
 }
 add_action( 'wp_head', 'o_patriota_output_schema_jsonld' );
+
+
+/**
+ * Data editorial atual do portal. O shortcode é executado pelo WordPress.
+ * PHP inserido diretamente no arquivo HTML de um template FSE não é executado.
+ */
+function o_patriota_current_date_shortcode() {
+	$timestamp = current_datetime()->getTimestamp();
+	$date      = wp_date( 'l, j \\d\\e F \\d\\e Y', $timestamp, wp_timezone() );
+	$iso_date  = wp_date( 'Y-m-d', $timestamp, wp_timezone() );
+	return '<time class="patriota-current-date" datetime="' . esc_attr( $iso_date ) . '">Brasília, ' . esc_html( $date ) . '</time>';
+}
+add_shortcode( 'o_patriota_data_atual', 'o_patriota_current_date_shortcode' );
