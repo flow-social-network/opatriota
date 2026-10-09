@@ -249,6 +249,99 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 `
   },
   {
+    id: 'page-nossas-fontes',
+    slug: 'nossas-fontes',
+    title: 'Nossas Fontes',
+    subtitle: 'Transparência sobre a origem das informações: conheça as fontes públicas e institucionais monitoradas pelo portal.',
+    badge: 'TRANSPARÊNCIA EDITORIAL',
+    model: 'institucional',
+    updatedAt: '09 de outubro de 2026',
+    publishedAt: '09 de outubro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/factcheck_smartphone.jpg',
+    menuLocations: ['footer_col2'],
+    author: 'Redação O Patriota',
+    seo: {
+      metaTitle: 'Nossas Fontes — Transparência Editorial | O Patriota',
+      metaDescription: 'Consulte fontes públicas e institucionais utilizadas como referência editorial por O Patriota e entenda a diferença entre tecnologia e produção jornalística.',
+      canonicalUrl: 'https://opatriota.com.br/nossas-fontes/'
+    },
+    toc: [
+      { id: 'origem', title: '1. Origem e responsabilidade editorial' },
+      { id: 'fontes-institucionais', title: '2. Fontes institucionais cadastradas' },
+      { id: 'como-usamos', title: '3. Como as informações são utilizadas' },
+      { id: 'imagens-creditos', title: '4. Imagens, créditos e direitos' },
+      { id: 'limites', title: '5. Limites e correções' }
+    ],
+    relatedLinks: [
+      { label: 'Fontes e Metodologia', url: '/fontes-e-metodologia/', description: 'Critérios de apuração e verificação.' },
+      { label: 'Princípios Editoriais', url: '/principios-editoriais/', description: 'Compromissos éticos da redação.' },
+      { label: 'Política de Correções', url: '/politica-de-correcoes/', description: 'Como comunicar imprecisões.' }
+    ],
+    content: `
+<section id="origem">
+  <h2>1. Origem e responsabilidade editorial</h2>
+  <p><strong>O PATRIOTA distingue a infraestrutura tecnológica da atividade jornalística.</strong> Desenvolvedores mantêm o site, os sistemas de publicação e as integrações técnicas; isso, por si só, não significa que sejam autores das notícias. O conteúdo jornalístico deve ter origem identificável, referência verificável e responsabilidade editorial da redação.</p>
+  <p>O cadastro de uma fonte indica que ela faz parte do catálogo de referência do sistema. Não significa que todos os seus conteúdos sejam publicados, que cada feed esteja sempre disponível ou que uma informação esteja automaticamente confirmada. A veracidade é avaliada caso a caso, conforme a natureza da afirmação e a documentação disponível.</p>
+</section>
+
+<section id="fontes-institucionais">
+  <h2>2. Fontes institucionais cadastradas</h2>
+  <p>O catálogo atual do projeto inclui as seguintes fontes e canais institucionais. Os links direcionam aos respectivos sites oficiais ou canais de publicação; a disponibilidade de feeds e a atualização de cada integração podem variar.</p>
+  <h3>Partidos e órgãos do Poder Executivo</h3>
+  <ul>
+    <li><a href="https://novo.org.br/" target="_blank" rel="noopener noreferrer">Partido NOVO</a></li>
+    <li><a href="https://partidoliberal.org.br/" target="_blank" rel="noopener noreferrer">Partido Liberal (PL)</a></li>
+    <li><a href="https://www.gov.br/planalto/pt-br" target="_blank" rel="noopener noreferrer">Presidência da República — Palácio do Planalto</a></li>
+    <li><a href="https://www.gov.br/" target="_blank" rel="noopener noreferrer">Governo Federal do Brasil</a></li>
+    <li><a href="https://www.bcb.gov.br/" target="_blank" rel="noopener noreferrer">Banco Central do Brasil (BCB)</a></li>
+    <li><a href="https://www.gov.br/pf/pt-br" target="_blank" rel="noopener noreferrer">Polícia Federal (PF)</a></li>
+    <li><a href="https://www.gov.br/prf/pt-br" target="_blank" rel="noopener noreferrer">Polícia Rodoviária Federal (PRF)</a></li>
+    <li><a href="https://www.estado.rs.gov.br/" target="_blank" rel="noopener noreferrer">Governo do Estado do Rio Grande do Sul</a></li>
+    <li><a href="https://www.brigadamilitar.rs.gov.br/" target="_blank" rel="noopener noreferrer">Brigada Militar do RS</a></li>
+    <li><a href="https://www.pc.rs.gov.br/" target="_blank" rel="noopener noreferrer">Polícia Civil do RS</a></li>
+    <li><a href="https://www.bombeiros.rs.gov.br/" target="_blank" rel="noopener noreferrer">Corpo de Bombeiros Militar do RS</a></li>
+    <li><a href="https://www.policiapenal.rs.gov.br/" target="_blank" rel="noopener noreferrer">Polícia Penal do RS</a></li>
+    <li><a href="https://www.mprs.mp.br/" target="_blank" rel="noopener noreferrer">Ministério Público do Estado do RS (MPRS)</a></li>
+    <li><a href="https://www.tjrs.jus.br/" target="_blank" rel="noopener noreferrer">Tribunal de Justiça do RS (TJRS)</a></li>
+    <li><a href="https://www.defesacivil.rs.gov.br/" target="_blank" rel="noopener noreferrer">Defesa Civil do Estado do RS</a></li>
+  </ul>
+  <h3>Legislativo, Justiça e controle</h3>
+  <ul>
+    <li><a href="https://www.camara.leg.br/" target="_blank" rel="noopener noreferrer">Congresso Nacional — Câmara dos Deputados</a></li>
+    <li><a href="https://www.camara.leg.br/agencia/" target="_blank" rel="noopener noreferrer">Agência Câmara</a></li>
+    <li><a href="https://www12.senado.leg.br/noticias" target="_blank" rel="noopener noreferrer">Agência Senado</a></li>
+    <li><a href="https://www.stf.jus.br/" target="_blank" rel="noopener noreferrer">Supremo Tribunal Federal (STF)</a></li>
+    <li><a href="https://www.tse.jus.br/" target="_blank" rel="noopener noreferrer">Tribunal Superior Eleitoral (TSE)</a></li>
+    <li><a href="https://www.tcu.gov.br/" target="_blank" rel="noopener noreferrer">Tribunal de Contas da União (TCU)</a></li>
+    <li><a href="https://www.gov.br/cgu/pt-br" target="_blank" rel="noopener noreferrer">Controladoria-Geral da União (CGU)</a></li>
+  </ul>
+  <h3>Agências de notícias e veículos</h3>
+  <ul>
+    <li><a href="https://agenciabrasil.ebc.com.br/ultimas" target="_blank" rel="noopener noreferrer">Agência Brasil (EBC) — feed de últimas notícias</a></li>
+    <li><a href="https://g1.globo.com/" target="_blank" rel="noopener noreferrer">Grupo Globo (G1 / O Globo / GloboNews)</a> — registro no catálogo sujeito à política editorial e às restrições de uso do portal.</li>
+  </ul>
+  <p><strong>Nota sobre o catálogo:</strong> esta página documenta as fontes atualmente registradas no catálogo do projeto. O cadastro não equivale a uma declaração de que todas as integrações estejam operacionais em produção.</p>
+</section>
+
+<section id="como-usamos">
+  <h2>3. Como as informações são utilizadas</h2>
+  <p>Feeds e páginas públicas podem ajudar a identificar comunicados, documentos, dados e notícias de interesse. Quando um conteúdo é reproduzido em formato de chamada ou resumo, deve ser acompanhado de atribuição e link para a publicação original sempre que aplicável. Declarações relevantes, números e alegações sensíveis exigem conferência contextual e, quando necessário, cruzamento com documentos primários ou outras fontes independentes.</p>
+  <p>Um comunicado oficial comprova que o órgão publicou determinada informação; nem sempre comprova, sozinho, a veracidade independente de todas as alegações contidas nele. O contexto, os limites da fonte e eventuais versões divergentes devem ser considerados.</p>
+</section>
+
+<section id="imagens-creditos">
+  <h2>4. Imagens, créditos e direitos</h2>
+  <p>Imagens fornecidas por feeds só devem ser exibidas quando a integração conseguir identificar a URL da imagem. A disponibilidade técnica não concede automaticamente licença de reutilização. Créditos, termos de uso, direitos autorais e eventuais restrições devem ser respeitados; na dúvida, a imagem não deve ser reutilizada fora do contexto permitido.</p>
+</section>
+
+<section id="limites">
+  <h2>5. Limites e correções</h2>
+  <p>Conteúdo proveniente de fontes externas não é garantia automática de verdade. O PATRIOTA deve corrigir erros identificados, indicar atualizações relevantes e receber apontamentos documentados por meio do canal de contato da redação. Consulte também nossa <a href="/fontes-e-metodologia/">metodologia de apuração</a> e nossa <a href="/politica-de-correcoes/">política de correções</a>.</p>
+</section>
+`
+  },
+  {
     id: 'page-metodologia',
     slug: 'fontes-e-metodologia',
     title: 'Fontes e Metodologia',
