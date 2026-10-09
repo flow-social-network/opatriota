@@ -218,6 +218,8 @@ router.post("/:id/publish", requireAuth, requireRole(UserRole.EDITOR, UserRole.C
   if (article.status !== ArticleStatus.APPROVED || !article.humanApprovedAt || !article.humanApprovedById) {
     throw new HttpError(409, "HUMAN_APPROVAL_REQUIRED", "Only explicitly human-approved articles can be published");
   }
+  const humanApprovedAt = article.humanApprovedAt;
+  const humanApprovedById = article.humanApprovedById;
   const now = new Date();
   const published = await prisma.$transaction(async (tx) => {
     const result = await tx.article.update({
@@ -226,7 +228,7 @@ router.post("/:id/publish", requireAuth, requireRole(UserRole.EDITOR, UserRole.C
       select: { id: true, title: true, slug: true, status: true, publishedAt: true, version: true },
     });
     await tx.auditEvent.create({
-      data: { actorId: user.id, action: "ARTICLE_PUBLISHED", entityType: "Article", entityId: article.id, metadata: { humanApprovedById: article.humanApprovedById, humanApprovedAt: article.humanApprovedAt.toISOString() } },
+      data: { actorId: user.id, action: "ARTICLE_PUBLISHED", entityType: "Article", entityId: article.id, metadata: { humanApprovedById, humanApprovedAt: humanApprovedAt.toISOString() } },
     });
     return result;
   });
