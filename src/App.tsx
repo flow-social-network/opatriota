@@ -441,17 +441,9 @@ export default function App() {
         <main className="flex-1">
 
           <div className="max-w-[1360px] mx-auto px-4 py-8">
-            <HeroSection
-              articles={articles}
-              onSelectArticle={handleSelectArticle}
-            />
-
+            {/* A capa usa o feed publicado pelas fontes; os artigos de demonstração
+                não devem aparecer como se fossem notícias atuais. */}
             <LiveSourceNews />
-
-            <EditorialGrid
-              articles={articles}
-              onSelectArticle={handleSelectArticle}
-            />
 
             <FactCheckRibbon
               factChecks={factChecks}
