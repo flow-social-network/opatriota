@@ -8,6 +8,7 @@ import { Footer } from './components/Footer';
 import { LiveSourceNews } from './components/LiveSourceNews';
 import { ArticleView } from './components/ArticleView';
 import { FactCheckHub } from './components/FactCheckHub';
+import { FactCheckSubmissionPage } from './components/FactCheckSubmissionPage';
 import { AdminDashboard } from './components/AdminDashboard';
 import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
@@ -83,6 +84,7 @@ export default function App() {
     'institutional' | 
     'custom' | 
     'factcheck' | 
+    'factcheck-submit' | 
     'admin' | 
     'subscriber' | 
     'newsroom'
@@ -268,6 +270,11 @@ export default function App() {
     }
     if (slug === 'busca') {
       setCurrentView('search');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    if (slug === 'enviar-checagem') {
+      setCurrentView('factcheck-submit');
       window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
@@ -608,6 +615,13 @@ export default function App() {
             onBack={handleNavigateHome}
             onOpenItem={handleOpenFactCheck}
           />
+        </main>
+      )}
+
+      {/* VIEW: ENVIO DE MATERIAL PARA CHECAGEM */}
+      {currentView === 'factcheck-submit' && (
+        <main className="flex-1">
+          <FactCheckSubmissionPage onBack={() => setCurrentView('factcheck')} />
         </main>
       )}
 
