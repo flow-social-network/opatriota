@@ -200,7 +200,7 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header className="w-full bg-white select-none">
         {/* A barra de utilidades permanece fixa; marca e navegação rolam com o conteúdo. */}
-      <div className="site-utility-bar bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]">
+      <div className="site-utility-bar sticky top-0 z-50 bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]">
         <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1">
           {/* Left: Date & Dynamic Weather from INMET */}
           <div className="flex items-center gap-4 text-[11px] sm:text-xs">
@@ -224,8 +224,11 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="text-[#5D6673] hidden sm:inline text-[11px] font-normal truncate max-w-[110px]">
                 {selectedCapital.condition}
               </span>
-              <span className="bg-[#16803C] group-hover:bg-[#22A447] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase tracking-wider ml-0.5">
-                INMET
+              <span className="pointer-events-none absolute left-0 top-full z-50 mt-2 hidden w-64 rounded-lg border border-[#D9DEE7] bg-white p-3 text-left text-xs font-normal text-[#17202A] shadow-xl group-hover:block group-focus-visible:block">
+                <span className="block font-bold text-[#0B2345]">{selectedCapital.fullName} ({selectedCapital.uf})</span>
+                <span className="mt-1 block">{selectedCapital.condition} · {selectedCapital.temp}°C · mínima {selectedCapital.min}° / máxima {selectedCapital.max}°</span>
+                <span className="mt-2 block text-[10px] text-[#5D6673]">{getSyncStateMeta(selectedCapital.syncState).label} · Fonte: {selectedCapital.dataSource}</span>
+                <span className="mt-1 block font-semibold text-[#16803C]">Clique para abrir a previsão completa</span>
               </span>
             </button>
 
@@ -349,7 +352,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* O ticker fica logo abaixo da barra fixa e recolhe visualmente ao rolar. */}
-      <BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} />
+      <div className="sticky top-[38px] z-40"><BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} /></div>
 
       {/* 2. GRAND BRANDING BANNER */}
       <div className="py-2 sm:py-2.5 px-4 bg-white border-b border-[#D9DEE7]">
