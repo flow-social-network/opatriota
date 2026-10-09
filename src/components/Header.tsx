@@ -35,6 +35,7 @@ import {
 } from '../data/weatherData';
 import { WeatherCapitalsModal } from './weather/WeatherCapitalsModal';
 import { WeatherBar } from './weather/WeatherBar';
+import { BreakingNewsTicker } from './BreakingNewsTicker';
 import { subscribeToWebPush, getPushPermissionStatus } from '../services/webPushService';
 
 interface HeaderProps {
@@ -178,9 +179,9 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header className="w-full bg-white select-none">
-        {/* 1. TOP UTILITY BAR */}
-      <div className="bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs py-1.5 px-4 text-[#5D6673]">
-        <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-3">
+        {/* A barra de utilidades permanece fixa; marca e navegação rolam com o conteúdo. */}
+      <div className="site-utility-bar bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]">
+        <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1">
           {/* Left: Date & Dynamic Weather from INMET */}
           <div className="flex items-center gap-4 text-[11px] sm:text-xs">
             <span className="font-semibold text-[#17202A]">Brasília, 8 de outubro de 2026</span>
@@ -317,8 +318,11 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* 2. GRAND BRANDING BANNER (Exact reproduction of middle header) */}
-      <div className="py-6 sm:py-8 px-4 bg-white border-b border-[#D9DEE7]">
+      {/* O ticker fica logo abaixo da barra fixa e recolhe visualmente ao rolar. */}
+      <BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} />
+
+      {/* 2. GRAND BRANDING BANNER */}
+      <div className="py-3 sm:py-4 px-4 bg-white border-b border-[#D9DEE7]">
         <div className="max-w-[1360px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           {/* Left Column: Quote */}
           <div className="hidden lg:flex lg:col-span-3 flex-col justify-center">
@@ -351,7 +355,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* 3. MAIN NAVIGATION BAR (Dark Navy #0B2345 with Gold/Green accents) */}
-      <nav className="bg-[#0B2345] text-white sticky top-0 z-40 shadow-sm border-b border-[#07172E]">
+      <nav className="bg-[#0B2345] text-white shadow-sm border-b border-[#07172E]">
         <div className="max-w-[1360px] mx-auto px-4 flex items-center justify-between">
           {/* Mobile hamburger button */}
           <button

@@ -218,12 +218,21 @@ export const DEFAULT_WEBPUSH_CONFIG: WebPushConfig = {
   welcomeMessage: 'Você receberá notícias urgentes, plantões e reportagens investigativas em primeira mão.'
 };
 
+export const DEFAULT_MARKET_TICKER_CONFIG = {
+  enabled: true,
+  speedSeconds: 42,
+  showEconomicNews: false,
+  indicators: ['USD/BRL', 'EUR/BRL', 'IBOVESPA', 'SELIC', 'IPCA'],
+  lastCollectionAt: undefined
+};
+
 export const DEFAULT_PORTAL_SETTINGS: PortalSettings = {
   identity: DEFAULT_IDENTITY_CONFIG,
   socialNetworks: DEFAULT_SOCIAL_NETWORKS,
   adsense: DEFAULT_ADSENSE_CONFIG,
   adSlots: DEFAULT_AD_SLOTS,
   webPush: DEFAULT_WEBPUSH_CONFIG,
+  marketTicker: DEFAULT_MARKET_TICKER_CONFIG,
   updatedAt: new Date().toISOString()
 };
 
@@ -255,8 +264,9 @@ export async function loadPortalSettings(): Promise<PortalSettings> {
         socialNetworks: data.socialNetworks?.length ? data.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
         adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(data.adsense || {}) },
         adSlots: data.adSlots?.length ? data.adSlots : DEFAULT_AD_SLOTS,
-        webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(data.webPush || {}) },
-        updatedAt: data.updatedAt || new Date().toISOString()
+  webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(data.webPush || {}) },
+  marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(data.marketTicker || {}) },
+  updatedAt: data.updatedAt || new Date().toISOString()
       };
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
       return merged;
