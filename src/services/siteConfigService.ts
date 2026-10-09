@@ -1,5 +1,20 @@
-import { initializeApp, getApps, getApp } from 'firebase/app';
-import { getFirestore, doc, getDoc, setDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+
+async function supabaseRequest(path: string, options: RequestInit = {}) {
+  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase não configurado');
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...options,
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  });
+  if (!response.ok) throw new Error(`Supabase ${response.status}`);
+  return response.status === 204 ? null : response.json();
+}
 import { 
   PortalSettings, 
   SiteIdentityConfig, 
@@ -19,21 +34,6 @@ export type {
   NewsletterSubscriber,
   WebPushConfig 
 };
-
-// Official Firebase configuration provided for O Patriota
-export const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAM7XqRKi2DWNvEpwZZTg99QGgq75_FWgc",
-  authDomain: "o-patriota-5db52.firebaseapp.com",
-  projectId: "o-patriota-5db52",
-  storageBucket: "o-patriota-5db52.firebasestorage.app",
-  messagingSenderId: "144044011965",
-  appId: "1:144044011965:web:6da58292d47845e931e2d4",
-  measurementId: "G-DSWWC4VLNP"
-};
-
-// Initialize Firebase App safely (singleton)
-export const firebaseApp = !getApps().length ? initializeApp(FIREBASE_CONFIG) : getApp();
-export const firestoreDb = getFirestore(firebaseApp);
 
 export const DEFAULT_IDENTITY_CONFIG: SiteIdentityConfig = {
   headerLogoType: 'default_svg',
@@ -228,7 +228,7 @@ export const DEFAULT_PORTAL_SETTINGS: PortalSettings = {
 };
 
 const LOCAL_STORAGE_KEY = 'o_patriota_portal_settings_v1';
-const FIRESTORE_SETTINGS_DOC = 'portal_settings/main';
+const SUPABASE_SETTINGS_ID = 'main';
 
 /**
  * Loads current settings from Firestore with local storage cache fallback.
@@ -245,12 +245,11 @@ export async function loadPortalSettings(): Promise<PortalSettings> {
     // Ignore cache error
   }
 
-  // 2. Try fetching latest from Firestore
+  // 2. Tenta buscar a configuração persistida no Supabase
   try {
-    const docRef = doc(firestoreDb, 'config', 'portal_settings');
-    const snap = await getDoc(docRef);
-    if (snap.exists()) {
-      const data = snap.data() as PortalSettings;
+    const rows = await supabaseRequest(`portal_settings?id=eq.${SUPABASE_SETTINGS_ID}&select=settings`);
+    const data = rows?.[0]?.settings as Partial<PortalSettings> | undefined;
+    if (data) {
       const merged: PortalSettings = {
         identity: { ...DEFAULT_IDENTITY_CONFIG, ...(data.identity || {}) },
         socialNetworks: data.socialNetworks?.length ? data.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
@@ -259,14 +258,11 @@ export async function loadPortalSettings(): Promise<PortalSettings> {
         webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(data.webPush || {}) },
         updatedAt: data.updatedAt || new Date().toISOString()
       };
-      // Update local storage
-      try {
-        localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
-      } catch (err) {}
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
       return merged;
     }
-  } catch (error) {
-    // Firestore unavailable or permissions not configured yet; return cached or default
+  } catch {
+    // Permite que o portal continue funcional quando a rede estiver indisponível.
   }
 
   if (cached) {
@@ -299,17 +295,16 @@ export async function savePortalSettings(settings: PortalSettings): Promise<{ su
     console.warn('Falha ao gravar configurações em cache local', e);
   }
 
-  // 2. Persist to Firestore
+  // 2. Persiste no Supabase; o RLS impede alterações sem sessão administrativa.
   try {
-    const docRef = doc(firestoreDb, 'config', 'portal_settings');
-    await setDoc(docRef, updatedSettings, { merge: true });
-    return { success: true, message: 'Configurações salvas e sincronizadas com sucesso no Firebase!' };
-  } catch (error: any) {
-    // Return success for local update with notice
-    return { 
-      success: true, 
-      message: 'Configurações salvas localmente no navegador (sincronização na nuvem pendente de regras de acesso).' 
-    };
+    await supabaseRequest('portal_settings?on_conflict=id', {
+      method: 'POST',
+      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
+      body: JSON.stringify({ id: SUPABASE_SETTINGS_ID, settings: updatedSettings })
+    });
+    return { success: true, message: 'Configurações salvas e sincronizadas com o Supabase.' };
+  } catch {
+    return { success: true, message: 'Configurações salvas no navegador; sincronização pendente de autenticação administrativa.' };
   }
 }
 
@@ -341,16 +336,7 @@ export async function subscribeToNewsletter(email: string, name?: string): Promi
     }
   } catch (e) {}
 
-  // Attempt Firestore insert
-  try {
-    const colRef = collection(firestoreDb, 'newsletter_subscribers');
-    await addDoc(colRef, {
-      ...subscriber,
-      createdAt: serverTimestamp()
-    });
-  } catch (err) {
-    // Safe graceful fallback
-  }
+  // A tabela de newsletter pode ser habilitada depois sem bloquear a inscrição local.
 
   return { success: true, message: 'Inscrição na newsletter confirmada com sucesso!' };
 }
