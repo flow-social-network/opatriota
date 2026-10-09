@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Logo } from './Logo';
 import { CategorySlug, UserSession, PortalSettings, SocialPlatform } from '../types';
-import { AdSlot } from './ads/AdSlot';
 import { 
   Search, 
   ChevronDown, 
@@ -76,6 +75,17 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     setPushStatus(getPushPermissionStatus());
   }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setMobileMenuOpen(false);
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [mobileMenuOpen]);
 
   const handleTogglePush = async () => {
     setPushLoading(true);
@@ -167,16 +177,6 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      {/* Optional Top Leaderboard Ad Slot */}
-      {portalSettings && (
-        <AdSlot
-          position="HOME_TOP_LEADERBOARD"
-          adSlots={portalSettings.adSlots}
-          adsense={portalSettings.adsense}
-          className="my-2"
-        />
-      )}
-
       <header className="w-full bg-white select-none">
         {/* 1. TOP UTILITY BAR */}
       <div className="bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs py-1.5 px-4 text-[#5D6673]">
@@ -355,10 +355,13 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="max-w-[1360px] mx-auto px-4 flex items-center justify-between">
           {/* Mobile hamburger button */}
           <button
+            type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden py-3 text-white focus:outline-none flex items-center gap-2 text-xs font-bold uppercase"
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation"
+            className="lg:hidden py-3 px-2 text-white focus:outline-none flex items-center gap-2 text-xs font-bold uppercase"
           >
-            <span>☰ MENU</span>
+            <span>{mobileMenuOpen ? 'FECHAR MENU' : 'ABRIR MENU'}</span>
           </button>
 
           {/* Desktop Nav Links */}
@@ -398,7 +401,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden bg-[#07172E] border-t border-white/10 px-4 py-3 space-y-2">
+          <div id="mobile-navigation" className="lg:hidden bg-[#07172E] border-t border-white/10 px-4 py-3 space-y-2" aria-label="Navegação móvel">
             {navItems.map((item) => (
               <button
                 key={item.slug}
