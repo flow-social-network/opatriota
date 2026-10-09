@@ -354,6 +354,40 @@ export const ContactPageView: React.FC<ContactPageViewProps> = ({
               </div>
             </div>
 
+            {/* Sede Social da Mantenedora */}
+            <div className="bg-[#F8FAFC] border border-[#D9DEE7] rounded-lg p-6 shadow-xs">
+              <h3 className="font-serif font-bold text-sm text-[#0B2345] uppercase tracking-wider pb-3 border-b border-[#EAECEF] mb-4 flex items-center gap-2">
+                <ShieldCheck className="w-4 h-4 text-[#FFCC29]" />
+                Empresa Mantenedora
+              </h3>
+
+              <div className="space-y-3 text-xs text-[#404B5A] leading-relaxed">
+                <div>
+                  <span className="font-bold text-[#0B2345] block">Razão Social:</span>
+                  <span>DEEVO SOLUÇÕES FINANCEIRAS LTDA</span>
+                </div>
+                <div>
+                  <span className="font-bold text-[#0B2345] block">CNPJ:</span>
+                  <span className="font-mono text-[#0B2345]">63.187.175/0001-70</span>
+                </div>
+                <div>
+                  <span className="font-bold text-[#0B2345] block">Sede Social:</span>
+                  <span>Taquara, Rio Grande do Sul — Brasil</span>
+                </div>
+                <div className="pt-2 border-t border-[#EAECEF]">
+                  <span className="font-bold text-[#0B2345] block mb-1">Facebook Oficial:</span>
+                  <a 
+                    href="https://www.facebook.com/opatriota.news.brasil" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-[#0B5FFF] hover:underline break-all block"
+                  >
+                    facebook.com/opatriota.news.brasil
+                  </a>
+                </div>
+              </div>
+            </div>
+
             {/* Address & Hours */}
             <div className="bg-white border border-[#D9DEE7] rounded-lg p-6 shadow-xs">
               <h3 className="font-serif font-bold text-sm text-[#0B2345] uppercase tracking-wider pb-3 border-b border-[#EAECEF] mb-4 flex items-center gap-2">

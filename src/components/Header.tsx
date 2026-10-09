@@ -9,12 +9,25 @@ import {
   Instagram, 
   Youtube, 
   Sun, 
+  CloudSun,
+  Cloud,
+  CloudRain,
+  CloudLightning,
   SlidersHorizontal, 
   ShieldCheck, 
   User, 
   PenTool, 
-  Sparkles 
+  Sparkles,
+  ExternalLink,
+  ChevronRight
 } from 'lucide-react';
+import { 
+  CapitalWeather, 
+  BRAZIL_CAPITALS_WEATHER, 
+  OFFICIAL_INMET_URL 
+} from '../data/weatherData';
+import { WeatherCapitalsModal } from './weather/WeatherCapitalsModal';
+import { WeatherBar } from './weather/WeatherBar';
 
 interface HeaderProps {
   currentCategory: CategorySlug;
@@ -44,6 +57,8 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchSubmit
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
+  const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(BRAZIL_CAPITALS_WEATHER[0]);
 
   const navItems: { label: string; slug: CategorySlug; hasSubmenu?: boolean }[] = [
     { label: 'INÍCIO', slug: 'todos' },
@@ -60,21 +75,58 @@ export const Header: React.FC<HeaderProps> = ({
     { label: 'ESPORTES', slug: 'esportes' },
   ];
 
+  const handleOpenWeather = (capitalId?: string) => {
+    if (capitalId) {
+      const found = BRAZIL_CAPITALS_WEATHER.find(c => c.id === capitalId);
+      if (found) setSelectedCapital(found);
+    }
+    setIsWeatherModalOpen(true);
+  };
+
+  const renderWeatherIcon = (code: CapitalWeather['code'], className = "w-3.5 h-3.5") => {
+    switch (code) {
+      case 'clear':
+        return <Sun className={`${className} text-[#FFCC29] fill-[#FFCC29]`} />;
+      case 'partly-cloudy':
+        return <CloudSun className={`${className} text-[#FFCC29]`} />;
+      case 'cloudy':
+        return <Cloud className={`${className} text-slate-400`} />;
+      case 'rain':
+        return <CloudRain className={`${className} text-[#0B5FFF]`} />;
+      case 'thunderstorm':
+        return <CloudLightning className={`${className} text-amber-500`} />;
+      default:
+        return <Sun className={`${className} text-[#FFCC29]`} />;
+    }
+  };
+
   return (
     <header className="w-full bg-white select-none">
       {/* 1. TOP UTILITY BAR */}
       <div className="bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs py-1.5 px-4 text-[#5D6673]">
         <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-3">
-          {/* Left: Date & Weather */}
+          {/* Left: Date & Dynamic Weather from INMET */}
           <div className="flex items-center gap-4 text-[11px] sm:text-xs">
             <span className="font-semibold text-[#17202A]">Brasília, 8 de outubro de 2026</span>
             <span className="text-[#D9DEE7] hidden sm:inline">|</span>
-            <div className="flex items-center gap-1.5 font-medium text-[#17202A]">
-              <span>Distrito Federal</span>
-              <Sun className="w-3.5 h-3.5 text-[#FFCC29] fill-[#FFCC29]" />
-              <span className="font-bold">25°C</span>
-              <span className="text-[#5D6673] hidden sm:inline">Tempo firme</span>
-            </div>
+
+            {/* DYNAMIC WEATHER PILL (INMET - portal.inmet.gov.br) */}
+            <button
+              onClick={() => handleOpenWeather(selectedCapital.id)}
+              className="group flex items-center gap-1.5 font-medium text-[#17202A] hover:text-[#0B5FFF] bg-white hover:bg-[#F0F5FF] border border-[#D9DEE7] hover:border-[#0B5FFF] px-2 py-0.5 rounded transition cursor-pointer shadow-2xs"
+              title="Ver previsão completa das 27 capitais brasileiras (Fonte: INMET)"
+            >
+              <span className="font-bold">{selectedCapital.name} ({selectedCapital.uf})</span>
+              {renderWeatherIcon(selectedCapital.code)}
+              <span className="font-black text-[#0B2345]">{selectedCapital.temp}°C</span>
+              <span className="text-[#5D6673] hidden sm:inline text-[11px] font-normal truncate max-w-[110px]">
+                {selectedCapital.condition}
+              </span>
+              <span className="bg-[#16803C] group-hover:bg-[#22A447] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase tracking-wider ml-0.5">
+                INMET
+              </span>
+            </button>
+
             {onNavigatePage && (
               <>
                 <span className="text-[#D9DEE7] hidden md:inline">|</span>
@@ -128,37 +180,42 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
             </form>
 
-            {/* BUTTON 1: ÁREA DO ASSINANTE (/minha-conta) */}
+            {/* BUTTON 1: ÁREA DO ASSINANTE */}
             <button
               onClick={() => onOpenSubscriberArea('dashboard')}
               className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
-              title="Acessar Área do Assinante e Minha Conta"
+              title="Acessar Área do Assinante"
             >
               <User className="w-3 h-3" />
-              <span className="truncate max-w-[120px]">
-                {currentUser ? currentUser.name.split(' ')[0] : 'MINHA CONTA'}
+              <span className="truncate max-w-[130px]">
+                {currentUser ? currentUser.name.split(' ')[0] : 'ÁREA DO ASSINANTE'}
               </span>
             </button>
 
-            {/* BUTTON 2: ÁREA DA REDAÇÃO (/redacao) */}
-            <button
-              onClick={onOpenNewsroom}
-              className="flex items-center gap-1.5 bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
-              title="Acessar Esteira Editorial e Gestão de Matérias"
-            >
-              <PenTool className="w-3 h-3 text-[#FFCC29]" />
-              <span className="hidden sm:inline">REDAÇÃO</span>
-            </button>
+            {/* BUTTONS PRIVADOS DA REDAÇÃO E ADMIN (Apenas para equipe autorizada autenticada) */}
+            {currentUser && ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(currentUser.role) && (
+              <>
+                <button
+                  onClick={onOpenNewsroom}
+                  className="flex items-center gap-1.5 bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
+                  title="Acessar Esteira Editorial e Gestão de Matérias"
+                >
+                  <PenTool className="w-3 h-3 text-[#FFCC29]" />
+                  <span className="hidden sm:inline">REDAÇÃO</span>
+                </button>
 
-            {/* BUTTON 3: BACKOFFICE WORDPRESS */}
-            <button
-              onClick={onOpenAdmin}
-              className="hidden lg:flex items-center gap-1 bg-slate-200 hover:bg-slate-300 text-[#07172E] text-[10px] font-bold px-2 py-1 rounded transition-colors cursor-pointer"
-              title="Acessar Central de Fontes e Gerador ZIP do WordPress"
-            >
-              <SlidersHorizontal className="w-3 h-3" />
-              <span>WP ADMIN</span>
-            </button>
+                {['editor_chefe', 'administrador'].includes(currentUser.role) && (
+                  <button
+                    onClick={onOpenAdmin}
+                    className="hidden lg:flex items-center gap-1 bg-slate-200 hover:bg-slate-300 text-[#07172E] text-[10px] font-bold px-2 py-1 rounded transition-colors cursor-pointer"
+                    title="Acessar Central de Fontes e Gerador ZIP do WordPress"
+                  >
+                    <SlidersHorizontal className="w-3 h-3" />
+                    <span>WP ADMIN</span>
+                  </button>
+                )}
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -262,18 +319,34 @@ export const Header: React.FC<HeaderProps> = ({
                 onClick={() => { onOpenSubscriberArea(); setMobileMenuOpen(false); }}
                 className="text-left py-2 px-3 text-xs font-bold text-[#FFCC29] hover:bg-white/10 rounded uppercase"
               >
-                Área do Assinante (/minha-conta)
+                Área do Assinante
               </button>
-              <button
-                onClick={() => { onOpenNewsroom(); setMobileMenuOpen(false); }}
-                className="text-left py-2 px-3 text-xs font-bold text-white hover:bg-white/10 rounded uppercase"
-              >
-                Área da Redação (/redacao)
-              </button>
+              {currentUser && ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(currentUser.role) && (
+                <button
+                  onClick={() => { onOpenNewsroom(); setMobileMenuOpen(false); }}
+                  className="text-left py-2 px-3 text-xs font-bold text-white hover:bg-white/10 rounded uppercase"
+                >
+                  Área da Redação
+                </button>
+              )}
             </div>
           </div>
         )}
       </nav>
+
+      {/* 4. DYNAMIC WEATHER BAR (CAPITAIS DO BRASIL — INMET) */}
+      <WeatherBar 
+        onOpenModal={handleOpenWeather}
+        selectedCapital={selectedCapital}
+      />
+
+      {/* 5. WEATHER CAPITALS MODAL (FONTE OFICIAL INMET) */}
+      <WeatherCapitalsModal
+        isOpen={isWeatherModalOpen}
+        onClose={() => setIsWeatherModalOpen(false)}
+        selectedCapitalId={selectedCapital.id}
+        onSelectCapital={(cap) => setSelectedCapital(cap)}
+      />
     </header>
   );
 };

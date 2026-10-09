@@ -50,11 +50,11 @@ export const Footer: React.FC<FooterProps> = ({
         {/* 3 Columns Official Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-10 border-b border-white/10 text-xs">
           
-          {/* COLUNA 1 — EDITORIAS */}
+          {/* EDITORIAS */}
           <div>
             <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-4 text-[#FFCC29] flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#16803C]"></span>
-              COLUNA 1 — EDITORIAS
+              EDITORIAL
             </h4>
             <ul className="space-y-2.5 text-white/80">
               <li>
@@ -100,11 +100,11 @@ export const Footer: React.FC<FooterProps> = ({
             </ul>
           </div>
 
-          {/* COLUNA 2 — INSTITUCIONAL */}
+          {/* INSTITUCIONAL */}
           <div>
             <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-4 text-[#FFCC29] flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#FFCC29]"></span>
-              COLUNA 2 — INSTITUCIONAL
+              INSTITUCIONAL
             </h4>
             <ul className="space-y-2.5 text-white/80">
               <li>
@@ -145,11 +145,11 @@ export const Footer: React.FC<FooterProps> = ({
             </ul>
           </div>
 
-          {/* COLUNA 3 — TRANSPARÊNCIA E LGPD */}
+          {/* TRANSPARÊNCIA E LGPD */}
           <div>
             <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-4 text-[#FFCC29] flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-[#0B5FFF]"></span>
-              COLUNA 3 — TRANSPARÊNCIA E LGPD
+              TRANSPARÊNCIA E LGPD
             </h4>
             <ul className="space-y-2.5 text-white/80">
               <li>
@@ -174,12 +174,7 @@ export const Footer: React.FC<FooterProps> = ({
               </li>
               <li className="pt-2 border-t border-white/10">
                 <button onClick={() => onNavigatePage('minha-conta')} className="text-[#FFCC29] hover:underline transition cursor-pointer font-bold block">
-                  Área do Assinante (/minha-conta)
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigatePage('redacao')} className="text-white hover:underline transition cursor-pointer font-bold block">
-                  Acesso da Redação (/redacao)
+                  Área do Assinante
                 </button>
               </li>
             </ul>
@@ -190,10 +185,10 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom Tier: Copyright & Compliance */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-white/50 gap-4 text-center md:text-left">
           <p>
-            © 2026 O PATRIOTA — Notícias, Análise e Opinião. Todos os direitos reservados. CNPJ 00.000.000/0001-00 (Registro Editorial).
+            © 2026 DEEVO Soluções Financeiras LTDA — CNPJ: 63.187.175/0001-70. Todos os direitos reservados. Mantenedora Jornal O Patriota.
           </p>
           <div className="text-[11px] text-white/40">
-            Hospedado no Brasil • Desenvolvido com WordPress CMS & FSE • O Patriota Editorial
+            Hospedado no Brasil • Desenvolvido com WordPress CMS & FSE • Taquara/RS
           </div>
         </div>
 
