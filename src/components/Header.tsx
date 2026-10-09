@@ -200,7 +200,7 @@ export const Header: React.FC<HeaderProps> = ({
     <>
       <header className="w-full bg-white select-none pt-[70px]">
         {/* A barra de utilidades permanece fixa; marca e navegação rolam com o conteúdo. */}
-      <div className="site-utility-bar fixed left-0 right-0 top-0 z-[60] bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]">
+      <div className="site-utility-bar fixed inset-x-0 top-0 z-[1000] bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000 }}>
         <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1">
           {/* Left: Date & Dynamic Weather from INMET */}
           <div className="flex items-center gap-4 text-[11px] sm:text-xs">
@@ -352,7 +352,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Segunda faixa fixa: mercados ao vivo, logo abaixo da barra cinza. */}
-      <div className="fixed left-0 right-0 top-[38px] z-[55]"><BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} /></div>
+      <div className="fixed inset-x-0 top-[38px] z-[999]" style={{ position: "fixed", top: "38px", left: 0, right: 0, zIndex: 999 }}><BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} /></div>
 
       {/* 2. GRAND BRANDING BANNER */}
       <div className="py-2 sm:py-2.5 px-4 bg-white border-b border-[#D9DEE7]">
