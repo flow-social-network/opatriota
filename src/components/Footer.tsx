@@ -191,7 +191,7 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           {/* 4. ALERTAS WEB PUSH (FCM) */}
-          <div className="bg-white/5 border border-white/10 p-4 rounded-lg flex flex-col justify-between">
+          <div className="bg-white/5 border border-white/10 p-4 rounded-lg flex h-fit min-h-0 self-start flex-col justify-start gap-4">
             <div>
               <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-2 text-[#FFCC29] flex items-center gap-1.5">
                 <Bell className="w-3.5 h-3.5 text-[#FFCC29]" />
@@ -202,7 +202,7 @@ export const Footer: React.FC<FooterProps> = ({
               </p>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-2 mt-1">
               {pushNotice && (
                 <div className="p-2 bg-[#16803C]/30 border border-[#22A447] text-white text-[10px] rounded flex items-center gap-1">
                   <CheckCircle2 className="w-3 h-3 text-[#22A447] shrink-0" />
