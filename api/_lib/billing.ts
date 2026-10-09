@@ -75,3 +75,46 @@ export function constantTimeHexEqual(a:string,b:string) {
   try {const aa=Buffer.from(a,'hex'),bb=Buffer.from(b,'hex');return aa.length===bb.length&&timingSafeEqual(aa,bb);}catch{return false;}
 }
 export const newId=()=>randomUUID();
+
+export async function firestoreList(collection: string): Promise<any[]> {
+  const account = serviceAccount();
+  const token = await googleAccessToken();
+  const base = 'https://firestore.googleapis.com/v1/projects/' + account.project_id + '/databases/(default)/documents/' + collection;
+  const output: any[] = [];
+  let nextPageToken = '';
+  do {
+    const url = new URL(base);
+    url.searchParams.set('pageSize', '100');
+    if (nextPageToken) url.searchParams.set('pageToken', nextPageToken);
+    const response = await fetch(url, { headers: { Authorization: 'Bearer ' + token } });
+    if (response.status === 404) return output;
+    const payload: any = await response.json();
+    if (!response.ok) throw new Error('Firestore list failed: ' + response.status);
+    for (const doc of payload.documents || []) {
+      const decode = (v: any): any =>
+        v.stringValue !== undefined ? v.stringValue :
+        v.booleanValue !== undefined ? v.booleanValue :
+        v.integerValue !== undefined ? Number(v.integerValue) :
+        v.doubleValue !== undefined ? v.doubleValue :
+        v.nullValue === null ? null :
+        v.mapValue ? Object.fromEntries(Object.entries(v.mapValue.fields || {}).map(([k, val]) => [k, decode(val)])) :
+        v.arrayValue ? (v.arrayValue.values || []).map(decode) : null;
+      output.push({
+        id: doc.name.split('/').pop(),
+        ...Object.fromEntries(Object.entries(doc.fields || {}).map(([k, v]) => [k, decode(v)]))
+      });
+    }
+    nextPageToken = payload.nextPageToken || '';
+  } while (nextPageToken);
+  return output;
+}
+
+export async function firestoreDelete(collection: string, documentId: string): Promise<void> {
+  const account = serviceAccount();
+  const token = await googleAccessToken();
+  const url = 'https://firestore.googleapis.com/v1/projects/' + account.project_id +
+    '/databases/(default)/documents/' + collection + '/' + encodeURIComponent(documentId);
+  const response = await fetch(url, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token } });
+  if (response.status === 404) return;
+  if (!response.ok) throw new Error('Firestore delete failed: ' + response.status);
+}
