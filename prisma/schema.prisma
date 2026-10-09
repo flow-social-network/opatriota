@@ -305,6 +305,21 @@ model PaymentEvent {
   @@index([paymentId, receivedAt])
   @@map("payment_events")
 }
+
+model PushSubscription {
+  id String @id @default(cuid())
+  token String @unique
+  deviceType String
+  userAgent String?
+  active Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastSeenAt DateTime @default(now())
+
+  @@index([active, lastSeenAt])
+  @@map("push_subscriptions")
+}
+
 model AuditEvent {
   id String @id @default(cuid())
   actorId String?
