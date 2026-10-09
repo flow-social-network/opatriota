@@ -1,6 +1,5 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
-import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 
 const firebaseApp = getApps().length ? getApp() : initializeApp({
   apiKey: 'AIzaSyAM7XqRKi2DWNvEpwZZTg99QGgq75_FWgc',
@@ -10,7 +9,6 @@ const firebaseApp = getApps().length ? getApp() : initializeApp({
   messagingSenderId: '144044011965',
   appId: '1:144044011965:web:6da58292d47845e931e2d4'
 });
-const firestoreDb = getFirestore(firebaseApp);
 import { PushSubscriber, PushNotificationCampaign } from '../types';
 
 // VAPID Web Push Public Key provided for O Patriota
@@ -146,23 +144,35 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
       }
     } catch (e) {}
 
-    // 7. Persist to Firestore collection 'push_subscribers'
+    // 7. Persist the subscription through the application API (PostgreSQL/Neon).
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\\/$/, '');
     try {
-      const colRef = collection(firestoreDb, 'push_subscribers');
-      await addDoc(colRef, {
-        ...subscriberData,
-        createdAt: serverTimestamp(),
-        vapidPublicKey: vapidKey
+      const response = await fetch(`${apiBase}/api/push/subscriptions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: currentToken,
+          deviceType,
+          userAgent: ua.slice(0, 150)
+        })
       });
-    } catch (firestoreError) {
-      // Graceful fallback: local token is active
-      console.info('[WebPush] Token registrado localmente (Firestore pendente de regras).');
+      if (!response.ok) {
+        throw new Error(`API de notificações respondeu HTTP ${response.status}`);
+      }
+    } catch (apiError) {
+      console.error('[WebPush] Não foi possível salvar a inscrição no backend PostgreSQL:', apiError);
+      return {
+        success: false,
+        token: currentToken,
+        message: 'A permissão do navegador foi concedida, mas não foi possível registrar o dispositivo no servidor. Tente novamente mais tarde.',
+        permission
+      };
     }
 
     return {
       success: true,
       token: currentToken,
-      message: 'Inscrição para alertas urgentes ativada com sucesso!',
+      message: 'Inscrição registrada no servidor do O Patriota.',
       permission
     };
   } catch (err: any) {
