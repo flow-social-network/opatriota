@@ -1,6 +1,16 @@
+import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
-import { collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
-import { firebaseApp, firestoreDb } from './siteConfigService';
+import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+
+const firebaseApp = getApps().length ? getApp() : initializeApp({
+  apiKey: 'AIzaSyAM7XqRKi2DWNvEpwZZTg99QGgq75_FWgc',
+  authDomain: 'o-patriota-5db52.firebaseapp.com',
+  projectId: 'o-patriota-5db52',
+  storageBucket: 'o-patriota-5db52.firebasestorage.app',
+  messagingSenderId: '144044011965',
+  appId: '1:144044011965:web:6da58292d47845e931e2d4'
+});
+const firestoreDb = getFirestore(firebaseApp);
 import { PushSubscriber, PushNotificationCampaign } from '../types';
 
 // VAPID Web Push Public Key provided for O Patriota
