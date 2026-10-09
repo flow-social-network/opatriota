@@ -8,6 +8,7 @@ import { HttpError } from "./lib/http.js";
 import authRoutes from "./routes/auth.js";
 import articleRoutes from "./routes/articles.js";
 import categoryRoutes from "./routes/categories.js";
+import pushRoutes from "./routes/push.js";
 
 export const app = express();
 
@@ -41,6 +42,7 @@ app.get("/health/ready", async (_req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/categories", categoryRoutes);
+app.use("/api/push", pushRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: { code: "NOT_FOUND", message: "Route not found" } }));
 
