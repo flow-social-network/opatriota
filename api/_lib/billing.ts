@@ -33,17 +33,14 @@ export async function googleAccessToken(): Promise<string> {
   if (!response.ok || !data.access_token) throw new Error('Firebase service token request failed');
   return data.access_token;
 }
-export async function firestoreWrite(collection: string, documentId: string, fields: Record<string, unknown>, merge = true) {
+export async function firestoreWrite(collection: string, documentId: string, fields: Record<string, unknown>, _merge = true) {
   const account = serviceAccount(); const token = await googleAccessToken();
   const encode = (v: unknown): any => v === null ? {nullValue:null} : typeof v === 'string' ? {stringValue:v} : typeof v === 'boolean' ? {booleanValue:v} : typeof v === 'number' ? {doubleValue:v} : Array.isArray(v) ? {arrayValue:{values:v.map(encode)}} : {mapValue:{fields:Object.fromEntries(Object.entries(v as object).map(([k,val])=>[k,encode(val)]))}};
-  const mask = merge ? '&updateMask.fieldPaths='+Object.keys(fields).map(encodeURIComponent).join('&updateMask.fieldPaths=') : '';
-  const url = 'https://firestore.googleapis.com/v1/projects/'+account.project_id+'/databases/(default)/documents/'+collection+'/'+encodeURIComponent(documentId)+(merge ? '?currentDocument.exists=true'+mask : '');
-  // First create; on existing document, update using PATCH with an explicit field mask.
   const base = 'https://firestore.googleapis.com/v1/projects/'+account.project_id+'/databases/(default)/documents/'+collection+'/'+encodeURIComponent(documentId);
+  const query = Object.keys(fields).map((key)=>'updateMask.fieldPaths='+encodeURIComponent(key)).join('&');
   const body = {fields:Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,encode(v)]))};
-  let response = await fetch(base,{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if (response.status === 404) response = await fetch('https://firestore.googleapis.com/v1/projects/'+account.project_id+'/databases/(default)/documents/'+collection+'?documentId='+encodeURIComponent(documentId),{method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if (!response.ok) throw new Error('Firestore write failed: '+response.status);
+  const response = await fetch(base+'?'+query,{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  if (!response.ok) throw new Error('Firestore write failed: '+response.status+' '+(await response.text()).slice(0,300));
 }
 export async function firestoreGet(collection: string, documentId: string): Promise<any|null> {
   const account = serviceAccount(); const token = await googleAccessToken();
