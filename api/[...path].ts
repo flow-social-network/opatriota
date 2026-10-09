@@ -121,6 +121,71 @@ export default async function handler(req: Req, res: Res) {
       const profile = await firestoreGet('userSubscriptions', identity.uid);
       return json(res, 200, profile || { plan: 'gratuito', status: 'inativo', autoRenew: false });
     }
+    if (path === 'editorial/sources/sync' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
+      const sources = await firestoreList('editorialSources');
+      const existingQueue = await firestoreList('editorialQueue');
+      const seen = new Set(existingQueue.map(item => String(item.canonicalUrl || item.originalUrl || '').trim()).filter(Boolean));
+      const updatedSources: any[] = [];
+      const newItems: any[] = [];
+      for (const source of sources.filter(item => item.isActive !== false && item.rssUrl)) {
+        const rssUrl = String(source.rssUrl);
+        let parsedUrl: URL;
+        try { parsedUrl = new URL(rssUrl); } catch {
+          updatedSources.push({ ...source, lastError: 'URL de feed inválida', lastPolled: new Date().toISOString() });
+          continue;
+        }
+        const host = parsedUrl.hostname.toLowerCase();
+        if (parsedUrl.protocol !== 'https:' || host === 'localhost' || host.endsWith('.local') ||
+            /^(127\.|10\.|192\.168\.|169\.254\.|0\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host) ||
+            host === '::1' || host.startsWith('fc') || host.startsWith('fe80:')) {
+          updatedSources.push({ ...source, lastError: 'Feed bloqueado por política de segurança; use uma URL HTTPS pública.', lastPolled: new Date().toISOString() });
+          continue;
+        }
+        try {
+          const response = await fetch(parsedUrl, { headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' }, signal: AbortSignal.timeout(10000) });
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          const xml = (await response.text()).slice(0, 2_000_000);
+          const entries = [...xml.matchAll(/<(item|entry)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/gi)].slice(0, 50);
+          let imported = 0;
+          const decodeXml = (value: string) => value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/\s+/g, ' ').trim();
+          for (const entry of entries) {
+            const block = entry[2];
+            const titleMatch = block.match(/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/i);
+            const linkMatch = block.match(/<link(?:\s[^>]*href=["']([^"']+)["'][^>]*)?\s*\/?>/i) || block.match(/<link(?:\s[^>]*)?>([\s\S]*?)<\/link>/i) || block.match(/<guid(?:\s[^>]*)?>([\s\S]*?)<\/guid>/i);
+            const descMatch = block.match(/<(description|summary|content:encoded)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/i);
+            const title = decodeXml(titleMatch?.[1] || '');
+            let link = decodeXml(linkMatch?.[1] || linkMatch?.[2] || '');
+            if (!title || !link) continue;
+            try { const normalized = new URL(link, parsedUrl); if (normalized.protocol !== 'https:') continue; link = normalized.toString(); } catch { continue; }
+            if (seen.has(link)) continue;
+            seen.add(link);
+            const id = Date.now() + newItems.length;
+            const record = {
+              id, title: title.slice(0, 500),
+              summary: decodeXml(descMatch?.[2] || '').slice(0, 2000),
+              originalUrl: link, canonicalUrl: link,
+              sourceName: String(source.name || parsedUrl.hostname).slice(0, 200),
+              category: String(source.category || 'brasil'),
+              capturedAt: new Date().toISOString(),
+              dedupStatus: 'NOVO', dedupReason: 'Importado de feed RSS/Atom; revisão editorial pendente.',
+              editorialStatus: 'RECEBIDA'
+            };
+            await firestoreWrite('editorialQueue', String(id), record, false);
+            newItems.push(record);
+            imported++;
+          }
+          const updated = { ...source, lastPolled: new Date().toISOString(), lastSuccess: new Date().toISOString(), lastError: null, itemsReceived: Number(source.itemsReceived || 0) + imported };
+          await firestoreWrite('editorialSources', String(source.id), updated);
+          updatedSources.push(updated);
+        } catch (error) {
+          const updated = { ...source, lastPolled: new Date().toISOString(), lastError: String((error as Error)?.message || 'Falha ao consultar feed').slice(0, 300) };
+          await firestoreWrite('editorialSources', String(source.id), updated);
+          updatedSources.push(updated);
+        }
+      }
+      return json(res, 200, { sources: updatedSources, queueItems: newItems, importedCount: newItems.length, checkedSources: updatedSources.length });
+    }
     if (path === 'editorial/ai-review' && method === 'POST') {
       if (!requireRole(identity, STAFF, res)) return;
       const apiKey = process.env.GEMINI_API_KEY;
