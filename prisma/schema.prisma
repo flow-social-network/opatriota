@@ -8,7 +8,9 @@ datasource db {
 enum UserRole {
   READER
   JOURNALIST
+  REVIEWER
   EDITOR
+  CHIEF_EDITOR
   ADMIN
 }
 enum ArticleStatus {
@@ -19,6 +21,17 @@ enum ArticleStatus {
   SCHEDULED
   PUBLISHED
   ARCHIVED
+}
+enum EditorialRiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+enum ReviewDecision {
+  APPROVE
+  REQUEST_CHANGES
+  REJECT
 }
 enum SourceKind {
   OFFICIAL
@@ -79,7 +92,8 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   articles Article[] @relation("ArticleAuthor")
-  reviews ArticleReview[]
+  reviews ArticleReview[] @relation("ReviewActor")
+  approvedArticles Article[] @relation("ArticleHumanApprover")
   subscriptions Subscription[]
   auditEvents AuditEvent[] @relation("AuditActor")
   sessions RefreshSession[]
@@ -125,6 +139,10 @@ model Article {
   scheduledAt DateTime?
   authorId String
   categoryId String?
+  riskLevel EditorialRiskLevel @default(MEDIUM)
+  riskAssessment Json?
+  humanApprovedAt DateTime?
+  humanApprovedById String?
   seoTitle String?
   seoDescription String?
   canonicalUrl String?
@@ -132,6 +150,7 @@ model Article {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   author User @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  humanApprover User? @relation("ArticleHumanApprover", fields: [humanApprovedById], references: [id], onDelete: SetNull)
   category Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
   sources ArticleSource[]
   reviews ArticleReview[]
@@ -146,11 +165,14 @@ model ArticleReview {
   id String @id @default(cuid())
   articleId String
   reviewerId String
-  decision String
+  decision ReviewDecision
+  riskLevel EditorialRiskLevel?
+  riskNotes String? @db.Text
   notes String? @db.Text
+  isSelfApproval Boolean @default(false)
   createdAt DateTime @default(now())
   article Article @relation(fields: [articleId], references: [id], onDelete: Cascade)
-  reviewer User @relation(fields: [reviewerId], references: [id], onDelete: Restrict)
+  reviewer User @relation("ReviewActor", fields: [reviewerId], references: [id], onDelete: Restrict)
 
   @@index([articleId, createdAt])
   @@map("article_reviews")
