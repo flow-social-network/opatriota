@@ -611,6 +611,7 @@ export default function App() {
           <SubscriberPortal
             currentUser={currentUser}
             onLogin={(user) => setCurrentUser(user)}
+            onGoogleLogin={handleGoogleLogin}
             onLogout={() => { setCurrentUser(null); handleNavigateHome(); }}
             onBackToHome={handleNavigateHome}
             articles={articles}
