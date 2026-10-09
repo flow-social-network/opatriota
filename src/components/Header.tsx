@@ -406,21 +406,36 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="hidden lg:flex items-center space-x-0.5">
             {navItems.map((item) => {
               const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
+              const categoryButtonClass = `flex h-full items-center gap-1 px-3 py-3 text-[11px] xl:text-xs font-bold tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer ${
+                isActive
+                  ? 'bg-[#07172E] text-[#FFCC29] border-b-2 border-[#FFCC29]'
+                  : 'text-white/90 hover:text-white hover:bg-[#0E2C56]'
+              }`;
+
+              // INÍCIO é um link direto; apenas as editorias possuem submenu.
+              if (item.slug === 'todos') {
+                return (
+                  <button
+                    key={item.slug}
+                    onClick={() => onSelectCategory(item.slug)}
+                    className={categoryButtonClass}
+                  >
+                    <span>{item.label}</span>
+                  </button>
+                );
+              }
+
               return (
                 <div key={item.slug} className="group relative h-full">
                   <button
                     onClick={() => onSelectCategory(item.slug)}
                     aria-haspopup="true"
-                    className={`flex h-full items-center gap-1 px-3 py-3 text-[11px] xl:text-xs font-bold tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer ${
-                      isActive
-                        ? 'bg-[#07172E] text-[#FFCC29] border-b-2 border-[#FFCC29]'
-                        : 'text-white/90 hover:text-white hover:bg-[#0E2C56]'
-                    }`}
+                    className={categoryButtonClass}
                   >
                     <span>{item.label}</span>
                     <ChevronDown className="w-2.5 h-2.5 text-white/50" aria-hidden="true" />
                   </button>
-                  <div className="invisible absolute left-0 top-full z-[1100] min-w-52 translate-y-1 border border-[#D9DEE7] bg-white py-1 text-[#17202A] opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                  <div className="invisible pointer-events-none absolute left-0 top-full z-[1100] min-w-52 translate-y-1 border border-[#D9DEE7] bg-white py-1 text-[#17202A] opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
                     <button onClick={() => onSelectCategory(item.slug)} className="block w-full px-4 py-2 text-left text-xs font-bold hover:bg-slate-100">Ver {item.label.toLowerCase()}</button>
                     <div className="my-1 border-t border-slate-200" />
                     <button onClick={() => onNavigatePage?.('contato')} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">Anuncie nesta editoria</button>
