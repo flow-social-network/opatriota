@@ -34,13 +34,20 @@ export async function googleAccessToken(): Promise<string> {
   return data.access_token;
 }
 export async function firestoreWrite(collection: string, documentId: string, fields: Record<string, unknown>, _merge = true) {
-  const account = serviceAccount(); const token = await googleAccessToken();
-  const encode = (v: unknown): any => v === null ? {nullValue:null} : typeof v === 'string' ? {stringValue:v} : typeof v === 'boolean' ? {booleanValue:v} : typeof v === 'number' ? {doubleValue:v} : Array.isArray(v) ? {arrayValue:{values:v.map(encode)}} : {mapValue:{fields:Object.fromEntries(Object.entries(v as object).map(([k,val])=>[k,encode(val)]))}};
-  const base = 'https://firestore.googleapis.com/v1/projects/'+account.project_id+'/databases/(default)/documents/'+collection+'/'+encodeURIComponent(documentId);
-  const query = Object.keys(fields).map((key)=>'updateMask.fieldPaths='+encodeURIComponent(key)).join('&');
-  const body = {fields:Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,encode(v)]))};
-  const response = await fetch(base+'?'+query,{method:'PATCH',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},body:JSON.stringify(body)});
-  if (!response.ok) throw new Error('Firestore write failed: '+response.status+' '+(await response.text()).slice(0,300));
+ const account=serviceAccount(); const token=await googleAccessToken();
+ const encode=(v:unknown):any=>v===null?{nullValue:null}:typeof v==='string'?{stringValue:v}:typeof v==='boolean'?{booleanValue:v}:typeof v==='number'?{doubleValue:v}:Array.isArray(v)?{arrayValue:{values:v.map(encode)}}:{mapValue:{fields:Object.fromEntries(Object.entries(v as object).map(([k,val])=>[k,encode(val)]))}};
+ const base='https://firestore.googleapis.com/v1/projects/'+account.project_id+'/databases/(default)/documents';
+ const encodedFields=Object.fromEntries(Object.entries(fields).map(([k,v])=>[k,encode(v)]));
+ const query=Object.keys(fields).map(key=>'updateMask.fieldPaths='+encodeURIComponent(key)).join('&');
+ const headers={Authorization:'Bearer '+token,'Content-Type':'application/json'};
+ const patch=await fetch(base+'/'+collection+'/'+encodeURIComponent(documentId)+'?'+query,{method:'PATCH',headers,body:JSON.stringify({fields:encodedFields})});
+ if(patch.ok)return;
+ if(patch.status===404){
+  const create=await fetch(base+'/'+collection+'?documentId='+encodeURIComponent(documentId),{method:'POST',headers,body:JSON.stringify({fields:encodedFields})});
+  if(create.ok)return;
+  throw new Error('Firestore create failed: '+create.status+' '+(await create.text()).slice(0,300));
+ }
+ throw new Error('Firestore update failed: '+patch.status+' '+(await patch.text()).slice(0,300));
 }
 export async function firestoreGet(collection: string, documentId: string): Promise<any|null> {
   const account = serviceAccount(); const token = await googleAccessToken();
