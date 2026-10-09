@@ -145,7 +145,7 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
     } catch (e) {}
 
     // 7. Persist the subscription through the application API (PostgreSQL/Neon).
-    const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\\/$/, '');
+    const apiBase = (import.meta.env.VITE_API_BASE_URL || '').replace(/\/$/, '');
     try {
       const response = await fetch(`${apiBase}/api/push/subscriptions`, {
         method: 'POST',
