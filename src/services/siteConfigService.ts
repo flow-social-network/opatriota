@@ -1,20 +1,3 @@
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || import.meta.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || import.meta.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
-async function supabaseRequest(path: string, options: RequestInit = {}) {
-  if (!SUPABASE_URL || !SUPABASE_KEY) throw new Error('Supabase não configurado');
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-    ...options,
-    headers: {
-      apikey: SUPABASE_KEY,
-      Authorization: `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    }
-  });
-  if (!response.ok) throw new Error(`Supabase ${response.status}`);
-  return response.status === 204 ? null : response.json();
-}
 import { 
   PortalSettings, 
   SiteIdentityConfig, 
@@ -243,78 +226,36 @@ const SUPABASE_SETTINGS_ID = 'main';
  * Loads current settings from Firestore with local storage cache fallback.
  */
 export async function loadPortalSettings(): Promise<PortalSettings> {
-  // 1. Try local cache first for instant hydration
-  let cached: PortalSettings | null = null;
   try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (raw) {
-      cached = JSON.parse(raw);
-    }
-  } catch (e) {
-    // Ignore cache error
-  }
-
-  // 2. Tenta buscar a configuração persistida no Supabase
-  try {
-    const rows = await supabaseRequest(`portal_settings?id=eq.${SUPABASE_SETTINGS_ID}&select=settings`);
-    const data = rows?.[0]?.settings as Partial<PortalSettings> | undefined;
-    if (data) {
-      const merged: PortalSettings = {
-        identity: { ...DEFAULT_IDENTITY_CONFIG, ...(data.identity || {}) },
-        socialNetworks: data.socialNetworks?.length ? data.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
-        adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(data.adsense || {}) },
-        adSlots: data.adSlots?.length ? data.adSlots : DEFAULT_AD_SLOTS,
-  webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(data.webPush || {}) },
-  marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(data.marketTicker || {}) },
-  updatedAt: data.updatedAt || new Date().toISOString()
-      };
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged));
-      return merged;
-    }
-  } catch {
-    // Permite que o portal continue funcional quando a rede estiver indisponível.
-  }
-
-  if (cached) {
-    return {
-      identity: { ...DEFAULT_IDENTITY_CONFIG, ...(cached.identity || {}) },
-      socialNetworks: cached.socialNetworks?.length ? cached.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
-      adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(cached.adsense || {}) },
-      adSlots: cached.adSlots?.length ? cached.adSlots : DEFAULT_AD_SLOTS,
-      webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(cached.webPush || {}) },
-      updatedAt: cached.updatedAt || new Date().toISOString()
+    const data = await api.get<Partial<PortalSettings>>('/site-settings', { auth: false });
+    const merged: PortalSettings = {
+      identity: { ...DEFAULT_IDENTITY_CONFIG, ...(data.identity || {}) },
+      socialNetworks: Array.isArray(data.socialNetworks) ? data.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
+      adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(data.adsense || {}) },
+      adSlots: Array.isArray(data.adSlots) ? data.adSlots : DEFAULT_AD_SLOTS,
+      webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(data.webPush || {}) },
+      marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(data.marketTicker || {}) },
+      updatedAt: data.updatedAt || new Date().toISOString()
     };
+    try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged)); } catch { /* cache is optional */ }
+    return merged;
+  } catch (error) {
+    console.error('Não foi possível carregar as configurações persistidas:', error);
+    return DEFAULT_PORTAL_SETTINGS;
   }
-
-  return DEFAULT_PORTAL_SETTINGS;
 }
 
 /**
  * Saves settings to Firestore and local storage.
  */
 export async function savePortalSettings(settings: PortalSettings): Promise<{ success: boolean; message: string }> {
-  const updatedSettings: PortalSettings = {
-    ...settings,
-    updatedAt: new Date().toISOString()
-  };
-
-  // 1. Save to local storage immediately
+  const updatedSettings: PortalSettings = { ...settings, updatedAt: new Date().toISOString() };
   try {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedSettings));
-  } catch (e) {
-    console.warn('Falha ao gravar configurações em cache local', e);
-  }
-
-  // 2. Persiste no Supabase; o RLS impede alterações sem sessão administrativa.
-  try {
-    await supabaseRequest('portal_settings?on_conflict=id', {
-      method: 'POST',
-      headers: { Prefer: 'resolution=merge-duplicates,return=minimal' },
-      body: JSON.stringify({ id: SUPABASE_SETTINGS_ID, settings: updatedSettings })
-    });
-    return { success: true, message: 'Configurações salvas e sincronizadas com o Supabase.' };
-  } catch {
-    return { success: false, message: 'Não foi possível persistir as configurações no servidor. A cópia local não confirma a gravação; verifique a API e as permissões.' };
+    await api.patch<PortalSettings>('/site-settings', updatedSettings);
+    try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedSettings)); } catch { /* cache is optional */ }
+    return { success: true, message: 'Configurações gravadas no servidor.' };
+  } catch (error) {
+    return { success: false, message: error instanceof Error ? error.message : 'Falha ao persistir configurações.' };
   }
 }
 
