@@ -28,14 +28,6 @@ import { NotFoundPageView } from './components/pages/NotFoundPageView';
 import { CustomPageView } from './components/pages/CustomPageView';
 
 import { 
-  SUBSCRIPTION_PLANS
-} from './data/mockData';
-
-import { 
-  INITIAL_MENU_CONFIG
-} from './data/pagesData';
-
-import { 
   PortalSettings, 
   loadPortalSettings, 
   savePortalSettings, 
@@ -100,6 +92,7 @@ export default function App() {
   const [menuConfig, setMenuConfig] = useState<SiteMenuConfig>({ mainNav: [], topBar: [], footerCol1: [], footerCol2: [], footerCol3: [] });
   const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
   const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<import('./types').SubscriptionPlan[]>([]);
 
   // A sessão real é restaurada pelo Firebase; enquanto isso, o visitante permanece sem identidade.
   const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
@@ -135,6 +128,7 @@ export default function App() {
       }
     };
     void Promise.all([
+      load<import('./types').SubscriptionPlan[]>('/plans', setSubscriptionPlans),
       load<Article[]>('/articles', setArticles),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
       load<RssSource[]>('/editorial/sources', setSources),
@@ -390,10 +384,8 @@ export default function App() {
     handleNavigateHome();
   };
 
-  const handleSwitchStaffRole = (roleKey: string) => {
-    if (DEMO_USERS[roleKey]) {
-      setCurrentUser(DEMO_USERS[roleKey]);
-    }
+  const handleSwitchStaffRole = (_roleKey: string) => {
+    showToast('A função da equipa é atribuída pelo backend; não é possível alterná-la no navegador.');
   };
 
   // CMS Pages management handlers
@@ -596,7 +588,7 @@ export default function App() {
       {/* VIEW: THREE-STEP SUBSCRIPTION CHECKOUT */}
       {currentView === 'checkout' && (
         <CheckoutWizard
-          plans={SUBSCRIPTION_PLANS}
+          plans={subscriptionPlans}
           selectedPlanId={selectedCheckoutPlanId}
           currentUser={currentUser}
           onBack={() => setCurrentView('plans')}
