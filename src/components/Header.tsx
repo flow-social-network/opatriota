@@ -75,6 +75,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [utilityBarHeight, setUtilityBarHeight] = useState(36);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(BRAZIL_CAPITALS_WEATHER[0]);
   const [pushStatus, setPushStatus] = useState<string>('default');
@@ -198,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="w-full bg-white select-none pt-[72px]">
+      <header className="w-full bg-white select-none" style={{ paddingTop: `${utilityBarHeight * 2}px` }}>
         {/* Barra superior no fluxo normal para encostar diretamente no ticker, sem sobreposição. */}
       <div className="site-utility-bar fixed inset-x-0 top-0 z-[1000] w-full bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]" style={{ position: "fixed", top: 0, left: 0, right: 0, zIndex: 1000 }}>
         <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1">
@@ -352,7 +353,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Segunda faixa fixa: mercados ao vivo, logo abaixo da barra cinza. */}
-      <div className="fixed inset-x-0 top-[36px] z-[999]" style={{ position: "fixed", top: "36px", left: 0, right: 0, zIndex: 999 }}><BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} /></div>
+      <div className="fixed inset-x-0 z-[999]" style={{ position: "fixed", top: `${utilityBarHeight}px`, left: 0, right: 0, zIndex: 999 }}><BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} /></div>
 
       {/* 2. GRAND BRANDING BANNER */}
       <div className="py-2 sm:py-2.5 px-4 bg-white border-b border-[#D9DEE7]">
@@ -406,20 +407,26 @@ export const Header: React.FC<HeaderProps> = ({
             {navItems.map((item) => {
               const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
               return (
-                <button
-                  key={item.slug}
-                  onClick={() => onSelectCategory(item.slug)}
-                  className={`flex items-center gap-1 px-3 py-3 text-[11px] xl:text-xs font-bold tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer ${
-                    isActive
-                      ? 'bg-[#07172E] text-[#FFCC29] border-b-2 border-[#FFCC29]'
-                      : 'text-white/90 hover:text-white hover:bg-[#0E2C56]'
-                  }`}
-                >
-                  <span>{item.label}</span>
-                  {item.hasSubmenu && (
-                    <ChevronDown className="w-2.5 h-2.5 text-white/50" />
-                  )}
-                </button>
+                <div key={item.slug} className="group relative h-full">
+                  <button
+                    onClick={() => onSelectCategory(item.slug)}
+                    aria-haspopup="true"
+                    className={`flex h-full items-center gap-1 px-3 py-3 text-[11px] xl:text-xs font-bold tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer ${
+                      isActive
+                        ? 'bg-[#07172E] text-[#FFCC29] border-b-2 border-[#FFCC29]'
+                        : 'text-white/90 hover:text-white hover:bg-[#0E2C56]'
+                    }`}
+                  >
+                    <span>{item.label}</span>
+                    <ChevronDown className="w-2.5 h-2.5 text-white/50" aria-hidden="true" />
+                  </button>
+                  <div className="invisible absolute left-0 top-full z-[1100] min-w-52 translate-y-1 border border-[#D9DEE7] bg-white py-1 text-[#17202A] opacity-0 shadow-xl transition-all group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                    <button onClick={() => onSelectCategory(item.slug)} className="block w-full px-4 py-2 text-left text-xs font-bold hover:bg-slate-100">Ver {item.label.toLowerCase()}</button>
+                    <div className="my-1 border-t border-slate-200" />
+                    <button onClick={() => onNavigatePage?.('contato')} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">Anuncie nesta editoria</button>
+                    <button onClick={() => onNavigatePage?.('contato')} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">Solicitar mídia kit</button>
+                  </div>
+                </div>
               );
             })}
           </div>
