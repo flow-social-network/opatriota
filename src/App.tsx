@@ -34,7 +34,6 @@ import {
   INITIAL_FACT_CHECKS, 
   INITIAL_RSS_SOURCES, 
   INITIAL_EDITORIAL_QUEUE,
-  DEMO_USERS,
   SUBSCRIPTION_PLANS
 } from './data/mockData';
 
@@ -398,11 +397,7 @@ export default function App() {
     handleNavigateHome();
   };
 
-  const handleSwitchStaffRole = (roleKey: string) => {
-    if (DEMO_USERS[roleKey]) {
-      setCurrentUser(DEMO_USERS[roleKey]);
-    }
-  };
+
 
   // CMS Pages management handlers
   const handleSavePage = (savedPage: InstitutionalPage) => {
