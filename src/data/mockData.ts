@@ -760,6 +760,110 @@ Ex-medalhistas olímpicos brasileiros participam como mentores dos núcleos regi
     sourcesConsulted: ['Boletim do COB', 'Programa Atletas de Alto Rendimento'],
     tags: ['Esportes', 'Juventude', 'Atletismo', 'Olimpismo'],
     priority: 'normal'
+  },
+  {
+    id: 'art-rs-1',
+    slug: 'governo-do-rs-e-porto-alegre-aceleram-obras-de-diques-e-protecao-contra-cheias',
+    title: 'Governo do RS e Prefeitura de Porto Alegre aceleram obras estruturais de diques e contenção',
+    subtitle: 'Investimentos somam R$ 3,2 bilhões em modernização das casas de bombas, reforço de comportas e ampliação da capacidade de vazão do Guaíba.',
+    kicker: 'RIO GRANDE DO SUL',
+    category: 'brasil',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `PORTO ALEGRE — O Governo do Estado do Rio Grande do Sul e a Prefeitura de Porto Alegre apresentaram o balanço consolidado das frentes de trabalho para o plano integrado de proteção contra cheias na Região Metropolitana.
+    
+Com recursos federais e estaduais já empenhados, mais de 14 casas de bombas foram totalmente automatizadas e receberam grupos geradores próprios para garantir funcionamento contínuo mesmo sob contingências severas.
+    
+Além dos diques do Sarandi e Mathias Velho, novas dragagens estratégicas no Rio Gravataí e na foz do Rio dos Sinos começaram a operar em regime de turno dobrado.`,
+    author: 'Equipe Editorial O Patriota RS',
+    authorRole: 'Correspondente Regional RS',
+    publishedAt: '08 de outubro de 2026 às 16:20',
+    readTimeMinutes: 4,
+    imageUrl: '/src/assets/images/news_infraestrutura.jpg',
+    imageCaption: 'Obras de engenharia reforçam os sistemas de diques e bombeamento em Porto Alegre.',
+    sourceName: 'Governo do Estado do RS / PMPA',
+    sourceUrl: 'https://estado.rs.gov.br',
+    sourcesConsulted: ['Relatório do Comitê de Reconstrução RS', 'Secretaria de Obras e Habitação RS'],
+    tags: ['Porto Alegre', 'Rio Grande do Sul', 'Infraestrutura', 'Defesa Civil', 'Guaíba'],
+    priority: 'alta'
+  },
+  {
+    id: 'art-rs-2',
+    slug: 'polo-calcadista-de-novo-hamburgo-e-vale-do-sinos-amplia-exportacoes',
+    title: 'Polo de Novo Hamburgo e Vale do Sinos amplia vendas externas de calçados de alto valor agregado',
+    subtitle: 'Com tecnologia e couros nobres certificados, indústrias gaúchas ampliam presença nos mercados europeu e norte-americano.',
+    kicker: 'VALE DO SINOS & INDÚSTRIA',
+    category: 'economia',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `NOVO HAMBURGO — As indústrias do cluster calçadista do Vale do Sinos registraram um avanço de 14,8% no faturamento das exportações nos últimos nove meses, com destaque para calçados de segurança e linhas femininas de couro legítimo.
+    
+A Feira Internacional de Calçados e Artefatos (FIMEC), sediada no centro de convenções da Fenac em Novo Hamburgo, confirmou delegações de compradores de mais de 35 países.
+    
+Lideranças empresariais do Vale ressaltaram a resiliência dos trabalhadores e a capacidade técnica da região em superar adversidades climáticas através de inovação e valor agregado.`,
+    author: 'Beatriz Albuquerque',
+    authorId: 'usr-8',
+    authorRole: 'Correspondente de Economia e Mercado',
+    publishedAt: '08 de outubro de 2026 às 15:40',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_porto.jpg',
+    imageCaption: 'Exportações de produtos manufaturados do Vale do Sinos ganham tração no exterior.',
+    sourceName: 'Abicalçados / Fiergs',
+    sourceUrl: 'https://abicalcados.com.br',
+    sourcesConsulted: ['Dados SECEX/MDIC', 'Boletim Econômico Fiergs'],
+    tags: ['Novo Hamburgo', 'Vale do Sinos', 'Calçados', 'Indústria', 'Economia RS'],
+    priority: 'alta'
+  },
+  {
+    id: 'art-rs-3',
+    slug: 'vitivinicultura-e-enoturismo-da-serra-gaucha-alcancam-plena-ocupacao-na-primavera',
+    title: 'Serra Gaúcha celebra safra recorde de uvas viníferas e atinge ocupação hoteleira máxima',
+    subtitle: 'Gramado, Canela, Bento Gonçalves e Caxias do Sul unem vinícolas premiadas e gastronomia típica para impulsionar a economia regional.',
+    kicker: 'SERRA GAÚCHA',
+    category: 'cultura',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `BENTO GONÇALVES & GRAMADO — As vinícolas do Vale dos Vinhedos e da Serra Gaúcha projetam uma das melhores safras das últimas décadas, impulsionada pelo clima favorável e pelo frio prolongado que garantiu a maturação ideal das uvas viníferas.
+    
+A rede hoteleira de Gramado e Canela registrou reservas esgotadas para os festivais de primavera e finais de semana de colheita cultural.
+    
+O enoturismo consolidou-se como um dos motores mais fortes da economia gaúcha, gerando milhares de empregos diretos na hotelaria, comércio e no campo.`,
+    author: 'Thiago Vasconcellos',
+    authorId: 'usr-4',
+    authorRole: 'Correspondente Especial',
+    publishedAt: '08 de outubro de 2026 às 14:10',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/hero_congresso.jpg',
+    imageCaption: 'Parreirais da Serra Gaúcha prometem rótulos de vinhos e espumantes de padrão internacional.',
+    sourceName: 'Ibravin / Associação Enoturismo RS',
+    sourceUrl: 'https://ibravin.org.br',
+    sourcesConsulted: ['Censo Vitivinícola RS', 'Sindicato da Hotelaria da Serra'],
+    tags: ['Serra Gaúcha', 'Gramado', 'Bento Gonçalves', 'Caxias do Sul', 'Turismo', 'Vinho'],
+    priority: 'normal'
+  },
+  {
+    id: 'art-rs-4',
+    slug: 'campo-gaucho-inicia-plantio-de-arroz-e-soja-com-novas-linhas-do-plano-safra',
+    title: 'Produtores gaúchos iniciam plantio de arroz e soja com novas linhas de crédito e tecnologia de solo',
+    subtitle: 'Com recuperação de áreas produtivas e apoio de cooperativas agropecuárias, o campo gaúcho reafirma seu papel no abastecimento nacional.',
+    kicker: 'AGRONEGÓCIO GAÚCHO',
+    category: 'economia',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `PELOTAS & SANTA MARIA — O plantio da safra de arroz irrigado e de soja na Depressão Central e na Fronteira Oeste do Rio Grande do Sul avançou em ritmo acelerado nos últimos dias com a abertura de janelas de tempo firme.
+    
+A Federação da Agricultura do RS (Farsul) destacou o espírito de união e a adoção maciça de técnicas de agricultura de precisão para recuperar a fertilidade de lavouras e assegurar a soberania alimentar brasileira.`,
+    author: 'Equipe Editorial O Patriota',
+    authorRole: 'Redação de Agronegócios',
+    publishedAt: '08 de outubro de 2026 às 12:30',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_infraestrutura.jpg',
+    imageCaption: 'Agricultores do Rio Grande do Sul investem em sementes de alta produtividade e defensivos biológicos.',
+    sourceName: 'Farsul / Irga',
+    sourceUrl: 'https://farsul.org.br',
+    sourcesConsulted: ['Instituto Rio Grandense do Arroz', 'Relatório Conab Safra RS'],
+    tags: ['Agronegócio', 'Arroz', 'Soja', 'Rio Grande do Sul', 'Farsul'],
+    priority: 'normal'
   }
 ];
 

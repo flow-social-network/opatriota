@@ -35,6 +35,7 @@ export const PagesManager: React.FC<PagesManagerProps> = ({
   const [filterStatus, setFilterStatus] = useState<string>('todos');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'conteudo' | 'seo' | 'localizacao'>('conteudo');
+  const [formError, setFormError] = useState<string | null>(null);
 
   const filteredPages = pages.filter((p) => {
     if (filterStatus !== 'todos' && p.status !== filterStatus) return false;
@@ -46,6 +47,7 @@ export const PagesManager: React.FC<PagesManagerProps> = ({
   });
 
   const handleCreateNew = () => {
+    setFormError(null);
     const newPage: InstitutionalPage = {
       id: `page-${Date.now()}`,
       slug: 'nova-pagina',
@@ -70,14 +72,15 @@ export const PagesManager: React.FC<PagesManagerProps> = ({
   const handleSave = () => {
     if (!editingPage) return;
     if (!editingPage.title.trim()) {
-      alert('Por favor, defina um título para a página.');
+      setFormError('Por favor, defina um título para a página.');
       return;
     }
     if (!editingPage.slug.trim()) {
-      alert('Por favor, defina um slug (URL) válido.');
+      setFormError('Por favor, defina um slug (URL) válido.');
       return;
     }
 
+    setFormError(null);
     const updated = {
       ...editingPage,
       updatedAt: new Date().toLocaleDateString('pt-BR')
@@ -142,6 +145,13 @@ export const PagesManager: React.FC<PagesManagerProps> = ({
               </button>
             </div>
           </div>
+
+          {formError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-[#B42318] text-xs rounded font-medium flex items-center justify-between">
+              <span>{formError}</span>
+              <button type="button" onClick={() => setFormError(null)} className="text-red-400 hover:text-red-700">✕</button>
+            </div>
+          )}
 
           {/* Edit Tabs */}
           <div className="flex border-b border-[#EAECEF] mb-6 gap-6 text-xs">

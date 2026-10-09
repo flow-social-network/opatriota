@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Logo } from './Logo';
-import { CategorySlug, UserSession } from '../types';
+import { CategorySlug, UserSession, PortalSettings, SocialPlatform } from '../types';
+import { AdSlot } from './ads/AdSlot';
 import { 
   Search, 
   ChevronDown, 
@@ -8,6 +9,10 @@ import {
   Twitter, 
   Instagram, 
   Youtube, 
+  Radio,
+  MessageCircle,
+  Rss,
+  Share2,
   Sun, 
   CloudSun,
   Cloud,
@@ -19,7 +24,8 @@ import {
   PenTool, 
   Sparkles,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Bell
 } from 'lucide-react';
 import { 
   CapitalWeather, 
@@ -30,6 +36,7 @@ import {
 } from '../data/weatherData';
 import { WeatherCapitalsModal } from './weather/WeatherCapitalsModal';
 import { WeatherBar } from './weather/WeatherBar';
+import { subscribeToWebPush, getPushPermissionStatus } from '../services/webPushService';
 
 interface HeaderProps {
   currentCategory: CategorySlug;
@@ -43,6 +50,7 @@ interface HeaderProps {
   searchQuery: string;
   onSearchChange: (q: string) => void;
   onSearchSubmit: () => void;
+  portalSettings?: PortalSettings;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -56,11 +64,30 @@ export const Header: React.FC<HeaderProps> = ({
   currentUser,
   searchQuery,
   onSearchChange,
-  onSearchSubmit
+  onSearchSubmit,
+  portalSettings
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(BRAZIL_CAPITALS_WEATHER[0]);
+  const [pushStatus, setPushStatus] = useState<string>('default');
+  const [pushLoading, setPushLoading] = useState(false);
+
+  useEffect(() => {
+    setPushStatus(getPushPermissionStatus());
+  }, []);
+
+  const handleTogglePush = async () => {
+    setPushLoading(true);
+    try {
+      const res = await subscribeToWebPush(portalSettings?.webPush?.vapidPublicKey);
+      setPushStatus(res.permission);
+    } catch (e) {
+      // Ignored
+    } finally {
+      setPushLoading(false);
+    }
+  };
 
   // Automatically sync live weather for initial capital on mount
   useEffect(() => {
@@ -115,9 +142,43 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
+  const renderSocialIcon = (platform: SocialPlatform, className = "w-3.5 h-3.5") => {
+    switch (platform) {
+      case 'facebook':
+        return <Facebook className={className} />;
+      case 'instagram':
+        return <Instagram className={className} />;
+      case 'youtube':
+        return <Youtube className={className} />;
+      case 'x':
+        return <Twitter className={className} />;
+      case 'tiktok':
+        return <Radio className={className} />;
+      case 'whatsapp':
+        return <MessageCircle className={className} />;
+      case 'rss':
+        return <Rss className={className} />;
+      default:
+        return <Share2 className={className} />;
+    }
+  };
+
+  const activeSocials = (portalSettings?.socialNetworks || []).filter(s => s.active);
+
   return (
-    <header className="w-full bg-white select-none">
-      {/* 1. TOP UTILITY BAR */}
+    <>
+      {/* Optional Top Leaderboard Ad Slot */}
+      {portalSettings && (
+        <AdSlot
+          position="HOME_TOP_LEADERBOARD"
+          adSlots={portalSettings.adSlots}
+          adsense={portalSettings.adsense}
+          className="my-2"
+        />
+      )}
+
+      <header className="w-full bg-white select-none">
+        {/* 1. TOP UTILITY BAR */}
       <div className="bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs py-1.5 px-4 text-[#5D6673]">
         <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-3">
           {/* Left: Date & Dynamic Weather from INMET */}
@@ -163,20 +224,21 @@ export const Header: React.FC<HeaderProps> = ({
 
           {/* Right: Social Networks, Search, Subscriber Area & Newsroom */}
           <div className="flex items-center gap-3">
-            {/* Social Icons */}
+            {/* Social Icons (Dynamic from Portal Settings) */}
             <div className="hidden md:flex items-center gap-2.5 text-[#0B2345] mr-1">
-              <a href="#facebook" aria-label="Facebook" className="hover:text-[#0B5FFF] transition-colors">
-                <Facebook className="w-3.5 h-3.5" />
-              </a>
-              <a href="#x" aria-label="X Twitter" className="hover:text-[#0B5FFF] transition-colors">
-                <Twitter className="w-3.5 h-3.5" />
-              </a>
-              <a href="#instagram" aria-label="Instagram" className="hover:text-[#0B5FFF] transition-colors">
-                <Instagram className="w-3.5 h-3.5" />
-              </a>
-              <a href="#youtube" aria-label="YouTube" className="hover:text-[#0B5FFF] transition-colors">
-                <Youtube className="w-3.5 h-3.5" />
-              </a>
+              {activeSocials.map((soc) => (
+                <a
+                  key={soc.id}
+                  href={soc.url}
+                  target={soc.url.startsWith('http') ? '_blank' : undefined}
+                  rel={soc.url.startsWith('http') ? 'noopener noreferrer' : undefined}
+                  aria-label={soc.ariaLabel || soc.name}
+                  title={`${soc.name}: ${soc.url}`}
+                  className="hover:text-[#0B5FFF] transition-colors"
+                >
+                  {renderSocialIcon(soc.platform)}
+                </a>
+              ))}
             </div>
 
             {/* Search Input Box */}
@@ -199,6 +261,21 @@ export const Header: React.FC<HeaderProps> = ({
                 <Search className="w-3 h-3" />
               </button>
             </form>
+
+            {/* BUTTON: ALERTA WEB PUSH */}
+            <button
+              onClick={handleTogglePush}
+              disabled={pushLoading}
+              className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded border transition-colors shadow-2xs cursor-pointer ${
+                pushStatus === 'granted'
+                  ? 'bg-[#EBF7EE] text-[#16803C] border-[#16803C]/40 hover:bg-[#d8f2dc]'
+                  : 'bg-white text-[#0B2345] border-[#D9DEE7] hover:border-[#0B5FFF] hover:text-[#0B5FFF]'
+              }`}
+              title={pushStatus === 'granted' ? 'Alertas push ativos neste navegador' : 'Ativar alertas urgentes no navegador'}
+            >
+              <Bell className={`w-3 h-3 ${pushStatus === 'granted' ? 'text-[#16803C] fill-[#16803C]' : 'text-[#0B2345]'}`} />
+              <span>{pushStatus === 'granted' ? 'ALERTAS ATIVOS' : 'RECEBER ALERTAS'}</span>
+            </button>
 
             {/* BUTTON 1: ÁREA DO ASSINANTE */}
             <button
@@ -256,7 +333,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => onSelectCategory('todos')}
               className="text-left focus:outline-none cursor-pointer"
             >
-              <Logo />
+              <Logo identityConfig={portalSettings?.identity} />
             </button>
           </div>
 
@@ -368,5 +445,6 @@ export const Header: React.FC<HeaderProps> = ({
         onSelectCapital={(cap) => setSelectedCapital(cap)}
       />
     </header>
+  </>
   );
 };

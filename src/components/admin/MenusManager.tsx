@@ -29,6 +29,7 @@ export const MenusManager: React.FC<MenusManagerProps> = ({
   const [config, setConfig] = useState<SiteMenuConfig>(menuConfig);
   const [showAddModal, setShowAddModal] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [modalError, setModalError] = useState<string | null>(null);
 
   // New item form state
   const [itemType, setItemType] = useState<'categoria' | 'pagina' | 'custom'>('categoria');
@@ -36,7 +37,7 @@ export const MenusManager: React.FC<MenusManagerProps> = ({
   const [customLabel, setCustomLabel] = useState<string>('');
   const [customUrl, setCustomUrl] = useState<string>('');
 
-  const currentItems = config[currentMenuTab];
+  const currentItems = config[currentMenuTab] || [];
 
   const handleMove = (index: number, direction: 'up' | 'down') => {
     const newItems = [...currentItems];
@@ -82,7 +83,7 @@ export const MenusManager: React.FC<MenusManagerProps> = ({
       };
     } else {
       if (!customLabel || !customUrl) {
-        alert('Preencha o rótulo e a URL do link personalizado.');
+        setModalError('Preencha o rótulo e a URL do link personalizado.');
         return;
       }
       newItem = {
@@ -93,6 +94,7 @@ export const MenusManager: React.FC<MenusManagerProps> = ({
       };
     }
 
+    setModalError(null);
     setConfig({
       ...config,
       [currentMenuTab]: [...currentItems, newItem]
@@ -171,7 +173,7 @@ export const MenusManager: React.FC<MenusManagerProps> = ({
                 : 'border-transparent text-[#717E8E] hover:text-[#0B2345]'
             }`}
           >
-            {tab.label} ({config[tab.key as keyof SiteMenuConfig].length})
+            {tab.label} ({config[tab.key as keyof SiteMenuConfig]?.length || 0})
           </button>
         ))}
       </div>
@@ -241,6 +243,13 @@ export const MenusManager: React.FC<MenusManagerProps> = ({
             <h3 className="font-serif font-bold text-lg text-[#0B2345] mb-4">
               Adicionar Link ao Menu
             </h3>
+
+            {modalError && (
+              <div className="mb-4 p-2.5 bg-red-50 border border-red-200 text-[#B42318] text-xs rounded font-medium flex items-center justify-between">
+                <span>{modalError}</span>
+                <button type="button" onClick={() => setModalError(null)} className="text-red-400 hover:text-red-700">✕</button>
+              </div>
+            )}
 
             <div className="space-y-4 text-xs">
               <div>

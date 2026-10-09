@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Article, CategorySlug, UserSession } from '../types';
 import { 
   ArrowLeft, 
@@ -40,6 +40,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
   onOpenLogin,
   onSelectAuthor
 }) => {
+  const [copied, setCopied] = useState(false);
   const isBookmarked = currentUser?.bookmarks?.includes(article.id) || false;
 
   const handlePrint = () => {
@@ -55,7 +56,8 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-      alert('Link copiado para a área de transferência!');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 3000);
     }
   };
 
@@ -119,10 +121,14 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
 
           <button
             onClick={handleShare}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded border border-[#D9DEE7] hover:bg-[#F1F3F5] text-[#17202A] transition cursor-pointer"
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded border transition cursor-pointer ${
+              copied
+                ? 'bg-[#EBF7EE] text-[#16803C] border-[#16803C] font-semibold'
+                : 'border-[#D9DEE7] hover:bg-[#F1F3F5] text-[#17202A]'
+            }`}
           >
             <Share2 className="w-3.5 h-3.5" />
-            <span>Compartilhar</span>
+            <span>{copied ? 'Link Copiado!' : 'Compartilhar'}</span>
           </button>
 
           <button

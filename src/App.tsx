@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
 import { BreakingNewsTicker } from './components/BreakingNewsTicker';
 import { HeroSection } from './components/HeroSection';
@@ -42,6 +42,13 @@ import {
   INITIAL_CONTACT_SUBMISSIONS,
   INITIAL_LGPD_REQUESTS
 } from './data/pagesData';
+
+import { 
+  PortalSettings, 
+  loadPortalSettings, 
+  savePortalSettings, 
+  DEFAULT_PORTAL_SETTINGS 
+} from './services/siteConfigService';
 
 import { 
   Article, 
@@ -106,8 +113,38 @@ export default function App() {
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Modals
+  // Portal Settings (Identity, Logos, Social Networks, Ad Slots, AdSense)
+  const [portalSettings, setPortalSettings] = useState<PortalSettings>(DEFAULT_PORTAL_SETTINGS);
+
+  // Load persistent settings from Firebase / local storage on mount
+  useEffect(() => {
+    let isMounted = true;
+    loadPortalSettings().then((loaded) => {
+      if (isMounted && loaded) {
+        setPortalSettings(loaded);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const handleSavePortalSettings = async (newSettings: PortalSettings) => {
+    setPortalSettings(newSettings);
+    const res = await savePortalSettings(newSettings);
+    showToast(res.message);
+  };
+
+  // Modals & Notifications
   const [supportModalOpen, setSupportModalOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setTimeout(() => {
+      setToastMessage(prev => prev === message ? null : prev);
+    }, 4000);
+  };
 
   // Handlers
   const handleNavigateHome = () => {
@@ -319,12 +356,12 @@ export default function App() {
       ? pages.map(p => p.id === savedPage.id ? savedPage : p)
       : [savedPage, ...pages];
     setPages(updated);
-    alert(`Página "${savedPage.title}" salva com sucesso no portal!`);
+    showToast(`Página "${savedPage.title}" salva com sucesso no portal!`);
   };
 
   const handleDeletePage = (pageId: string) => {
     setPages(pages.filter(p => p.id !== pageId));
-    alert('Página excluída do sistema.');
+    showToast('Página excluída do sistema com sucesso.');
   };
 
   // CMS Category management handlers
@@ -334,7 +371,7 @@ export default function App() {
       ? categories.map(c => c.slug === savedCategory.slug ? savedCategory : c)
       : [...categories, savedCategory];
     setCategories(updated);
-    alert(`Editoria "${savedCategory.name}" salva! Página /categoria/${savedCategory.slug}/ criada automaticamente.`);
+    showToast(`Editoria "${savedCategory.name}" salva! Página /categoria/${savedCategory.slug}/ atualizada.`);
   };
 
   return (
@@ -352,6 +389,7 @@ export default function App() {
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onSearchSubmit={() => handleSearchSubmit()}
+        portalSettings={portalSettings}
       />
 
       {/* VIEW: HOME (Front Page Layout) */}
@@ -587,6 +625,8 @@ export default function App() {
             onBack={handleNavigateHome}
             onUpdateSource={setSources}
             onUpdateQueue={setQueueItems}
+            portalSettings={portalSettings}
+            onSavePortalSettings={handleSavePortalSettings}
           />
         </main>
       )}
@@ -607,6 +647,25 @@ export default function App() {
         isOpen={supportModalOpen}
         onClose={() => setSupportModalOpen(false)}
       />
+
+      {/* Floating Toast Feedback */}
+      {toastMessage && (
+        <div 
+          role="status" 
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 bg-[#0B2345] text-white px-4 py-3 rounded-lg shadow-xl border border-[#FFCC29] text-xs sm:text-sm flex items-center gap-3 animate-fade-in"
+        >
+          <span className="font-medium">{toastMessage}</span>
+          <button 
+            type="button"
+            onClick={() => setToastMessage(null)} 
+            className="text-white/70 hover:text-white font-bold ml-2 cursor-pointer"
+            aria-label="Fechar notificação"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

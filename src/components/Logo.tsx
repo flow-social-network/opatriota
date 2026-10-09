@@ -1,27 +1,101 @@
 import React from 'react';
+import { SiteIdentityConfig } from '../types';
 
 interface LogoProps {
   className?: string;
   size?: 'sm' | 'md' | 'lg';
-  variant?: 'full' | 'compact' | 'icon';
+  variant?: 'full' | 'compact' | 'icon' | 'footer';
+  identityConfig?: SiteIdentityConfig;
 }
 
-export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md', variant = 'full' }) => {
+export const Logo: React.FC<LogoProps> = ({ 
+  className = '', 
+  size = 'md', 
+  variant = 'full',
+  identityConfig
+}) => {
+  // 1. FOOTER VARIANT (Tailored for dark blue #07172E background)
+  if (variant === 'footer') {
+    // Custom image for footer
+    if (identityConfig?.footerLogoType === 'custom_image' && identityConfig.footerLogoUrl) {
+      return (
+        <div className={`flex flex-col items-start ${className}`}>
+          <img
+            src={identityConfig.footerLogoUrl}
+            alt={identityConfig.footerLogoAlt || 'O Patriota Brasil'}
+            style={{ maxWidth: `${identityConfig.footerLogoWidth || 280}px` }}
+            className="h-auto object-contain mb-2"
+          />
+          <p className="text-[10px] text-[#FFCC29] font-bold uppercase tracking-widest">
+            {identityConfig.slogan || 'INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE'}
+          </p>
+        </div>
+      );
+    }
+
+    // Reuse header custom image if selected
+    if (
+      identityConfig?.footerLogoType === 'same_as_header' && 
+      identityConfig.headerLogoType === 'custom_image' && 
+      identityConfig.headerLogoUrl
+    ) {
+      return (
+        <div className={`flex flex-col items-start ${className}`}>
+          <img
+            src={identityConfig.headerLogoUrl}
+            alt={identityConfig.footerLogoAlt || 'O Patriota Brasil'}
+            style={{ maxWidth: `${identityConfig.footerLogoWidth || 280}px` }}
+            className="h-auto object-contain mb-2"
+          />
+          <p className="text-[10px] text-[#FFCC29] font-bold uppercase tracking-widest">
+            {identityConfig.slogan || 'INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE'}
+          </p>
+        </div>
+      );
+    }
+
+    // Default SVG / Vector for dark footer
+    return (
+      <div className={`flex flex-col items-start text-left select-none ${className}`}>
+        <div className="flex items-center gap-3 mb-2">
+          {/* Circular mini emblem */}
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#0B3B7B] to-[#07172E] p-1 border border-[#FFCC29] shadow-sm flex items-center justify-center shrink-0">
+            <svg viewBox="0 0 100 100" className="w-full h-full" fill="none">
+              <circle cx="50" cy="50" r="42" fill="#0B3B7B" />
+              <polygon points="50,18 80,50 50,82 20,50" fill="#FFCC29" />
+              <circle cx="50" cy="50" r="18" fill="#07172E" />
+              <path d="M35 50 Q 50 44 65 50" stroke="#FFFFFF" strokeWidth="3" fill="none" />
+              <circle cx="48" cy="53" r="1.5" fill="#FFFFFF" />
+              <circle cx="53" cy="48" r="1.2" fill="#FFFFFF" />
+            </svg>
+          </div>
+          <div>
+            <span className="font-serif text-2xl md:text-3xl font-black text-white tracking-wide block leading-none">
+              O PATRIOTA
+            </span>
+            <span className="text-[9px] font-bold tracking-[0.25em] uppercase text-[#FFCC29] block mt-0.5">
+              BRASIL
+            </span>
+          </div>
+        </div>
+
+        <p className="text-[10px] text-[#FFCC29] font-bold tracking-widest uppercase mt-1 leading-snug">
+          {identityConfig?.slogan || 'INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE'}
+        </p>
+      </div>
+    );
+  }
+
+  // 2. ICON ONLY VARIANT
   if (variant === 'icon') {
     return (
       <div className={`relative flex items-center justify-center rounded-2xl bg-gradient-to-b from-[#0B3B7B] to-[#07172E] p-2 shadow-md border border-[#2563EB]/40 ${className}`}>
         <svg viewBox="0 0 100 100" className="w-full h-full" fill="none">
-          {/* Brazil globe center */}
           <circle cx="50" cy="50" r="38" fill="#0B3B7B" stroke="#FFCC29" strokeWidth="2" />
-          {/* Green wave */}
           <path d="M12 50 Q 50 15 88 50 Q 50 85 12 50" fill="#16803C" opacity="0.85" />
-          {/* Yellow diamond */}
           <polygon points="50,22 78,50 50,78 22,50" fill="#FFCC29" />
-          {/* Blue celestial sphere */}
           <circle cx="50" cy="50" r="16" fill="#0B2345" />
-          {/* Ordem e Progresso white arc */}
           <path d="M36 50 Q 50 44 64 50" stroke="#FFFFFF" strokeWidth="2.5" fill="none" />
-          {/* Big O letter overlay */}
           <text x="50" y="66" textAnchor="middle" fill="#FFFFFF" fontFamily="Georgia, serif" fontSize="56" fontWeight="bold" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.5))">
             O
           </text>
@@ -29,6 +103,31 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md', variant
       </div>
     );
   }
+
+  // 3. HEADER CUSTOM IMAGE (if configured)
+  if (identityConfig?.headerLogoType === 'custom_image' && identityConfig.headerLogoUrl) {
+    return (
+      <div className={`flex flex-col items-center justify-center text-center select-none ${className}`}>
+        <img
+          src={identityConfig.headerLogoUrl}
+          alt={identityConfig.headerLogoAlt || 'O Patriota'}
+          style={{ maxWidth: `${identityConfig.headerLogoWidth || 320}px` }}
+          className="h-auto object-contain mb-2"
+        />
+        <p className="text-[9px] sm:text-[11px] font-semibold tracking-[0.18em] uppercase text-[#5D6673] mb-1.5">
+          {identityConfig.slogan || 'INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE'}
+        </p>
+        <div className="w-28 sm:w-36 h-1 flex rounded-full overflow-hidden shadow-xs">
+          <div className="flex-1 bg-[#16803C]" />
+          <div className="flex-1 bg-[#FFCC29]" />
+          <div className="flex-1 bg-[#0B5FFF]" />
+        </div>
+      </div>
+    );
+  }
+
+  // 4. FULL OFFICIAL VECTOR EMBLEM (Standard)
+  const sloganText = identityConfig?.slogan || 'INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE';
 
   return (
     <div className={`flex flex-col items-center justify-center text-center select-none ${className}`}>
@@ -103,7 +202,7 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md', variant
 
       {/* Main Slogan: INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE. */}
       <p className="text-[9px] sm:text-[11px] font-semibold tracking-[0.18em] uppercase text-[#5D6673] mb-1.5">
-        INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE
+        {sloganText}
       </p>
 
       {/* Brazilian Flag Color Bar */}
@@ -115,3 +214,4 @@ export const Logo: React.FC<LogoProps> = ({ className = '', size = 'md', variant
     </div>
   );
 };
+

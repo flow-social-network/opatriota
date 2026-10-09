@@ -1,5 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { CategorySlug, SiteMenuConfig } from '../types';
+import { Bell, CheckCircle2 } from 'lucide-react';
+import { subscribeToWebPush, getPushPermissionStatus } from '../services/webPushService';
 
 interface FooterProps {
   onSelectCategory: (category: CategorySlug) => void;
@@ -14,6 +16,24 @@ export const Footer: React.FC<FooterProps> = ({
   onNavigatePage,
   menuConfig
 }) => {
+  const [pushStatus, setPushStatus] = useState<string>(() => getPushPermissionStatus());
+  const [isPushLoading, setIsPushLoading] = useState(false);
+  const [pushNotice, setPushNotice] = useState<string | null>(null);
+
+  const handleSubscribePush = async () => {
+    setIsPushLoading(true);
+    setPushNotice(null);
+    try {
+      const res = await subscribeToWebPush();
+      setPushStatus(res.permission);
+      setPushNotice(res.message);
+      setTimeout(() => setPushNotice(null), 5000);
+    } catch (err: any) {
+      setPushNotice(err.message || 'Falha ao registrar.');
+    } finally {
+      setIsPushLoading(false);
+    }
+  };
   return (
     <footer className="bg-[#07172E] text-white pt-12 pb-8 border-t border-[#0B2345] select-none">
       <div className="max-w-[1360px] mx-auto px-4">
@@ -47,8 +67,8 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
         </div>
 
-        {/* 3 Columns Official Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pb-10 border-b border-white/10 text-xs">
+        {/* 4 Columns Grid including Web Push & Transparency */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-10 border-b border-white/10 text-xs">
           
           {/* EDITORIAS */}
           <div>
@@ -92,11 +112,6 @@ export const Footer: React.FC<FooterProps> = ({
                   Agência de Checagem
                 </button>
               </li>
-              <li>
-                <button onClick={() => onSelectCategory('tecnologia')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Tecnologia & Inovação
-                </button>
-              </li>
             </ul>
           </div>
 
@@ -137,11 +152,6 @@ export const Footer: React.FC<FooterProps> = ({
                   Fale com a Redação
                 </button>
               </li>
-              <li>
-                <button onClick={() => onNavigatePage('planos')} className="hover:text-white hover:underline transition cursor-pointer text-[#FFCC29] font-semibold">
-                  Planos de Assinatura
-                </button>
-              </li>
             </ul>
           </div>
 
@@ -178,6 +188,46 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
             </ul>
+          </div>
+
+          {/* 4. ALERTAS WEB PUSH (FCM) */}
+          <div className="bg-white/5 border border-white/10 p-4 rounded-lg flex flex-col justify-between">
+            <div>
+              <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-2 text-[#FFCC29] flex items-center gap-1.5">
+                <Bell className="w-3.5 h-3.5 text-[#FFCC29]" />
+                ALERTAS URGENTES PUSH
+              </h4>
+              <p className="text-[11px] text-white/70 leading-relaxed mb-3">
+                Receba breaking news, plantões e apurações exclusivas em tempo real no seu dispositivo.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {pushNotice && (
+                <div className="p-2 bg-[#16803C]/30 border border-[#22A447] text-white text-[10px] rounded flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-[#22A447] shrink-0" />
+                  <span>{pushNotice}</span>
+                </div>
+              )}
+
+              <button
+                onClick={handleSubscribePush}
+                disabled={isPushLoading}
+                className={`w-full py-2 px-3 text-xs font-bold rounded flex items-center justify-center gap-1.5 transition cursor-pointer ${
+                  pushStatus === 'granted'
+                    ? 'bg-[#16803C] hover:bg-[#22A447] text-white'
+                    : 'bg-[#FFCC29] hover:bg-[#ffb700] text-[#07172E]'
+                }`}
+              >
+                <Bell className={`w-3.5 h-3.5 ${pushStatus === 'granted' ? 'fill-white' : ''}`} />
+                <span>
+                  {pushStatus === 'granted' ? 'Notificações Ativadas ✓' : 'Ativar Alertas Push'}
+                </span>
+              </button>
+              <div className="text-[9px] text-white/40 text-center">
+                Firebase Cloud Messaging • Cancele a qualquer momento
+              </div>
+            </div>
           </div>
 
         </div>

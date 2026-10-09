@@ -394,4 +394,130 @@ export interface SiteMenuConfig {
   footerCol1: SiteMenuItem[];
   footerCol2: SiteMenuItem[];
   footerCol3: SiteMenuItem[];
+  footerCol4?: SiteMenuItem[];
+  footerCol5?: SiteMenuItem[];
+}
+
+// -------------------------------------------------------------
+// Portal Settings, Identity & Monetization Configurations
+// -------------------------------------------------------------
+
+export type LogoSourceType = 'default_svg' | 'custom_image' | 'same_as_header';
+
+export interface SiteIdentityConfig {
+  headerLogoType: LogoSourceType;
+  headerLogoUrl: string;
+  headerLogoAlt: string;
+  headerLogoWidth: number;
+  footerLogoType: LogoSourceType;
+  footerLogoUrl: string;
+  footerLogoAlt: string;
+  footerLogoWidth: number;
+  slogan: string;
+  shortDescription: string;
+  copyrightText: string;
+}
+
+export type SocialPlatform = 
+  | 'facebook' 
+  | 'instagram' 
+  | 'youtube' 
+  | 'x' 
+  | 'tiktok' 
+  | 'whatsapp' 
+  | 'rss';
+
+export interface SocialNetworkItem {
+  id: string;
+  name: string;
+  platform: SocialPlatform;
+  url: string;
+  active: boolean;
+  order: number;
+  ariaLabel: string;
+}
+
+export type AdSlotPosition = 
+  | 'HOME_TOP_LEADERBOARD'
+  | 'HOME_BELOW_BREAKING'
+  | 'HOME_SIDEBAR_NATIONAL'
+  | 'HOME_BETWEEN_SECTIONS'
+  | 'HOME_PRE_FOOTER'
+  | 'ARTICLE_AFTER_CONTENT'
+  | 'ARTICLE_SIDEBAR';
+
+export type AdSlotFormat = 
+  | 'leaderboard_728x90' 
+  | 'billboard_970x250' 
+  | 'medium_rectangle_300x250' 
+  | 'half_page_300x600' 
+  | 'responsive_banner';
+
+export interface AdSlotConfig {
+  id: string;
+  position: AdSlotPosition;
+  name: string;
+  format: AdSlotFormat;
+  width: number;
+  height: number;
+  active: boolean;
+  platform: 'adsense' | 'direct' | 'empty';
+  slotId: string;
+  customHtml?: string;
+  demoTitle: string;
+  notes?: string;
+}
+
+export interface AdSenseGlobalConfig {
+  publisherId: string;
+  enabled: boolean;
+  autoAds: boolean;
+  testMode: boolean;
+}
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  name?: string;
+  subscribedAt: string;
+  source: string;
+  consentLgpd: boolean;
+}
+
+export interface WebPushConfig {
+  enabled: boolean;
+  vapidPublicKey: string;
+  projectId: string;
+  autoPrompt: boolean;
+  welcomeTitle: string;
+  welcomeMessage: string;
+}
+
+export interface PushSubscriber {
+  id: string;
+  token: string;
+  subscribedAt: string;
+  userAgent?: string;
+  deviceType?: 'desktop' | 'mobile' | 'tablet';
+  active: boolean;
+}
+
+export interface PushNotificationCampaign {
+  id: string;
+  title: string;
+  body: string;
+  url: string;
+  icon?: string;
+  sentAt: string;
+  recipientCount: number;
+  status: 'enviado' | 'rascunho' | 'falha';
+}
+
+export interface PortalSettings {
+  identity: SiteIdentityConfig;
+  socialNetworks: SocialNetworkItem[];
+  adsense: AdSenseGlobalConfig;
+  adSlots: AdSlotConfig[];
+  webPush?: WebPushConfig;
+  updatedAt?: string;
 }

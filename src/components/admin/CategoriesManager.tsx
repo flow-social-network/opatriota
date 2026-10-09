@@ -25,8 +25,10 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
   onPreviewCategory
 }) => {
   const [editingCategory, setEditingCategory] = useState<CategoryDetail | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleCreateNew = () => {
+    setFormError(null);
     const newCat: CategoryDetail = {
       id: `cat-${Date.now()}`,
       slug: 'nova-editoria' as CategorySlug,
@@ -45,14 +47,15 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
   const handleSave = () => {
     if (!editingCategory) return;
     if (!editingCategory.name.trim()) {
-      alert('Informe o nome da categoria.');
+      setFormError('Informe o nome da categoria.');
       return;
     }
     if (!editingCategory.slug.trim()) {
-      alert('Informe o slug da categoria.');
+      setFormError('Informe o slug da categoria.');
       return;
     }
 
+    setFormError(null);
     onSaveCategory(editingCategory);
     setEditingCategory(null);
   };
@@ -106,6 +109,13 @@ export const CategoriesManager: React.FC<CategoriesManagerProps> = ({
               </button>
             </div>
           </div>
+
+          {formError && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 text-[#B42318] text-xs rounded font-medium flex items-center justify-between">
+              <span>{formError}</span>
+              <button type="button" onClick={() => setFormError(null)} className="text-red-400 hover:text-red-700">✕</button>
+            </div>
+          )}
 
           <div className="space-y-4 max-w-2xl">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

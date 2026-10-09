@@ -39,6 +39,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchInternal, setSearchInternal] = useState('');
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   // Filter published articles for this category
   const categoryArticles = articles.filter(
@@ -417,26 +418,32 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
                 <p className="text-xs text-white/80 leading-relaxed mb-4">
                   Cadastre-se gratuitamente para receber os destaques diários apurados pela nossa redação direto na sua caixa de entrada.
                 </p>
-                <form 
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    alert('Inscrição confirmada na newsletter com sucesso!');
-                  }}
-                  className="space-y-2"
-                >
-                  <input
-                    type="email"
-                    required
-                    placeholder="Seu melhor e-mail"
-                    className="w-full text-xs bg-white text-[#17202A] px-3 py-2.5 rounded focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    className="w-full bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold py-2.5 rounded transition cursor-pointer"
+                {newsletterSubscribed ? (
+                  <div className="p-3 bg-[#16803C]/20 border border-[#22A447] text-white rounded text-xs text-center font-medium">
+                    ✓ Inscrição confirmada na newsletter com sucesso!
+                  </div>
+                ) : (
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      setNewsletterSubscribed(true);
+                    }}
+                    className="space-y-2"
                   >
-                    INSCREVER-SE GRÁTIS
-                  </button>
-                </form>
+                    <input
+                      type="email"
+                      required
+                      placeholder="Seu melhor e-mail"
+                      className="w-full text-xs bg-white text-[#17202A] px-3 py-2.5 rounded focus:outline-none"
+                    />
+                    <button
+                      type="submit"
+                      className="w-full bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold py-2.5 rounded transition cursor-pointer"
+                    >
+                      INSCREVER-SE GRÁTIS
+                    </button>
+                  </form>
+                )}
               </div>
 
             </aside>

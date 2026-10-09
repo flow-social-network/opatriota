@@ -118,6 +118,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   // Modal for requesting corrections
   const [correctionModalOpen, setCorrectionModalOpen] = useState(false);
   const [correctionNotes, setCorrectionNotes] = useState('');
+  const [correctionError, setCorrectionError] = useState<string | null>(null);
   const [targetArticleForCorrection, setTargetArticleForCorrection] = useState<Article | null>(null);
 
   // Feedback banner
@@ -388,6 +389,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   const handleOpenCorrectionModal = (art: Article) => {
     setTargetArticleForCorrection(art);
     setCorrectionNotes('');
+    setCorrectionError(null);
     setCorrectionModalOpen(true);
   };
 
@@ -395,9 +397,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   const handleConfirmCorrection = () => {
     if (!targetArticleForCorrection) return;
     if (!correctionNotes.trim()) {
-      alert('É obrigatório informar as orientações de correção para o repórter.');
+      setCorrectionError('É obrigatório informar as orientações de correção para o repórter.');
       return;
     }
+    setCorrectionError(null);
 
     const updated = articles.map((a) => {
       if (a.id === targetArticleForCorrection.id) {
@@ -1385,6 +1388,13 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
             <p className="text-xs text-[#5D6673]">
               Matéria: <strong>"{targetArticleForCorrection.title}"</strong> (Autor: {targetArticleForCorrection.author})
             </p>
+
+            {correctionError && (
+              <div className="p-2.5 bg-red-50 border border-red-200 text-[#B42318] text-xs rounded font-medium flex items-center justify-between">
+                <span>{correctionError}</span>
+                <button type="button" onClick={() => setCorrectionError(null)} className="text-red-400 hover:text-red-700">✕</button>
+              </div>
+            )}
 
             <div>
               <label className="block text-xs font-bold mb-1 text-[#0B2345]">

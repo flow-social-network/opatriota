@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
-import { RssSource, EditorialQueueItem, DedupStatus, EditorialStatus } from '../types';
+import { RssSource, EditorialQueueItem, DedupStatus, EditorialStatus, PortalSettings } from '../types';
 import { OfficialSourcesHub } from './admin/OfficialSourcesHub';
+import { IdentityManager } from './admin/IdentityManager';
+import { SocialMediaManager } from './admin/SocialMediaManager';
+import { AdsManager } from './admin/AdsManager';
+import { PushNotificationManager } from './admin/PushNotificationManager';
+import { DEFAULT_WEBPUSH_CONFIG } from '../services/siteConfigService';
 import { 
   classifyLeadFactualStatus, 
   isGloboSource, 
@@ -23,7 +28,11 @@ import {
   Trash2,
   ExternalLink,
   ShieldAlert,
-  ShieldCheck
+  ShieldCheck,
+  Palette,
+  Share2,
+  Megaphone,
+  Bell
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -32,6 +41,8 @@ interface AdminDashboardProps {
   onBack: () => void;
   onUpdateSource: (sources: RssSource[]) => void;
   onUpdateQueue: (items: EditorialQueueItem[]) => void;
+  portalSettings: PortalSettings;
+  onSavePortalSettings: (newSettings: PortalSettings) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -39,9 +50,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   queueItems,
   onBack,
   onUpdateSource,
-  onUpdateQueue
+  onUpdateQueue,
+  portalSettings,
+  onSavePortalSettings
 }) => {
-  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'download'>('painel');
+  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download'>('painel');
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
@@ -63,6 +76,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // One-click ZIP generation state
   const [isZipping, setIsZipping] = useState(false);
   const [zipSuccess, setZipSuccess] = useState<string | null>(null);
+  const [zipError, setZipError] = useState<string | null>(null);
 
   // Sync handler
   const handleSyncAll = () => {
@@ -198,6 +212,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleDownloadZip = async (type: 'theme' | 'plugin' | 'both') => {
     setIsZipping(true);
     setZipSuccess(null);
+    setZipError(null);
 
     try {
       const zip = new JSZip();
@@ -244,7 +259,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       setZipSuccess(`Arquivo ${link.download} gerado e baixado com sucesso! Pronto para instalar no WordPress.`);
     } catch (err) {
       setIsZipping(false);
-      alert('Erro ao empacotar arquivo ZIP.');
+      setZipError('Erro ao empacotar arquivo ZIP.');
     }
   };
 
@@ -336,6 +351,46 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           >
             <Layers className="w-4 h-4" />
             <span>Deduplicação (5 Camadas)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('identidade')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'identidade' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+            }`}
+          >
+            <Palette className="w-4 h-4 text-[#0B5FFF]" />
+            <span>Identidade & Logótipos</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('redes')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'redes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+            }`}
+          >
+            <Share2 className="w-4 h-4 text-[#16803C]" />
+            <span>Redes Sociais</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('publicidade')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'publicidade' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+            }`}
+          >
+            <Megaphone className="w-4 h-4 text-[#FFCC29]" />
+            <span>Central de Publicidade</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('push')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'push' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+            }`}
+          >
+            <Bell className="w-4 h-4 text-[#0B5FFF]" />
+            <span>Web Push (FCM)</span>
           </button>
 
           <button
@@ -699,7 +754,65 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         )}
 
-        {/* TAB 5: DOWNLOAD ZIP */}
+        {/* TAB 5: IDENTIDADE & LOGÓTIPOS */}
+        {activeTab === 'identidade' && (
+          <IdentityManager
+            identityConfig={portalSettings.identity}
+            onSaveIdentity={(newIdentity) => {
+              onSavePortalSettings({
+                ...portalSettings,
+                identity: newIdentity
+              });
+            }}
+          />
+        )}
+
+        {/* TAB 6: REDES SOCIAIS */}
+        {activeTab === 'redes' && (
+          <SocialMediaManager
+            socialNetworks={portalSettings.socialNetworks}
+            onSaveSocialNetworks={(newSocials) => {
+              onSavePortalSettings({
+                ...portalSettings,
+                socialNetworks: newSocials
+              });
+            }}
+          />
+        )}
+
+        {/* TAB 7: CENTRAL DE PUBLICIDADE & ADSENSE */}
+        {activeTab === 'publicidade' && (
+          <AdsManager
+            adsenseConfig={portalSettings.adsense}
+            adSlots={portalSettings.adSlots}
+            onSaveAds={(newAdsense, newSlots) => {
+              onSavePortalSettings({
+                ...portalSettings,
+                adsense: newAdsense,
+                adSlots: newSlots
+              });
+            }}
+          />
+        )}
+
+        {/* TAB 8: NOTIFICAÇÕES WEB PUSH (FCM) */}
+        {activeTab === 'push' && (
+          <PushNotificationManager
+            webPushConfig={portalSettings.webPush || DEFAULT_WEBPUSH_CONFIG}
+            onUpdateWebPushConfig={(newWebPush) => {
+              onSavePortalSettings({
+                ...portalSettings,
+                webPush: newWebPush
+              });
+            }}
+            onShowToast={(msg) => {
+              setSyncMessage(msg);
+              setTimeout(() => setSyncMessage(null), 4000);
+            }}
+          />
+        )}
+
+        {/* TAB 9: DOWNLOAD ZIP */}
         {activeTab === 'download' && (
           <div className="bg-white p-8 rounded border border-[#D9DEE7] shadow-xs space-y-6">
             <div>
@@ -719,6 +832,13 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="p-4 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] rounded text-xs flex items-center gap-2 font-semibold">
                 <CheckCircle2 className="w-4 h-4 shrink-0" />
                 <span>{zipSuccess}</span>
+              </div>
+            )}
+
+            {zipError && (
+              <div className="p-4 bg-red-50 border border-red-200 text-[#B42318] rounded text-xs flex items-center gap-2 font-semibold">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{zipError}</span>
               </div>
             )}
 
