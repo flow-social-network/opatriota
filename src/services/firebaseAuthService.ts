@@ -9,7 +9,7 @@ import {
   type Unsubscribe,
 } from 'firebase/auth';
 import type { UserSession } from '../types';
-import { setApiTokenProvider } from './apiClient';
+import { api, setApiTokenProvider } from './apiClient';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -36,13 +36,22 @@ export function observeAuth(callback: (user: UserSession | null) => void): Unsub
     callback(null);
     return () => undefined;
   }
-  return onAuthStateChanged(auth, (user) => callback(user ? mapFirebaseUser(user) : null));
+  return onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      callback(null);
+      return;
+    }
+    void mapAuthenticatedUser(user).then(callback).catch((error) => {
+      console.error('Não foi possível carregar o perfil no backend:', error);
+      callback(mapFirebaseUser(user));
+    });
+  });
 }
 
 export async function signInWithGoogle() {
   if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
   const result = await signInWithPopup(auth, googleProvider);
-  return mapFirebaseUser(result.user);
+  return mapAuthenticatedUser(result.user);
 }
 
 export async function signOutFromFirebase() {
@@ -60,6 +69,31 @@ function mapFirebaseUser(user: FirebaseUser): UserSession {
     bookmarks: [],
     notificationPrefs: { breakingNews: true, dailyBrief: true, factChecks: true, weeklyDigest: true },
     createdAt: user.metadata.creationTime || new Date().toISOString(),
+  };
+}
+
+async function mapAuthenticatedUser(user: FirebaseUser): Promise<UserSession> {
+  const base = mapFirebaseUser(user);
+  const profile = await api.get<{
+    role?: UserSession['role'];
+    name?: string;
+    avatarUrl?: string;
+    phone?: string;
+    bio?: string;
+    subscription?: UserSession['subscription'];
+    bookmarks?: string[];
+    notificationPrefs?: UserSession['notificationPrefs'];
+  }>('/me');
+  return {
+    ...base,
+    name: profile.name || base.name,
+    avatarUrl: profile.avatarUrl || base.avatarUrl,
+    phone: profile.phone,
+    bio: profile.bio,
+    role: profile.role || 'leitor_gratuito',
+    subscription: profile.subscription || base.subscription,
+    bookmarks: profile.bookmarks || base.bookmarks,
+    notificationPrefs: profile.notificationPrefs || base.notificationPrefs,
   };
 }
 
