@@ -139,7 +139,7 @@ export default function App() {
       load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),
     ]);
     return () => { active = false; };
-  }, []);
+  }, [currentUser?.id]);
 
   // Load persistent settings from the centralized portal service on mount
   useEffect(() => {
