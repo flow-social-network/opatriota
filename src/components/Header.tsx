@@ -303,7 +303,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
                 title="Abrir minha conta"
               >
-                {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover" /> : <User className="w-3 h-3" />}
+                <User className="w-3.5 h-3.5" aria-hidden="true" />
                 <span className="truncate max-w-[100px]">{currentUser.name.split(' ')[0]}</span>
                 <ChevronDown className="w-3 h-3" />
               </button>
