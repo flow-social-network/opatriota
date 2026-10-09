@@ -1,11 +1,12 @@
-import { ArticleStatus, UserRole } from "@prisma/client";
+import { ArticleStatus, EditorialRiskLevel, UserRole } from "@prisma/client";
 import { Router } from "express";
 import { prisma } from "../db/prisma.js";
 import { asyncHandler, HttpError, readString } from "../lib/http.js";
 import { requireAuth, requireRole, type AuthUser } from "../middleware/auth.js";
 
 const router = Router();
-const editorialRoles = [UserRole.JOURNALIST, UserRole.EDITOR, UserRole.ADMIN];
+const editorialRoles = [UserRole.JOURNALIST, UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN];
+const approverRoles = [UserRole.REVIEWER, UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN];
 
 router.get("/", asyncHandler(async (req, res) => {
   const page = Math.max(1, Math.min(10000, Number.parseInt(String(req.query.page ?? "1"), 10) || 1));
@@ -48,7 +49,6 @@ router.get("/:slug", asyncHandler(async (req, res) => {
   });
   if (!article) throw new HttpError(404, "ARTICLE_NOT_FOUND", "Article not found");
   if (article.isSubscriberOnly) {
-    // Paid-content enforcement must be connected to the subscription entitlement module before enabling subscriber-only publication.
     throw new HttpError(403, "SUBSCRIPTION_REQUIRED", "This article requires an active subscription");
   }
   res.json({ data: article });
@@ -76,28 +76,145 @@ router.patch("/:id", requireAuth, requireRole(...editorialRoles), asyncHandler(a
   if (user.role === UserRole.JOURNALIST && existing.authorId !== user.id) {
     throw new HttpError(403, "FORBIDDEN", "Journalists may edit only their own articles");
   }
+  if (req.body?.status !== undefined) {
+    throw new HttpError(400, "WORKFLOW_ENDPOINT_REQUIRED", "Use the submit, approve, or publish workflow endpoint to change editorial status");
+  }
 
   const data: Record<string, unknown> = { version: { increment: 1 } };
   if (req.body?.title !== undefined) data.title = readString(req.body.title, "title", 240);
   if (req.body?.body !== undefined) data.body = readString(req.body.body, "body", 100000);
   if (req.body?.excerpt !== undefined) data.excerpt = typeof req.body.excerpt === "string" ? req.body.excerpt.trim().slice(0, 1000) : null;
   if (req.body?.categoryId !== undefined) data.categoryId = req.body.categoryId || null;
-  if (req.body?.status !== undefined) {
-    if (user.role === UserRole.JOURNALIST) throw new HttpError(403, "FORBIDDEN", "Journalists cannot change article publication status");
-    const allowed = [ArticleStatus.DRAFT, ArticleStatus.PITCH, ArticleStatus.IN_REVIEW, ArticleStatus.APPROVED, ArticleStatus.SCHEDULED, ArticleStatus.PUBLISHED, ArticleStatus.ARCHIVED];
-    if (!allowed.includes(req.body.status)) throw new HttpError(400, "VALIDATION_ERROR", "Invalid article status");
-    if (req.body.status === ArticleStatus.PUBLISHED && user.role !== UserRole.EDITOR && user.role !== UserRole.ADMIN) {
-      throw new HttpError(403, "FORBIDDEN", "Only editors and admins can publish articles");
-    }
-    data.status = req.body.status;
-    data.publishedAt = req.body.status === ArticleStatus.PUBLISHED ? new Date() : null;
+
+  const contentChanged = ["title", "body", "excerpt", "categoryId"].some((key) => req.body?.[key] !== undefined);
+  if (contentChanged && [ArticleStatus.APPROVED, ArticleStatus.SCHEDULED, ArticleStatus.PUBLISHED].includes(existing.status)) {
+    // Any content edit invalidates approval and removes the old public version until re-review.
+    data.status = ArticleStatus.DRAFT;
+    data.publishedAt = null;
+    data.scheduledAt = null;
+    data.humanApprovedAt = null;
+    data.humanApprovedById = null;
   }
+
   const article = await prisma.article.update({
     where: { id: existing.id },
     data: data as never,
     select: { id: true, title: true, slug: true, status: true, version: true, updatedAt: true },
   });
   res.json({ data: article });
+}));
+
+router.post("/:id/submit", requireAuth, requireRole(...editorialRoles), asyncHandler(async (req, res) => {
+  const user = res.locals.user as AuthUser;
+  const article = await prisma.article.findUnique({ where: { id: req.params.id } });
+  if (!article) throw new HttpError(404, "ARTICLE_NOT_FOUND", "Article not found");
+  if (user.role === UserRole.JOURNALIST && article.authorId !== user.id) {
+    throw new HttpError(403, "FORBIDDEN", "Journalists may submit only their own articles");
+  }
+  if (![ArticleStatus.DRAFT, ArticleStatus.PITCH, ArticleStatus.CHANGES_REQUESTED].includes(article.status)) {
+    throw new HttpError(409, "INVALID_EDITORIAL_STATE", "Only drafts or articles requiring changes can be submitted");
+  }
+
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.article.update({
+      where: { id: article.id },
+      data: { status: ArticleStatus.IN_REVIEW, humanApprovedAt: null, humanApprovedById: null, version: { increment: 1 } },
+      select: { id: true, title: true, status: true, authorId: true, updatedAt: true },
+    });
+    await tx.auditEvent.create({
+      data: { actorId: user.id, action: "ARTICLE_SUBMITTED_FOR_REVIEW", entityType: "Article", entityId: article.id, metadata: { fromStatus: article.status, toStatus: ArticleStatus.IN_REVIEW } },
+    });
+    return result;
+  });
+  res.status(200).json({ data: updated, notification: { required: true, recipient: "EDITORIAL_APPROVER", delivery: "NOT_CONFIGURED" } });
+}));
+
+router.post("/:id/approve", requireAuth, requireRole(...approverRoles), asyncHandler(async (req, res) => {
+  const user = res.locals.user as AuthUser;
+  const decision = req.body?.decision;
+  const riskLevel = req.body?.riskLevel;
+  const notes = typeof req.body?.notes === "string" ? req.body.notes.trim().slice(0, 10000) : null;
+  const riskNotes = typeof req.body?.riskNotes === "string" ? req.body.riskNotes.trim().slice(0, 10000) : null;
+
+  if (!["APPROVE", "REQUEST_CHANGES", "REJECT"].includes(decision)) {
+    throw new HttpError(400, "VALIDATION_ERROR", "decision must be APPROVE, REQUEST_CHANGES or REJECT");
+  }
+  if (!Object.values(EditorialRiskLevel).includes(riskLevel)) {
+    throw new HttpError(400, "VALIDATION_ERROR", "riskLevel must be LOW, MEDIUM, HIGH or CRITICAL");
+  }
+
+  const article = await prisma.article.findUnique({ where: { id: req.params.id } });
+  if (!article) throw new HttpError(404, "ARTICLE_NOT_FOUND", "Article not found");
+  if (article.status !== ArticleStatus.IN_REVIEW) {
+    throw new HttpError(409, "INVALID_EDITORIAL_STATE", "Only articles in review can receive a human decision");
+  }
+  const selfApproval = article.authorId === user.id;
+  if (selfApproval && user.role !== UserRole.ADMIN && user.role !== UserRole.CHIEF_EDITOR) {
+    throw new HttpError(403, "SELF_APPROVAL_FORBIDDEN", "Authors cannot approve their own articles unless they are the designated chief editor or administrator");
+  }
+  if (riskLevel === EditorialRiskLevel.CRITICAL && decision === "APPROVE" && !notes) {
+    throw new HttpError(400, "RISK_NOTES_REQUIRED", "Critical-risk approvals require documented human review notes");
+  }
+
+  const nextStatus = decision === "APPROVE"
+    ? ArticleStatus.APPROVED
+    : decision === "REQUEST_CHANGES"
+      ? ArticleStatus.CHANGES_REQUESTED
+      : ArticleStatus.REJECTED;
+  const now = new Date();
+
+  const result = await prisma.$transaction(async (tx) => {
+    const updated = await tx.article.update({
+      where: { id: article.id },
+      data: {
+        status: nextStatus,
+        riskLevel,
+        riskAssessment: { source: "human_review", riskLevel, riskNotes, notes, reviewerId: user.id, reviewedAt: now.toISOString() },
+        humanApprovedAt: decision === "APPROVE" ? now : null,
+        humanApprovedById: decision === "APPROVE" ? user.id : null,
+        publishedAt: null,
+        scheduledAt: null,
+        version: { increment: 1 },
+      },
+      select: { id: true, title: true, slug: true, status: true, riskLevel: true, humanApprovedAt: true, humanApprovedById: true, updatedAt: true },
+    });
+    await tx.articleReview.create({
+      data: { articleId: article.id, reviewerId: user.id, decision, riskLevel, riskNotes, notes, isSelfApproval: selfApproval },
+    });
+    await tx.auditEvent.create({
+      data: {
+        actorId: user.id,
+        action: decision === "APPROVE" ? "ARTICLE_HUMAN_APPROVED" : decision === "REQUEST_CHANGES" ? "ARTICLE_CHANGES_REQUESTED" : "ARTICLE_REJECTED",
+        entityType: "Article",
+        entityId: article.id,
+        metadata: { decision, riskLevel, selfApproval, previousStatus: article.status, nextStatus },
+      },
+    });
+    return updated;
+  });
+  res.status(200).json({ data: result, public: false, nextAction: decision === "APPROVE" ? "SCHEDULE_OR_PUBLISH_SEPARATELY" : "AUTHOR_ACTION_REQUIRED" });
+}));
+
+router.post("/:id/publish", requireAuth, requireRole(UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN), asyncHandler(async (req, res) => {
+  const user = res.locals.user as AuthUser;
+  const article = await prisma.article.findUnique({ where: { id: req.params.id } });
+  if (!article) throw new HttpError(404, "ARTICLE_NOT_FOUND", "Article not found");
+  if (article.status !== ArticleStatus.APPROVED || !article.humanApprovedAt || !article.humanApprovedById) {
+    throw new HttpError(409, "HUMAN_APPROVAL_REQUIRED", "Only explicitly human-approved articles can be published");
+  }
+  const now = new Date();
+  const published = await prisma.$transaction(async (tx) => {
+    const result = await tx.article.update({
+      where: { id: article.id },
+      data: { status: ArticleStatus.PUBLISHED, publishedAt: now, version: { increment: 1 } },
+      select: { id: true, title: true, slug: true, status: true, publishedAt: true, version: true },
+    });
+    await tx.auditEvent.create({
+      data: { actorId: user.id, action: "ARTICLE_PUBLISHED", entityType: "Article", entityId: article.id, metadata: { humanApprovedById: article.humanApprovedById, humanApprovedAt: article.humanApprovedAt.toISOString() } },
+    });
+    return result;
+  });
+  res.status(200).json({ data: published });
 }));
 
 export default router;
