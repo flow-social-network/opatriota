@@ -322,7 +322,7 @@ export const Header: React.FC<HeaderProps> = ({
       <BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} />
 
       {/* 2. GRAND BRANDING BANNER */}
-      <div className="py-3 sm:py-4 px-4 bg-white border-b border-[#D9DEE7]">
+      <div className="py-2 sm:py-2.5 px-4 bg-white border-b border-[#D9DEE7]">
         <div className="max-w-[1360px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
           {/* Left Column: Quote */}
           <div className="hidden lg:flex lg:col-span-3 flex-col justify-center">
