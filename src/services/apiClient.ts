@@ -1,6 +1,6 @@
 /**
  * Cliente HTTP único do frontend O PATRIOTA.
- * O frontend nunca deve simular persistência: falhas da API são devolvidas ao chamador.
+ * O frontend não simula persistência: falhas da API são devolvidas ao chamador.
  */
 export class ApiError extends Error {
   readonly status: number;
@@ -17,11 +17,10 @@ export class ApiError extends Error {
 }
 
 type TokenProvider = () => Promise<string | null>;
-
 let tokenProvider: TokenProvider = async () => null;
 
 const configuredBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
-export const API_BASE_URL = configuredBaseUrl.replace(/\/$/, '');
+export const API_BASE_URL = configuredBaseUrl.replace(/\/+$/, '');
 
 export function setApiTokenProvider(provider: TokenProvider) {
   tokenProvider = provider;
@@ -45,13 +44,16 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   const normalizedPath = path.startsWith('/') ? path : `/${path}`;
   const controller = new AbortController();
   const timeoutMs = options.timeoutMs ?? 15000;
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
   const headers = new Headers(options.headers);
   headers.set('Accept', 'application/json');
 
   let body: BodyInit | undefined;
   if (options.body !== undefined) {
-    if (options.body instanceof FormData || options.body instanceof Blob || typeof options.body === 'string') {
+    if (
+      (typeof FormData !== 'undefined' && options.body instanceof FormData) ||
+      (typeof Blob !== 'undefined' && options.body instanceof Blob) ||
+      typeof options.body === 'string'
+    ) {
       body = options.body as BodyInit;
     } else {
       headers.set('Content-Type', 'application/json');
@@ -59,18 +61,29 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     }
   }
 
-  if (options.auth !== false) {
-    const token = await tokenProvider();
-    if (token) headers.set('Authorization', `Bearer ${token}`);
-  }
+  const abortFromCaller = () => controller.abort(options.signal?.reason);
+  if (options.signal?.aborted) abortFromCaller();
+  else options.signal?.addEventListener('abort', abortFromCaller, { once: true });
+
+  const timeout = setTimeout(() => controller.abort(new DOMException('Request timed out', 'TimeoutError')), timeoutMs);
 
   try {
+    if (options.auth !== false) {
+      const token = await tokenProvider();
+      if (token) headers.set('Authorization', `Bearer ${token}`);
+      else headers.delete('Authorization');
+    } else {
+      headers.delete('Authorization');
+    }
+
+    const { auth: _auth, timeoutMs: _timeoutMs, signal: _signal, ...requestInit } = options;
     const response = await fetch(`${API_BASE_URL}${normalizedPath}`, {
-      ...options,
+      ...requestInit,
       headers,
       body,
-      signal: options.signal ?? controller.signal,
+      signal: controller.signal,
     });
+
     if (response.status === 204) {
       if (!response.ok) throw new ApiError('A API recusou o pedido.', response.status);
       return undefined as T;
@@ -94,12 +107,22 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
     return payload as T;
   } catch (error) {
     if (error instanceof ApiError) throw error;
-    if (error instanceof DOMException && error.name === 'AbortError') {
-      throw new ApiError('O pedido expirou ou foi cancelado.', 408, 'REQUEST_TIMEOUT');
+    if (controller.signal.aborted) {
+      const timedOut = controller.signal.reason instanceof DOMException &&
+        (controller.signal.reason.name === 'TimeoutError' || controller.signal.reason.name === 'AbortError') &&
+        !options.signal?.aborted;
+      if (timedOut) throw new ApiError('O pedido expirou. Tente novamente.', 408, 'REQUEST_TIMEOUT');
+      throw new ApiError('O pedido foi cancelado.', 499, 'REQUEST_ABORTED');
     }
-    throw new ApiError('Não foi possível contactar a API. Verifique a ligação e tente novamente.', 0, 'NETWORK_ERROR', error);
+    throw new ApiError(
+      'Não foi possível contactar a API. Verifique a ligação e tente novamente.',
+      0,
+      'NETWORK_ERROR',
+      error,
+    );
   } finally {
     clearTimeout(timeout);
+    options.signal?.removeEventListener('abort', abortFromCaller);
   }
 }
 
