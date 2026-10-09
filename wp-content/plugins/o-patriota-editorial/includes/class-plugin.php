@@ -45,6 +45,9 @@ class O_Patriota_Plugin {
 		// Inicializar gestor automático de editorias e categorias
 		O_Patriota_Category_Manager::init();
 
+		// Inicializar API REST e módulo meteorológico dinâmico
+		O_Patriota_Weather_Api::init();
+
 		// Agendador de sincronização
 		add_action( 'o_patriota_cron_poll_sources', array( $this, 'execute_scheduled_poll' ) );
 

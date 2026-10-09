@@ -38,6 +38,17 @@ function o_patriota_enqueue_assets() {
 			true
 		);
 	}
+
+	// Módulo meteorológico dinâmico das 27 capitais (Open-Meteo & INMET)
+	if ( file_exists( get_template_directory() . '/assets/js/weather.js' ) ) {
+		wp_enqueue_script(
+			'o-patriota-weather',
+			get_template_directory_uri() . '/assets/js/weather.js',
+			array(),
+			O_PATRIOTA_VERSION,
+			true
+		);
+	}
 }
 add_action( 'wp_enqueue_scripts', 'o_patriota_enqueue_assets' );
 

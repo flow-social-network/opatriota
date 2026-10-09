@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Logo } from './Logo';
 import { CategorySlug, UserSession } from '../types';
 import { 
@@ -24,7 +24,9 @@ import {
 import { 
   CapitalWeather, 
   BRAZIL_CAPITALS_WEATHER, 
-  OFFICIAL_INMET_URL 
+  OFFICIAL_INMET_URL,
+  fetchLiveCapitalWeather,
+  getSyncStateMeta
 } from '../data/weatherData';
 import { WeatherCapitalsModal } from './weather/WeatherCapitalsModal';
 import { WeatherBar } from './weather/WeatherBar';
@@ -59,6 +61,19 @@ export const Header: React.FC<HeaderProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(BRAZIL_CAPITALS_WEATHER[0]);
+
+  // Automatically sync live weather for initial capital on mount
+  useEffect(() => {
+    let isMounted = true;
+    fetchLiveCapitalWeather(BRAZIL_CAPITALS_WEATHER[0]).then((result) => {
+      if (isMounted && result.isSuccess && result.updatedCapital) {
+        setSelectedCapital(result.updatedCapital);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const navItems: { label: string; slug: CategorySlug; hasSubmenu?: boolean }[] = [
     { label: 'INÍCIO', slug: 'todos' },
@@ -110,12 +125,17 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-semibold text-[#17202A]">Brasília, 8 de outubro de 2026</span>
             <span className="text-[#D9DEE7] hidden sm:inline">|</span>
 
-            {/* DYNAMIC WEATHER PILL (INMET - portal.inmet.gov.br) */}
+            {/* DYNAMIC WEATHER PILL (Open-Meteo live / INMET stations reference) */}
             <button
               onClick={() => handleOpenWeather(selectedCapital.id)}
               className="group flex items-center gap-1.5 font-medium text-[#17202A] hover:text-[#0B5FFF] bg-white hover:bg-[#F0F5FF] border border-[#D9DEE7] hover:border-[#0B5FFF] px-2 py-0.5 rounded transition cursor-pointer shadow-2xs"
-              title="Ver previsão completa das 27 capitais brasileiras (Fonte: INMET)"
+              title={`Previsão de ${selectedCapital.fullName} • ${selectedCapital.syncState === 'live' ? 'Tempo real via Open-Meteo' : 'Cache local preservado'} • Estação INMET: ${selectedCapital.inmetStationCode}`}
             >
+              <span 
+                className="w-1.5 h-1.5 rounded-full shrink-0" 
+                style={{ backgroundColor: getSyncStateMeta(selectedCapital.syncState).indicatorColor }}
+                title={`Estado: ${getSyncStateMeta(selectedCapital.syncState).label}`}
+              />
               <span className="font-bold">{selectedCapital.name} ({selectedCapital.uf})</span>
               {renderWeatherIcon(selectedCapital.code)}
               <span className="font-black text-[#0B2345]">{selectedCapital.temp}°C</span>

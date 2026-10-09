@@ -6,7 +6,19 @@
       <div class="flex items-center gap-4">
         <span class="font-medium text-[#17202A]"><?php echo date_i18n('l, j \d\e F \d\e Y'); ?></span>
         <span>•</span>
-        <span>Brasília - DF 24°C Céu claro</span>
+        <!-- Dynamic Weather Bar Widget (FSE & REST API) -->
+        <div id="patriota-weather-widget" class="patriota-weather-widget flex items-center gap-2" data-source="open-meteo" data-reference="inmet">
+          <a href="https://portal.inmet.gov.br/" target="_blank" rel="noopener noreferrer" class="weather-inmet-badge bg-[#16803C] hover:bg-[#22A447] text-white text-[9px] font-black px-1.5 py-0.5 rounded tracking-wider flex items-center gap-1" title="Portal Oficial INMET — Referência Institucional de Estações">
+            <span>INMET</span>
+            <span class="text-[8px]">↗</span>
+          </a>
+          <button id="patriota-weather-pill" class="patriota-weather-pill flex items-center gap-1.5 bg-white hover:bg-[#F0F5FF] border border-[#D9DEE7] hover:border-[#0B5FFF] px-2 py-0.5 rounded text-xs text-[#17202A] transition cursor-pointer" title="Clique para ver previsão completa das 27 capitais">
+            <span id="weather-status-dot" class="w-1.5 h-1.5 rounded-full bg-amber-400" title="Sincronizando..."></span>
+            <span id="weather-city-label" class="font-bold">Brasília (DF)</span>
+            <span id="weather-temp-label" class="font-black text-[#0B2345]">--°C</span>
+            <span id="weather-condition-label" class="text-[#5D6673] hidden sm:inline text-[11px]">Sincronizando...</span>
+          </button>
+        </div>
       </div>
       <div class="flex items-center gap-6">
         <div class="social-icons flex items-center gap-3">
@@ -46,6 +58,32 @@
           APOIE O JORNAL
         </a>
       </div>
+    </div>
+  </div>
+
+  <!-- Weather Bar Ticker for 27 Capitals (Dynamic FSE Integration) -->
+  <div id="patriota-weather-ticker-bar" class="weather-ticker-bar bg-[#0B2345] text-white text-xs py-1.5 px-4 border-b border-[#07172E]">
+    <div class="max-w-[1360px] mx-auto flex items-center justify-between gap-3 overflow-hidden">
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="https://portal.inmet.gov.br/" target="_blank" rel="noopener noreferrer" class="bg-[#16803C] hover:bg-[#22A447] text-white font-black text-[10px] px-2 py-0.5 rounded flex items-center gap-1" title="Portal Oficial do INMET — Referência Institucional">
+          <span>INMET</span>
+          <span class="text-[8px]">↗</span>
+        </a>
+        <button id="weather-ticker-title-btn" class="text-[11px] font-bold text-[#FFCC29] hover:underline cursor-pointer">
+          PREVISÃO DAS CAPITAIS:
+        </button>
+        <span id="weather-ticker-sync-badge" class="hidden md:inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-[#FFCC29]">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#22A447] animate-pulse"></span>
+          <span>Tempo Real (Open-Meteo)</span>
+        </span>
+      </div>
+      <div id="weather-ticker-list" class="flex items-center gap-3.5 overflow-x-auto no-scrollbar text-[11px] py-0.5">
+        <span class="text-white/60">Carregando previsão das 27 capitais...</span>
+      </div>
+      <button id="weather-view-all-modal-btn" class="shrink-0 text-[11px] font-bold text-white/90 hover:underline flex items-center gap-1 pl-2 border-l border-white/20 hidden sm:flex cursor-pointer">
+        <span>Todas as 27</span>
+        <span class="text-[10px]">↗</span>
+      </button>
     </div>
   </div>
 </header>

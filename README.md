@@ -50,7 +50,7 @@ O PATRIOTA é um portal digital de notícias de cobertura nacional, estruturado 
    - Rodapé institucional patriótico com 4 pilares: Notícia, Análise, Opinião, Brasil.
 
 2. **Engenharia Editorial & Serviços Cívicos**:
-   - **Previsão do Tempo Dinâmica das 27 Capitais**: Integração direta com a base meteorológica oficial do **INMET (Instituto Nacional de Meteorologia — [portal.inmet.gov.br](https://portal.inmet.gov.br/))**, cobrindo todas as capitais das 5 regiões com temperatura ao vivo, mínima/máxima, umidade, vento, pressão atmosférica, índice UV e projeção para 4 dias.
+   - **Previsão do Tempo Dinâmica das 27 Capitais**: Monitoramento meteorológico de todas as capitais das 5 regiões brasileiras. Os dados dinâmicos em tempo real são processados via modelos numéricos abertos (**Open-Meteo API — WMO / ECMWF**), enquanto os identificadores e coordenadas têm como referência cadastral a rede oficial do **INMET (Instituto Nacional de Meteorologia — [portal.inmet.gov.br](https://portal.inmet.gov.br/))** mantida como utilidade pública institucional. Conta com 6 estados explícitos de sincronização (`live`, `cached`, `loading`, `source_unavailable`, `data_unavailable`, `error`), preservação estrita de timestamps em caso de falha externa, projeção estendida de 4 dias e endpoint REST dedicado no WordPress (`/wp-json/o-patriota/v1/weather/capitals`) com rate limiting e cache transitório.
    - Central de fontes com proteção contra SSRF e injeção XXE.
    - Motor de deduplicação em 5 camadas com algoritmo fonético e similaridade textual.
    - Fluxo de trabalho que garante a **publicação humana obrigatória**.
@@ -84,4 +84,20 @@ No ambiente da aplicação, o acesso pode ser verificado através das credenciai
 3. **Assinante Digital**:
    - E-mail: `mariana.duarte@exemplo.com.br`
    - Acesso liberado aos dossiês exclusivos e réplicas digitais em `/minha-conta`.
+
+---
+
+## ⛅ Previsão do Tempo Dinâmica das Capitais do Brasil (Fonte Oficial: INMET)
+
+O portal integra um módulo de **Previsão Meteorológica Oficial** para todas as 27 capitais brasileiras com base no **Instituto Nacional de Meteorologia (INMET)**:
+
+- **Fonte Oficial:** [INMET — Instituto Nacional de Meteorologia (portal.inmet.gov.br)](https://portal.inmet.gov.br/)
+- **Elementos na Interface:**
+  1. **Weather Pill no Topo:** Exibe a capital selecionada, temperatura atual, condição do tempo e selo oficial do INMET.
+  2. **Barra de Capitais (Ticker):** Carrossel horizontal dinâmico com navegação e status climático de capitais de todas as cinco regiões (Centro-Oeste, Sudeste, Sul, Nordeste e Norte).
+  3. **Central Meteorológica das 27 Capitais (Modal/Painel):**
+     - Busca instantânea e filtro por macrorregiões.
+     - Detalhamento de umidade relativa do ar, velocidade do vento, pressão atmosférica e sensação térmica.
+     - Previsão estendida de 4 dias por capital.
+     - Botão de sincronização em tempo real e link direto para o portal oficial do INMET (`https://portal.inmet.gov.br/`).
 
