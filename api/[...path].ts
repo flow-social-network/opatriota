@@ -65,6 +65,28 @@ export default async function handler(req: Req, res: Res) {
       throw new Error('Invalid Firebase ID token');
     });
 
+    if (path === 'me' && method === 'PATCH') {
+      if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
+      const body = cleanObject(await readBody(req));
+      const current = await firestoreGet('userProfiles', identity.uid) || {};
+      const next: Record<string, unknown> = { ...current, id: identity.uid, email: identity.email, updatedAt: new Date().toISOString() };
+      if (body.name !== undefined) {
+        const name = String(body.name).trim().slice(0, 120);
+        if (name.length < 2) return json(res, 400, { error: 'INVALID_PROFILE_NAME', message: 'Informe um nome válido.' });
+        next.name = name;
+      }
+      if (body.phone !== undefined) next.phone = String(body.phone).trim().slice(0, 40);
+      if (body.bio !== undefined) next.bio = String(body.bio).trim().slice(0, 1000);
+      if (body.notificationPrefs && typeof body.notificationPrefs === 'object') {
+        const prefs = cleanObject(body.notificationPrefs);
+        next.notificationPrefs = {
+          breakingNews: Boolean(prefs.breakingNews), dailyBrief: Boolean(prefs.dailyBrief),
+          factChecks: Boolean(prefs.factChecks), weeklyDigest: Boolean(prefs.weeklyDigest)
+        };
+      }
+      await firestoreWrite('userProfiles', identity.uid, next);
+      return json(res, 200, { ...next, role: identity.role });
+    }
     if (path === 'me' && method === 'GET') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       const profile = await firestoreGet('userProfiles', identity.uid);
@@ -80,6 +102,19 @@ export default async function handler(req: Req, res: Res) {
       const bookmarks = Array.isArray(body.bookmarks) ? [...new Set(body.bookmarks.filter((id: unknown) => typeof id === 'string').slice(0, 2000))] : [];
       await firestoreWrite('userBookmarks', identity.uid, { bookmarks, updatedAt: new Date().toISOString() });
       return json(res, 200, { bookmarks });
+    }
+    if (path === 'me/payments' && method === 'GET') {
+      if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
+      const orders = await firestoreList('checkoutOrders');
+      const payments = orders.filter(order => order.uid === identity!.uid).map(order => ({
+        id: String(order.orderId || order.id),
+        date: String(order.createdAt || ''),
+        amount: Number(order.amount || 0),
+        planName: String(order.planName || order.planId || 'Assinatura'),
+        status: order.status === 'approved' ? 'concluido' : order.status === 'refunded' ? 'reembolsado' : 'processando',
+        invoiceNumber: String(order.orderId || order.id)
+      }));
+      return json(res, 200, payments);
     }
     if (path === 'me/subscription' && method === 'GET') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
