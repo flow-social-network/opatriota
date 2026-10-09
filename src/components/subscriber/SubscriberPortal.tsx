@@ -32,6 +32,7 @@ interface SubscriberPortalProps {
   currentUser: UserSession | null;
   onLogin: (user: UserSession) => void;
   onGoogleLogin: () => Promise<void> | void;
+  onFacebookLogin: () => Promise<void> | void;
   onLogout: () => void;
   onBackToHome: () => void;
   articles: Article[];
@@ -43,6 +44,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
   currentUser,
   onLogin,
   onGoogleLogin,
+  onFacebookLogin,
   onLogout,
   onBackToHome,
   articles,
@@ -285,7 +287,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
             Entre gratuitamente com sua conta Google para salvar matérias e acessar os conteúdos disponíveis. Você poderá escolher um plano depois.
           </p>
         </div>
-        <AuthModal onClose={onBackToHome} onGoogleLogin={onGoogleLogin} />
+        <AuthModal onClose={onBackToHome} onGoogleLogin={onGoogleLogin} onFacebookLogin={onFacebookLogin} />
       </div>
     );
   }
