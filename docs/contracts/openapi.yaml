@@ -1,0 +1,380 @@
+openapi: 3.1.0
+info:
+  title: O Patriota Brasil API
+  version: 1.0.0-draft
+  description: Contrato-alvo preparatório. Rotas descritas podem ainda não estar implementadas.
+servers:
+  - url: https://api.example.invalid
+    description: Placeholder; substituir pelo domínio real no momento da configuração.
+security:
+  - FirebaseBearer: []
+paths:
+  /health/live:
+    get:
+      security: []
+      summary: Liveness
+      responses:
+        "200":
+          description: Processo vivo
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [status]
+                properties:
+                  status: { const: ok }
+  /health/ready:
+    get:
+      security: []
+      summary: Readiness
+      responses:
+        "200": { description: Dependências disponíveis }
+        "503": { $ref: "#/components/responses/ServiceUnavailable" }
+  /api/auth/me:
+    get:
+      summary: Perfil e permissões do utilizador autenticado
+      responses:
+        "200":
+          description: Perfil interno
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/CurrentUser" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/auth/sync:
+    post:
+      summary: Sincronizar identidade Firebase com perfil interno
+      description: Cria o perfil com papel READER; nunca aceita papel do cliente.
+      responses:
+        "200":
+          description: Perfil sincronizado
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/CurrentUser" }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+  /api/articles:
+    get:
+      security: []
+      summary: Listar matérias publicadas
+      parameters:
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1, default: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 50, default: 20 }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        "200":
+          description: Página de matérias públicas
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data, pagination]
+                properties:
+                  data:
+                    type: array
+                    items: { $ref: "#/components/schemas/ArticleSummary" }
+                  pagination: { $ref: "#/components/schemas/Pagination" }
+    post:
+      summary: Criar rascunho editorial
+      description: Requer JOURNALIST, EDITOR ou ADMIN. O backend define authorId pelo utilizador autenticado.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArticleCreate" }
+      responses:
+        "201": { description: Rascunho criado }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "422": { $ref: "#/components/responses/ValidationError" }
+  /api/articles/{slug}:
+    get:
+      security: []
+      summary: Obter matéria publicada
+      parameters:
+        - in: path
+          name: slug
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Matéria publicada
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data: { $ref: "#/components/schemas/Article" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/articles/{id}:
+    patch:
+      summary: Atualizar matéria autorizada
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+        - in: header
+          name: If-Match
+          required: false
+          description: Versão otimista opcional para evitar sobrescrita concorrente.
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ArticlePatch" }
+      responses:
+        "200": { description: Matéria atualizada }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "409": { description: Conflito de versão }
+  /api/articles/{id}/submit:
+    post:
+      summary: Submeter matéria para revisão
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Matéria submetida }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/articles/{id}/reviews:
+    post:
+      summary: Registar decisão editorial
+      description: Requer REVIEWER, EDITOR, CHIEF_EDITOR ou ADMIN conforme política.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewCreate" }
+      responses:
+        "201": { description: Revisão registada }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/articles/{id}/publish:
+    post:
+      summary: Publicar matéria aprovada
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Matéria publicada e evento auditado }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: Matéria não aprovada ou estado inválido }
+  /api/social/oauth/meta/start:
+    get:
+      summary: Iniciar autorização Meta
+      description: Apenas administrador autorizado; deve gerar state anti-CSRF.
+      responses:
+        "302": { description: Redirecionamento para consentimento Meta }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/social/oauth/meta/callback:
+    get:
+      security: []
+      summary: Callback OAuth Meta
+      parameters:
+        - in: query
+          name: code
+          schema: { type: string }
+        - in: query
+          name: state
+          required: true
+          schema: { type: string }
+        - in: query
+          name: error
+          schema: { type: string }
+      responses:
+        "302": { description: Retorno para o painel após validação e troca server-side }
+        "400": { description: State inválido ou autorização recusada }
+  /api/social/publications:
+    post:
+      summary: Agendar publicação social
+      description: Apenas matéria aprovada; token nunca é devolvido.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/SocialPublicationCreate" }
+      responses:
+        "202": { description: Publicação agendada }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: Matéria não aprovada ou duplicação idempotente }
+  /api/social/publications/{id}:
+    get:
+      summary: Consultar estado de publicação social
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Estado sanitizado da publicação }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/admin/social/pause:
+    post:
+      summary: Pausar ou retomar publicações sociais
+      description: Operação auditada, apenas ADMIN/CHIEF_EDITOR.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [paused]
+              properties:
+                paused: { type: boolean }
+                reason: { type: string, maxLength: 500 }
+      responses:
+        "200": { description: Estado atualizado }
+        "403": { $ref: "#/components/responses/Forbidden" }
+components:
+  securitySchemes:
+    FirebaseBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: Firebase ID Token
+  schemas:
+    CurrentUser:
+      type: object
+      required: [id, firebaseUid, email, displayName, role, disabled]
+      properties:
+        id: { type: string }
+        firebaseUid: { type: string }
+        email: { type: string, format: email }
+        displayName: { type: string, maxLength: 100 }
+        role:
+          type: string
+          enum: [READER, JOURNALIST, REVIEWER, EDITOR, CHIEF_EDITOR, ADMIN]
+        disabled: { type: boolean }
+        permissions:
+          type: array
+          items: { type: string }
+    ArticleSummary:
+      type: object
+      required: [id, slug, title, publishedAt]
+      properties:
+        id: { type: string }
+        slug: { type: string, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$' }
+        title: { type: string, maxLength: 240 }
+        excerpt: { type: [string, "null"], maxLength: 1000 }
+        heroImageUrl: { type: [string, "null"], format: uri }
+        publishedAt: { type: string, format: date-time }
+        category: { type: [object, "null"] }
+    Article:
+      allOf:
+        - $ref: "#/components/schemas/ArticleSummary"
+        - type: object
+          properties:
+            body: { type: string }
+            sources:
+              type: array
+              items:
+                type: object
+                required: [name, url]
+                properties:
+                  name: { type: string }
+                  url: { type: string, format: uri }
+            isSubscriberOnly: { type: boolean }
+    ArticleCreate:
+      type: object
+      required: [title, slug, body]
+      additionalProperties: false
+      properties:
+        title: { type: string, minLength: 1, maxLength: 240 }
+        slug: { type: string, pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$', maxLength: 240 }
+        body: { type: string, minLength: 1, maxLength: 100000 }
+        excerpt: { type: [string, "null"], maxLength: 1000 }
+        categoryId: { type: [string, "null"] }
+    ArticlePatch:
+      type: object
+      minProperties: 1
+      additionalProperties: false
+      properties:
+        title: { type: string, minLength: 1, maxLength: 240 }
+        body: { type: string, minLength: 1, maxLength: 100000 }
+        excerpt: { type: [string, "null"], maxLength: 1000 }
+        categoryId: { type: [string, "null"] }
+    ReviewCreate:
+      type: object
+      required: [decision]
+      additionalProperties: false
+      properties:
+        decision: { type: string, enum: [APPROVE, REQUEST_CHANGES, REJECT] }
+        notes: { type: [string, "null"], maxLength: 10000 }
+    SocialPublicationCreate:
+      type: object
+      required: [articleId, channel, scheduledAt, idempotencyKey]
+      additionalProperties: false
+      properties:
+        articleId: { type: string }
+        channel: { type: string, enum: [FACEBOOK_PAGE, INSTAGRAM_PROFESSIONAL] }
+        scheduledAt: { type: string, format: date-time }
+        idempotencyKey: { type: string, minLength: 16, maxLength: 128 }
+        captionOverride: { type: [string, "null"], maxLength: 5000 }
+    Pagination:
+      type: object
+      required: [page, pageSize, total, pages]
+      properties:
+        page: { type: integer, minimum: 1 }
+        pageSize: { type: integer, minimum: 1, maximum: 50 }
+        total: { type: integer, minimum: 0 }
+        pages: { type: integer, minimum: 0 }
+    ApiError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, requestId]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            requestId: { type: string }
+  responses:
+    Unauthorized:
+      description: Token ausente, inválido ou expirado
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
+    Forbidden:
+      description: Utilizador autenticado sem permissão
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
+    ValidationError:
+      description: Payload inválido
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
+    ServiceUnavailable:
+      description: Dependência indisponível
+      content:
+        application/json:
+          schema: { $ref: "#/components/schemas/ApiError" }
