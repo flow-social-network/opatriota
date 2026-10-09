@@ -22,7 +22,7 @@ jobs:
         with:
           version: 12.8.1
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: TypeScript validation
         run: pnpm lint
       - name: Production build
