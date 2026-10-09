@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   Activity, BookOpen, Boxes, ChartNoAxesCombined, CircleDollarSign, Database, FileClock,
   HardDrive, LayoutDashboard, Link2, LockKeyhole, LogOut, Menu, MessageSquareText,
-  Search, Settings, ShieldCheck, Users, X, RefreshCw, AlertTriangle, CheckCircle2,
+  Search, Settings, ShieldCheck, Users, X, RefreshCw, AlertTriangle,
   ExternalLink, Bot, CreditCard, Globe, Image, Mail, Server, SlidersHorizontal
 } from 'lucide-react';
 
@@ -47,7 +47,6 @@ export const AdminConsole: React.FC<{ onBack: () => void; onLogout: () => void }
   const [knowledgeQuestion, setKnowledgeQuestion] = useState('');
   const [knowledgeAnswer, setKnowledgeAnswer] = useState('');
   const [knowledgeBusy, setKnowledgeBusy] = useState(false);
-  const [notice, setNotice] = useState('');
   const [settings, setSettings] = useState({ portalName: 'O Patriota Brasil', timezone: 'America/Sao_Paulo', language: 'pt-BR', maintenance: false });
   const [maintenanceSaved, setMaintenanceSaved] = useState(false);
 
@@ -156,7 +155,7 @@ export const AdminConsole: React.FC<{ onBack: () => void; onLogout: () => void }
         {[...new Set(visibleSections.map(s=>s.group))].map(group=><div key={group} className="mb-4"><p className="px-3 pb-2 text-[10px] font-extrabold uppercase tracking-widest text-slate-400">{group}</p><nav className="space-y-1">{visibleSections.filter(s=>s.group===group).map(s=>{const Icon=s.icon;return <button key={s.id} onClick={()=>{setActive(s.id);setSidebarOpen(false);}} className={`flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold transition ${active===s.id?'bg-blue-700 text-white shadow-sm':'text-slate-600 hover:bg-slate-100 hover:text-slate-900'}`}><Icon className="h-4 w-4 shrink-0"/><span>{s.label}</span></button>})}</nav></div>)}
         <button onClick={onBack} className="mt-2 flex min-h-10 w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-100"><ExternalLink className="h-4 w-4"/>Voltar ao portal</button>
       </aside>
-      <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8"><div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-700">Painel administrativo</p><h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{titleFor[active]}</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Gestão central do portal, infraestrutura, utilizadores, financeiro e conhecimento interno.</p></div><div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600"><span className={`h-2 w-2 rounded-full ${health.status==='ok'?'bg-emerald-500':'bg-amber-500'}`}/>{health.status==='ok'?'API verificada':'Estado da API não confirmado'}</div></div>{notice && <div role="status" className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm text-blue-800">{notice}</div>}{renderContent()}<footer className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-4 text-xs text-slate-400"><span>O Patriota Brasil · Administração</span><span>Indicadores reais só aparecem quando fornecidos pelos serviços conectados.</span></footer></main>
+      <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8"><div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><p className="text-xs font-extrabold uppercase tracking-[.16em] text-blue-700">Painel administrativo</p><h1 className="mt-2 text-2xl font-extrabold tracking-tight text-slate-950 sm:text-3xl">{titleFor[active]}</h1><p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">Gestão central do portal, infraestrutura, utilizadores, financeiro e conhecimento interno.</p></div><div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600"><span className={`h-2 w-2 rounded-full ${health.status==='ok'?'bg-emerald-500':'bg-amber-500'}`}/>{health.status==='ok'?'API verificada':'Estado da API não confirmado'}</div></div>{renderContent()}<footer className="mt-8 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-4 text-xs text-slate-400"><span>O Patriota Brasil · Administração</span><span>Indicadores reais só aparecem quando fornecidos pelos serviços conectados.</span></footer></main>
     </div>
   </div>;
 };
