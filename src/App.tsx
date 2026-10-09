@@ -660,7 +660,6 @@ export default function App() {
             currentUser={currentUser}
             onUpdateArticles={setArticles}
             onBackToHome={handleNavigateHome}
-            onSwitchStaffRole={handleSwitchStaffRole}
             pages={pages}
             onSavePage={handleSavePage}
             onDeletePage={handleDeletePage}
