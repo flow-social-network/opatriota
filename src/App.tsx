@@ -122,6 +122,12 @@ export default function App() {
   const [portalSettings, setPortalSettings] = useState<PortalSettings>(DEFAULT_PORTAL_SETTINGS);
 
   useEffect(() => {
+    const openFactCheckSubmit = () => setCurrentView('factcheck-submit');
+    window.addEventListener('opatriota:open-fact-check-submit', openFactCheckSubmit);
+    return () => window.removeEventListener('opatriota:open-fact-check-submit', openFactCheckSubmit);
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = observeAuth((user) => {
       setCurrentUser(user);
       setAuthLoading(false);
