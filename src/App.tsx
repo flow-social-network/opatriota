@@ -550,8 +550,13 @@ export default function App() {
         <main className="flex-1">
           <ContactPageView
             onNavigateHome={handleNavigateHome}
-            onSubmitContact={(submission) => {
-              setContactSubmissions([submission, ...contactSubmissions]);
+            onSubmitContact={async (submission) => {
+              const result = await api.post<{ id: string; protocol: string }>('/contact-submissions', {
+                name: submission.name, email: submission.email, phone: submission.phone,
+                subject: submission.subject, articleRef: submission.articleRef, message: submission.message
+              }, { auth: false });
+              setContactSubmissions(current => [{ ...submission, id: result.id }, ...current]);
+              return result;
             }}
           />
         </main>
@@ -562,8 +567,13 @@ export default function App() {
         <main className="flex-1">
           <LgpdPageView
             onNavigateHome={handleNavigateHome}
-            onSubmitLgpd={(req) => {
-              setLgpdRequests([req, ...lgpdRequests]);
+            onSubmitLgpd={async (request) => {
+              const result = await api.post<{ id: string; protocol: string }>('/privacy-requests', {
+                name: request.name, email: request.email, documentId: request.documentId,
+                requestType: request.requestType, details: request.details
+              }, { auth: false });
+              setLgpdRequests(current => [{ ...request, id: result.id }, ...current]);
+              return result;
             }}
           />
         </main>
@@ -573,7 +583,7 @@ export default function App() {
       {currentView === 'plans' && (
         <main className="flex-1">
           <PlansPageView
-            plans={[]}
+            plans={subscriptionPlans}
             currentUser={currentUser}
             onSelectPlan={(planId) => {
               setSelectedCheckoutPlanId(planId);
