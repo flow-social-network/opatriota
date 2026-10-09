@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Header } from './components/Header';
-import { BreakingNewsTicker } from './components/BreakingNewsTicker';
 import { HeroSection } from './components/HeroSection';
 import { EditorialGrid } from './components/EditorialGrid';
 import { FactCheckRibbon } from './components/FactCheckRibbon';
@@ -395,10 +394,6 @@ export default function App() {
       {/* VIEW: HOME (Front Page Layout) */}
       {currentView === 'home' && (
         <main className="flex-1">
-          <BreakingNewsTicker
-            articles={articles}
-            onSelectArticle={handleSelectArticle}
-          />
 
           <div className="max-w-[1360px] mx-auto px-4 py-8">
             <HeroSection

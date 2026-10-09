@@ -513,11 +513,20 @@ export interface PushNotificationCampaign {
   status: 'enviado' | 'rascunho' | 'falha';
 }
 
+export interface MarketTickerConfig {
+  enabled: boolean;
+  speedSeconds: number;
+  showEconomicNews: boolean;
+  indicators: string[];
+  lastCollectionAt?: string;
+}
+
 export interface PortalSettings {
   identity: SiteIdentityConfig;
   socialNetworks: SocialNetworkItem[];
   adsense: AdSenseGlobalConfig;
   adSlots: AdSlotConfig[];
   webPush?: WebPushConfig;
+  marketTicker?: MarketTickerConfig;
   updatedAt?: string;
 }
