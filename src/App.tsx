@@ -12,7 +12,7 @@ import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
 import { SupportModal } from './components/SupportModal';
 import { AuthModal } from './components/AuthModal';
-import { observeAuth, signInWithGoogle, signOutFromFirebase } from './services/firebaseAuthService';
+import { observeAuth, signInWithGoogle, signInWithFacebook, signOutFromFirebase } from './services/firebaseAuthService';
 
 // Model Pages Components
 import { InstitutionalPageView } from './components/pages/InstitutionalPageView';
@@ -366,6 +366,17 @@ export default function App() {
     }
   };
 
+  const handleFacebookLogin = async () => {
+    try {
+      await signInWithFacebook();
+    } catch (error) {
+      const code = error instanceof Error ? error.message : '';
+      showToast(code === 'AUTH_NOT_CONFIGURED'
+        ? 'Autenticação ainda não configurada neste ambiente.'
+        : 'Não foi possível concluir o acesso com Facebook. Verifique se o provedor está habilitado.');
+    }
+  };
+
   const handleGoogleLogout = async () => {
     await signOutFromFirebase();
     setCurrentUser(null);
@@ -612,6 +623,7 @@ export default function App() {
             currentUser={currentUser}
             onLogin={(user) => setCurrentUser(user)}
             onGoogleLogin={handleGoogleLogin}
+            onFacebookLogin={handleFacebookLogin}
             onLogout={() => { setCurrentUser(null); handleNavigateHome(); }}
             onBackToHome={handleNavigateHome}
             articles={articles}
@@ -673,7 +685,7 @@ export default function App() {
 
       {/* Login/cadastro em janela modal, sem abandonar a página atual. */}
       {authModalOpen && !currentUser && (
-        <AuthModal onClose={() => setAuthModalOpen(false)} onGoogleLogin={handleGoogleLogin} />
+        <AuthModal onClose={() => setAuthModalOpen(false)} onGoogleLogin={handleGoogleLogin} onFacebookLogin={handleFacebookLogin} />
       )}
 
       {/* Support Modal */}
