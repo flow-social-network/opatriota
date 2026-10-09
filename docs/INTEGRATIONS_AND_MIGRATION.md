@@ -31,7 +31,7 @@ Estados editoriais previstos:
 DRAFT -> IN_REVIEW -> APPROVED -> SCHEDULED -> PUBLISHED
 Ramos de revisão: IN_REVIEW -> CHANGES_REQUESTED -> IN_REVIEW ou IN_REVIEW -> REJECTED. Estados novos precisam ser harmonizados no enum Prisma e nos contratos antes de aplicar a migração final.
 
-**Atenção à implementação atual:** a rota de publicação já filtra conteúdo por estado publicado nos endpoints públicos, mas o fluxo completo de notificação, avaliação de risco, aprovação humana, autoaprovação autorizada e integração Firebase ainda precisa ser implementado e testado no backend. A migração SQL preparada não foi aplicada ao Neon.
+**Estado atual:** o backend contém rotas para envio à revisão, decisão humana, auditoria, notificações internas e publicação separada; os endpoints públicos filtram conteúdo publicado. A análise de risco ainda não é um serviço de IA automatizado, e a interface de notificações/configurações ainda precisa ser ligada a estas APIs. A integração Firebase ID token → backend, as rotas OAuth Meta, armazenamento cifrado de tokens, publicação social idempotente, prévias com marca d'água e métricas Meta ainda precisam ser implementadas e testadas. A migração SQL preparada não foi aplicada ao Neon. Consulte também [docs/NEWSROOM_SOCIAL_PUBLISHING.md](NEWSROOM_SOCIAL_PUBLISHING.md) para o plano operacional.
 
 ## Firebase Authentication
 1. No Firebase Console, habilitar Google em Authentication > Sign-in method e cadastrar domínios de dev/produção em Authorized domains.
