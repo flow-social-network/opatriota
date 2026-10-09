@@ -149,6 +149,20 @@ export const Header: React.FC<HeaderProps> = ({
     { label: 'ESPORTES', slug: 'esportes' },
   ];
 
+  const categorySubmenus: Partial<Record<CategorySlug, string[]>> = {
+    politica: ['Congresso Nacional', 'Presidência da República', 'Partidos políticos', 'Eleições'],
+    brasil: ['Governo Federal', 'Estados e municípios', 'Infraestrutura', 'Educação', 'Serviços públicos'],
+    economia: ['Indicadores econômicos', 'Inflação e juros', 'Emprego e renda', 'Empresas e negócios', 'Agronegócio', 'Impostos e tributação'],
+    seguranca: ['Polícia Federal', 'Polícias estaduais', 'Segurança nas rodovias', 'Legislação e Justiça', 'Defesa Civil'],
+    saude: ['Ministério da Saúde', 'Vigilância sanitária', 'Vacinação', 'Saúde pública', 'Pesquisa científica'],
+    opiniao: ['Editorial do jornal', 'Colunistas', 'Análises políticas', 'Análises económicas', 'Enviar artigo'],
+    checagem: ['Enviar texto ou captura', 'Checagens recentes', 'Alegações falsas', 'Conteúdos enganosos', 'Metodologia de verificação'],
+    tecnologia: ['Inteligência artificial', 'Cibersegurança', 'Empresas de tecnologia', 'Ciência e inovação', 'Governo digital'],
+    mundo: ['América Latina', 'Estados Unidos', 'Europa', 'Ásia', 'Geopolítica', 'Comércio internacional'],
+    cultura: ['História e património', 'Literatura', 'Cinema e televisão', 'Música', 'Artes e exposições'],
+    esportes: ['Futebol', 'Seleções brasileiras', 'Campeonatos nacionais', 'Esportes olímpicos', 'Automobilismo']
+  };
+
   const handleOpenWeather = (capitalId?: string) => {
     if (capitalId) {
       const found = BRAZIL_CAPITALS_WEATHER.find(c => c.id === capitalId);
@@ -435,8 +449,13 @@ export const Header: React.FC<HeaderProps> = ({
                     <span>{item.label}</span>
                     <ChevronDown className="w-2.5 h-2.5 text-white/50" aria-hidden="true" />
                   </button>
-                  <div className="invisible pointer-events-none absolute left-0 top-full z-[1100] min-w-52 translate-y-1 border border-[#D9DEE7] bg-white py-1 text-[#17202A] opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
-                    <button onClick={() => onSelectCategory(item.slug)} className="block w-full px-4 py-2 text-left text-xs font-bold hover:bg-slate-100">Ver {item.label.toLowerCase()}</button>
+                  <div className="invisible pointer-events-none absolute left-0 top-full z-[1100] min-w-60 translate-y-1 border border-[#D9DEE7] bg-white py-1 text-[#17202A] opacity-0 shadow-xl transition-all duration-150 group-hover:visible group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:visible group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+                    <button onClick={() => onSelectCategory(item.slug)} className="block w-full px-4 py-2 text-left text-xs font-bold text-[#0B5FFF] hover:bg-blue-50">Ver editoria completa</button>
+                    <button onClick={() => onSelectCategory(item.slug)} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">Últimas notícias</button>
+                    <button onClick={() => onSelectCategory(item.slug)} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">Mais lidas</button>
+                    {(categorySubmenus[item.slug] || []).map((topic) => (
+                      <button key={topic} onClick={() => item.slug === 'checagem' && topic === 'Enviar texto ou captura' ? onNavigatePage?.('enviar-checagem') : onSelectCategory(item.slug)} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">{topic}</button>
+                    ))}
                     <div className="my-1 border-t border-slate-200" />
                     <button onClick={() => onNavigatePage?.('contato')} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">Anuncie nesta editoria</button>
                     <button onClick={() => onNavigatePage?.('contato')} className="block w-full px-4 py-2 text-left text-xs hover:bg-slate-100">Solicitar mídia kit</button>
