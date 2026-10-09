@@ -46,7 +46,7 @@ export const DEFAULT_IDENTITY_CONFIG: SiteIdentityConfig = {
   footerLogoWidth: 280,
   slogan: 'INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE',
   shortDescription: 'Jornalismo independente, defesa das liberdades civis e compromisso inegociável com a soberania nacional e a verdade factual.',
-  copyrightText: 'DEEVO Soluções Financeiras LTDA — CNPJ: 63.187.175/0001-70. Todos os direitos reservados. Mantenedora Jornal O Patriota.'
+  copyrightText: '© 2026 O PATRIOTA BRASIL. Todos os direitos reservados.'
 };
 
 export const DEFAULT_SOCIAL_NETWORKS: SocialNetworkItem[] = [

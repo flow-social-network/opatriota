@@ -235,10 +235,10 @@ export const Footer: React.FC<FooterProps> = ({
         {/* Bottom Tier: Copyright & Compliance */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-white/50 gap-4 text-center md:text-left">
           <p>
-            © 2026 DEEVO Soluções Financeiras LTDA — CNPJ: 63.187.175/0001-70. Todos os direitos reservados. Mantenedora Jornal O Patriota.
+            © 2026 O PATRIOTA BRASIL. Todos os direitos reservados.
           </p>
           <div className="text-[11px] text-white/40">
-            Hospedado no Brasil • Desenvolvido com WordPress CMS & FSE • Taquara/RS
+            Jornalismo independente com compromisso com a informação verificável.
           </div>
         </div>
 

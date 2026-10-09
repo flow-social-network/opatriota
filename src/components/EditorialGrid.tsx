@@ -1,5 +1,6 @@
 import React from 'react';
 import { Article } from '../types';
+import { ArticleImage } from './ArticleImage';
 
 interface EditorialGridProps {
   articles: Article[];
@@ -39,14 +40,14 @@ export const EditorialGrid: React.FC<EditorialGridProps> = ({
             <article
               key={article.id}
               onClick={() => onSelectArticle(article)}
-              className="bg-white border border-[#D9DEE7] rounded overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
+              className="bg-white border border-[#D9DEE7] rounded overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 min-w-0"
             >
               {/* Thumbnail with Badge */}
-              <div className="relative h-32 w-full overflow-hidden bg-slate-100">
+              <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">
                 <span className={`absolute top-2 left-2 z-10 text-[10px] font-bold px-2 py-0.5 uppercase tracking-wider rounded-xs shadow-xs ${badgeClass}`}>
                   {article.kicker}
                 </span>
-                <img
+                <ArticleImage
                   src={article.imageUrl}
                   alt={article.title}
                   className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
