@@ -160,38 +160,41 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
     }
   };
 
-  // Profile save
-  const handleSaveProfile = (e: React.FormEvent) => {
+  // Profile and plan actions are confirmed by the server/provider.
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentUser) return;
-    currentUser.name = profileName;
-    currentUser.phone = profilePhone;
-    currentUser.bio = profileBio;
-    setProfileSaved(true);
-    setTimeout(() => setProfileSaved(false), 3000);
+    try {
+      const updated = await api.patch<Partial<UserSession>>('/me', {
+        name: profileName.trim(), phone: profilePhone.trim(), bio: profileBio.trim()
+      });
+      onLogin({ ...currentUser, ...updated });
+      setProfileSaved(true);
+      setTimeout(() => setProfileSaved(false), 3000);
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Não foi possível salvar o perfil.');
+    }
   };
 
-  // Plan change
-  const handleChangePlan = (planId: 'gratuito' | 'digital' | 'premium') => {
+  const handleChangePlan = async (planId: 'gratuito' | 'digital' | 'premium') => {
     if (!currentUser) return;
-    currentUser.subscription.plan = planId;
-    currentUser.role = planId === 'premium' ? 'assinante_premium' : planId === 'digital' ? 'assinante_digital' : 'leitor_gratuito';
-    setActivePlanId(planId);
-
-    if (planId !== 'gratuito') {
-      const newPay: PaymentRecord = {
-        id: 'pay-' + Date.now(),
-        date: new Date().toLocaleDateString('pt-BR'),
-        amount: planId === 'digital' ? 29.90 : 59.90,
-        planName: planId === 'digital' ? 'Assinante Digital (Mensal)' : 'Assinante Patriota Premium (Mensal)',
-        status: 'concluido',
-        invoiceNumber: 'NF-PAT-2026-' + Math.floor(10000 + Math.random() * 90000)
-      };
-      setPayments([newPay, ...payments]);
+    if (planId === 'gratuito') {
+      setPlanSuccessMsg('O estado da assinatura gratuita é confirmado pelo servidor; não há cobrança a iniciar.');
+      return;
     }
-
-    setPlanSuccessMsg(`Seu plano foi atualizado para ${planId.toUpperCase()} com sucesso! Os acessos exclusivos foram liberados.`);
-    setTimeout(() => setPlanSuccessMsg(null), 5000);
+    setPlanSuccessMsg(null);
+    try {
+      const checkout = await api.post<{ checkoutUrl: string }>('/checkout', {
+        planId, cycle: 'monthly', paymentMethod: 'pix',
+        name: currentUser.name, email: currentUser.email
+      });
+      if (!checkout.checkoutUrl || !/^https:\/\//.test(checkout.checkoutUrl)) {
+        throw new Error('O provedor não devolveu um endereço de checkout válido.');
+      }
+      window.location.assign(checkout.checkoutUrl);
+    } catch (error) {
+      setPlanSuccessMsg(error instanceof Error ? error.message : 'Não foi possível iniciar o checkout.');
+    }
   };
 
   // Bookmarks
@@ -199,14 +202,18 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
     currentUser?.bookmarks?.includes(a.id)
   );
 
-  const handleRemoveBookmark = (artId: string) => {
+  const handleRemoveBookmark = async (artId: string) => {
     if (!currentUser) return;
-    currentUser.bookmarks = currentUser.bookmarks.filter(id => id !== artId);
-    // Force re-render
-    onLogin({ ...currentUser });
+    const bookmarks = currentUser.bookmarks.filter(id => id !== artId);
+    try {
+      await api.put('/me/bookmarks', { bookmarks });
+      onLogin({ ...currentUser, bookmarks });
+    } catch (error) {
+      setLoginError(error instanceof Error ? error.message : 'Não foi possível atualizar os favoritos.');
+    }
   };
 
-  // LGPD Export
+    // LGPD Export
   const handleExportData = () => {
     if (!currentUser) return;
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(currentUser, null, 2));
@@ -749,7 +756,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                               </div>
                             ) : (
                               <button
-                                onClick={() => handleChangePlan(plan.id)}
+                                onClick={() => { void handleChangePlan(plan.id); }}
                                 className="w-full bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold py-2.5 rounded transition cursor-pointer"
                               >
                                 {plan.id === 'gratuito' ? 'MUDAR PARA GRÁTIS' : `ASSINAR ${plan.name.toUpperCase()}`}
