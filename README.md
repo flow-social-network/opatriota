@@ -30,6 +30,14 @@ O repositório contém um frontend React/Vite e uma API Node.js/Express em `back
 └── package.json
 ```
 
+## Login Google e acesso administrativo
+
+A interface de login usa o provedor Google do Firebase Authentication e não apresenta formulário público de cadastro. O fluxo OAuth do Firebase pode criar o registo de identidade no primeiro acesso; isso não concede, por si só, permissões de administração, redação ou assinatura.
+
+Configure no ambiente do frontend as variáveis `VITE_FIREBASE_API_KEY`, `VITE_FIREBASE_AUTH_DOMAIN`, `VITE_FIREBASE_PROJECT_ID`, `VITE_FIREBASE_STORAGE_BUCKET`, `VITE_FIREBASE_MESSAGING_SENDER_ID` e `VITE_FIREBASE_APP_ID`. Defina `VITE_ADMIN_EMAILS` como lista separada por vírgulas de e-mails autorizados a abrir a interface administrativa. No Firebase Console, habilite o provedor Google e inclua os domínios de desenvolvimento/produção em Authorized domains.
+
+**Limite de segurança:** `VITE_ADMIN_EMAILS` é uma barreira de interface, não uma autorização de backend. Antes de operar com dados reais, os endpoints administrativos devem validar o ID token do Firebase no servidor e conferir uma função/claim administrativa ou uma lista de permissões persistida no backend. Não confiar apenas no controlo React para proteger operações financeiras, credenciais ou alterações de produção. Nunca colocar segredos de API em variáveis `VITE_*`.
+
 ## Requisitos
 
 - Node.js 22 LTS ou superior
