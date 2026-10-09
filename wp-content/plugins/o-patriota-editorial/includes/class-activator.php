@@ -61,6 +61,7 @@ class O_Patriota_Activator {
 			title varchar(500) NOT NULL,
 			title_hash varchar(64) NOT NULL,
 			summary text NULL,
+			source_image_url varchar(1000) NULL,
 			author_name varchar(255) NULL,
 			original_published_at datetime NULL,
 			captured_at datetime DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -99,6 +100,35 @@ class O_Patriota_Activator {
 		// Agendar cron periódico para consulta de fontes RSS
 		if ( ! wp_next_scheduled( 'o_patriota_cron_poll_sources' ) ) {
 			wp_schedule_event( time(), 'hourly', 'o_patriota_cron_poll_sources' );
+		}
+
+
+		// Fonte inicial verificável: Agência Brasil (feed público). Importação sempre para triagem, nunca publicação automática.
+		$existing_agencia_brasil = $wpdb->get_var( $wpdb->prepare(
+			"SELECT id FROM {$table_sources} WHERE rss_url = %s LIMIT 1",
+			'https://agenciabrasil.ebc.com.br/feed/'
+		) );
+		if ( ! $existing_agencia_brasil ) {
+			$wpdb->insert(
+				$table_sources,
+				array(
+					'name' => 'Agência Brasil — Últimas notícias',
+					'source_category' => 'Agência pública',
+					'uf' => 'BR',
+					'official_url' => 'https://agenciabrasil.ebc.com.br/',
+					'news_url' => 'https://agenciabrasil.ebc.com.br/ultimas',
+					'rss_url' => 'https://agenciabrasil.ebc.com.br/feed/',
+					'source_type' => 'agência pública',
+					'category_slug' => 'brasil',
+					'integration_type' => 'RSS Feed',
+					'validation_status' => 'VALIDADO',
+					'editorial_policy' => 'APROVADA_CONSULTA_CITACAO',
+					'is_active' => 1,
+					'poll_frequency_min' => 60,
+					'notes' => 'Fonte pública para pauta e triagem. Revisar texto, imagem, legenda e licença antes de publicar; nunca republicar automaticamente.',
+				),
+				array( '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%s' )
+			);
 		}
 
 		// Adicionar permissões personalizadas
