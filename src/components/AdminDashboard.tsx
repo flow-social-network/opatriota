@@ -52,6 +52,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onBack,
   onUpdateSource,
   onUpdateQueue,
+  onSyncResult,
   portalSettings,
   onSavePortalSettings
 }) => {
