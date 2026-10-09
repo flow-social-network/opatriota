@@ -148,3 +148,109 @@ body {
   .site-header .branding-bar .logo-center { width: 100%; }
   .site-header .weather-ticker-bar > div { gap: 0.5rem; }
 }
+
+
+/* Cabeçalho editorial O PATRIOTA — reprodução da referência desktop */
+.site-header .patriota-header-inner {
+  width: min(100% - 32px, 1200px);
+  margin-inline: auto;
+  box-sizing: border-box;
+}
+.site-header .top-bar {
+  padding: 5px 0;
+  background: #f1f3f5;
+  color: #263445;
+  border-top: 1px solid #e1e5eb;
+  border-bottom: 1px solid #d9dee7;
+  font-size: 11px;
+  line-height: 1.35;
+}
+.site-header .top-bar-inner,
+.site-header .top-bar-left,
+.site-header .top-bar-right,
+.site-header .institutional-links,
+.site-header .social-icons,
+.site-header .header-search,
+.site-header .patriota-weather-widget,
+.site-header .patriota-weather-pill {
+  display: flex;
+  align-items: center;
+}
+.site-header .top-bar-inner {
+  justify-content: space-between;
+  gap: 12px;
+}
+.site-header .top-bar-left,
+.site-header .top-bar-right { gap: 12px; min-width: 0; }
+.site-header .top-bar-left { white-space: nowrap; }
+.site-header .top-bar .wp-block-shortcode { margin: 0; }
+.site-header .patriota-current-date { font-weight: 700; text-transform: capitalize; color: #17202a; }
+.site-header .header-divider { width: 1px; height: 22px; background: #d9dee7; flex: 0 0 1px; }
+.site-header .patriota-weather-pill {
+  gap: 6px; border: 1px solid #d9dee7; border-radius: 3px; padding: 4px 8px;
+  background: #fff; color: #17202a; font: inherit; cursor: pointer;
+}
+.site-header .weather-status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22a447; flex: 0 0 6px; }
+.site-header .weather-inmet-badge { background: #16803c; color: #fff; border-radius: 2px; padding: 1px 4px; font-size: 9px; font-weight: 800; }
+.site-header .institutional-links { gap: 14px; white-space: nowrap; }
+.site-header .institutional-links a { color: #5d6673; text-decoration: none; }
+.site-header .institutional-links a:hover { color: #0b2345; }
+.site-header .institutional-links .institutional-plans { color: #16803c; font-weight: 800; }
+.site-header .social-icons { gap: 9px; white-space: nowrap; }
+.site-header .social-icons a { color: #0b2345; text-decoration: none; font-weight: 800; font-size: 12px; }
+.site-header .header-search { height: 25px; border: 1px solid #cbd3df; background: #fff; }
+.site-header .header-search input { width: 180px; min-width: 90px; border: 0; outline: 0; padding: 4px 8px; background: transparent; color: #17202a; font-size: 11px; }
+.site-header .header-search button { height: 25px; width: 30px; border: 0; background: #0b2345; color: #fff; cursor: pointer; }
+.site-header .header-login { display: inline-flex; align-items: center; gap: 5px; white-space: nowrap; padding: 6px 10px; border: 1px solid #0b2345; border-radius: 3px; color: #0b2345; text-decoration: none; font-weight: 800; font-size: 10px; }
+.site-header .weather-ticker-bar { background: #07172e; color: #fff; border-bottom: 1px solid #172b46; padding: 5px 0; font-size: 10px; }
+.site-header .ticker-inner { display: flex; align-items: center; gap: 16px; min-width: 0; }
+.site-header .ticker-label { flex: 0 0 auto; color: #ffcc29; font-size: 9px; letter-spacing: .04em; }
+.site-header .ticker-list { display: flex; align-items: center; gap: 18px; min-width: 0; flex: 1 1 auto; overflow-x: auto; white-space: nowrap; scrollbar-width: none; }
+.site-header .ticker-list::-webkit-scrollbar { display: none; }
+.site-header .ticker-more, .site-header .ticker-view-all { flex: 0 0 auto; border: 0; background: transparent; color: #fff; font: inherit; cursor: pointer; white-space: nowrap; }
+.site-header .ticker-more { margin-left: auto; }
+.site-header .branding-bar { padding: 18px 0 14px; background: #fff; border-bottom: 1px solid #e1e5eb; }
+.site-header .branding-inner { display: grid; grid-template-columns: 1fr 1.4fr 1fr; align-items: center; gap: 20px; min-height: 66px; }
+.site-header .branding-quote { border-left: 2px solid #ffcc29; padding-left: 12px; color: #5d6673; font: italic 12px/1.5 Georgia, serif; }
+.site-header .logo-center { text-align: center; min-width: 0; }
+.site-header .logo-center .wp-block-site-logo { margin: 0 auto 2px; }
+.site-header .logo-center .wp-block-site-logo img { max-height: 34px; width: auto; object-fit: contain; }
+.site-header .logo-center .wp-block-site-title { margin: 0; font: 800 32px/1 Georgia, 'Times New Roman', serif; letter-spacing: .02em; text-transform: uppercase; }
+.site-header .logo-center .wp-block-site-title a { color: #0b2345; text-decoration: none; }
+.site-header .logo-center .wp-block-site-tagline { margin: 5px 0 0; color: #5d6673; font-size: 8px; letter-spacing: .18em; text-transform: uppercase; }
+.site-header .editorial-pillars { display: flex; flex-direction: column; align-items: flex-end; border-right: 2px solid #16803c; padding-right: 12px; color: #0b2345; font-size: 9px; font-weight: 800; line-height: 1.45; letter-spacing: .18em; }
+.site-header .editorial-pillars strong { color: #16803c; }
+.site-header .main-navigation { background: #0b2345; color: #fff; border-bottom: 1px solid #07172e; }
+.site-header .navigation-inner { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 36px; }
+.site-header .navigation-inner .wp-block-navigation { flex: 1 1 auto; min-width: 0; color: #fff; }
+.site-header .navigation-inner .wp-block-navigation__container { gap: 0; flex-wrap: nowrap; }
+.site-header .navigation-inner .wp-block-navigation-item__content { padding: 12px 11px; color: #fff; font-size: 9px; font-weight: 800; text-decoration: none; text-transform: uppercase; white-space: nowrap; }
+.site-header .navigation-inner .wp-block-navigation-item__content:hover,
+.site-header .navigation-inner .current-menu-item > .wp-block-navigation-item__content { color: #ffcc29; background: #07172e; }
+.site-header .support-journal-button { flex: 0 0 auto; padding: 7px 11px; background: #16803c; color: #fff; text-decoration: none; font-size: 9px; font-weight: 800; border-radius: 2px; white-space: nowrap; }
+.site-header .support-journal-button:hover { background: #22a447; }
+@media (max-width: 1050px) {
+  .site-header .top-bar-inner { align-items: flex-start; }
+  .site-header .top-bar-right { flex-wrap: wrap; justify-content: flex-end; }
+  .site-header .institutional-links { display: none; }
+  .site-header .navigation-inner .wp-block-navigation-item__content { padding-inline: 7px; font-size: 8px; }
+}
+@media (max-width: 782px) {
+  .site-header .patriota-header-inner { width: calc(100% - 20px); }
+  .site-header .top-bar-inner, .site-header .top-bar-left, .site-header .top-bar-right { flex-wrap: wrap; }
+  .site-header .top-bar-inner { gap: 6px; }
+  .site-header .top-bar-left { gap: 7px; white-space: normal; }
+  .site-header .weather-condition-label, .site-header .social-icons { display: none; }
+  .site-header .top-bar-right { justify-content: flex-start; gap: 7px; }
+  .site-header .header-search input { width: 125px; }
+  .site-header .ticker-inner { gap: 9px; }
+  .site-header .ticker-view-all { display: none; }
+  .site-header .branding-bar { padding: 14px 0; }
+  .site-header .branding-inner { grid-template-columns: 1fr; gap: 8px; }
+  .site-header .branding-quote, .site-header .editorial-pillars { display: none; }
+  .site-header .logo-center .wp-block-site-title { font-size: 27px; }
+  .site-header .navigation-inner { align-items: stretch; flex-direction: column; padding-block: 6px; }
+  .site-header .navigation-inner .wp-block-navigation__container { flex-wrap: wrap; }
+  .site-header .navigation-inner .wp-block-navigation-item__content { padding: 8px 7px; }
+  .site-header .support-journal-button { align-self: flex-start; margin-bottom: 6px; }
+}
