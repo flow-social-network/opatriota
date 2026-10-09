@@ -58,7 +58,6 @@ interface NewsroomDashboardProps {
   currentUser: UserSession;
   onUpdateArticles: (articles: Article[]) => void;
   onBackToHome: () => void;
-  onSwitchStaffRole: (roleKey: string) => void;
   pages?: InstitutionalPage[];
   onSavePage?: (page: InstitutionalPage) => void;
   onDeletePage?: (pageId: string) => void;
@@ -77,7 +76,6 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   currentUser,
   onUpdateArticles,
   onBackToHome,
-  onSwitchStaffRole,
   pages = [],
   onSavePage,
   onDeletePage,
@@ -88,8 +86,31 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   menuConfig,
   onSaveMenuConfig
 }) => {
-  // Navigation tabs in newsroom
-  const [activeTab, setActiveTab] = useState<'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus'>('painel');
+  // Matriz de acesso por função. As permissões de backend devem espelhar esta matriz.
+  const isAdmin = currentUser.role === 'administrador';
+  const isChiefEditor = currentUser.role === 'editor_chefe';
+  const isEditor = currentUser.role === 'editor';
+  const isReviewer = currentUser.role === 'revisor';
+  const isReporter = currentUser.role === 'jornalista';
+  const canManageSite = isAdmin || isChiefEditor;
+  const canManageSources = isAdmin || isChiefEditor || isEditor || isReviewer;
+  const canPublish = isAdmin || isChiefEditor || isEditor;
+  const canReview = isAdmin || isChiefEditor || isEditor || isReviewer;
+  const canCreateArticle = isAdmin || isChiefEditor || isEditor || isReporter;
+  const canEditArticle = (article: Article) => isAdmin || isChiefEditor || isEditor || (article.authorId === currentUser.id && (isReporter || isReviewer));
+  type NewsroomTab = 'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus';
+  const availableTabs: { id: NewsroomTab; label: string; icon: typeof SlidersHorizontal }[] = [
+    { id: 'painel', label: 'Painel Geral & Métricas', icon: SlidersHorizontal },
+    { id: 'materias', label: 'Matérias', icon: FileText },
+    ...(canManageSources ? [{ id: 'fontes' as const, label: 'Fontes Oficiais', icon: BookOpen }] : []),
+    ...(canManageSite ? [
+      { id: 'paginas' as const, label: 'Gestor de Páginas', icon: Globe },
+      { id: 'categorias' as const, label: 'Editorias & Categorias', icon: Compass },
+      { id: 'menus' as const, label: 'Gestor de Menus', icon: Menu },
+    ] : []),
+    ...(canManageSite || isEditor ? [{ id: 'midia' as const, label: 'Biblioteca de Mídia', icon: ImageIcon }] : []),
+  ];
+  const [activeTab, setActiveTab] = useState<NewsroomTab>('painel');
 
   // Article filters
   const [statusFilter, setStatusFilter] = useState<string>('TODAS');
@@ -287,6 +308,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   // Submit to Review (EM REVISÃO)
   const handleSubmitToReview = () => {
     if (!editingArticle) return;
+    if (!canEditArticle(editingArticle)) { showFeedback('Você não tem permissão para editar esta matéria.', 'error'); return; }
 
     // Checagem de fontes da matéria: se for sustentada exclusivamente por veículos da Globo, rejeita
     const allSourcesText = [
@@ -333,6 +355,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
   // Approve Article (STRICT RULE: Journalist cannot approve their own story!)
   const handleApprove = (art: Article) => {
+    if (!canReview) { showFeedback('Seu perfil não tem permissão para aprovar matérias.', 'error'); return; }
     // 1. Strict Self-approval check
     if (art.authorId === currentUser.id && currentUser.role !== 'administrador') {
       showFeedback('VIOLAÇÃO DE POLÍTICA EDITORIAL: O próprio autor da matéria não pode aprová-la. A aprovação exige a validação de um Revisor ou Editor independente.', 'error');
@@ -432,8 +455,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
   // Publish / Schedule Article
   const handlePublish = (art: Article) => {
-    const canPublishRoles: UserRole[] = ['editor', 'editor_chefe', 'administrador'];
-    if (!canPublishRoles.includes(currentUser.role)) {
+    if (!canPublish) {
       showFeedback('Apenas Editores e Administradores possuem autorização para publicar no portal.', 'error');
       return;
     }
@@ -551,46 +573,12 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
           </div>
         </div>
 
-        {/* STAFF IDENTITY SWITCHER (CRITICAL FOR DEMONSTRATING REAL ROLES & RESTRICTIONS) */}
+        {/* Identidade da conta autenticada; a própria pessoa não pode trocar de função. */}
         <div className="flex items-center gap-3 text-xs">
-          <span className="text-white/70 hidden sm:inline">Operando como:</span>
-          <div className="flex items-center gap-2 bg-[#0B2345] border border-white/20 px-2.5 py-1 rounded">
-            <UserCheck className="w-3.5 h-3.5 text-[#FFCC29]" />
+          <div className="flex items-center gap-2 rounded border border-white/20 bg-[#0B2345] px-3 py-2">
+            <UserCheck className="h-4 w-4 text-[#FFCC29]" />
             <span className="font-bold text-white">{currentUser.name}</span>
-            <span className="text-[10px] uppercase font-mono bg-white/10 px-1.5 py-0.5 rounded text-[#FFCC29]">
-              {currentUser.role.replace('_', ' ')}
-            </span>
-          </div>
-
-          {/* Quick test buttons to change role */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => onSwitchStaffRole('jornalista')}
-              className={`px-2 py-1 text-[10px] font-bold rounded transition cursor-pointer ${
-                currentUser.role === 'jornalista' ? 'bg-[#0B5FFF] text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-              title="Testar como Repórter/Jornalista (não pode auto-aprovar)"
-            >
-              Jornalista
-            </button>
-            <button
-              onClick={() => onSwitchStaffRole('revisor')}
-              className={`px-2 py-1 text-[10px] font-bold rounded transition cursor-pointer ${
-                currentUser.role === 'revisor' ? 'bg-[#0B5FFF] text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-              title="Testar como Revisor Textual"
-            >
-              Revisor
-            </button>
-            <button
-              onClick={() => onSwitchStaffRole('editor_chefe')}
-              className={`px-2 py-1 text-[10px] font-bold rounded transition cursor-pointer ${
-                currentUser.role === 'editor_chefe' ? 'bg-[#16803C] text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-              title="Testar como Editor-Chefe (aprova e publica)"
-            >
-              Editor-Chefe
-            </button>
+            <span className="rounded bg-white/10 px-2 py-1 text-[10px] font-mono uppercase text-[#FFCC29]">{currentUser.role.replace('_', ' ')}</span>
           </div>
         </div>
       </div>
@@ -611,15 +599,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         {/* Navigation Tabs */}
         <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-[#D9DEE7] pb-2">
           <div className="flex gap-2">
-            {[
-              { id: 'painel', label: 'Painel Geral & Métricas', icon: SlidersHorizontal },
-              { id: 'materias', label: `Todas as Matérias (${articles.length})`, icon: FileText },
-              { id: 'paginas', label: `Gestor de Páginas (${pages.length})`, icon: Globe },
-              { id: 'categorias', label: `Editorias & Categorias (${categories.length})`, icon: Compass },
-              { id: 'menus', label: 'Gestor de Menus', icon: Menu },
-              { id: 'fontes', label: `Fontes Oficiais (${sources.length})`, icon: BookOpen },
-              { id: 'midia', label: `Biblioteca de Mídia (${mediaList.length})`, icon: ImageIcon },
-            ].map((t) => {
+            {availableTabs.map((t) => {
               const Icon = t.icon;
               const isActive = activeTab === t.id;
               return (
@@ -637,13 +617,13 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
             })}
           </div>
 
-          <button
+          {canCreateArticle && <button
             onClick={handleOpenCreate}
             className="flex items-center gap-1.5 bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold px-3.5 py-2 rounded transition cursor-pointer shadow-xs active:scale-95"
           >
             <Plus className="w-4 h-4" />
             <span>NOVA MATÉRIA</span>
-          </button>
+          </button>}
         </div>
 
         {/* TAB 1: PAINEL GERAL & MÉTRICAS */}
@@ -1220,7 +1200,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         )}
 
         {/* TAB 4: CENTRAL DE FONTES OFICIAIS */}
-        {activeTab === 'fontes' && (
+        {activeTab === 'fontes' && canManageSources && (
           <div className="bg-white p-6 rounded-xl border border-[#D9DEE7] shadow-xs">
             <OfficialSourcesHub
               sources={sources}
@@ -1230,7 +1210,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         )}
 
         {/* TAB 5: BIBLIOTECA DE MÍDIA */}
-        {activeTab === 'midia' && (
+        {activeTab === 'midia' && (canManageSite || isEditor) && (
           <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs space-y-6">
             <div className="flex items-center justify-between">
               <div>
@@ -1339,7 +1319,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         )}
 
         {/* TAB: GESTOR DE PÁGINAS & MODELOS */}
-        {activeTab === 'paginas' && onSavePage && onDeletePage && onPreviewPage && (
+        {activeTab === 'paginas' && canManageSite && onSavePage && onDeletePage && onPreviewPage && (
           <PagesManager
             pages={pages}
             onSavePage={onSavePage}
@@ -1349,7 +1329,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         )}
 
         {/* TAB: GESTOR DE EDITORIAS & CATEGORIAS */}
-        {activeTab === 'categorias' && onSaveCategory && onPreviewCategory && (
+        {activeTab === 'categorias' && canManageSite && onSaveCategory && onPreviewCategory && (
           <CategoriesManager
             categories={categories}
             onSaveCategory={onSaveCategory}
@@ -1358,7 +1338,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         )}
 
         {/* TAB: GESTOR DE MENUS */}
-        {activeTab === 'menus' && menuConfig && onSaveMenuConfig && (
+        {activeTab === 'menus' && canManageSite && menuConfig && onSaveMenuConfig && (
           <MenusManager
             menuConfig={menuConfig}
             allPages={pages}
