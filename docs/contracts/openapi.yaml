@@ -157,7 +157,7 @@ paths:
   /api/articles/{id}/reviews:
     post:
       summary: Registar decisão editorial
-      description: Requer REVIEWER, EDITOR, CHIEF_EDITOR ou ADMIN conforme política.
+      description: Requer REVIEWER, EDITOR, CHIEF_EDITOR ou ADMIN conforme política. Esta decisão é humana; a IA só fornece avaliação de apoio e nunca aprova.
       parameters:
         - in: path
           name: id
@@ -171,6 +171,36 @@ paths:
       responses:
         "201": { description: Revisão registada }
         "403": { $ref: "#/components/responses/Forbidden" }
+  /api/articles/{id}/approve:
+    post:
+      summary: Registar aprovação humana explícita
+      description: >
+        A IA nunca aprova nem publica. Matérias de terceiros exigem aprovador autorizado
+        diferente do autor. O proprietário/editor-chefe designado pode autoaprovar
+        conteúdo próprio, com auditoria explícita. Aprovação não torna a matéria pública.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [riskLevel, decision]
+              additionalProperties: false
+              properties:
+                decision: { type: string, enum: [APPROVE, REQUEST_CHANGES, REJECT] }
+                riskLevel: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+                riskNotes: { type: [string, "null"], maxLength: 10000 }
+                notes: { type: [string, "null"], maxLength: 10000 }
+      responses:
+        "200": { description: Decisão humana auditada; APPROVE apenas transita para APPROVED }
+        "401": { $ref: "#/components/responses/Unauthorized" }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: Estado editorial inválido para revisão }
   /api/articles/{id}/publish:
     post:
       summary: Publicar matéria aprovada
@@ -180,7 +210,7 @@ paths:
           required: true
           schema: { type: string }
       responses:
-        "200": { description: Matéria publicada e evento auditado }
+        "200": { description: Matéria publicada e evento auditado; exige aprovação humana anterior registrada }
         "403": { $ref: "#/components/responses/Forbidden" }
         "409": { description: Matéria não aprovada ou estado inválido }
   /api/social/oauth/meta/start:
@@ -297,6 +327,8 @@ components:
                   name: { type: string }
                   url: { type: string, format: uri }
             isSubscriberOnly: { type: boolean }
+            riskLevel: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+            humanApprovedAt: { type: [string, "null"], format: date-time }
     ArticleCreate:
       type: object
       required: [title, slug, body]
