@@ -4,6 +4,10 @@ import {
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
+  updateProfile,
   signOut,
   type User as FirebaseUser,
   type Unsubscribe,
@@ -52,6 +56,25 @@ export async function signInWithGoogle() {
   if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
   const result = await signInWithPopup(auth, googleProvider);
   return mapAuthenticatedUser(result.user);
+}
+
+export async function signInWithEmail(email: string, password: string): Promise<UserSession> {
+  if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
+  const result = await signInWithEmailAndPassword(auth, email.trim(), password);
+  return mapAuthenticatedUser(result.user);
+}
+
+export async function registerWithEmail(name: string, email: string, password: string): Promise<UserSession> {
+  if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
+  const result = await createUserWithEmailAndPassword(auth, email.trim(), password);
+  await updateProfile(result.user, { displayName: name.trim() });
+  await result.user.getIdToken(true);
+  return mapAuthenticatedUser(result.user);
+}
+
+export async function requestPasswordReset(email: string): Promise<void> {
+  if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
+  await sendPasswordResetEmail(auth, email.trim());
 }
 
 export async function signOutFromFirebase() {
