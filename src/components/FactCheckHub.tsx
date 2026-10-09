@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { FactCheckItem, FactVerdict } from '../types';
-import { ShieldAlert, CheckCircle, AlertTriangle, FileText, ArrowLeft, ExternalLink } from 'lucide-react';
+import { ShieldAlert, CheckCircle, AlertTriangle, FileText, ArrowLeft, ExternalLink, UploadCloud } from 'lucide-react';
 
 interface FactCheckHubProps {
   factChecks: FactCheckItem[];
   onBack: () => void;
   onOpenItem: (item: FactCheckItem) => void;
+  onStartCheck?: () => void;
 }
 
 export const FactCheckHub: React.FC<FactCheckHubProps> = ({
   factChecks,
   onBack,
-  onOpenItem
+  onOpenItem,
+  onStartCheck
 }) => {
   const [filterVerdict, setFilterVerdict] = useState<string>('TODOS');
   const [activeItem, setActiveItem] = useState<FactCheckItem | null>(null);
@@ -65,6 +67,7 @@ export const FactCheckHub: React.FC<FactCheckHubProps> = ({
           <p className="text-sm text-white/80 leading-relaxed">
             Nossa missão é combater a desinformação com método transparente, consulta a documentos oficiais primários, auditoria de dados públicos e compromisso irrestrito com a verdade dos fatos.
           </p>
+          <button onClick={onStartCheck} className="mt-5 inline-flex items-center gap-2 rounded bg-[#FFCC29] px-4 py-3 text-sm font-black text-[#0B2345] transition hover:bg-white"><UploadCloud size={17}/> ENVIAR TEXTO OU CAPTURA PARA CHECAGEM</button>
         </div>
       </div>
 
