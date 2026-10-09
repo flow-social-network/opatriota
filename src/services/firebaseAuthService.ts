@@ -9,6 +9,7 @@ import {
   type Unsubscribe,
 } from 'firebase/auth';
 import type { UserSession } from '../types';
+import { setApiTokenProvider } from './apiClient';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -66,6 +67,9 @@ export async function getFirebaseIdToken() {
   const user = auth?.currentUser;
   return user ? user.getIdToken() : null;
 }
+
+// O cliente centralizado da API recebe apenas o token atual do utilizador autenticado.
+setApiTokenProvider(getFirebaseIdToken);
 
 export { auth };
 const firebaseAuthStatus = isFirebaseAuthConfigured();
