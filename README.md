@@ -1,103 +1,77 @@
-# O PATRIOTA — Portal Jornalístico Profissional
+# O PATRIOTA BRASIL
 
-> **"INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE."**
-> Notícia • Análise • Opinião • Brasil • Sempre
+Portal jornalístico digital para notícias, análise, opinião, checagem de fatos e fontes públicas.
 
-O PATRIOTA é um portal digital de notícias de cobertura nacional, estruturado sobre WordPress FSE (Full Site Editing) com plugin editorial avançado de ingestão de fontes, deduplicação em 5 camadas, checagem de fatos com ClaimReview Schema.org e redação integrada.
+## Estado do repositório
 
----
+O repositório contém um frontend React/Vite e uma API Node.js/Express em `backend/`, com Prisma e PostgreSQL. A infraestrutura AWS documentada é uma arquitetura-alvo; não significa que recursos AWS tenham sido criados ou que a aplicação esteja implantada em produção.
 
-## Estrutura do Repositório
+## Estrutura principal
 
-```
+```text
 /
-├── wp-content/
-│   ├── themes/
-│   │   └── o-patriota/           # Tema WordPress FSE Oficial
-│   │       ├── style.css         # Identidade, design tokens CSS
-│   │       ├── theme.json        # Paleta, fontes, presets de bloco
-│   │       ├── functions.php     # Bootstrap do tema
-│   │       ├── templates/        # Templates FSE (front-page, single, etc.)
-│   │       ├── parts/            # Cabeçalho, ticker, rodapé, newsletter
-│   │       ├── patterns/         # Padrões editoriais (Hero 3-col, Grid 6-col)
-│   │       └── inc/              # Módulos PHP (setup, assets, acessibilidade)
-│   └── plugins/
-│       └── o-patriota-editorial/ # Plugin Editorial Avançado
-│           ├── o-patriota-editorial.php
-│           ├── includes/         # Classes do motor (Fontes, RSS, Deduplicação, Fila)
-│           └── admin/            # Painel editorial da redação
-├── docs/                         # Documentação completa de engenharia
-│   ├── ARCHITECTURE.md           # Arquitetura detalhada
-│   ├── INSTALLATION.md           # Guia de implantação em servidor
-│   └── EDITORIAL-WORKFLOW.md     # Fluxo da esteira de redação
-├── src/                          # Aplicação interativa ao vivo (Port 3000)
-│   ├── components/               # Componentes visuais fiéis à referência
-│   └── App.tsx                   # Portal vivo + Painel editorial + Exportador ZIP
+├── src/                    # Frontend React/Vite
+├── public/                 # Arquivos públicos
+├── backend/
+│   ├── src/
+│   │   ├── config/         # Configuração da API
+│   │   ├── db/             # Cliente Prisma
+│   │   ├── lib/            # Utilitários HTTP
+│   │   ├── middleware/     # Autenticação/autorização
+│   │   ├── routes/         # Auth, artigos e categorias
+│   │   ├── app.ts
+│   │   └── index.ts
+│   └── tsconfig.json
+├── prisma/
+│   └── schema.prisma
+├── scripts/
+│   └── setup-backend.sh
+├── docs/
 └── package.json
 ```
 
----
+## Requisitos
 
-## Funcionalidades em Destaque
+- Node.js 22 LTS ou superior
+- pnpm 10+
+- PostgreSQL compatível com Prisma
+- Variáveis locais em `.env`; nunca versionar credenciais
 
-1. **Composição Fiel à Referência**:
-   - Cabeçalho institucional com citação e princípios editoriais.
-   - Navegação completa por editorias com botão verde "APOIE O JORNAL".
-   - Ticker de "Últimas Notícias" atualizado em tempo real.
-   - Bloco nobre em 3 colunas (Manchete + Imagem de Brasília + Notícias Laterais).
-   - Seção de 6 cartões temáticos (Política, Brasil, Economia, Segurança, Saúde, Opinião).
-   - Faixa de Checagem ("FAÇA A CHECAGEM") com dossiês e caixa de Newsletter.
-   - Rodapé institucional patriótico com 4 pilares: Notícia, Análise, Opinião, Brasil.
+## Instalação local
 
-2. **Engenharia Editorial & Serviços Cívicos**:
-   - **Previsão do Tempo Dinâmica das 27 Capitais**: Monitoramento meteorológico de todas as capitais das 5 regiões brasileiras. Os dados dinâmicos em tempo real são processados via modelos numéricos abertos (**Open-Meteo API — WMO / ECMWF**), enquanto os identificadores e coordenadas têm como referência cadastral a rede oficial do **INMET (Instituto Nacional de Meteorologia — [portal.inmet.gov.br](https://portal.inmet.gov.br/))** mantida como utilidade pública institucional. Conta com 6 estados explícitos de sincronização (`live`, `cached`, `loading`, `source_unavailable`, `data_unavailable`, `error`), preservação estrita de timestamps em caso de falha externa, projeção estendida de 4 dias e endpoint REST dedicado no WordPress (`/wp-json/o-patriota/v1/weather/capitals`) com rate limiting e cache transitório.
-   - Central de fontes com proteção contra SSRF e injeção XXE.
-   - Motor de deduplicação em 5 camadas com algoritmo fonético e similaridade textual.
-   - Fluxo de trabalho que garante a **publicação humana obrigatória**.
-   - Marcação Schema.org NewsArticle e ClaimReview para Google News e Fact Check Tools.
-   - Exportador integrado em 1 clique para download dos pacotes ZIP prontos para instalação no WordPress.
+```bash
+pnpm backend:setup
+```
 
----
+O script instala dependências, sincroniza o lockfile, valida/genera o cliente Prisma e verifica os tipos do backend. Ele cria apenas um arquivo `.env` de exemplo se não existir; não provisiona PostgreSQL ou AWS e não aplica migrations automaticamente.
 
-## 🔒 Separação de Interfaces & Endereços de Acesso (Rotas Internas e Privadas)
+Configure `DATABASE_URL` em `.env`. Em ambiente de desenvolvimento:
 
-Conforme as diretrizes editoriais do jornal, **os painéis de trabalho interno não são expostos publicamente na navegação do leitor**. O site público do leitor contém apenas os conteúdos jornalísticos abertos, editoriais e páginas de transparência.
+```bash
+pnpm exec prisma migrate dev --name init
+pnpm api:dev
+```
 
-Os acessos aos ambientes restritos e painéis operacionais são documentados a seguir:
+Em outro terminal, execute o frontend:
 
-| Ambiente / Módulo | Rota / Endereço | Perfil Autorizado | Finalidade |
-|---|---|---|---|
-| **Site Público do Jornal** | `/` | Público em Geral | Homepage, editorias, reportagens e busca |
-| **Área do Leitor / Assinante** | `/minha-conta` | Assinantes Cadastrados | Dashboard do leitor, réplica PDF, acervo e gestão de assinatura |
-| **Painel Privado da Redação** | `/redacao` | Jornalistas, Editores e Revisores | Esteira de produção jornalística, checagem e fila de revisão |
-| **Backoffice WordPress / Fontes** | `/admin` ou `/wp-admin` | Editor-Chefe e Administrador | Central Nacional de Fontes Oficiais, deduplicação e gerador ZIP |
+```bash
+pnpm dev
+```
 
-### Contas de Acesso para Demonstração e Auditoria
+## Endpoints implementados na base atual
 
-No ambiente da aplicação, o acesso pode ser verificado através das credenciais:
+- `GET /health/live` — liveness
+- `GET /health/ready` — verifica PostgreSQL
+- `POST /api/auth/register` — cadastro de leitor
+- `POST /api/auth/login` — inicia sessão HTTP-only
+- `GET /api/auth/me` — sessão atual
+- `POST /api/auth/logout` — encerra sessão
+- `GET /api/articles` e `GET /api/articles/:slug` — leitura pública de artigos publicados
+- `POST /api/articles` e `PATCH /api/articles/:id` — operações editoriais autenticadas
+- `GET /api/categories` — categorias com conteúdo publicado
 
-1. **Jornalista / Repórter**:
-   - E-mail: `thiago.jornalista@opatriota.com.br`
-   - Função: Criação de pautas, apuração e envio para revisão na esteira editorial.
-2. **Editor-Chefe / Administrador**:
-   - Acesso irrestrito à Central de Fontes Oficiais, triagem de feeds RSS e exportação do tema/plugin WordPress.
-3. **Assinante Digital**:
-   - E-mail: `mariana.duarte@exemplo.com.br`
-   - Acesso liberado aos dossiês exclusivos e réplicas digitais em `/minha-conta`.
+## Segurança e prontidão
 
----
+Esta é uma implementação inicial, não uma declaração de prontidão para produção. Antes de produção, validar schema e migrations, testar todos os fluxos, acrescentar rate limiting e proteção contra CSRF conforme o deployment, implementar autorização de assinaturas antes de habilitar conteúdo pago, concluir integração Efí com webhooks idempotentes, adicionar testes de integração, revisar logging/privacidade, configurar backups, monitorização, secrets, IAM e CI/CD.
 
-## ⛅ Previsão do Tempo Dinâmica das Capitais do Brasil (Fonte Oficial: INMET)
-
-O portal integra um módulo de **Previsão Meteorológica Oficial** para todas as 27 capitais brasileiras com base no **Instituto Nacional de Meteorologia (INMET)**:
-
-- **Fonte Oficial:** [INMET — Instituto Nacional de Meteorologia (portal.inmet.gov.br)](https://portal.inmet.gov.br/)
-- **Elementos na Interface:**
-  1. **Weather Pill no Topo:** Exibe a capital selecionada, temperatura atual, condição do tempo e selo oficial do INMET.
-  2. **Barra de Capitais (Ticker):** Carrossel horizontal dinâmico com navegação e status climático de capitais de todas as cinco regiões (Centro-Oeste, Sudeste, Sul, Nordeste e Norte).
-  3. **Central Meteorológica das 27 Capitais (Modal/Painel):**
-     - Busca instantânea e filtro por macrorregiões.
-     - Detalhamento de umidade relativa do ar, velocidade do vento, pressão atmosférica e sensação térmica.
-     - Previsão estendida de 4 dias por capital.
-     - Botão de sincronização em tempo real e link direto para o portal oficial do INMET (`https://portal.inmet.gov.br/`).
-
+A integração Efí existente em `server/` permanece legado não conectado às rotas atuais. Não processe pagamentos reais por esse código até a integração ser reimplementada e auditada.
