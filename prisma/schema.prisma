@@ -28,11 +28,6 @@ enum EditorialRiskLevel {
   HIGH
   CRITICAL
 }
-enum ReviewDecision {
-  APPROVE
-  REQUEST_CHANGES
-  REJECT
-}
 enum SourceKind {
   OFFICIAL
   RSS
@@ -165,7 +160,7 @@ model ArticleReview {
   id String @id @default(cuid())
   articleId String
   reviewerId String
-  decision ReviewDecision
+  decision String
   riskLevel EditorialRiskLevel?
   riskNotes String? @db.Text
   notes String? @db.Text
