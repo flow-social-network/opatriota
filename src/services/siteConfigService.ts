@@ -314,7 +314,7 @@ export async function savePortalSettings(settings: PortalSettings): Promise<{ su
     });
     return { success: true, message: 'Configurações salvas e sincronizadas com o Supabase.' };
   } catch {
-    return { success: true, message: 'Configurações salvas no navegador; sincronização pendente de autenticação administrativa.' };
+    return { success: false, message: 'Não foi possível persistir as configurações no servidor. A cópia local não confirma a gravação; verifique a API e as permissões.' };
   }
 }
 
