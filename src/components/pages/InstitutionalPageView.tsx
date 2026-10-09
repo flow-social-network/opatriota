@@ -263,7 +263,7 @@ export const InstitutionalPageView: React.FC<InstitutionalPageViewProps> = ({
                 prose-ul:text-sm prose-ul:text-[#2D3748] prose-ul:space-y-2 prose-ul:mb-4
                 prose-li:leading-relaxed
                 prose-strong:text-[#0B2345] prose-strong:font-bold
-                prose-a:text-[#0B5FFF] prose-a:font-semibold prose-a:underline hover:prose-a:text-[#0B2345]"
+                prose-a:text-[#0B5FFF] prose-a:font-bold prose-a:underline prose-a:decoration-2 prose-a:underline-offset-2 prose-a:bg-[#EFF6FF] prose-a:px-1 prose-a:py-0.5 prose-a:rounded hover:prose-a:text-white hover:prose-a:bg-[#0B5FFF] focus-within:prose-a:outline-2"
               dangerouslySetInnerHTML={{ __html: page.content }}
             />
 
