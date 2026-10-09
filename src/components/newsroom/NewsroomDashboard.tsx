@@ -544,7 +544,8 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   };
 
   // Filtered articles list
-  const filteredArticles = articles.filter((a) => {
+  const newsroomArticles = isReporter ? articles.filter((article) => article.authorId === currentUser.id) : articles;
+  const filteredArticles = newsroomArticles.filter((a) => {
     const matchesStatus = statusFilter === 'TODAS' || a.editorialStatus === statusFilter;
     const matchesCategory = categoryFilter === 'TODAS' || a.category === categoryFilter;
     const matchesSearch = !searchQuery || 
@@ -691,7 +692,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
               </div>
 
               <div className="divide-y divide-[#D9DEE7]">
-                {articles.filter(a => a.editorialStatus === 'EM REVISÃO' || a.editorialStatus === 'CORREÇÕES').map((art) => (
+                {newsroomArticles.filter(a => a.editorialStatus === 'EM REVISÃO' || a.editorialStatus === 'CORREÇÕES').map((art) => (
                   <div key={art.id} className="py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 text-[10px] font-bold text-[#5D6673] uppercase mb-1">
