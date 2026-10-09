@@ -1,0 +1,18 @@
+<!-- wp:group {"className":"breaking-news-ticker bg-white border-b border-[#D9DEE7] py-2 px-4","layout":{"type":"constrained"}} -->
+<div class="wp-block-group breaking-news-ticker bg-white border-b border-[#D9DEE7] py-2 px-4">
+  <div class="max-w-[1360px] mx-auto flex items-center gap-4 text-xs">
+    <span class="bg-[#B42318] text-white font-bold px-3 py-1 uppercase tracking-wide shrink-0">
+      ÚLTIMAS NOTÍCIAS
+    </span>
+    <!-- wp:query {"queryId":1,"query":{"perPage":3,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":false}} -->
+    <div class="wp-block-query flex-1 overflow-hidden">
+      <!-- wp:post-template {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+        <span class="text-[#5D6673] font-mono mr-1"><!-- wp:post-date {"format":"H:i"} /--></span>
+        <!-- wp:post-title {"isLink":true,"style":{"typography":{"fontWeight":"600"}}} /-->
+        <span class="text-[#D9DEE7] mx-3">|</span>
+      <!-- /wp:post-template -->
+    </div>
+    <!-- /wp:query -->
+  </div>
+</div>
+<!-- /wp:group -->

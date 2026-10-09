@@ -1,0 +1,1368 @@
+import { 
+  Article, 
+  FactCheckItem, 
+  RssSource, 
+  EditorialQueueItem, 
+  UserSession, 
+  PaymentRecord, 
+  SubscriptionPlan, 
+  MediaItem 
+} from '../types';
+
+export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
+  {
+    id: 'gratuito',
+    name: 'Acesso Livre',
+    badge: 'LEITOR CADASTRADO',
+    priceMonthly: 0,
+    priceAnnual: 0,
+    description: 'Acesso às notícias abertas e checagens de fatos de circulação pública.',
+    benefits: [
+      'Acesso ilimitado às matérias abertas',
+      'Boletim diário da Agência de Checagem',
+      'Participação na comunidade de leitores',
+      'Notificações no navegador'
+    ],
+    accessLevel: 'aberto'
+  },
+  {
+    id: 'digital',
+    name: 'Digital Mensal Completa',
+    badge: 'OFERTA DE BOAS-VINDAS',
+    priceMonthly: 6.50,
+    originalPriceMonthly: 20.70,
+    priceAnnual: 78.00,
+    promoNotice: 'De R$ 20,70 por R$ 6,50 p/ 3 meses — após R$ 20,70',
+    loyaltyTerm: '*Fidelidade 12 meses com renovação automática.',
+    description: 'Acesso digital completo com réplica em PDF, acervo e conteúdo multimídia exclusivo.',
+    benefits: [
+      'Completo acesso ao site e portal.',
+      'Réplica digital folheável (PDF).',
+      'Acervo digital histórico.',
+      'Acesso completo ao conteúdo em vídeo e podcasts.',
+      'Sem anúncios invasivos durante a leitura.'
+    ],
+    accessLevel: 'assinante',
+    isPopular: true
+  },
+  {
+    id: 'premium',
+    name: 'CP Digital Anual Econômico',
+    badge: 'MELHOR VALOR',
+    priceMonthly: 5.24,
+    priceAnnual: 62.90,
+    originalPriceAnnual: 248.40,
+    promoNotice: 'De R$ 248,40 por R$ 62,90 / ano inteiro — Economia real assinando o ano todo',
+    loyaltyTerm: '*Fidelidade 12 meses com renovação automática.',
+    description: 'Economia máxima anual com todos os benefícios do portal e Clube exclusivo incluso.',
+    benefits: [
+      'Tudo do plano mensal com desconto garantido.',
+      'Clube Correio do Povo incluso no pacote.',
+      'Fidelidade 12 meses.',
+      'Acervo digital.',
+      'Acesso completo ao conteúdo em vídeo e podcasts.',
+      'Prioridade na bancada de checagem de fatos.'
+    ],
+    accessLevel: 'premium',
+    bestValue: true
+  }
+];
+
+export const DEMO_USERS: Record<string, UserSession> = {
+  gratuito: {
+    id: 'usr-1',
+    name: 'Lucas Ferreira',
+    email: 'lucas.leitor@exemplo.com.br',
+    role: 'leitor_gratuito',
+    avatarUrl: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=160&q=80',
+    bio: 'Leitor atento das notícias do Brasil e entusiasta da liberdade de imprensa.',
+    phone: '(61) 98765-4321',
+    subscription: {
+      plan: 'gratuito',
+      status: 'ativo',
+      autoRenew: false
+    },
+    bookmarks: ['art-1', 'art-3'],
+    notificationPrefs: {
+      breakingNews: true,
+      dailyBrief: false,
+      factChecks: true,
+      weeklyDigest: true
+    },
+    createdAt: '15/01/2026'
+  },
+  digital: {
+    id: 'usr-2',
+    name: 'Mariana Duarte',
+    email: 'mariana.duarte@exemplo.com.br',
+    role: 'assinante_digital',
+    avatarUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=160&q=80',
+    bio: 'Advogada tributarista e assinante digital de O Patriota desde a fundação.',
+    phone: '(11) 99123-4567',
+    subscription: {
+      plan: 'digital',
+      status: 'ativo',
+      validUntil: '07/11/2026',
+      autoRenew: true
+    },
+    bookmarks: ['art-1', 'art-2', 'art-5'],
+    notificationPrefs: {
+      breakingNews: true,
+      dailyBrief: true,
+      factChecks: true,
+      weeklyDigest: true
+    },
+    createdAt: '03/03/2026'
+  },
+  premium: {
+    id: 'usr-3',
+    name: 'Coronel Roberto Antunes',
+    email: 'roberto.antunes@exemplo.com.br',
+    role: 'assinante_premium',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=160&q=80',
+    bio: 'Produtor rural, patriota e apoiador do jornalismo independente.',
+    phone: '(67) 99888-7766',
+    subscription: {
+      plan: 'premium',
+      status: 'ativo',
+      validUntil: '15/10/2027',
+      autoRenew: true
+    },
+    bookmarks: ['art-1', 'art-2', 'art-6', 'art-10'],
+    notificationPrefs: {
+      breakingNews: true,
+      dailyBrief: true,
+      factChecks: true,
+      weeklyDigest: true
+    },
+    createdAt: '10/02/2026'
+  },
+  jornalista: {
+    id: 'usr-4',
+    name: 'Thiago Vasconcellos',
+    email: 'thiago.jornalista@opatriota.com.br',
+    role: 'jornalista',
+    avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
+    bio: 'Repórter de Política em Brasília. Cobre Congresso Nacional e Ministério da Fazenda.',
+    phone: '(61) 98111-2233',
+    subscription: {
+      plan: 'premium',
+      status: 'ativo',
+      autoRenew: true
+    },
+    bookmarks: [],
+    notificationPrefs: {
+      breakingNews: true,
+      dailyBrief: true,
+      factChecks: true,
+      weeklyDigest: true
+    },
+    createdAt: '01/01/2026'
+  },
+  revisor: {
+    id: 'usr-5',
+    name: 'Helena Miranda',
+    email: 'helena.revisora@opatriota.com.br',
+    role: 'revisor',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
+    bio: 'Revisora de textos e estilo editorial. Especialista em apuração factual e normas ABNT/Manual O Patriota.',
+    phone: '(61) 98222-3344',
+    subscription: {
+      plan: 'premium',
+      status: 'ativo',
+      autoRenew: true
+    },
+    bookmarks: [],
+    notificationPrefs: {
+      breakingNews: true,
+      dailyBrief: true,
+      factChecks: true,
+      weeklyDigest: true
+    },
+    createdAt: '01/01/2026'
+  },
+  editor_chefe: {
+    id: 'usr-6',
+    name: 'Dr. Alberto Gonçalves',
+    email: 'alberto.editor@opatriota.com.br',
+    role: 'editor_chefe',
+    avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=160&q=80',
+    bio: 'Editor-Chefe e Membro do Conselho Editorial de O Patriota. Mais de 25 anos de jornalismo de cobertura nacional.',
+    phone: '(61) 98333-4455',
+    subscription: {
+      plan: 'premium',
+      status: 'ativo',
+      autoRenew: true
+    },
+    bookmarks: [],
+    notificationPrefs: {
+      breakingNews: true,
+      dailyBrief: true,
+      factChecks: true,
+      weeklyDigest: true
+    },
+    createdAt: '01/01/2026'
+  }
+};
+
+export const INITIAL_PAYMENTS: PaymentRecord[] = [
+  {
+    id: 'pay-101',
+    date: '07/10/2026',
+    amount: 29.90,
+    planName: 'Assinante Digital (Mensal)',
+    status: 'concluido',
+    invoiceNumber: 'NF-PAT-2026-08912'
+  },
+  {
+    id: 'pay-100',
+    date: '07/09/2026',
+    amount: 29.90,
+    planName: 'Assinante Digital (Mensal)',
+    status: 'concluido',
+    invoiceNumber: 'NF-PAT-2026-07841'
+  },
+  {
+    id: 'pay-099',
+    date: '07/08/2026',
+    amount: 29.90,
+    planName: 'Assinante Digital (Mensal)',
+    status: 'concluido',
+    invoiceNumber: 'NF-PAT-2026-06720'
+  }
+];
+
+export const INITIAL_MEDIA_ITEMS: MediaItem[] = [
+  {
+    id: 'med-1',
+    name: 'hero_congresso.jpg',
+    url: '/src/assets/images/hero_congresso.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Thiago Vasconcellos',
+    fileType: 'image/jpeg',
+    sizeBytes: 895992,
+    caption: 'Congresso Nacional em Brasília sob céu claro',
+    credits: 'Agência Senado / O Patriota'
+  },
+  {
+    id: 'med-2',
+    name: 'news_economia.jpg',
+    url: '/src/assets/images/news_economia.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Mariana Duarte',
+    fileType: 'image/jpeg',
+    sizeBytes: 879471,
+    caption: 'Gráficos de crescimento do PIB e mercado financeiro',
+    credits: 'Banco Central / Ilustração'
+  },
+  {
+    id: 'med-3',
+    name: 'news_seguranca.jpg',
+    url: '/src/assets/images/news_seguranca.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Redação Policial',
+    fileType: 'image/jpeg',
+    sizeBytes: 1065925,
+    caption: 'Operação integrada de segurança pública',
+    credits: 'Polícia Federal / Divulgação'
+  },
+  {
+    id: 'med-4',
+    name: 'news_infraestrutura.jpg',
+    url: '/src/assets/images/news_infraestrutura.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Thiago Vasconcellos',
+    fileType: 'image/jpeg',
+    sizeBytes: 957290,
+    caption: 'Ponte estaiada e malha viária moderna',
+    credits: 'Ministério dos Transportes'
+  },
+  {
+    id: 'med-5',
+    name: 'news_porto.jpg',
+    url: '/src/assets/images/news_porto.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Alberto Gonçalves',
+    fileType: 'image/jpeg',
+    sizeBytes: 1111840,
+    caption: 'Porto de Santos e carregamento de contêineres',
+    credits: 'Autoridade Portuária de Santos'
+  },
+  {
+    id: 'med-6',
+    name: 'news_saude.jpg',
+    url: '/src/assets/images/news_saude.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Helena Miranda',
+    fileType: 'image/jpeg',
+    sizeBytes: 744065,
+    caption: 'Atendimento médico no Sistema Único de Saúde',
+    credits: 'Ministério da Saúde'
+  },
+  {
+    id: 'med-7',
+    name: 'news_opiniao.jpg',
+    url: '/src/assets/images/news_opiniao.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Alberto Gonçalves',
+    fileType: 'image/jpeg',
+    sizeBytes: 739750,
+    caption: 'Escrita editorial com caneta e pergaminho',
+    credits: 'Acervo O Patriota'
+  },
+  {
+    id: 'med-8',
+    name: 'factcheck_smartphone.jpg',
+    url: '/src/assets/images/factcheck_smartphone.jpg',
+    uploadedAt: '07/10/2026',
+    uploadedBy: 'Núcleo de Checagem',
+    fileType: 'image/jpeg',
+    sizeBytes: 719745,
+    caption: 'Mensagens falsas em grupos de aplicativo móvel',
+    credits: 'Agência de Checagem O Patriota'
+  }
+];
+
+export const INITIAL_ARTICLES: Article[] = [
+  {
+    id: 'art-1',
+    slug: 'congresso-avanca-em-propostas-para-gerar-empregos-e-reduzir-o-custo-do-trabalho',
+    title: 'Congresso avança em propostas para gerar empregos e reduzir o custo do trabalho',
+    subtitle: 'Projetos em discussão no Parlamento buscam modernizar a legislação, estimular a economia e ampliar oportunidades para os brasileiros, mantendo os direitos trabalhistas.',
+    kicker: 'POLÍTICA NACIONAL',
+    category: 'politica',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `BRASÍLIA — O Congresso Nacional deu início nesta semana à tramitação de um conjunto articulado de medidas legislativas voltadas para o estímulo à atividade econômica, a desoneração da folha de pagamento e a simplificação dos encargos sobre a contratação formal.
+
+O pacote, construído após meses de audiências públicas com setores produtivos, confederações empresariais e entidades representativas dos trabalhadores, visa reduzir o chamado Custo Brasil sem retirar direitos constitucionais consolidados.
+
+Entre os principais eixos do projeto estão:
+1. **Incentivo à Primeira Contratação**: Redução transitória de contribuições patronais para jovens de até 24 anos e trabalhadores com mais de 50 anos em busca de recolocação no mercado formal.
+2. **Desburocratização de Obrigações Acessórias**: Unificação de declarações fiscais e trabalhistas em plataforma digital simplificada, eliminando redundâncias que oneram micro e pequenas empresas.
+3. **Segurança Jurídica nas Relações Laborais**: Consolidação de parâmetros objetivos para contratos de trabalho flexíveis, prestação de serviços e trabalho remoto.
+
+"Nosso compromisso fundamental é criar condições para que o empreendedor nacional possa abrir vagas com confiança, competitividade e segurança jurídica, gerando renda para as famílias brasileiras", destacou o relator da matéria na comissão especial.
+
+A expectativa da presidência da Câmara e do Senado é que a matéria seja apreciada em plenário nas próximas semanas, antes do recesso legislativo.`,
+    author: 'Thiago Vasconcellos',
+    authorId: 'usr-4',
+    authorRole: 'Correspondente Político em Brasília',
+    publishedAt: '07 de outubro de 2026 às 14:32',
+    updatedAt: '07 de outubro de 2026 às 15:10',
+    readTimeMinutes: 4,
+    imageUrl: '/src/assets/images/hero_congresso.jpg',
+    imageCaption: 'Propostas em análise no Congresso Nacional podem impactar diretamente o mercado de trabalho nos próximos anos.',
+    imageCredits: 'Agência Senado / O Patriota',
+    sourceName: 'Agência Senado e Agência Câmara',
+    sourceUrl: 'https://www.camara.leg.br',
+    sourcesConsulted: ['Relatório Preliminar PL 4.218/2026', 'Pronunciamento oficial na CCJ', 'Dados CAGED/MTE'],
+    tags: ['Congresso Nacional', 'Emprego', 'Reforma Trabalhista', 'Economia'],
+    priority: 'alta',
+    auditLog: [
+      {
+        id: 'aud-1',
+        timestamp: '07/10/2026 10:15',
+        userName: 'Thiago Vasconcellos',
+        userRole: 'jornalista',
+        action: 'Criação da matéria em rascunho'
+      },
+      {
+        id: 'aud-2',
+        timestamp: '07/10/2026 12:30',
+        userName: 'Thiago Vasconcellos',
+        userRole: 'jornalista',
+        action: 'Envio para revisão editorial',
+        previousStatus: 'RASCUNHO',
+        newStatus: 'EM REVISÃO'
+      },
+      {
+        id: 'aud-3',
+        timestamp: '07/10/2026 13:40',
+        userName: 'Helena Miranda',
+        userRole: 'revisor',
+        action: 'Revisão textual e checagem de fontes concluída'
+      },
+      {
+        id: 'aud-4',
+        timestamp: '07/10/2026 14:30',
+        userName: 'Dr. Alberto Gonçalves',
+        userRole: 'editor_chefe',
+        action: 'Aprovação e publicação no portal',
+        previousStatus: 'EM REVISÃO',
+        newStatus: 'PUBLICADA',
+        notes: 'Pauta principal da manchete aprovada com destaques do Congresso.'
+      }
+    ]
+  },
+  {
+    id: 'art-2',
+    slug: 'pib-mostra-sinais-de-recuperacao-e-reforca-expectativa-de-crescimento',
+    title: 'PIB mostra sinais de recuperação e reforça expectativa de crescimento',
+    subtitle: 'Setores de serviços e agronegócio puxam alta e indicam um segundo semestre mais positivo.',
+    kicker: 'ECONOMIA',
+    category: 'economia',
+    accessLevel: 'assinante',
+    editorialStatus: 'PUBLICADA',
+    content: `Os indicadores antecedentes de atividade econômica divulgados pelo Banco Central e pelo IBGE confirmam uma trajetória consistente de expansão da economia brasileira no terceiro trimestre.
+
+O Produto Interno Bruto (PIB) apresentou avanço impulsionado sobretudo pela safra recorde do agronegócio no Centro-Oeste e pela recuperação expressiva do setor de serviços, que responde por mais de 70% dos empregos formais gerados no país.
+
+Analistas de mercado revisaram para cima as projeções de crescimento anual, destacando o controle gradual dos juros futuros e a confiança dos agentes produtivos.
+
+Em análise detalhada do boletim Focus, a taxa básica de juros projetada para o encerramento do exercício aponta estabilidade favorável a investimentos de capital intensivo na construção civil e na indústria mecânica de precisão.`,
+    author: 'Equipe de Economia O Patriota',
+    authorRole: 'Analista Econômico',
+    publishedAt: '07 de outubro de 2026 às 13:45',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_economia.jpg',
+    imageCaption: 'Indicadores do mercado financeiro e produção registram viés de alta.',
+    sourceName: 'Banco Central do Brasil / IBGE',
+    sourceUrl: 'https://www.bcb.gov.br',
+    sourcesConsulted: ['Boletim Focus do Banco Central', 'Série histórica do PIB trimestral IBGE'],
+    tags: ['PIB', 'Economia', 'Agronegócio', 'Serviços'],
+    priority: 'alta'
+  },
+  {
+    id: 'art-3',
+    slug: 'operacao-integrada-combate-faccoes-em-quatro-estados',
+    title: 'Operação integrada combate facções em quatro estados',
+    subtitle: 'Ação reúne forças federais e estaduais para desarticular o crime organizado e reduzir a violência.',
+    kicker: 'SEGURANÇA',
+    category: 'seguranca',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `Uma megaoperação deflagrada de forma coordenada entre a Polícia Federal, a Polícia Rodoviária Federal e as polícias civis e militares de quatro unidades da federação resultou no cumprimento de mais de 80 mandados de busca, apreensão e prisão preventiva.
+
+O foco central da ofensiva foi o bloqueio de ativos financeiros e a interceptação de rotas logísticas utilizadas por organizações criminosas interestaduais para o tráfico de entorpecentes e armamento pesado.
+
+As autoridades policiais enfatizaram que a inteligência integrada e o compartilhamento de dados estratégicos foram determinantes para o sucesso das incursões sem registro de confronto armado em áreas residenciais.`,
+    author: 'Redação de Segurança Pública',
+    authorRole: 'Repórter Policial',
+    publishedAt: '07 de outubro de 2026 às 13:15',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_seguranca.jpg',
+    imageCaption: 'Forças de segurança pública atuam em cooperação tática interestadual.',
+    sourceName: 'Ministério da Justiça e Segurança Pública',
+    sourceUrl: 'https://www.gov.br/mj',
+    priority: 'alta'
+  },
+  {
+    id: 'art-4',
+    slug: 'farmacia-popular-segue-como-um-dos-maiores-programas-sociais-do-pais',
+    title: 'Farmácia Popular segue como um dos maiores programas sociais do país',
+    subtitle: 'Mais de 24 milhões de brasileiros foram beneficiados em 2026, segundo dados do Ministério da Saúde.',
+    kicker: 'SAÚDE',
+    category: 'saude',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `O programa Farmácia Popular do Brasil atingiu a marca histórica de 24 milhões de cidadãos atendidos com medicamentos gratuitos ou com até 90% de desconto neste ano.
+
+Com ampliação do rol de itens essenciais para hipertensão, diabetes, asma e osteoporose, a iniciativa consolida-se como pilar fundamental da atenção primária à saúde, aliviando o orçamento familiar de milhões de aposentados e trabalhadores de baixa renda.
+
+A pasta da Saúde reiterou que o orçamento do programa está integralmente garantido e que a rede credenciada conta atualmente com mais de 31 mil farmácias conveniadas em todo o território nacional.`,
+    author: 'Redação de Saúde',
+    authorRole: 'Repórter de Saúde Pública',
+    publishedAt: '07 de outubro de 2026 às 12:48',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_saude.jpg',
+    imageCaption: 'Rede credenciada distribui medicamentos essenciais com gratuidade.',
+    sourceName: 'Ministério da Saúde',
+    sourceUrl: 'https://www.gov.br/saude',
+    priority: 'normal'
+  },
+  {
+    id: 'art-5',
+    slug: 'reforma-administrativa-volta-ao-debate-no-congresso',
+    title: 'Reforma administrativa volta ao debate no Congresso',
+    subtitle: 'Parlamentares discutem medidas para tornar o Estado mais eficiente e reduzir gastos públicos.',
+    kicker: 'POLÍTICA',
+    category: 'politica',
+    accessLevel: 'assinante',
+    editorialStatus: 'PUBLICADA',
+    content: `A modernização da máquina pública voltou a ocupar o centro dos debates nas lideranças partidárias em Brasília. O objetivo central é limitar supersalários, instituir avaliação de desempenho periódica e direcionar recursos para a ponta do atendimento: saúde, segurança e educação.
+
+O estudo de impacto fiscal encomendado pela bancada reformista estima uma economia acumulada superior a R$ 120 bilhões ao longo de dez anos, decorrente primordialmente da digitalização de serviços e do fim de penduricalhos remuneratórios no alto funcionalismo.`,
+    author: 'Thiago Vasconcellos',
+    authorRole: 'Repórter',
+    publishedAt: '07 de outubro de 2026 às 11:20',
+    readTimeMinutes: 2,
+    imageUrl: '/src/assets/images/hero_congresso.jpg',
+    imageCaption: 'Esplanada dos Ministérios sedia novas rodadas de negociação.',
+    sourceName: 'Congresso em Foco / Câmara',
+    priority: 'normal'
+  },
+  {
+    id: 'art-6',
+    slug: 'investimentos-em-infraestrutura-podem-colocar-o-pais-em-um-novo-ciclo-de-desenvolvimento',
+    title: 'Investimentos em infraestrutura podem colocar o país em um novo ciclo de desenvolvimento',
+    subtitle: 'Projetos em rodovias, ferrovias e energia são apontados como essenciais para aumentar a competitividade do Brasil.',
+    kicker: 'BRASIL',
+    category: 'brasil',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `Novas concessões rodoviárias e a expansão de malhas ferroviárias prometem reduzir em até 20% os custos de frete do agronegócio até os portos do Sul e Sudeste, atraindo capital privado de longo prazo.`,
+    author: 'Redação de Infraestrutura',
+    authorRole: 'Analista de Logística',
+    publishedAt: '07 de outubro de 2026 às 10:50',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_infraestrutura.jpg',
+    imageCaption: 'Obras de escoamento e mobilidade avançam nas regiões metropolitanas.',
+    sourceName: 'Ministério dos Transportes / ANTT',
+    priority: 'normal'
+  },
+  {
+    id: 'art-7',
+    slug: 'exportacoes-brasileiras-batem-recorde-e-fortalecem-o-agro',
+    title: 'Exportações brasileiras batem recorde e fortalecem o agro',
+    subtitle: 'Crescimento nas vendas externas impulsiona a economia e amplia a geração de empregos no setor produtivo.',
+    kicker: 'ECONOMIA',
+    category: 'economia',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `A balança comercial brasileira registrou superávit histórico no acumulado do ano. Os embarques de soja, carne bovina, café e celulose alcançaram novos mercados na Ásia e no Oriente Médio, fortalecendo a geração de divisas internacionais.`,
+    author: 'Redação Agro & Negócios',
+    authorRole: 'Repórter de Comércio Exterior',
+    publishedAt: '07 de outubro de 2026 às 10:15',
+    readTimeMinutes: 2,
+    imageUrl: '/src/assets/images/news_porto.jpg',
+    imageCaption: 'Terminais portuários operam em capacidade máxima de embarque.',
+    sourceName: 'MDIC / Secex',
+    priority: 'normal'
+  },
+  {
+    id: 'art-8',
+    slug: 'estados-ampliam-acoes-contra-o-crime-organizado',
+    title: 'Estados ampliam ações contra o crime organizado',
+    subtitle: 'Novas operações e tecnologia reforçam o combate às facções criminosas em todo o país.',
+    kicker: 'SEGURANÇA',
+    category: 'seguranca',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `Câmeras corporais com reconhecimento facial e drones de patrulhamento tático estão sendo integrados às centrais de comando estaduais para sufocar esquemas de extorsão e lavagem de dinheiro.`,
+    author: 'Redação de Segurança',
+    authorRole: 'Repórter',
+    publishedAt: '07 de outubro de 2026 às 09:40',
+    readTimeMinutes: 2,
+    imageUrl: '/src/assets/images/news_seguranca.jpg',
+    imageCaption: 'Tecnologia e patrulhamento ostensivo ganham reforço nos estados.',
+    sourceName: 'Conselho Nacional de Secretários de Segurança',
+    priority: 'normal'
+  },
+  {
+    id: 'art-9',
+    slug: 'mais-brasileiros-tem-acesso-a-atendimentos-especializados',
+    title: 'Mais brasileiros têm acesso a atendimentos especializados',
+    subtitle: 'Programa de expansão da rede pública reduz filas e melhora o atendimento no SUS.',
+    kicker: 'SAÚDE',
+    category: 'saude',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `Mutirões cirúrgicos e a digitalização de prontuários médicos permitiram encurtar o tempo de espera por exames complexos em mais de doze capitais brasileiras nos últimos seis meses.`,
+    author: 'Redação de Saúde',
+    authorRole: 'Repórter',
+    publishedAt: '07 de outubro de 2026 às 09:00',
+    readTimeMinutes: 2,
+    imageUrl: '/src/assets/images/news_saude.jpg',
+    imageCaption: 'Médicos e especialistas ampliam atendimentos ambulatoriais.',
+    sourceName: 'Ministério da Saúde / CONASS',
+    priority: 'normal'
+  },
+  {
+    id: 'art-10',
+    slug: 'o-brasil-que-queremos-para-as-proximas-geracoes',
+    title: 'O Brasil que queremos para as próximas gerações',
+    subtitle: 'Um olhar sobre os desafios e as oportunidades para construir um país mais justo, livre e próspero.',
+    kicker: 'OPINIÃO',
+    category: 'opiniao',
+    accessLevel: 'premium',
+    editorialStatus: 'PUBLICADA',
+    content: `Construir uma nação próspera exige apego à verdade factual, respeito irrestrito à ordem legal e apreço pela liberdade de empreender e pensar. As próximas gerações não herdarão apenas nossos números econômicos, mas sobretudo a solidez das nossas instituições republicanas e a coragem com que enfrentamos os desafios do presente.
+
+Neste ensaio exclusivo para assinantes Premium, aprofundamos os três vetores estratégicos indispensáveis para garantir a soberania nacional frente às transformações geopolíticas globais: autonomia energética, segurança alimentar e desregulamentação dos polos de tecnologia aplicada.`,
+    author: 'Dr. Alberto Gonçalves',
+    authorId: 'usr-6',
+    authorRole: 'Conselho Editorial O Patriota',
+    publishedAt: '07 de outubro de 2026 às 08:30',
+    readTimeMinutes: 4,
+    imageUrl: '/src/assets/images/news_opiniao.jpg',
+    imageCaption: 'A reflexão sobre os rumos do país é dever cívico de todo cidadão.',
+    sourceName: 'Editorial O Patriota',
+    priority: 'normal'
+  },
+  // Artigo em Revisão na Redação (para demonstração funcional)
+  {
+    id: 'art-11',
+    slug: 'projeto-de-desregulamentacao-das-startups-avanca-no-senado',
+    title: 'Projeto de desregulamentação de startups e inovação ganha parecer favorável no Senado',
+    subtitle: 'Texto prevê incentivo fiscal para investidores anjo e elimina exigências cartoriais para empresas de tecnologia.',
+    kicker: 'TECNOLOGIA & NEGÓCIOS',
+    category: 'tecnologia',
+    accessLevel: 'assinante',
+    editorialStatus: 'EM REVISÃO',
+    content: `BRASÍLIA — A Comissão de Ciência, Tecnologia, Inovação e Informática do Senado Federal aprovou por ampla maioria o substitutivo que simplifica o marco legal das startups e empreendimentos de base tecnológica.
+
+O projeto estabelece que empresas com faturamento anual de até R$ 16 milhões poderão adotar regimes contábeis digitais simplificados, dispensando livros físicos e autenticações burocráticas que oneravam o ecossistema brasileiro.
+
+Além disso, foram criados incentivos claros para aportes de capital semente, equiparando a segurança jurídica dos investidores aos modelos consagrados na União Europeia e nos Estados Unidos.`,
+    author: 'Thiago Vasconcellos',
+    authorId: 'usr-4',
+    authorRole: 'Jornalista',
+    publishedAt: 'Pendente de publicação',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_economia.jpg',
+    imageCaption: 'Comissão do Senado debate estímulo a investimentos no ecossistema tech.',
+    sourceName: 'Agência Senado',
+    sourceUrl: 'https://www12.senado.leg.br',
+    sourcesConsulted: ['Parecer do relator na CCT', 'Manifestação da Associação Brasileira de Startups'],
+    tags: ['Startups', 'Inovação', 'Senado', 'Tecnologia'],
+    priority: 'alta',
+    reviewNotes: 'Aguardando validação do texto final pelo Revisor/Editor.',
+    auditLog: [
+      {
+        id: 'aud-10',
+        timestamp: '08/10/2026 14:10',
+        userName: 'Thiago Vasconcellos',
+        userRole: 'jornalista',
+        action: 'Criação da matéria'
+      },
+      {
+        id: 'aud-11',
+        timestamp: '08/10/2026 15:00',
+        userName: 'Thiago Vasconcellos',
+        userRole: 'jornalista',
+        action: 'Submissão para revisão',
+        previousStatus: 'RASCUNHO',
+        newStatus: 'EM REVISÃO'
+      }
+    ]
+  },
+  // Artigo com Solicitação de Correções
+  {
+    id: 'art-12',
+    slug: 'balanco-das-operacoes-de-combate-ao-narcotrafico-na-fronteira',
+    title: 'Balanço preliminar aponta recorde de interceptações na fronteira sul',
+    subtitle: 'Forças policiais apreenderam carregamentos de alta periculosidade nas rodovias de integração.',
+    kicker: 'SEGURANÇA NACIONAL',
+    category: 'seguranca',
+    accessLevel: 'aberto',
+    editorialStatus: 'CORREÇÕES',
+    content: `Ações coordenadas na faixa de fronteira resultaram no desmantelamento de rotas logísticas ilícitas nos últimos trinta dias. O balanço reúne dados das secretarias de segurança do Paraná e Santa Catarina em conjunto com a Polícia Rodoviária Federal.`,
+    author: 'Thiago Vasconcellos',
+    authorId: 'usr-4',
+    authorRole: 'Jornalista',
+    publishedAt: 'Pendente de correções',
+    readTimeMinutes: 2,
+    imageUrl: '/src/assets/images/news_seguranca.jpg',
+    imageCaption: 'Apreensões na malha rodoviária federal.',
+    sourceName: 'PRF / Ministério da Justiça',
+    sourcesConsulted: ['Boletim da Delegacia de Foz do Iguaçu'],
+    tags: ['Segurança', 'Fronteira', 'Polícia Federal'],
+    priority: 'normal',
+    reviewNotes: 'Por favor, confirmar os números exatos com a assessoria da Polícia Federal antes de submeter novamente para aprovação. Inserir link do relatório oficial.',
+    auditLog: [
+      {
+        id: 'aud-20',
+        timestamp: '08/10/2026 11:00',
+        userName: 'Thiago Vasconcellos',
+        userRole: 'jornalista',
+        action: 'Submissão para revisão'
+      },
+      {
+        id: 'aud-21',
+        timestamp: '08/10/2026 13:20',
+        userName: 'Helena Miranda',
+        userRole: 'revisor',
+        action: 'Devolvido para correções',
+        previousStatus: 'EM REVISÃO',
+        newStatus: 'CORREÇÕES',
+        notes: 'Confirmar os números exatos com a assessoria da Polícia Federal antes de submeter novamente para aprovação.'
+      }
+    ]
+  },
+  {
+    id: 'art-13',
+    slug: 'brasil-amplia-acordos-comerciais-bilaterais-na-asia',
+    title: 'Brasil amplia acordos bilaterais e abre novos mercados para produtos agrícolas na Ásia',
+    subtitle: 'Missão comercial em Tóquio e Jacarta consolida habilitação de frigoríficos brasileiros e isenção tarifária para café e cacau.',
+    kicker: 'MUNDO & DIPLOMACIA',
+    category: 'mundo',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `JACARTA — A diplomacia econômica brasileira concluiu nesta semana uma rodada decisiva de negociações comerciais no sudeste asiático. Os memorandos de entendimento firmados garantem a abertura imediata do mercado da Indonésia e do Japão para cortes nobres de carne bovina e café especial com certificação de origem.
+
+O Ministério das Relações Exteriores destacou que as tratativas preservaram o equilíbrio balança bilateral, sem concessões que prejudicassem a indústria manufatureira brasileira.
+
+"Estamos demonstrando que a qualidade sanitária, a sustentabilidade e a eficiência do agronegócio brasileiro são reconhecidas e requisitadas pelos maiores importadores mundiais", afirmou a delegação oficial em coletiva.`,
+    author: 'Beatriz Albuquerque',
+    authorId: 'usr-8',
+    authorRole: 'Correspondente de Assuntos Internacionais',
+    publishedAt: '07 de outubro de 2026 às 15:40',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_porto.jpg',
+    imageCaption: 'Delegação encerra rodada comercial na Ásia com acordos aduaneiros históricos.',
+    sourceName: 'Itamaraty / Ministério da Agricultura',
+    sourceUrl: 'https://www.gov.br/mre',
+    sourcesConsulted: ['Boletim Oficial do MRE', 'Associação Brasileira de Frigoríficos'],
+    tags: ['Comércio Exterior', 'Ásia', 'Agronegócio', 'Diplomacia'],
+    priority: 'normal'
+  },
+  {
+    id: 'art-14',
+    slug: 'restauracao-do-patrimonio-historico-nacional-mobiliza-especialistas',
+    title: 'Restauro de monumentos e centros históricos valoriza a memória republicana e atrai turismo cívico',
+    subtitle: 'Obras de preservação em Ouro Preto, Salvador e no Eixo Monumental de Brasília recebem aporte público-privado.',
+    kicker: 'CULTURA & MEMÓRIA',
+    category: 'cultura',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `A preservação do patrimônio arquitetônico e histórico nacional ganha novo fôlego com a entrega de obras de restauração em três capitais emblemáticas do país.
+
+O plano abrange a recuperação de fachadas coloniais em Ouro Preto, restauração de fortes marítimos em Salvador e requalificação dos jardins de Burle Marx no centro de Brasília.
+
+Especialistas ressaltam que o resgate do patrimônio cívico fortalece a autoestima nacional, atrai turismo qualificado e gera renda para restauradores, artesãos e historiadores locais.`,
+    author: 'Helena Miranda',
+    authorId: 'usr-5',
+    authorRole: 'Editora de Cultura e Cidadania',
+    publishedAt: '07 de outubro de 2026 às 14:15',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/news_opiniao.jpg',
+    imageCaption: 'Trabalho minucioso de restauradores recupera detalhes de edifícios históricos.',
+    sourceName: 'IPHAN / Ministério da Cultura',
+    sourceUrl: 'https://www.gov.br/iphan',
+    sourcesConsulted: ['Relatório de Bens Tombados IPHAN', 'Secretaria de Cultura do DF'],
+    tags: ['Patrimônio Histórico', 'Cultura', 'Brasília', 'Turismo Cívico'],
+    priority: 'normal'
+  },
+  {
+    id: 'art-15',
+    slug: 'projeto-de-formacao-esportiva-de-base-atinge-cem-mil-jovens-no-brasil',
+    title: 'Iniciativas de esporte de base e escolas cívicas revelam novos talentos para o atletismo nacional',
+    subtitle: 'Com apoio de atletas olímpicos e Forças Armadas, programa descentralizado leva pistas oficiais e treinos a regiões periféricas.',
+    kicker: 'ESPORTES & FORMAÇÃO',
+    category: 'esportes',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: `O programa nacional de formação esportiva de base ultrapassou a marca de 100 mil crianças e jovens matriculados em polos de atletismo, judô, natação e ginástica olímpica em 18 estados.
+
+A iniciativa combina bolsas de treinamento com acompanhamento pedagógico rigoroso, exigindo frequência escolar e bom desempenho disciplinar.
+
+Ex-medalhistas olímpicos brasileiros participam como mentores dos núcleos regionais, transmitindo valores de disciplina, patriotismo, superação e espírito esportivo para a nova geração.`,
+    author: 'Roberto Siqueira',
+    authorId: 'usr-7',
+    authorRole: 'Repórter Especial',
+    publishedAt: '07 de outubro de 2026 às 11:55',
+    readTimeMinutes: 3,
+    imageUrl: '/src/assets/images/hero_congresso.jpg',
+    imageCaption: 'Jovens atletas celebram índice de qualificação para os Jogos da Juventude.',
+    sourceName: 'Comitê Olímpico do Brasil / Ministério do Esporte',
+    sourceUrl: 'https://www.cob.org.br',
+    sourcesConsulted: ['Boletim do COB', 'Programa Atletas de Alto Rendimento'],
+    tags: ['Esportes', 'Juventude', 'Atletismo', 'Olimpismo'],
+    priority: 'normal'
+  }
+];
+
+export const INITIAL_FACT_CHECKS: FactCheckItem[] = [
+  {
+    id: 'fc-1',
+    slug: 'e-falso-que-o-governo-vai-acabar-com-a-farmacia-popular',
+    title: 'É falso que o governo vai acabar com a Farmácia Popular. Confira os documentos.',
+    claim: 'Vídeos que circulam no WhatsApp e no TikTok afirmam que o programa Farmácia Popular será extinto em 2027.',
+    claimant: 'Postagens virais em redes sociais e correntes de mensagens',
+    verdict: 'FALSO',
+    imageUrl: '/src/assets/images/factcheck_smartphone.jpg',
+    context: 'Publicações desinformativas manipularam trechos do orçamento federal para sugerir o encerramento do fornecimento gratuito de medicamentos.',
+    conclusion: 'A Lei Orçamentária Anual (LOA) e os decretos vigentes mantêm o orçamento integralmente alocado e inclusive expandiram a lista de medicamentos gratuitos para os beneficiários.',
+    documents: [
+      { title: 'Diário Oficial da União — Dotação Orçamentária da Saúde', url: 'https://in.gov.br' },
+      { title: 'Nota Oficial de Esclarecimento do Ministério da Saúde', url: 'https://gov.br/saude' }
+    ],
+    factChecker: 'Agência de Checagem O Patriota',
+    date: '07 de outubro de 2026'
+  },
+  {
+    id: 'fc-2',
+    slug: 'nao-ha-proposta-oficial-para-extinguir-a-clt',
+    title: 'Não há proposta oficial para extinguir a CLT. Entenda o que diz o plano de governo.',
+    claim: 'Alegação de que projeto em tramitação no Congresso revoga a Consolidação das Leis do Trabalho integralmente.',
+    claimant: 'Mensagens em grupos de mensageria privada',
+    verdict: 'ENGANOSO',
+    imageUrl: '/src/assets/images/news_opiniao.jpg',
+    context: 'Propostas de modernização laboral tratam de desoneração e flexibilização pontual, sem extinguir os direitos previstos no artigo 7º da Constituição Federal.',
+    conclusion: 'O texto em discussão não elimina a CLT, mantendo férias, 13º salário e FGTS intactos.',
+    documents: [
+      { title: 'Texto Inicial da Proposta de Lei em Tramitação', url: 'https://camara.leg.br' },
+      { title: 'Constituição Federal — Artigo 7º (Direitos Sociais)', url: 'https://planalto.gov.br' }
+    ],
+    factChecker: 'Núcleo de Verificação Constitucional',
+    date: '06 de outubro de 2026'
+  },
+  {
+    id: 'fc-3',
+    slug: 'e-mentira-que-sera-criado-um-novo-imposto-para-o-pix',
+    title: 'É mentira que será criado um novo imposto para o Pix. Veja a checagem.',
+    claim: 'Afirmação de que transferências via Pix terão cobrança compulsória de 1,5% de imposto em transações entre pessoas físicas.',
+    claimant: 'Vídeos com cortes fora de contexto no Instagram',
+    verdict: 'FALSO',
+    imageUrl: '/src/assets/images/news_economia.jpg',
+    context: 'A Constituição e as resoluções do Banco Central garantem a gratuidade universal do Pix para pessoas físicas.',
+    conclusion: 'Nem o Banco Central nem o Ministério da Fazenda encaminharam qualquer proposição tributária incidindo sobre transferências de pessoas físicas no Pix.',
+    documents: [
+      { title: 'Resolução BCB nº 1/2020 — Regulamento do Pix', url: 'https://bcb.gov.br' },
+      { title: 'Manifestação da Receita Federal sobre Tributação de Meios de Pagamento', url: 'https://gov.br/receitafederal' }
+    ],
+    factChecker: 'Agência de Checagem O Patriota',
+    date: '05 de outubro de 2026'
+  }
+];
+
+export const INITIAL_RSS_SOURCES: RssSource[] = [
+  // PARTIDOS POLÍTICOS
+  {
+    id: 1,
+    name: 'Partido NOVO',
+    sourceCategory: 'Partidos políticos',
+    uf: 'BR',
+    officialUrl: 'https://novo.org.br/',
+    newsUrl: 'https://novo.org.br/noticias/',
+    rssUrl: '',
+    sourceType: 'partido',
+    category: 'politica',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'SEM RSS (MONITORAMENTO MANUAL)',
+    isActive: true,
+    pollFrequencyMin: 120,
+    lastPolled: 'Hoje às 16:00',
+    lastSuccess: 'Hoje às 16:00',
+    lastError: null,
+    lastVerified: 'Hoje às 16:00',
+    lastImported: 'Ontem às 18:30',
+    itemsReceived: 14,
+    notes: 'Portal oficial do Partido NOVO. Monitoramento manual da editoria de notícias.'
+  },
+  {
+    id: 2,
+    name: 'Partido Liberal (PL)',
+    sourceCategory: 'Partidos políticos',
+    uf: 'BR',
+    officialUrl: 'https://partidoliberal.org.br/',
+    newsUrl: 'https://partidoliberal.org.br/noticias/',
+    rssUrl: '',
+    sourceType: 'partido',
+    category: 'politica',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'SEM RSS (MONITORAMENTO MANUAL)',
+    isActive: true,
+    pollFrequencyMin: 120,
+    lastPolled: 'Hoje às 15:55',
+    lastSuccess: 'Hoje às 15:55',
+    lastError: null,
+    lastVerified: 'Hoje às 15:55',
+    lastImported: 'Hoje às 11:20',
+    itemsReceived: 21,
+    notes: 'Assessoria de imprensa e notícias do Partido Liberal.'
+  },
+
+  // GOVERNO E INSTITUIÇÕES FEDERAIS
+  {
+    id: 3,
+    name: 'Presidência da República — Palácio do Planalto',
+    sourceCategory: 'Presidência da República',
+    uf: 'BR',
+    officialUrl: 'https://www.gov.br/planalto/',
+    newsUrl: 'https://www.gov.br/planalto/pt-br/acompanhe-o-planalto/noticias',
+    rssUrl: '',
+    sourceType: 'governo',
+    category: 'politica',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: 'Hoje às 16:15',
+    lastSuccess: 'Hoje às 16:15',
+    lastError: null,
+    lastVerified: 'Hoje às 16:15',
+    lastImported: 'Hoje às 15:00',
+    itemsReceived: 42,
+    notes: 'Despachos oficiais, atos assinados e discursos presidenciais.'
+  },
+  {
+    id: 4,
+    name: 'Governo Federal do Brasil',
+    sourceCategory: 'Governo Federal',
+    uf: 'BR',
+    officialUrl: 'https://www.gov.br/',
+    newsUrl: 'https://www.gov.br/pt-br/noticias',
+    rssUrl: '',
+    sourceType: 'governo',
+    category: 'brasil',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: 'Hoje às 16:20',
+    lastSuccess: 'Hoje às 16:20',
+    lastError: null,
+    lastVerified: 'Hoje às 16:20',
+    lastImported: 'Hoje às 15:30',
+    itemsReceived: 65,
+    notes: 'Central integrada de notícias de ministérios e secretarias federais.'
+  },
+  {
+    id: 5,
+    name: 'Banco Central do Brasil (BCB)',
+    sourceCategory: 'Banco Central',
+    uf: 'BR',
+    officialUrl: 'https://www.bcb.gov.br/',
+    newsUrl: 'https://www.bcb.gov.br/noticias/',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'economia',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 16:10',
+    lastSuccess: 'Hoje às 16:10',
+    lastError: null,
+    lastVerified: 'Hoje às 16:10',
+    lastImported: 'Hoje às 14:00',
+    itemsReceived: 38,
+    notes: 'Notas do COPOM, relatórios Focus, regulamentação do Pix e mercado financeiro.'
+  },
+  {
+    id: 6,
+    name: 'Polícia Federal (PF)',
+    sourceCategory: 'Polícia Federal',
+    uf: 'BR',
+    officialUrl: 'https://www.gov.br/pf/pt-br',
+    newsUrl: 'https://www.gov.br/pf/pt-br/assuntos/noticias/',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'seguranca',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: 'Hoje às 16:05',
+    lastSuccess: 'Hoje às 16:05',
+    lastError: null,
+    lastVerified: 'Hoje às 16:05',
+    lastImported: 'Hoje às 13:45',
+    itemsReceived: 53,
+    notes: 'Operações policiais, combate à corrupção, crimes de fronteira e cibernéticos.'
+  },
+  {
+    id: 7,
+    name: 'Polícia Rodoviária Federal (PRF)',
+    sourceCategory: 'Polícia Rodoviária Federal',
+    uf: 'BR',
+    officialUrl: 'https://www.gov.br/prf/pt-br',
+    newsUrl: 'https://www.gov.br/prf/pt-br/noticias/',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'seguranca',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 45,
+    lastPolled: 'Hoje às 15:50',
+    lastSuccess: 'Hoje às 15:50',
+    lastError: null,
+    lastVerified: 'Hoje às 15:50',
+    lastImported: 'Hoje às 12:15',
+    itemsReceived: 39,
+    notes: 'Apreensões em rodovias federais, fiscalização e segurança viária.'
+  },
+  {
+    id: 8,
+    name: 'Congresso Nacional',
+    sourceCategory: 'Congresso Nacional',
+    uf: 'BR',
+    officialUrl: 'https://www.congressonacional.leg.br/',
+    newsUrl: 'https://www.congressonacional.leg.br/noticias',
+    rssUrl: '',
+    sourceType: 'congresso',
+    category: 'politica',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 16:15',
+    lastSuccess: 'Hoje às 16:15',
+    lastError: null,
+    lastVerified: 'Hoje às 16:15',
+    lastImported: 'Hoje às 14:20',
+    itemsReceived: 27,
+    notes: 'Sessões conjuntas, vetos presidenciais e orçamentos da União.'
+  },
+  {
+    id: 9,
+    name: 'Câmara dos Deputados — Agência Câmara',
+    sourceCategory: 'Congresso Nacional',
+    uf: 'BR',
+    officialUrl: 'https://www.camara.leg.br/',
+    newsUrl: 'https://www.camara.leg.br/noticias/',
+    rssUrl: 'https://www.camara.leg.br/noticias/rss/ultimas-noticias',
+    sourceType: 'congresso',
+    category: 'politica',
+    integrationType: 'RSS Feed',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: 'Hoje às 16:22',
+    lastSuccess: 'Hoje às 16:22',
+    lastError: null,
+    lastVerified: 'Hoje às 16:22',
+    lastImported: 'Hoje às 16:05',
+    itemsReceived: 94,
+    notes: 'Feed oficial RSS ativo de votações, CPIs e comissões da Câmara.'
+  },
+  {
+    id: 10,
+    name: 'Senado Federal — Agência Senado',
+    sourceCategory: 'Congresso Nacional',
+    uf: 'BR',
+    officialUrl: 'https://www12.senado.leg.br/',
+    newsUrl: 'https://www12.senado.leg.br/noticias',
+    rssUrl: 'https://www12.senado.leg.br/noticias/feed/todas/rss',
+    sourceType: 'congresso',
+    category: 'politica',
+    integrationType: 'RSS Feed',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: 'Hoje às 16:25',
+    lastSuccess: 'Hoje às 16:25',
+    lastError: null,
+    lastVerified: 'Hoje às 16:25',
+    lastImported: 'Hoje às 16:12',
+    itemsReceived: 88,
+    notes: 'Feed oficial RSS do Senado. Votações em plenário e sabatinas.'
+  },
+  {
+    id: 11,
+    name: 'Supremo Tribunal Federal (STF)',
+    sourceCategory: 'Poder Judiciário',
+    uf: 'BR',
+    officialUrl: 'https://portal.stf.jus.br/',
+    newsUrl: 'https://portal.stf.jus.br/noticias/',
+    rssUrl: 'https://portal.stf.jus.br/rss/noticias.xml',
+    sourceType: 'tribunal',
+    category: 'politica',
+    integrationType: 'RSS Feed',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 16:00',
+    lastSuccess: 'Hoje às 16:00',
+    lastError: null,
+    lastVerified: 'Hoje às 16:00',
+    lastImported: 'Hoje às 15:40',
+    itemsReceived: 41,
+    notes: 'Julgamentos plenários, decisões monocráticas e repercussão geral.'
+  },
+  {
+    id: 12,
+    name: 'Tribunal Superior Eleitoral (TSE)',
+    sourceCategory: 'Tribunais eleitorais',
+    uf: 'BR',
+    officialUrl: 'https://www.tse.jus.br/',
+    newsUrl: 'https://www.tse.jus.br/comunicacao/noticias',
+    rssUrl: '',
+    sourceType: 'tribunal',
+    category: 'politica',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 15:40',
+    lastSuccess: 'Hoje às 15:40',
+    lastError: null,
+    lastVerified: 'Hoje às 15:40',
+    lastImported: 'Hoje às 14:10',
+    itemsReceived: 32,
+    notes: 'Resoluções eleitorais, prestação de contas partidárias e biometria.'
+  },
+  {
+    id: 13,
+    name: 'Tribunal de Contas da União (TCU)',
+    sourceCategory: 'Tribunais de contas',
+    uf: 'BR',
+    officialUrl: 'https://portal.tcu.gov.br/',
+    newsUrl: 'https://portal.tcu.gov.br/imprensa/noticias/',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'economia',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 90,
+    lastPolled: 'Hoje às 15:30',
+    lastSuccess: 'Hoje às 15:30',
+    lastError: null,
+    lastVerified: 'Hoje às 15:30',
+    lastImported: 'Hoje às 11:40',
+    itemsReceived: 24,
+    notes: 'Auditorias de contas públicas federais, licitações e fiscalização orçamentária.'
+  },
+  {
+    id: 14,
+    name: 'Controladoria-Geral da União (CGU)',
+    sourceCategory: 'Transparência pública',
+    uf: 'BR',
+    officialUrl: 'https://www.gov.br/cgu/',
+    newsUrl: 'https://www.gov.br/cgu/pt-br/assuntos/noticias',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'brasil',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 90,
+    lastPolled: 'Hoje às 15:15',
+    lastSuccess: 'Hoje às 15:15',
+    lastError: null,
+    lastVerified: 'Hoje às 15:15',
+    lastImported: 'Hoje às 12:00',
+    itemsReceived: 29,
+    notes: 'Combate à corrupção, auditoria de integridade e Portal da Transparência.'
+  },
+
+  // RIO GRANDE DO SUL (RS)
+  {
+    id: 15,
+    name: 'Governo do Estado do Rio Grande do Sul',
+    sourceCategory: 'Governos estaduais',
+    uf: 'RS',
+    officialUrl: 'https://estado.rs.gov.br/',
+    newsUrl: 'https://estado.rs.gov.br/noticias',
+    rssUrl: 'https://estado.rs.gov.br/rss',
+    sourceType: 'governo',
+    category: 'brasil',
+    integrationType: 'RSS Feed',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: 'Hoje às 16:18',
+    lastSuccess: 'Hoje às 16:18',
+    lastError: null,
+    lastVerified: 'Hoje às 16:18',
+    lastImported: 'Hoje às 15:50',
+    itemsReceived: 76,
+    notes: 'Feed oficial RSS do governo gaúcho. Atos do Palácio Piratini.'
+  },
+  {
+    id: 16,
+    name: 'Brigada Militar do RS',
+    sourceCategory: 'Polícias estaduais',
+    uf: 'RS',
+    officialUrl: 'https://www.brigadamilitar.rs.gov.br/',
+    newsUrl: 'https://www.brigadamilitar.rs.gov.br/noticias',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'seguranca',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 15:45',
+    lastSuccess: 'Hoje às 15:45',
+    lastError: null,
+    lastVerified: 'Hoje às 15:45',
+    lastImported: 'Hoje às 14:30',
+    itemsReceived: 35,
+    notes: 'Polícia militar gaúcha. Ações de policiamento ostensivo e operações regionais.'
+  },
+  {
+    id: 17,
+    name: 'Polícia Civil do RS',
+    sourceCategory: 'Polícias estaduais',
+    uf: 'RS',
+    officialUrl: 'https://www.pc.rs.gov.br/',
+    newsUrl: 'https://www.pc.rs.gov.br/noticias',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'seguranca',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 15:35',
+    lastSuccess: 'Hoje às 15:35',
+    lastError: null,
+    lastVerified: 'Hoje às 15:35',
+    lastImported: 'Hoje às 13:20',
+    itemsReceived: 44,
+    notes: 'Investigações policiais, mandados judiciais e combate ao crime organizado no RS.'
+  },
+  {
+    id: 18,
+    name: 'Corpo de Bombeiros Militar do RS (CBMRS)',
+    sourceCategory: 'Secretarias de Segurança Pública',
+    uf: 'RS',
+    officialUrl: 'https://www.bombeiros.rs.gov.br/',
+    newsUrl: 'https://www.bombeiros.rs.gov.br/noticias',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'seguranca',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 15:20',
+    lastSuccess: 'Hoje às 15:20',
+    lastError: null,
+    lastVerified: 'Hoje às 15:20',
+    lastImported: 'Hoje às 12:45',
+    itemsReceived: 22,
+    notes: 'Resgates, prevenção de incêndios e operações de emergência climática.'
+  },
+  {
+    id: 19,
+    name: 'Polícia Penal do RS (SUSEPE)',
+    sourceCategory: 'Secretarias de Segurança Pública',
+    uf: 'RS',
+    officialUrl: 'https://policiapenal.rs.gov.br/',
+    newsUrl: 'https://policiapenal.rs.gov.br/noticias',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'seguranca',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 120,
+    lastPolled: 'Hoje às 14:50',
+    lastSuccess: 'Hoje às 14:50',
+    lastError: null,
+    lastVerified: 'Hoje às 14:50',
+    lastImported: 'Hoje às 10:15',
+    itemsReceived: 18,
+    notes: 'Gestão penitenciária estadual, vistorias e operações especiais em presídios.'
+  },
+  {
+    id: 20,
+    name: 'Ministério Público do Estado do RS (MPRS)',
+    sourceCategory: 'Ministério Público',
+    uf: 'RS',
+    officialUrl: 'https://www.mprs.mp.br/',
+    newsUrl: 'https://www.mprs.mp.br/noticias/',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'brasil',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 15:30',
+    lastSuccess: 'Hoje às 15:30',
+    lastError: null,
+    lastVerified: 'Hoje às 15:30',
+    lastImported: 'Hoje às 13:50',
+    itemsReceived: 31,
+    notes: 'Ações civis públicas, investigações do GAECO e defesa do consumidor no RS.'
+  },
+  {
+    id: 21,
+    name: 'Tribunal de Justiça do RS (TJRS)',
+    sourceCategory: 'Poder Judiciário',
+    uf: 'RS',
+    officialUrl: 'https://www.tjrs.jus.br/',
+    newsUrl: 'https://www.tjrs.jus.br/novo/comunicacao/',
+    rssUrl: '',
+    sourceType: 'tribunal',
+    category: 'brasil',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 60,
+    lastPolled: 'Hoje às 15:10',
+    lastSuccess: 'Hoje às 15:10',
+    lastError: null,
+    lastVerified: 'Hoje às 15:10',
+    lastImported: 'Hoje às 11:30',
+    itemsReceived: 26,
+    notes: 'Decisões da Justiça estadual gaúcha, júris e pareceres do pleno.'
+  },
+  {
+    id: 22,
+    name: 'Defesa Civil do Estado do RS',
+    sourceCategory: 'Defesa Civil',
+    uf: 'RS',
+    officialUrl: 'https://www.defesacivil.rs.gov.br/',
+    newsUrl: 'https://www.defesacivil.rs.gov.br/noticias',
+    rssUrl: '',
+    sourceType: 'órgão público',
+    category: 'brasil',
+    integrationType: 'Monitoramento Editorial',
+    validationStatus: 'VALIDADO',
+    isActive: true,
+    pollFrequencyMin: 30,
+    lastPolled: 'Hoje às 16:15',
+    lastSuccess: 'Hoje às 16:15',
+    lastError: null,
+    lastVerified: 'Hoje às 16:15',
+    lastImported: 'Hoje às 15:45',
+    itemsReceived: 57,
+    notes: 'Alertas hidrológicos, avisos meteorológicos e relatórios de resgate no RS.'
+  }
+];
+
+export const INITIAL_EDITORIAL_QUEUE: EditorialQueueItem[] = [
+  {
+    id: 101,
+    title: 'Comissão aprova incentivo para contratação de jovens aprendizes na indústria de transformação',
+    summary: 'Projeto de lei flexibiliza cotas e garante crédito tributário para empresas com mais de 50 empregados que contratarem estagiários e aprendizes.',
+    originalUrl: 'https://www.camara.leg.br/noticias/exemplo-101',
+    canonicalUrl: 'https://camara.leg.br/noticias/exemplo-101',
+    sourceName: 'Agência Câmara de Notícias',
+    category: 'politica',
+    capturedAt: 'Hoje às 16:05',
+    dedupStatus: 'NOVO',
+    dedupReason: 'Camada 5: Nenhuma correspondência prévia encontrada.',
+    editorialStatus: 'EM APURAÇÃO',
+    assignedTo: 'Thiago Vasconcellos (Jornalista)'
+  },
+  {
+    id: 102,
+    title: 'Exportações de milho e soja crescem 14% nos portos do arco norte',
+    summary: 'Terminal de Barcarena registra movimentação de 3,2 milhões de toneladas no mês de setembro com escoamento pela BR-163.',
+    originalUrl: 'https://agenciabrasil.ebc.com.br/economia/noticia/exemplo-102',
+    canonicalUrl: 'https://agenciabrasil.ebc.com.br/economia/noticia/exemplo-102',
+    sourceName: 'Agência Brasil — EBC',
+    category: 'economia',
+    capturedAt: 'Hoje às 15:45',
+    dedupStatus: 'NOVO',
+    dedupReason: 'Camada 5: Inédito nas últimas 72h.',
+    editorialStatus: 'EM REDAÇÃO',
+    assignedTo: 'Mariana Duarte (Repórter)',
+    convertedPostId: 489
+  },
+  {
+    id: 103,
+    title: 'PIB brasileiro cresce no terceiro trimestre puxado por serviços',
+    summary: 'Notícia similar à matéria já em redação no portal.',
+    originalUrl: 'https://www12.senado.leg.br/noticias/exemplo-103?utm_source=rss',
+    canonicalUrl: 'https://senado.leg.br/noticias/exemplo-103',
+    sourceName: 'Agência Senado',
+    category: 'economia',
+    capturedAt: 'Hoje às 13:50',
+    dedupStatus: 'POSSÍVEL DUPLICADO',
+    dedupReason: 'Camada 4: Similaridade textual de 86.4% com matéria #art-2',
+    editorialStatus: 'EM TRIAGEM'
+  },
+  {
+    id: 104,
+    title: 'Polícia Rodoviária Federal apreende 4 toneladas de entorpecentes no Paraná',
+    summary: 'Carga ilícita estava escondida em fundo falso de caminhão de grãos interceptado na rodovia BR-277.',
+    originalUrl: 'https://www.gov.br/prf/noticias/exemplo-104',
+    canonicalUrl: 'https://gov.br/prf/noticias/exemplo-104',
+    sourceName: 'Ministério da Justiça',
+    category: 'seguranca',
+    capturedAt: 'Hoje às 12:20',
+    dedupStatus: 'NOVO',
+    dedupReason: 'Camada 5: Inédito.',
+    editorialStatus: 'RECEBIDA'
+  }
+];

@@ -1,0 +1,47 @@
+/*
+Theme Name: O Patriota
+Theme URI: https://opatriota.com.br
+Author: Redação O Patriota
+Author URI: https://opatriota.com.br/expediente
+Description: Tema editorial oficial do portal O Patriota — Notícias, Análise e Opinião. Desenvolvido para alta performance jornalística, suporte a Block Theme (Gutenberg FSE), design clássico contemporâneo e tipografia editorial.
+Version: 1.0.0
+Requires at least: 6.4
+Tested up to: 6.7
+Requires PHP: 8.0
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: o-patriota
+Tags: news, block-patterns, full-site-editing, wide-blocks, translation-ready, accessibility-ready, grid-layout
+
+O Patriota — Informação com liberdade por um Brasil mais forte.
+*/
+
+:root {
+  --color-primary: #0b2345;
+  --color-primary-dark: #07172e;
+  --color-secondary: #0b5fff;
+  --color-accent: #ffcc29;
+  --color-success: #16803c;
+  --color-success-light: #22a447;
+  --color-warning: #d97706;
+  --color-danger: #b42318;
+  --color-background: #f7f8fa;
+  --color-surface: #f1f3f5;
+  --color-border: #d9dee7;
+  --color-text: #17202a;
+  --color-text-muted: #5d6673;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.headline-serif {
+  font-family: "Georgia", "Newsreader", "Times New Roman", serif;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}

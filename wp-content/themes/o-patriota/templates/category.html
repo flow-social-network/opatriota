@@ -1,0 +1,61 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<main id="main-content" class="site-main py-8 px-4 max-w-[1360px] mx-auto">
+  <!-- wp:template-part {"slug":"breadcrumbs"} /-->
+
+  <!-- Category Header Banner -->
+  <!-- wp:group {"className":"category-header bg-[#0B2345] text-white p-8 rounded-lg mb-8 border-b-4 border-[#FFCC29]","layout":{"type":"constrained"}} -->
+  <header class="category-header bg-[#0B2345] text-white p-8 rounded-lg mb-8 border-b-4 border-[#FFCC29]">
+    <div class="category-badge text-[11px] font-bold tracking-widest text-[#FFCC29] uppercase mb-2">
+      EDITORIA OFICIAL
+    </div>
+    <!-- wp:query-title {"type":"archive","showPrefix":false,"className":"font-serif text-3xl md:text-5xl font-black text-white mb-2"} /-->
+    <!-- wp:term-description {"className":"text-sm text-white/90 max-w-2xl"} /-->
+  </header>
+  <!-- /wp:group -->
+
+  <!-- Query Loop for Category Articles -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+    <div class="lg:col-span-8">
+      <!-- wp:query {"queryId":1,"query":{"perPage":8,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","author":"","search":"","exclude":[],"sticky":"","inherit":true}} -->
+      <div class="wp-block-query">
+        <!-- wp:post-template {"layout":{"type":"grid","columnCount":2}} -->
+        <article class="category-card bg-white border border-[#D9DEE7] rounded-lg overflow-hidden shadow-2xs hover:shadow-md transition">
+          <!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/9"} /-->
+          <div class="p-5">
+            <!-- wp:post-terms {"term":"category","className":"text-[10px] font-bold text-[#0B5FFF] uppercase tracking-wider mb-1"} /-->
+            <!-- wp:post-title {"isLink":true,"className":"font-serif text-base font-bold text-[#0B2345] mb-2 leading-snug"} /-->
+            <!-- wp:post-excerpt {"moreText":"Ler mais","excerptLength":20,"className":"text-xs text-[#5D6673] mb-4"} /-->
+            <div class="flex items-center justify-between text-[11px] text-[#717E8E] pt-3 border-t border-[#EAECEF]">
+              <!-- wp:post-author {"showAvatar":false} /-->
+              <!-- wp:post-date /-->
+            </div>
+          </div>
+        </article>
+        <!-- /wp:post-template -->
+
+        <!-- Empty Query State -->
+        <!-- wp:query-no-results -->
+        <div class="bg-white border border-[#D9DEE7] rounded-lg p-10 text-center text-sm text-[#5D6673]">
+          <p>Nenhuma matéria publicada nesta editoria no momento. Nossa equipe está em apuração.</p>
+        </div>
+        <!-- /wp:query-no-results -->
+
+        <!-- Pagination -->
+        <!-- wp:query-pagination {"paginationArrow":"chevron","className":"mt-8 pt-6 border-t border-[#D9DEE7]"} -->
+        <!-- wp:query-pagination-previous /-->
+        <!-- wp:query-pagination-numbers /-->
+        <!-- wp:query-pagination-next /-->
+        <!-- /wp:query-pagination -->
+      </div>
+      <!-- /wp:query -->
+    </div>
+
+    <!-- Sidebar -->
+    <aside class="lg:col-span-4">
+      <!-- wp:template-part {"slug":"sidebar"} /-->
+    </aside>
+  </div>
+</main>
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

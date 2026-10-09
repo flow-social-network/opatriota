@@ -1,11 +1,57 @@
-<div align="center">
+# O PATRIOTA — Portal Jornalístico Profissional
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+> **"INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE."**
+> Notícia • Análise • Opinião • Brasil • Sempre
 
-  <h1>Built with AI Studio</h2>
+O PATRIOTA é um portal digital de notícias de cobertura nacional, estruturado sobre WordPress FSE (Full Site Editing) com plugin editorial avançado de ingestão de fontes, deduplicação em 5 camadas, checagem de fatos com ClaimReview Schema.org e redação integrada.
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+---
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+## Estrutura do Repositório
 
-</div>
+```
+/
+├── wp-content/
+│   ├── themes/
+│   │   └── o-patriota/           # Tema WordPress FSE Oficial
+│   │       ├── style.css         # Identidade, design tokens CSS
+│   │       ├── theme.json        # Paleta, fontes, presets de bloco
+│   │       ├── functions.php     # Bootstrap do tema
+│   │       ├── templates/        # Templates FSE (front-page, single, etc.)
+│   │       ├── parts/            # Cabeçalho, ticker, rodapé, newsletter
+│   │       ├── patterns/         # Padrões editoriais (Hero 3-col, Grid 6-col)
+│   │       └── inc/              # Módulos PHP (setup, assets, acessibilidade)
+│   └── plugins/
+│       └── o-patriota-editorial/ # Plugin Editorial Avançado
+│           ├── o-patriota-editorial.php
+│           ├── includes/         # Classes do motor (Fontes, RSS, Deduplicação, Fila)
+│           └── admin/            # Painel editorial da redação
+├── docs/                         # Documentação completa de engenharia
+│   ├── ARCHITECTURE.md           # Arquitetura detalhada
+│   ├── INSTALLATION.md           # Guia de implantação em servidor
+│   └── EDITORIAL-WORKFLOW.md     # Fluxo da esteira de redação
+├── src/                          # Aplicação interativa ao vivo (Port 3000)
+│   ├── components/               # Componentes visuais fiéis à referência
+│   └── App.tsx                   # Portal vivo + Painel editorial + Exportador ZIP
+└── package.json
+```
+
+---
+
+## Funcionalidades em Destaque
+
+1. **Composição Fiel à Referência**:
+   - Cabeçalho institucional com citação e princípios editoriais.
+   - Navegação completa por editorias com botão verde "APOIE O JORNAL".
+   - Ticker de "Últimas Notícias" atualizado em tempo real.
+   - Bloco nobre em 3 colunas (Manchete + Imagem de Brasília + Notícias Laterais).
+   - Seção de 6 cartões temáticos (Política, Brasil, Economia, Segurança, Saúde, Opinião).
+   - Faixa de Checagem ("FAÇA A CHECAGEM") com dossiês e caixa de Newsletter.
+   - Rodapé institucional patriótico com 4 pilares: Notícia, Análise, Opinião, Brasil.
+
+2. **Engenharia Editorial**:
+   - Central de fontes com proteção contra SSRF e injeção XXE.
+   - Motor de deduplicação em 5 camadas com algoritmo fonético e similaridade textual.
+   - Fluxo de trabalho que garante a **publicação humana obrigatória**.
+   - Marcação Schema.org NewsArticle e ClaimReview para Google News e Fact Check Tools.
+   - Exportador integrado em 1 clique para download dos pacotes ZIP prontos para instalação no WordPress.

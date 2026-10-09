@@ -1,0 +1,44 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<main id="main-content" class="site-main py-8 px-4 max-w-[1240px] mx-auto">
+  <!-- wp:template-part {"slug":"breadcrumbs"} /-->
+
+  <header class="search-header bg-white border border-[#D9DEE7] rounded-lg p-8 mb-8 shadow-xs">
+    <div class="text-[11px] font-bold text-[#0B2345] uppercase tracking-wider mb-2">
+      PESQUISA NO ACERVO
+    </div>
+    <!-- wp:query-title {"type":"search","showPrefix":true,"className":"font-serif text-3xl font-black text-[#0B2345] mb-4"} /-->
+    <!-- wp:search {"label":"Nova pesquisa","buttonText":"Buscar","buttonPosition":"button-inside","className":"max-w-xl"} /-->
+  </header>
+
+  <!-- wp:query {"queryId":4,"query":{"perPage":8,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true}} -->
+  <div class="wp-block-query">
+    <!-- wp:post-template {"layout":{"type":"default"}} -->
+    <article class="search-result bg-white border border-[#D9DEE7] rounded-lg p-5 mb-4 shadow-2xs hover:shadow-md transition">
+      <!-- wp:post-terms {"term":"category","className":"text-[10px] font-bold text-[#0B5FFF] uppercase tracking-wider mb-1"} /-->
+      <!-- wp:post-title {"isLink":true,"className":"font-serif text-lg font-bold text-[#0B2345] mb-2"} /-->
+      <!-- wp:post-excerpt {"moreText":"Ler matéria completa","excerptLength":30,"className":"text-xs text-[#5D6673] mb-3"} /-->
+      <div class="flex items-center gap-3 text-[11px] text-[#717E8E] pt-2 border-t border-[#F1F3F5]">
+        <!-- wp:post-author {"showAvatar":false} /-->
+        <!-- wp:post-date /-->
+      </div>
+    </article>
+    <!-- /wp:post-template -->
+
+    <!-- wp:query-no-results -->
+    <div class="bg-white border border-[#D9DEE7] rounded-lg p-12 text-center text-sm text-[#5D6673]">
+      <p class="font-bold text-base text-[#0B2345] mb-2">Nenhum resultado encontrado para a sua busca.</p>
+      <p>Tente utilizar termos mais genéricos ou navegue pelas editorias do portal.</p>
+    </div>
+    <!-- /wp:query-no-results -->
+
+    <!-- wp:query-pagination {"className":"mt-8 pt-6 border-t border-[#D9DEE7]"} -->
+    <!-- wp:query-pagination-previous /-->
+    <!-- wp:query-pagination-numbers /-->
+    <!-- wp:query-pagination-next /-->
+    <!-- /wp:query-pagination -->
+  </div>
+  <!-- /wp:query -->
+</main>
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

@@ -1,0 +1,56 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<main id="main-content" class="site-main py-8 px-4 max-w-[1240px] mx-auto">
+  <!-- wp:template-part {"slug":"breadcrumbs"} /-->
+
+  <article class="institutional-page">
+    <header class="bg-white border border-[#D9DEE7] rounded-lg p-8 md:p-10 mb-8 shadow-xs">
+      <div class="text-[11px] font-bold text-[#0B2345] uppercase tracking-wider bg-[#F1F3F5] inline-block px-3 py-1 rounded mb-3">
+        DOCUMENTO OFICIAL
+      </div>
+      <!-- wp:post-title {"level":1,"className":"font-serif text-3xl md:text-5xl font-black text-[#0B2345] mb-4"} /-->
+      <div class="text-xs text-[#5D6673] flex items-center gap-3 pt-4 border-t border-[#EAECEF]">
+        <span>Última Atualização: <!-- wp:post-modified-date /--></span>
+        <span>•</span>
+        <span>Responsável: <!-- wp:post-author {"showAvatar":false} /--></span>
+      </div>
+    </header>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <!-- Main Content (8 cols) -->
+      <div class="lg:col-span-8 bg-white border border-[#D9DEE7] rounded-lg p-6 md:p-10 shadow-xs">
+        <!-- wp:post-featured-image {"className":"mb-8 rounded-lg overflow-hidden"} /-->
+        <!-- wp:post-content {"className":"prose prose-slate max-w-none text-sm text-[#2D3748] leading-relaxed"} /-->
+      </div>
+
+      <!-- Institutional Sidebar (4 cols) -->
+      <aside class="lg:col-span-4 space-y-6">
+        <div class="bg-white border border-[#D9DEE7] rounded-lg p-5 shadow-xs">
+          <h3 class="font-serif font-bold text-sm text-[#0B2345] uppercase tracking-wider pb-3 border-b border-[#EAECEF] mb-3">
+            Transparência Editorial
+          </h3>
+          <ul class="space-y-2 text-xs text-[#0B5FFF]">
+            <li><a href="/sobre-o-patriota/" class="hover:underline">Sobre O Patriota</a></li>
+            <li><a href="/expediente/" class="hover:underline">Expediente e Redação</a></li>
+            <li><a href="/principios-editoriais/" class="hover:underline">Princípios Editoriais</a></li>
+            <li><a href="/fontes-e-metodologia/" class="hover:underline">Fontes e Metodologia</a></li>
+            <li><a href="/politica-de-correcoes/" class="hover:underline">Política de Correções</a></li>
+            <li><a href="/contato/" class="hover:underline">Fale com a Redação</a></li>
+          </ul>
+        </div>
+
+        <div class="bg-[#0B2345] text-white p-5 rounded-lg">
+          <h4 class="font-serif font-bold text-sm text-[#FFCC29] mb-1">Canais Oficiais</h4>
+          <p class="text-xs text-white/80 leading-relaxed mb-3">
+            Para dúvidas institucionais ou envio de documentos para apuração:
+          </p>
+          <a href="/contato/" class="inline-block bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold px-4 py-2 rounded">
+            Fale com a Redação
+          </a>
+        </div>
+      </aside>
+    </div>
+  </article>
+</main>
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

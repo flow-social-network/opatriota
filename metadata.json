@@ -1,0 +1,6 @@
+{
+  "name": "O Patriota — Portal Jornalístico",
+  "description": "Portal jornalístico profissional de notícias, análise, opinião e checagem de fatos por um Brasil mais forte.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

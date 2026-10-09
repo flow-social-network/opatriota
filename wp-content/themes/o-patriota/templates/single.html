@@ -1,0 +1,46 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<main id="main-content" class="site-main py-10 px-4 max-w-[860px] mx-auto">
+  <article class="single-article">
+    <!-- Category & Metadata -->
+    <div class="mb-4">
+      <!-- wp:post-terms {"term":"category","className":"text-xs font-bold uppercase tracking-wider text-[#0B5FFF]"} /-->
+    </div>
+
+    <!-- Title -->
+    <!-- wp:post-title {"level":1,"className":"font-serif text-3xl md:text-5xl font-bold leading-tight text-[#0B2345] mb-4"} /-->
+
+    <!-- Excerpt / Subtitle -->
+    <!-- wp:post-excerpt {"className":"text-lg text-[#5D6673] leading-relaxed mb-6 font-medium"} /-->
+
+    <!-- Byline & Date -->
+    <div class="flex items-center gap-4 py-4 border-y border-[#D9DEE7] mb-8 text-xs text-[#5D6673]">
+      <!-- wp:post-author-name {"isLink":true,"className":"font-bold text-[#17202A]"} /-->
+      <span>•</span>
+      <!-- wp:post-date {"format":"j \d\e F \d\e Y \à\s H:i"} /-->
+    </div>
+
+    <!-- Featured Image -->
+    <div class="mb-8 rounded overflow-hidden">
+      <!-- wp:post-featured-image /-->
+    </div>
+
+    <!-- Article Content -->
+    <div class="article-body prose max-w-none text-[#17202A] text-base leading-relaxed space-y-6">
+      <!-- wp:post-content /-->
+    </div>
+
+    <!-- Source References -->
+    <div class="mt-12 p-6 bg-[#F1F3F5] rounded border border-[#D9DEE7] text-xs">
+      <h4 class="font-bold text-[#0B2345] uppercase tracking-wider mb-2">Fontes e Metodologia da Notícia</h4>
+      <p class="text-[#5D6673]">Esta matéria foi apurada com base em documentos oficiais, fontes primárias e verificação jornalística independente da redação de O Patriota.</p>
+    </div>
+
+    <!-- Author Box -->
+    <div class="mt-8 p-6 bg-white rounded border border-[#D9DEE7] flex items-center gap-4">
+      <!-- wp:post-author-biography /-->
+    </div>
+  </article>
+</main>
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->

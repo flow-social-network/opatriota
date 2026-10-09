@@ -1,0 +1,52 @@
+<!-- wp:group {"tagName":"header","className":"site-header","layout":{"type":"constrained"}} -->
+<header class="wp-block-group site-header">
+  <!-- Top bar -->
+  <div class="top-bar bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs py-2 px-4 text-[#5D6673]">
+    <div class="max-w-[1360px] mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <span class="font-medium text-[#17202A]"><?php echo date_i18n('l, j \d\e F \d\e Y'); ?></span>
+        <span>•</span>
+        <span>Brasília - DF 24°C Céu claro</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <div class="social-icons flex items-center gap-3">
+          <a href="#" aria-label="Facebook">FB</a>
+          <a href="#" aria-label="X Twitter">X</a>
+          <a href="#" aria-label="Instagram">IG</a>
+          <a href="#" aria-label="YouTube">YT</a>
+        </div>
+        <!-- wp:search {"label":"Buscar notícias...","showLabel":false,"buttonText":"Buscar","buttonPosition":"button-inside"} /-->
+      </div>
+    </div>
+  </div>
+
+  <!-- Branding Banner -->
+  <div class="branding-bar py-6 px-4 bg-white border-b border-[#D9DEE7]">
+    <div class="max-w-[1360px] mx-auto flex items-center justify-between">
+      <div class="hidden lg:block max-w-[260px] text-xs italic text-[#5D6673]">
+        “Um jornal livre ajuda a construir um país mais forte.”
+      </div>
+      <div class="logo-center text-center">
+        <!-- wp:site-logo {"width":320} /-->
+        <!-- wp:site-title {"level":1,"style":{"typography":{"fontFamily":"Georgia, serif","fontSize":"2.75rem","fontWeight":"800"}}} /-->
+        <!-- wp:site-tagline {"style":{"typography":{"fontSize":"0.75rem","letterSpacing":"2px","textTransform":"uppercase"}}} /-->
+      </div>
+      <div class="hidden lg:block text-right text-xs font-semibold tracking-wider text-[#0B2345] leading-relaxed">
+        FATOS<br>IDEIAS<br>PESSOAS<br>SOLUÇÕES<br>PELO BRASIL
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="main-navigation bg-[#0B2345] text-white">
+    <div class="max-w-[1360px] mx-auto flex items-center justify-between px-4">
+      <!-- wp:navigation {"layout":{"type":"flex","justifyContent":"left","orientation":"horizontal"}} /-->
+      <div class="py-2">
+        <a href="/apoie-o-jornal/" class="bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold uppercase tracking-wider px-4 py-2 rounded transition-colors inline-block">
+          APOIE O JORNAL
+        </a>
+      </div>
+    </div>
+  </div>
+</header>
+<!-- /wp:group -->

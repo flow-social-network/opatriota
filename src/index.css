@@ -1,0 +1,46 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-primary: #0b2345;
+    --color-primary-dark: #07172e;
+    --color-secondary: #0b5fff;
+    --color-accent: #ffcc29;
+    --color-success: #16803c;
+    --color-success-light: #22a447;
+    --color-warning: #d97706;
+    --color-danger: #b42318;
+    --color-background: #f7f8fa;
+    --color-surface: #f1f3f5;
+    --color-border: #d9dee7;
+    --color-text: #17202a;
+    --color-text-muted: #5d6673;
+
+    --font-headline: "Newsreader", "Georgia", "Lora", serif;
+    --font-brand: "Cinzel", "Newsreader", "Georgia", serif;
+    --font-sans: "Plus Jakarta Sans", system-ui, -apple-system, sans-serif;
+  }
+
+  body {
+    background-color: #f7f8fa;
+    color: var(--color-text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, .font-editorial {
+    font-family: var(--font-headline);
+  }
+
+  .font-brand {
+    font-family: var(--font-brand);
+  }
+}
+
+/* Custom scrollbar and printing styles */
+@media print {
+  header, footer, nav, .no-print {
+    display: none !important;
+  }
+}

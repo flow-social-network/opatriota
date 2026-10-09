@@ -1,0 +1,51 @@
+<!-- wp:template-part {"slug":"header","tagName":"header"} /-->
+
+<main id="main-content" class="site-main py-8 px-4 max-w-[1240px] mx-auto">
+  <!-- wp:template-part {"slug":"breadcrumbs"} /-->
+
+  <!-- Author Bio Card -->
+  <!-- wp:group {"className":"author-header bg-white border border-[#D9DEE7] rounded-lg p-8 mb-8 shadow-xs flex flex-col md:flex-row gap-6 items-center md:items-start","layout":{"type":"constrained"}} -->
+  <header class="author-header bg-white border border-[#D9DEE7] rounded-lg p-8 mb-8 shadow-xs flex flex-col md:flex-row gap-6 items-center md:items-start">
+    <div class="author-avatar shrink-0">
+      <!-- wp:post-author-biography {"showAvatar":true,"avatarSize":120} /-->
+    </div>
+    <div class="author-meta flex-1 text-center md:text-left">
+      <div class="text-[11px] font-bold text-[#0B2345] uppercase tracking-wider bg-[#F1F3F5] inline-block px-2.5 py-0.5 rounded mb-2">
+        CORPO EDITORIAL O PATRIOTA
+      </div>
+      <!-- wp:post-author-name {"isLink":false,"className":"font-serif text-3xl font-black text-[#0B2345] mb-2"} /-->
+      <!-- wp:post-author-biography {"showAvatar":false,"className":"text-sm text-[#404B5A] leading-relaxed"} /-->
+    </div>
+  </header>
+  <!-- /wp:group -->
+
+  <!-- Author Articles Query -->
+  <section class="author-articles">
+    <h2 class="font-serif font-bold text-xl text-[#0B2345] pb-3 border-b-2 border-[#0B2345] mb-6">
+      Matérias Publicadas pelo Autor
+    </h2>
+
+    <!-- wp:query {"queryId":3,"query":{"perPage":9,"pages":0,"offset":0,"postType":"post","order":"desc","orderBy":"date","inherit":true}} -->
+    <div class="wp-block-query">
+      <!-- wp:post-template {"layout":{"type":"grid","columnCount":3}} -->
+      <article class="bg-white border border-[#D9DEE7] rounded-lg overflow-hidden shadow-2xs hover:shadow-md transition">
+        <!-- wp:post-featured-image {"isLink":true,"aspectRatio":"16/9"} /-->
+        <div class="p-4">
+          <!-- wp:post-terms {"term":"category","className":"text-[10px] font-bold text-[#0B5FFF] uppercase tracking-wider mb-1"} /-->
+          <!-- wp:post-title {"isLink":true,"className":"font-serif text-sm font-bold text-[#0B2345] mb-2 leading-snug line-clamp-2"} /-->
+          <!-- wp:post-date {"className":"text-[11px] text-[#717E8E] pt-2 border-t border-[#F1F3F5]"} /-->
+        </div>
+      </article>
+      <!-- /wp:post-template -->
+
+      <!-- wp:query-pagination {"className":"mt-8 pt-6 border-t border-[#D9DEE7]"} -->
+      <!-- wp:query-pagination-previous /-->
+      <!-- wp:query-pagination-numbers /-->
+      <!-- wp:query-pagination-next /-->
+      <!-- /wp:query-pagination -->
+    </div>
+    <!-- /wp:query -->
+  </section>
+</main>
+
+<!-- wp:template-part {"slug":"footer","tagName":"footer"} /-->
