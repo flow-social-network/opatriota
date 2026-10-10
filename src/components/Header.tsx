@@ -185,9 +185,9 @@ export const Header: React.FC<HeaderProps> = ({
       <header className="w-full bg-white select-none">
         {/* A barra de utilidades permanece fixa; marca e navegação rolam com o conteúdo. */}
       <div className="site-utility-bar bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]">
-        <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1">
+        <div className="max-w-[1360px] mx-auto flex flex-col xl:flex-row xl:flex-nowrap xl:items-center xl:justify-between gap-y-2 py-2">
           {/* Left: Date & Dynamic Weather from INMET */}
-          <div className="flex items-center gap-4 text-[11px] sm:text-xs">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs xl:flex-nowrap">
             <span className="font-semibold text-[#17202A]">Brasília, 8 de outubro de 2026</span>
             <span className="text-[#D9DEE7] hidden sm:inline">|</span>
 
@@ -228,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* Right: Social Networks, Search, Subscriber Area & Newsroom */}
-          <div className="flex items-center gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2 sm:gap-3 xl:flex-nowrap">
             {/* Social Icons (Dynamic from Portal Settings) */}
             <div className="hidden md:flex items-center gap-2.5 text-[#0B2345] mr-1">
               {activeSocials.map((soc) => (
@@ -249,14 +249,14 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Search Input Box */}
             <form 
               onSubmit={(e) => { e.preventDefault(); onSearchSubmit(); }}
-              className="flex items-center border border-[#D9DEE7] bg-white rounded overflow-hidden h-7"
+              className="flex min-w-0 items-center border border-[#D9DEE7] bg-white rounded overflow-hidden h-8"
             >
               <input
                 type="text"
                 placeholder="Buscar notícias..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="px-2.5 py-1 text-xs text-[#17202A] placeholder-[#5D6673] w-24 sm:w-36 focus:outline-none"
+                className="px-2.5 py-1 text-xs text-[#17202A] placeholder-[#5D6673] w-28 sm:w-36 lg:w-44 focus:outline-none"
               />
               <button
                 type="submit"
