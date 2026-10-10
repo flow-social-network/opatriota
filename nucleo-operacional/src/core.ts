@@ -254,3 +254,14 @@ export async function runCycle():Promise<{scheduled:number;processed:number}> {
   return {scheduled,processed:pending.length};
 }
 export async function disconnectCore():Promise<void>{await prisma.$disconnect();}
+
+export async function recordHeartbeat(lastError?:string):Promise<void> {
+  const os=await import("node:os");
+  const id=process.env.CORE_WORKER_ID || `${os.hostname()}-${process.pid}`;
+  const now=new Date();
+  await prisma.operationalHeartbeat.upsert({
+    where:{id},
+    create:{id,processId:process.pid,hostname:os.hostname(),startedAt:now,lastSeenAt:now,lastCycleAt:lastError?null:now,lastError:lastError?.slice(0,2000)??null},
+    update:{processId:process.pid,hostname:os.hostname(),lastSeenAt:now,lastCycleAt:lastError?undefined:now,lastError:lastError?.slice(0,2000)??null}
+  });
+}

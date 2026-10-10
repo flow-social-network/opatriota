@@ -8,16 +8,19 @@ const router=Router();
 router.use(requireAuth,requireRole(UserRole.ADMIN,UserRole.CHIEF_EDITOR));
 
 router.get("/status",asyncHandler(async(_req,res)=>{
-  const [pending,running,failed,succeeded,activeRssSources,recentTasks,recentRuns]=await Promise.all([
+  const [pending,running,failed,succeeded,activeRssSources,recentTasks,recentRuns,workers]=await Promise.all([
     prisma.operationalTask.count({where:{status:OperationalTaskStatus.PENDING}}),
     prisma.operationalTask.count({where:{status:OperationalTaskStatus.RUNNING}}),
     prisma.operationalTask.count({where:{status:OperationalTaskStatus.FAILED}}),
     prisma.operationalTask.count({where:{status:OperationalTaskStatus.SUCCEEDED}}),
     prisma.source.count({where:{status:"ACTIVE",kind:"RSS"}}),
     prisma.operationalTask.findMany({orderBy:{createdAt:"desc"},take:20,select:{id:true,taskType:true,status:true,attempts:true,createdAt:true,finishedAt:true,lastError:true}}),
-    prisma.agentExecution.findMany({orderBy:{createdAt:"desc"},take:20,select:{id:true,taskId:true,agent:true,status:true,startedAt:true,finishedAt:true,error:true}})
+    prisma.agentExecution.findMany({orderBy:{createdAt:"desc"},take:20,select:{id:true,taskId:true,agent:true,status:true,startedAt:true,finishedAt:true,error:true}}),
+    prisma.operationalHeartbeat.findMany({orderBy:{lastSeenAt:"desc"},take:10})
   ]);
-  res.json({data:{status:"api_available_worker_must_be_verified_separately",activeRssSources,tasks:{pending,running,failed,succeeded,recent:recentTasks},agentRuns:recentRuns}});
+  const now=Date.now();
+  const workerActive=workers.some(worker=>now-worker.lastSeenAt.getTime()<90_000);
+  res.json({data:{status:workerActive?"worker_heartbeat_recent":"worker_not_confirmed",workerActive,workers:workers.map(worker=>({...worker,stale:now-worker.lastSeenAt.getTime()>=90_000})),activeRssSources,tasks:{pending,running,failed,succeeded,recent:recentTasks},agentRuns:recentRuns}});
 }));
 
 router.get("/tasks",asyncHandler(async(req,res)=>{

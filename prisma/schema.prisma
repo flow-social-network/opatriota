@@ -443,3 +443,17 @@ model AgentExecution {
   @@index([agent, status, createdAt])
   @@map("agent_executions")
 }
+
+
+model OperationalHeartbeat {
+  id String @id
+  processId Int?
+  hostname String?
+  startedAt DateTime @default(now())
+  lastSeenAt DateTime @default(now()) @updatedAt
+  lastCycleAt DateTime?
+  lastError String? @db.Text
+
+  @@index([lastSeenAt])
+  @@map("operational_heartbeats")
+}
