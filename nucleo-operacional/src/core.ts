@@ -200,8 +200,18 @@ async function writeAndGuard(taskId:string,ingestionItemId:string,forceCorrectio
       summary:asString(r.summary,"Revisão preliminar concluída; aprovação humana continua obrigatória.")};
   });
   const readyForHumanReview=report.decision==="READY_FOR_HUMAN_REVIEW" && report.riskLevel!=="HIGH" && report.riskLevel!=="CRITICAL";
-  await prisma.article.update({where:{id:article.id},data:{status:readyForHumanReview?ArticleStatus.IN_REVIEW:ArticleStatus.DRAFT,riskLevel:toRisk(report.riskLevel),
-    riskAssessment:jsonInput({...report,checkedAt:new Date().toISOString(),sourceUrl:item.canonicalUrl,agent:"SYSTEM_GUARDIAN",humanApprovalRequired:true})}});
+  await prisma.$transaction(async(tx)=>{
+    await tx.article.update({where:{id:article.id},data:{status:readyForHumanReview?ArticleStatus.IN_REVIEW:ArticleStatus.DRAFT,riskLevel:toRisk(report.riskLevel),
+      riskAssessment:jsonInput({...report,checkedAt:new Date().toISOString(),sourceUrl:item.canonicalUrl,agent:"SYSTEM_GUARDIAN",humanApprovalRequired:true})}});
+    if(readyForHumanReview) {
+      const approvers=await tx.user.findMany({where:{role:{in:[UserRole.REVIEWER,UserRole.EDITOR,UserRole.CHIEF_EDITOR,UserRole.ADMIN]},disabledAt:null},select:{id:true}});
+      await Promise.all(approvers.map(approver=>tx.notification.create({data:{userId:approver.id,type:"ARTICLE_REVIEW_REQUIRED",
+        title:"Matéria automatizada aguarda revisão humana",message:`A matéria "${article.title}" foi preparada pelos agentes e aguarda decisão editorial.`,
+        entityType:"Article",entityId:article.id}})));
+      await tx.auditEvent.create({data:{action:"OPERATIONAL_ARTICLE_SUBMITTED_FOR_HUMAN_REVIEW",entityType:"Article",entityId:article.id,
+        metadata:jsonInput({taskId,sourceUrl:item.canonicalUrl,guardianDecision:report.decision,riskLevel:report.riskLevel,notifiedApprovers:approvers.length})}});
+    }
+  });
   if(report.decision==="NEEDS_CORRECTION" && (report.riskLevel==="LOW"||report.riskLevel==="MEDIUM") && correctionRound<1) {
     try {
       await prisma.operationalTask.create({data:{taskType:"WRITE_AND_GUARD_DRAFT",
