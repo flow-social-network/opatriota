@@ -235,4 +235,49 @@ router.post("/:id/publish", requireAuth, requireRole(UserRole.EDITOR, UserRole.C
   res.status(200).json({ data: published });
 }));
 
+router.post("/:id/schedule", requireAuth, requireRole(UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN), asyncHandler(async (req, res) => {
+  const user = res.locals.user as AuthUser;
+  const article = await prisma.article.findUnique({ where: { id: req.params.id } });
+  if (!article) throw new HttpError(404, "ARTICLE_NOT_FOUND", "Article not found");
+  if (article.status !== ArticleStatus.APPROVED && article.status !== ArticleStatus.SCHEDULED) {
+    throw new HttpError(409, "APPROVAL_REQUIRED", "Only human-approved articles can be scheduled");
+  }
+  if (!article.humanApprovedAt || !article.humanApprovedById) {
+    throw new HttpError(409, "HUMAN_APPROVAL_REQUIRED", "Only explicitly human-approved articles can be scheduled");
+  }
+
+  const raw = req.body?.scheduledAt;
+  let scheduledAt: Date | null;
+  if (raw === null || raw === undefined || raw === "") {
+    scheduledAt = null;
+  } else {
+    if (typeof raw !== "string") throw new HttpError(400, "VALIDATION_ERROR", "scheduledAt must be an ISO date-time or null");
+    scheduledAt = new Date(raw);
+    if (Number.isNaN(scheduledAt.getTime())) throw new HttpError(400, "VALIDATION_ERROR", "scheduledAt is not a valid date-time");
+    const now = Date.now();
+    if (scheduledAt.getTime() <= now) throw new HttpError(400, "VALIDATION_ERROR", "scheduledAt must be in the future");
+    if (scheduledAt.getTime() > now + 366 * 86400_000) throw new HttpError(400, "VALIDATION_ERROR", "scheduledAt must be within 366 days");
+  }
+
+  const nextStatus = scheduledAt ? ArticleStatus.SCHEDULED : ArticleStatus.APPROVED;
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.article.update({
+      where: { id: article.id },
+      data: { status: nextStatus, scheduledAt, version: { increment: 1 } },
+      select: { id: true, slug: true, status: true, scheduledAt: true },
+    });
+    await tx.auditEvent.create({
+      data: {
+        actorId: user.id,
+        action: scheduledAt ? "ARTICLE_SCHEDULED" : "ARTICLE_UNSCHEDULED",
+        entityType: "Article",
+        entityId: article.id,
+        metadata: { fromStatus: article.status, toStatus: nextStatus, scheduledAt: scheduledAt?.toISOString() ?? null },
+      },
+    });
+    return result;
+  });
+  res.json({ data: updated });
+}));
+
 export default router;

@@ -258,13 +258,28 @@ async function recoverStaleTasks():Promise<void> {
     await prisma.agentExecution.updateMany({where:{taskId:task.id,status:AgentRunStatus.RUNNING},data:{status:AgentRunStatus.FAILED,error:"Worker interrompido durante a execução.",finishedAt:new Date()}});
   }
 }
-export async function runCycle():Promise<{scheduled:number;processed:number}> {
+export async function publishDueScheduledArticles():Promise<number> {
+  const due=await prisma.article.findMany({
+    where:{status:ArticleStatus.SCHEDULED,scheduledAt:{lte:new Date()},humanApprovedAt:{not:null},humanApprovedById:{not:null}},
+    select:{id:true,scheduledAt:true,humanApprovedById:true}});
+  for(const article of due){
+    const publishedAt=article.scheduledAt??new Date();
+    await prisma.$transaction(async(tx)=>{
+      await tx.article.update({where:{id:article.id},data:{status:ArticleStatus.PUBLISHED,publishedAt,version:{increment:1}}});
+      await tx.auditEvent.create({data:{actorId:null,action:"ARTICLE_PUBLISHED",entityType:"Article",entityId:article.id,
+        metadata:{via:"schedule-worker",scheduledAt:publishedAt.toISOString(),humanApprovedById:article.humanApprovedById}}});
+    });
+  }
+  return due.length;
+}
+export async function runCycle():Promise<{scheduled:number;processed:number;publishedScheduled:number}> {
   await recoverStaleTasks();
   const scheduled=await scheduleDueSources();
+  const publishedScheduled=await publishDueScheduledArticles();
   const pending=await prisma.operationalTask.findMany({where:{status:OperationalTaskStatus.PENDING,availableAt:{lte:new Date()}},
     orderBy:[{availableAt:"asc"},{createdAt:"asc"}],take:Math.max(1,Math.min(20,Number(process.env.CORE_BATCH_SIZE||5))),select:{id:true}});
   for(const task of pending) await processTask(task.id);
-  return {scheduled,processed:pending.length};
+  return {scheduled,processed:pending.length,publishedScheduled};
 }
 export async function disconnectCore():Promise<void>{await prisma.$disconnect();}
 
