@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Article } from '../../types';
 import { ArticleImage } from '../ArticleImage';
-import { ArrowRight, Clock, UtensilsCrossed } from 'lucide-react';
+import { Clock, UtensilsCrossed } from 'lucide-react';
 
 interface RecipesSectionProps { articles: Article[]; onSelectArticle: (article: Article) => void; onViewAll?: () => void; fullPage?: boolean; }
 
