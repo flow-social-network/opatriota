@@ -30,6 +30,7 @@ export default function HomePage() {
     authors,
     portalSettings,
     dataLoading,
+    dataError,
   } = useData();
   const navigate = useNavigate();
 
@@ -62,10 +63,16 @@ export default function HomePage() {
           Configure <code>VITE_API_BASE_URL</code> no ambiente de publicação. Não serão mostradas notícias de demonstração como se fossem publicadas.
         </div>
       )}
-      {apiConfigured && !hasPublishedArticles && (
+      {apiConfigured && dataError && (
+        <div role="alert" className="mb-6 rounded-lg border border-red-300 bg-red-50 p-4 text-sm text-red-900">
+          <strong>Falha ao carregar as notícias.</strong> A API não confirmou o carregamento do conteúdo.
+          Verifique os logs do servidor e a configuração do fornecedor de dados. Detalhe: {dataError}
+        </div>
+      )}
+      {apiConfigured && !dataError && !hasPublishedArticles && (
         <div role="status" className="mb-6 rounded-lg border border-[#D9DEE7] bg-white p-4 text-sm text-[#404B5A]">
           <strong>Não há notícias publicadas para apresentar.</strong> A API respondeu, mas não devolveu artigos publicados.
-          Verifique a configuração do fornecedor de dados e o estado editorial das matérias.
+          Verifique o estado editorial das matérias.
         </div>
       )}
 
