@@ -6,6 +6,7 @@ import { RequireAuth, RequireRole } from './routeGuards';
 
 // ─── Páginas públicas (carregamento imediato — já no bundle) ───
 import HomePage from '../../pages/public/HomePage';
+import RecipesPage from '../../pages/public/RecipesPage';
 import ArticlePage from '../../pages/public/ArticlePage';
 import CategoryPage from '../../pages/public/CategoryPage';
 import SearchPage from '../../pages/public/SearchPage';
@@ -55,6 +56,7 @@ export const router = createBrowserRouter([
       { path: '/autor/:slug', element: <AuthorPage /> },
       { path: '/busca', element: <SearchPage /> },
       { path: '/arquivo', element: <ArchivePage /> },
+      { path: '/receitas', element: <RecipesPage /> },
       { path: '/contato', element: <ContactPage /> },
       { path: '/gestao-de-dados', element: <LgpdPage /> },
       { path: '/planos', element: <PlansPage /> },
