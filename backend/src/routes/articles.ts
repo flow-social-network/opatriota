@@ -28,13 +28,20 @@ router.get("/", asyncHandler(async (req, res) => {
       select: {
         id: true, slug: true, title: true, excerpt: true, heroImageUrl: true, heroImageSourceUrl: true, heroImageCredit: true, canonicalUrl: true,
         publishedAt: true, seoTitle: true, seoDescription: true,
-        author: { select: { displayName: true } },
+        author: { select: { displayName: true, disabledAt: true, journalistProfile: { select: { slug: true, status: true, verifiedAt: true, expiresAt: true } } } },
         category: { select: { slug: true, name: true } },
       },
     }),
     prisma.article.count({ where }),
   ]);
-  res.json({ data: items, pagination: { page, pageSize, total, pages: Math.ceil(total / pageSize) } });
+  const now = new Date();
+  const publicItems = items.map(item => {
+    const profile = item.author.journalistProfile;
+    const profileVerified = !item.author.disabledAt && profile?.status === "VERIFIED"
+      && profile.verifiedAt !== null && (profile.expiresAt === null || profile.expiresAt > now);
+    return { ...item, author: { displayName: item.author.displayName, profileSlug: profileVerified ? profile.slug : null } };
+  });
+  res.json({ data: publicItems, pagination: { page, pageSize, total, pages: Math.ceil(total / pageSize) } });
 }));
 
 router.get("/:slug", asyncHandler(async (req, res) => {
@@ -53,7 +60,10 @@ router.get("/:slug", asyncHandler(async (req, res) => {
   if (article.isSubscriberOnly) {
     throw new HttpError(403, "SUBSCRIPTION_REQUIRED", "This article requires an active subscription");
   }
-  res.json({ data: article });
+  const profile = article.author.journalistProfile;
+  const profileVerified = !article.author.disabledAt && profile?.status === "VERIFIED"
+    && profile.verifiedAt !== null && (profile.expiresAt === null || profile.expiresAt > new Date());
+  res.json({ data: { ...article, author: { displayName: article.author.displayName, profileSlug: profileVerified ? profile.slug : null } } });
 }));
 
 router.post("/", requireAuth, requireRole(...editorialRoles), asyncHandler(async (req, res) => {

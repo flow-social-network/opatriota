@@ -8,6 +8,8 @@ import { HttpError } from "./lib/http.js";
 import authRoutes from "./routes/auth.js";
 import adminRoutes from "./routes/admin.js";
 import articleRoutes from "./routes/articles.js";
+import journalistRoutes from "./routes/journalists.js";
+import adminJournalistRoutes from "./routes/admin-journalists.js";
 import categoryRoutes from "./routes/categories.js";
 import pushRoutes from "./routes/push.js";
 import notificationRoutes from "./routes/notifications.js";
@@ -43,6 +45,8 @@ app.get(["/health/ready", "/api/health/ready"], async (_req, res) => {
 });
 
 app.use("/api/auth", authRoutes);
+app.use("/api/admin/journalists", adminJournalistRoutes);
+app.use("/api/journalists", journalistRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/articles", articleRoutes);
 app.use("/api/categories", categoryRoutes);

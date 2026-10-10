@@ -8,3 +8,18 @@ a{color:var(--patriota-blue)}a:focus-visible,button:focus-visible,input:focus-vi
 .news-card img{width:100%;height:auto;max-height:240px;object-fit:cover;border-radius:8px}.news-card h2{margin:.25rem 0;line-height:1.2;color:var(--patriota-navy)}
 .source-credit{color:var(--patriota-muted);font-size:.9rem;overflow-wrap:anywhere}.error-state{padding:1rem;background:#fff4e5;border-left:4px solid #b45309}
 .site-footer{margin-top:4rem;padding:2rem 0;background:var(--patriota-navy);color:white}.site-footer a{color:white}
+
+.journalist-profile{background:#fff;border:1px solid var(--patriota-border);border-radius:16px;padding:clamp(1rem,3vw,2rem)}
+.journalist-profile-heading{display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap}
+.journalist-avatar{width:112px;height:112px;object-fit:cover;border-radius:50%;border:2px solid var(--patriota-border)}
+.journalist-avatar-placeholder{display:grid;place-items:center;background:#e8edf5;color:var(--patriota-navy);font-size:1.7rem;font-weight:800}
+.verified-label{display:inline-flex;gap:.4rem;align-items:center;color:#17623a;font-weight:800;font-size:.8rem;letter-spacing:.04em}
+.verified-status{display:inline-block;padding:.2rem .6rem;border-radius:999px;background:#e7f6ed;color:#17623a;font-weight:700}
+.verification-details{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:1rem;margin:1.5rem 0;padding:1rem 0;border-top:1px solid var(--patriota-border);border-bottom:1px solid var(--patriota-border)}
+.verification-details dt{font-size:.82rem;color:var(--patriota-muted)}.verification-details dd{margin:.2rem 0 0;font-weight:700;overflow-wrap:anywhere}
+.verification-scope{background:#f1f4f8;padding:1rem;border-radius:8px;font-size:.92rem;color:#374151}
+.profile-bio{white-space:pre-wrap}.profile-articles{padding-left:1.2rem}.profile-articles li{margin:.8rem 0}.profile-articles time{font-size:.9rem;color:var(--patriota-muted)}
+.verification-search{background:#fff;border:1px solid var(--patriota-border);border-radius:12px;padding:1.25rem;margin:1.5rem 0}
+.verification-search label{display:block;font-weight:700;margin-bottom:.5rem}.verification-search div{display:flex;gap:.6rem;flex-wrap:wrap}
+.verification-search input{flex:1;min-width:240px;padding:.8rem;border:1px solid var(--patriota-border);border-radius:6px;font:inherit}
+.verification-search button{padding:.8rem 1.2rem;border:0;border-radius:6px;background:var(--patriota-navy);color:#fff;font:inherit;font-weight:700;cursor:pointer}
