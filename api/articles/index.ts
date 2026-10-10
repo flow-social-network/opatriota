@@ -2,7 +2,7 @@ import type { IncomingMessage, ServerResponse } from 'node:http';
 import { newId } from '../_lib/billing';
 import { documentGet, documentList, documentWrite } from '../_lib/storage';
 import {
-  ApiRequest, ApiResponse, EDITOR_ROLES, STAFF_ROLES, canReadPaidContent,
+  ApiRequest, ApiResponse, EDITOR_ROLES, STAFF_ROLES, hasPaidAccess, paidAccessLevel,
   identityFromRequest, isOpenArticle, isPublicArticle, readRequestBody, sendJson,
 } from '../_lib/editorial-access';
 
@@ -16,15 +16,15 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     const identity = await identityFromRequest(req);
     if (req.method === 'GET') {
       const all = await documentList('articles');
-      const paidAccess = await canReadPaidContent(identity);
+      const paidLevel = await paidAccessLevel(identity);
       const staff = Boolean(identity && STAFF_ROLES.has(identity.role));
-      const articles = all
+      const articles = (await Promise.all(all
         .filter((article) => staff || isPublicArticle(article))
-        .map((article) => {
-          if (staff || paidAccess || isOpenArticle(article)) return article;
+        .map(async (article) => {
+          if (staff || isOpenArticle(article) || hasPaidAccess(article.accessLevel, paidLevel)) return article;
           const { content: _content, body: _body, htmlContent: _htmlContent, fullText: _fullText, ...teaser } = article;
           return { ...teaser, premiumLocked: true };
-        })
+        })))
         .sort((a, b) => {
           const priorityRank = (value: unknown) => value === 'alta' ? 3 : value === 'media' ? 2 : 1;
           const priorityDifference = priorityRank(b.priority) - priorityRank(a.priority);
