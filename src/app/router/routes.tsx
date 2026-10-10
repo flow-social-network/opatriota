@@ -75,6 +75,7 @@ export const router = createBrowserRouter([
       { path: '/contrato', element: <InstitutionalInfoPage /> },
       { path: '/planos', element: <PlansPage /> },
       { path: '/checkout', element: <CheckoutPage /> },
+      { path: '/apoie-o-jornal', element: <PlansPage /> },
       { path: '/verificacao', element: <FactCheckPage /> },
       { path: '/checagem', element: <FactCheckPage /> },
 
@@ -85,6 +86,7 @@ export const router = createBrowserRouter([
       // ─── Acesso negado / 404 ───
       { path: '/acesso-negado', element: <LazyPanel><AccessDeniedPage /></LazyPanel> },
       { path: '/404', element: <NotFound /> },
+      { path: '/:slug', element: <CustomPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },
