@@ -23,8 +23,9 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
       a.tags?.some(t => ['Rio Grande do Sul', 'Porto Alegre', 'Novo Hamburgo', 'Vale do Sinos', 'Serra Gaúcha'].includes(t))
   );
 
-  // If fewer than 4, take from main list
-  const displayArticles = rsArticles.length >= 3 ? rsArticles.slice(0, 4) : articles.slice(2, 6);
+  // Never label unrelated national stories as regional coverage.
+  const displayArticles = rsArticles.slice(0, 4);
+  if (displayArticles.length === 0) return null;
 
   return (
     <section className="mb-12 select-none" aria-label="Cobertura Regional do Rio Grande do Sul">
