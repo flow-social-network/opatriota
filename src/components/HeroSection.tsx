@@ -70,7 +70,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
         >
           {/* Green Category Badge */}
           <div className="absolute top-3 left-3 z-10 bg-[#16803C] text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider rounded-xs shadow-xs">
-            BRASIL
+            {leadArticle.kicker || leadArticle.category.toUpperCase()}
           </div>
 
           {/* Hero Image */}
