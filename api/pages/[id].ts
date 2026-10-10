@@ -1,4 +1,3 @@
-import { newId } from '../_lib/billing';
 import { documentDelete, documentGet, documentList, documentWrite } from '../_lib/storage';
 import {
   ApiRequest, ApiResponse, EDITOR_ROLES, identityFromRequest,
