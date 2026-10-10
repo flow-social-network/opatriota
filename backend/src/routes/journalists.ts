@@ -25,7 +25,7 @@ router.get("/", asyncHandler(async (req,res) => {
       {user:{is:{displayName:{contains:query,mode:"insensitive"}}}},
     ]}]},
     take:20, orderBy:[{verifiedAt:"desc"},{updatedAt:"desc"}],
-    select:{slug:true,professionalTitle:true,credentialCode:true,verifiedAt:true,expiresAt:true,user:{select:{displayName:true}}},
+    select:{slug:true,professionalTitle:true,credentialCode:true,status:true,verifiedAt:true,expiresAt:true,user:{select:{displayName:true}}},
   });
   const now = new Date();
   res.json({data:items.filter(item=>currentlyVerified(item,now)).map(item=>({

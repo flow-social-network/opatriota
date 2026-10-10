@@ -96,7 +96,7 @@ router.post("/:userId/verify",asyncHandler(async(req,res)=>{
 router.patch("/:userId/status",asyncHandler(async(req,res)=>{
  const userId=readString(req.params.userId,"userId",128);
  const status=req.body?.status;
- const allowed=[JournalistVerificationStatus.PENDING,JournalistVerificationStatus.SUSPENDED,JournalistVerificationStatus.REVOKED];
+ const allowed: JournalistVerificationStatus[]=[JournalistVerificationStatus.PENDING,JournalistVerificationStatus.SUSPENDED,JournalistVerificationStatus.REVOKED];
  if(typeof status!=="string"||!allowed.includes(status as JournalistVerificationStatus))throw new HttpError(400,"VALIDATION_ERROR","status must be PENDING, SUSPENDED or REVOKED; use the verify endpoint to confirm affiliation");
  const current=await prisma.journalistProfile.findUnique({where:{userId},select:{id:true,verifiedAt:true,credentialCode:true}});
  if(!current)throw new HttpError(404,"PROFILE_NOT_FOUND","Journalist profile not found");
