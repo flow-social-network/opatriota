@@ -125,6 +125,19 @@ export async function getFirebaseIdToken() {
   return user ? user.getIdToken() : null;
 }
 
+/**
+ * Recarrega o perfil do usuário logado (usado após retorno de checkout).
+ */
+export async function refreshUserProfile(): Promise<UserSession | null> {
+  const user = auth?.currentUser;
+  if (!user) return null;
+  try {
+    return await mapAuthenticatedUser(user);
+  } catch {
+    return null;
+  }
+}
+
 // O cliente centralizado da API recebe apenas o token atual do utilizador autenticado.
 setApiTokenProvider(getFirebaseIdToken);
 

@@ -2,6 +2,7 @@ import React from 'react';
 import { InstitutionalPage } from '../../types';
 import { Breadcrumbs } from './Breadcrumbs';
 import { ShieldCheck, Calendar, ArrowRight } from 'lucide-react';
+import { sanitizeHtml } from '../../utils/sanitizeHtml';
 
 interface CustomPageViewProps {
   page: InstitutionalPage;
@@ -70,7 +71,7 @@ export const CustomPageView: React.FC<CustomPageViewProps> = ({
               prose-h2:text-xl prose-h2:font-bold prose-h2:mt-6 prose-h2:mb-3
               prose-p:text-sm prose-p:text-[#2D3748] prose-p:leading-relaxed prose-p:mb-4
               prose-strong:text-[#0B2345]"
-            dangerouslySetInnerHTML={{ __html: page.content }}
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }}
           />
         </main>
       </div>

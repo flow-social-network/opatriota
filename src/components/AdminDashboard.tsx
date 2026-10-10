@@ -1,17 +1,16 @@
 import { api } from '../services/apiClient';
 import React, { useState } from 'react';
-import { RssSource, EditorialQueueItem, DedupStatus, EditorialStatus, PortalSettings } from '../types';
+import { RssSource, EditorialQueueItem, EditorialStatus, PortalSettings } from '../types';
 import { OfficialSourcesHub } from './admin/OfficialSourcesHub';
 import { IdentityManager } from './admin/IdentityManager';
 import { SocialMediaManager } from './admin/SocialMediaManager';
 import { AdsManager } from './admin/AdsManager';
 import { PushNotificationManager } from './admin/PushNotificationManager';
+import { AdminOverviewTab } from './admin/AdminOverviewTab';
+import { AdminQueueTab } from './admin/AdminQueueTab';
+import { AdminDedupTab } from './admin/AdminDedupTab';
+import { AdminExportTab } from './admin/AdminExportTab';
 import { DEFAULT_WEBPUSH_CONFIG } from '../services/siteConfigService';
-import { 
-  classifyLeadFactualStatus, 
-  isGloboSource, 
-  EDITORIAL_POLICY_CONFIG 
-} from '../utils/editorialPolicy';
 import JSZip from 'jszip';
 import { 
   SlidersHorizontal, 
@@ -20,16 +19,8 @@ import {
   GitPullRequest, 
   Download, 
   CheckCircle2, 
-  AlertCircle, 
   RefreshCw, 
-  Plus, 
   ArrowLeft,
-  Shield,
-  FileCode2,
-  Trash2,
-  ExternalLink,
-  ShieldAlert,
-  ShieldCheck,
   Palette,
   Share2,
   Megaphone,
@@ -42,6 +33,7 @@ interface AdminDashboardProps {
   onBack: () => void;
   onUpdateSource: (sources: RssSource[]) => void;
   onUpdateQueue: (items: EditorialQueueItem[]) => void;
+  onSyncResult: (sources: RssSource[], queue: EditorialQueueItem[]) => void;
   portalSettings: PortalSettings;
   onSavePortalSettings: (newSettings: PortalSettings) => void;
 }
@@ -394,258 +386,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* TAB 1: PAINEL GERAL */}
         {activeTab === 'painel' && (
-          <div className="space-y-8">
-            {/* Metric KPI cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-              <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#0B2345] shadow-xs">
-                <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Total de Pautas</div>
-                <div className="text-3xl font-black text-[#0B2345] mt-1">{queueItems.length + 128}</div>
-                <div className="text-[11px] text-[#16803C] mt-2 font-semibold">↑ Ingestão contínua</div>
-              </div>
-
-              <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#0B5FFF] shadow-xs">
-                <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Pendentes de Triagem</div>
-                <div className="text-3xl font-black text-[#0B5FFF] mt-1">
-                  {queueItems.filter(i => i.editorialStatus === 'RECEBIDA' || i.editorialStatus === 'EM TRIAGEM').length}
-                </div>
-                <div className="text-[11px] text-[#5D6673] mt-2">Aguardando decisão humana</div>
-              </div>
-
-              <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#16803C] shadow-xs">
-                <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Em Redação / Apuração</div>
-                <div className="text-3xl font-black text-[#16803C] mt-1">
-                  {queueItems.filter(i => i.editorialStatus === 'EM REDAÇÃO' || i.editorialStatus === 'EM APURAÇÃO').length}
-                </div>
-                <div className="text-[11px] text-[#16803C] mt-2 font-semibold">Repórteres alocados</div>
-              </div>
-
-              <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#B42318] shadow-xs">
-                <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Duplicados Bloqueados</div>
-                <div className="text-3xl font-black text-[#B42318] mt-1">19</div>
-                <div className="text-[11px] text-[#B42318] mt-2 font-semibold">Filtrados pelas 5 camadas</div>
-              </div>
-
-              <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#FFCC29] shadow-xs">
-                <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Fontes Monitoradas</div>
-                <div className="text-3xl font-black text-[#17202A] mt-1">{sources.length}</div>
-                <div className="text-[11px] text-[#5D6673] mt-2">Senado, Câmara, STF, EBC</div>
-              </div>
-            </div>
-
-            {/* Workflow Pipeline Graphic */}
-            <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs">
-              <h3 className="font-serif text-base font-bold text-[#0B2345] mb-4">
-                Pipeline da Esteira Editorial de O Patriota
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-center text-xs">
-                <div className="p-3 bg-[#F1F3F5] rounded border border-[#D9DEE7]">
-                  <span className="font-bold text-[#0B2345] block mb-1">1. RECEBIDA</span>
-                  <span className="text-[10px] text-[#5D6673]">Captura RSS segura com proteção XXE</span>
-                </div>
-                <div className="p-3 bg-[#F1F3F5] rounded border border-[#D9DEE7]">
-                  <span className="font-bold text-[#0B2345] block mb-1">2. TRIAGEM</span>
-                  <span className="text-[10px] text-[#5D6673]">Deduplicação 5 Camadas</span>
-                </div>
-                <div className="p-3 bg-[#EBF7EE] rounded border border-[#16803C]/30 text-[#16803C]">
-                  <span className="font-bold block mb-1">3. APURAÇÃO</span>
-                  <span className="text-[10px]">Checagem de fontes primárias</span>
-                </div>
-                <div className="p-3 bg-[#EBF7EE] rounded border border-[#16803C]/30 text-[#16803C]">
-                  <span className="font-bold block mb-1">4. REDAÇÃO</span>
-                  <span className="text-[10px]">Criação de Rascunho WP Nativo</span>
-                </div>
-                <div className="p-3 bg-[#F1F3F5] rounded border border-[#D9DEE7]">
-                  <span className="font-bold text-[#0B2345] block mb-1">5. REVISÃO</span>
-                  <span className="text-[10px] text-[#5D6673]">Chefe de Redação / Editor</span>
-                </div>
-                <div className="p-3 bg-[#0B2345] text-white rounded">
-                  <span className="font-bold block mb-1">6. PUBLICADA</span>
-                  <span className="text-[10px] text-white/80">Apenas por Humano Autorizado</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Recent Items Preview Table */}
-            <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-serif text-base font-bold text-[#0B2345]">
-                  Últimos Itens Ingeridos das Fontes Oficiais
-                </h3>
-                <button
-                  onClick={() => setActiveTab('fila')}
-                  className="text-xs font-bold text-[#0B5FFF] hover:underline cursor-pointer"
-                >
-                  Ver todos na Fila Editorial →
-                </button>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-xs text-left">
-                  <thead className="bg-[#F7F8FA] border-b border-[#D9DEE7] text-[#5D6673] uppercase font-bold text-[10px]">
-                    <tr>
-                      <th className="py-2.5 px-3">Título da Notícia</th>
-                      <th className="py-2.5 px-3">Fonte Oficial</th>
-                      <th className="py-2.5 px-3">Editoria</th>
-                      <th className="py-2.5 px-3">Deduplicação</th>
-                      <th className="py-2.5 px-3">Status Editorial</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-[#D9DEE7]">
-                    {queueItems.slice(0, 5).map((item) => (
-                      <tr key={item.id} className="hover:bg-[#F7F8FA]">
-                        <td className="py-3 px-3 font-semibold text-[#17202A] max-w-md">
-                          {item.title}
-                        </td>
-                        <td className="py-3 px-3 text-[#5D6673]">{item.sourceName}</td>
-                        <td className="py-3 px-3 uppercase text-[10px] font-bold text-[#0B5FFF]">{item.category}</td>
-                        <td className="py-3 px-3">
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                            item.dedupStatus === 'NOVO' ? 'bg-[#EBF7EE] text-[#16803C]' : 'bg-[#FEF3F2] text-[#B42318]'
-                          }`}>
-                            {item.dedupStatus}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3 font-mono font-bold text-[11px] text-[#0B2345]">
-                          {item.editorialStatus}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+          <AdminOverviewTab
+            sources={sources}
+            queueItems={queueItems}
+            onNavigateToQueue={() => setActiveTab('fila')}
+          />
         )}
 
         {/* TAB 2: FILA EDITORIAL */}
         {activeTab === 'fila' && (
-          <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[#0B2345]">
-                  Fila de Triagem e Produção Editorial
-                </h3>
-                <p className="text-xs text-[#5D6673]">
-                  Gerencie a esteira jornalística. Nenhuma notícia é publicada sem revisão humana.
-                </p>
-              </div>
-
-              {/* Status Filter */}
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-[#0B2345]">Status:</span>
-                <select
-                  value={queueFilter}
-                  onChange={(e) => setQueueFilter(e.target.value)}
-                  className="border border-[#D9DEE7] text-xs px-3 py-1.5 rounded focus:outline-none focus:border-[#0B5FFF]"
-                >
-                  <option value="TODAS">Todas as Fases</option>
-                  <option value="RECEBIDA">Recebida</option>
-                  <option value="EM TRIAGEM">Em Triagem</option>
-                  <option value="EM APURAÇÃO">Em Apuração</option>
-                  <option value="EM REDAÇÃO">Em Redação</option>
-                  <option value="EM REVISÃO">Em Revisão</option>
-                  <option value="PUBLICADA">Publicada</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              {filteredQueue.map((item) => {
-                const isGlobo = isGloboSource(item.sourceName) || isGloboSource(item.originalUrl) || item.editorialPolicy === 'EXCLUIDA_POLITICA_EDITORIAL';
-                const factAnalysis = classifyLeadFactualStatus(item.title, item.summary, item.sourceName);
-
-                return (
-                  <div
-                    key={item.id}
-                    className={`p-4 rounded border transition flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                      isGlobo ? 'bg-rose-50/50 border-rose-300 hover:border-rose-500' : 'bg-[#F7F8FA] border-[#D9DEE7] hover:border-[#0B5FFF]'
-                    }`}
-                  >
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-[#5D6673] uppercase mb-1 flex-wrap">
-                        <span className="text-[#0B5FFF]">{item.category}</span>
-                        <span>•</span>
-                        <span>{item.sourceName}</span>
-                        <span>•</span>
-                        <span>{item.capturedAt}</span>
-                        <span>•</span>
-                        <span className={`px-2 py-0.5 rounded text-[9px] font-bold border ${factAnalysis.badgeClass}`}>
-                          {factAnalysis.label}
-                        </span>
-                      </div>
-
-                      <h4 className="font-serif text-sm font-bold text-[#0B2345] mb-1.5">
-                        {item.title}
-                      </h4>
-
-                      <p className="text-xs text-[#5D6673] mb-2 leading-relaxed">
-                        {item.summary}
-                      </p>
-
-                      {/* Explicit Warning for Excluded/Globo Source */}
-                      {isGlobo && (
-                        <div className="mb-2 p-2 bg-rose-100/70 border border-rose-300 rounded text-rose-900 text-[11px] flex items-start gap-1.5 font-medium">
-                          <ShieldAlert className="w-3.5 h-3.5 text-rose-700 shrink-0 mt-0.5" />
-                          <span>
-                            <strong>RESTRIÇÃO EDITORIAL — GRUPO GLOBO:</strong> Vedado como fonte de sustentação. A redação deve buscar confirmação em documentos originais, registros oficiais ou fontes independentes autorizadas.
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Speculative Headline Warning */}
-                      {factAnalysis.isSpeculative && !isGlobo && (
-                        <div className="mb-2 p-2 bg-amber-50 border border-amber-300 rounded text-amber-900 text-[11px] flex items-start gap-1.5 font-medium">
-                          <AlertCircle className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
-                          <span>
-                            <strong>MANCHETE ESPECULATIVA:</strong> {factAnalysis.recommendation}
-                          </span>
-                        </div>
-                      )}
-
-                      <div className="flex flex-wrap items-center gap-3 text-[11px]">
-                        <span className="text-slate-500">
-                          Deduplicação: <strong className="text-slate-700">{item.dedupStatus}</strong> ({item.dedupReason})
-                        </span>
-                        {item.assignedTo && (
-                          <span className="text-blue-700 font-semibold">
-                            Responsável: {item.assignedTo}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-
-                  {/* Actions for editorial transition */}
-                  <div className="flex flex-col sm:flex-row items-center gap-2 shrink-0">
-                    <select
-                      value={item.editorialStatus}
-                      onChange={(e) => handleStatusChange(item.id, e.target.value as EditorialStatus)}
-                      className="border border-[#D9DEE7] bg-white text-xs font-bold text-[#0B2345] px-2.5 py-1.5 rounded focus:outline-none"
-                    >
-                      <option value="RECEBIDA">1. Recebida</option>
-                      <option value="EM TRIAGEM">2. Em Triagem</option>
-                      <option value="EM APURAÇÃO">3. Em Apuração</option>
-                      <option value="EM REDAÇÃO">4. Em Redação</option>
-                      <option value="EM REVISÃO">5. Em Revisão</option>
-                      <option value="APROVADA">6. Aprovada</option>
-                      <option value="PUBLICADA">7. Publicada</option>
-                      <option value="REJEITADA">Rejeitada</option>
-                    </select>
-
-                    <a
-                      href={item.originalUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="p-1.5 border border-[#D9DEE7] bg-white rounded text-[#5D6673] hover:text-[#0B2345] transition"
-                      title="Abrir URL original da fonte"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
-                </div>
-              );
-            })}
-            </div>
-          </div>
+          <AdminQueueTab
+            items={filteredQueue}
+            queueFilter={queueFilter}
+            onQueueFilterChange={setQueueFilter}
+            onStatusChange={handleStatusChange}
+          />
         )}
 
         {/* TAB 3: CENTRAL DE FONTES */}
@@ -662,84 +417,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* TAB 4: DEDUPLICAÇÃO */}
         {activeTab === 'dedup' && (
-          <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs space-y-6">
-            <div>
-              <h3 className="font-serif text-lg font-bold text-[#0B2345]">
-                Motor de Deduplicação em 5 Camadas
-              </h3>
-              <p className="text-xs text-[#5D6673]">
-                Evita duplicidades e plágio involuntário comparando URLs canônicas, GUIDs RSS, hashes de texto e distâncias fonéticas/Levenshtein.
-              </p>
-            </div>
-
-            {/* Interactive Deduplication Tester */}
-            <div className="p-5 bg-[#F7F8FA] border border-[#D9DEE7] rounded space-y-4">
-              <h4 className="font-bold text-xs uppercase text-[#0B2345] flex items-center gap-1.5">
-                <Shield className="w-4 h-4 text-[#0B5FFF]" />
-                <span>Simulador Interativo das 5 Camadas</span>
-              </h4>
-
-              <form onSubmit={handleTestDedup} className="space-y-3 text-xs">
-                <div>
-                  <label className="block font-semibold mb-1">Título da Notícia a Testar:</label>
-                  <input
-                    type="text"
-                    placeholder="Digite o título da matéria para testar similaridade..."
-                    value={testTitle}
-                    onChange={(e) => setTestTitle(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2.5 rounded bg-white text-xs"
-                    required
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white font-bold px-4 py-2 rounded transition cursor-pointer"
-                >
-                  Executar Teste de Deduplicação
-                </button>
-              </form>
-
-              {dedupTestResult && (
-                <div 
-                  className="p-4 rounded border text-xs space-y-2 mt-4"
-                  style={{ borderColor: dedupTestResult.color, backgroundColor: `${dedupTestResult.color}10` }}
-                >
-                  <div className="flex items-center justify-between font-bold" style={{ color: dedupTestResult.color }}>
-                    <span>RESULTADO: {dedupTestResult.status}</span>
-                    <span>Similaridade: {dedupTestResult.score}%</span>
-                  </div>
-                  <p className="text-[#17202A] leading-relaxed">
-                    {dedupTestResult.reason}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Architecture Explanation */}
-            <div className="grid grid-cols-1 md:grid-cols-5 gap-3 text-xs">
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded">
-                <strong className="block text-[#0B2345] mb-1">Camada 1: URL Canônica</strong>
-                <p className="text-[#5D6673]">Limpa parâmetros UTM, fbclid e normaliza trailing slashes.</p>
-              </div>
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded">
-                <strong className="block text-[#0B2345] mb-1">Camada 2: GUID RSS</strong>
-                <p className="text-[#5D6673]">Verifica o identificador único fornecido pelo veículo emissor.</p>
-              </div>
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded">
-                <strong className="block text-[#0B2345] mb-1">Camada 3: Hash do Título</strong>
-                <p className="text-[#5D6673]">SHA-256 do texto minúsculo, sem pontuação ou acentos.</p>
-              </div>
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded">
-                <strong className="block text-[#0B2345] mb-1">Camada 4: Similaridade</strong>
-                <p className="text-[#5D6673]">Algoritmo similar_text com threshold em 82% nas últimas 72h.</p>
-              </div>
-              <div className="p-3 bg-slate-50 border border-slate-200 rounded">
-                <strong className="block text-[#0B2345] mb-1">Camada 5: Decisão Humana</strong>
-                <p className="text-[#5D6673]">Caso ambíguo é remetido obrigatoriamente para a redação.</p>
-              </div>
-            </div>
-          </div>
+          <AdminDedupTab
+            testTitle={testTitle}
+            onTestTitleChange={setTestTitle}
+            dedupTestResult={dedupTestResult}
+            onSubmitTest={handleTestDedup}
+          />
         )}
 
         {/* TAB 5: IDENTIDADE & LOGÓTIPOS */}
@@ -802,99 +485,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
         {/* TAB 9: DOWNLOAD ZIP */}
         {activeTab === 'download' && (
-          <div className="bg-white p-8 rounded border border-[#D9DEE7] shadow-xs space-y-6">
-            <div>
-              <div className="inline-flex items-center gap-1.5 bg-[#EBF7EE] text-[#16803C] text-xs font-bold px-3 py-1 rounded uppercase tracking-wider mb-2">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Instalação Pronta para WordPress Real</span>
-              </div>
-              <h3 className="font-serif text-2xl font-bold text-[#0B2345]">
-                Download dos Pacotes Oficiais de O Patriota
-              </h3>
-              <p className="text-xs text-[#5D6673] leading-relaxed max-w-2xl mt-1">
-                Gere e baixe em 1 clique os arquivos estruturados em formato ZIP padrão do WordPress, prontos para upload direto em <strong>Aparência &gt; Temas</strong> e <strong>Plugins &gt; Adicionar Novo</strong>.
-              </p>
-            </div>
-
-            {zipSuccess && (
-              <div className="p-4 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] rounded text-xs flex items-center gap-2 font-semibold">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>{zipSuccess}</span>
-              </div>
-            )}
-
-            {zipError && (
-              <div className="p-4 bg-red-50 border border-red-200 text-[#B42318] rounded text-xs flex items-center gap-2 font-semibold">
-                <AlertCircle className="w-4 h-4 shrink-0" />
-                <span>{zipError}</span>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-              {/* Box 1: Theme */}
-              <div className="p-6 rounded border border-[#D9DEE7] bg-[#F7F8FA] flex flex-col justify-between">
-                <div>
-                  <FileCode2 className="w-8 h-8 text-[#0B2345] mb-3" />
-                  <h4 className="font-serif text-base font-bold text-[#0B2345] mb-1">
-                    Tema Oficial (Block Theme)
-                  </h4>
-                  <p className="text-xs text-[#5D6673] mb-4">
-                    Inclui `style.css`, `theme.json`, templates FSE, patterns 3-col e 6-col, e tipografia editorial.
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDownloadZip('theme')}
-                  disabled={isZipping}
-                  className="w-full bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold py-2.5 rounded transition flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Baixar Tema (.ZIP)</span>
-                </button>
-              </div>
-
-              {/* Box 2: Plugin */}
-              <div className="p-6 rounded border border-[#D9DEE7] bg-[#F7F8FA] flex flex-col justify-between">
-                <div>
-                  <Layers className="w-8 h-8 text-[#0B5FFF] mb-3" />
-                  <h4 className="font-serif text-base font-bold text-[#0B2345] mb-1">
-                    Plugin Editorial Avançado
-                  </h4>
-                  <p className="text-xs text-[#5D6673] mb-4">
-                    Central de Fontes RSS, motor de deduplicação em 5 camadas, checagem ClaimReview e esteira de redação.
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDownloadZip('plugin')}
-                  disabled={isZipping}
-                  className="w-full bg-[#0B5FFF] hover:bg-[#0B2345] text-white text-xs font-bold py-2.5 rounded transition flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Baixar Plugin (.ZIP)</span>
-                </button>
-              </div>
-
-              {/* Box 3: Suite Completa */}
-              <div className="p-6 rounded border border-[#16803C]/30 bg-[#EBF7EE] flex flex-col justify-between">
-                <div>
-                  <Download className="w-8 h-8 text-[#16803C] mb-3" />
-                  <h4 className="font-serif text-base font-bold text-[#16803C] mb-1">
-                    Suíte Completa O Patriota
-                  </h4>
-                  <p className="text-xs text-[#16803C]/80 mb-4">
-                    Pacote com Tema + Plugin + Documentação técnica completa de arquitetura e implantação.
-                  </p>
-                </div>
-                <button
-                  onClick={() => handleDownloadZip('both')}
-                  disabled={isZipping}
-                  className="w-full bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold py-2.5 rounded transition flex items-center justify-center gap-2 cursor-pointer shadow-xs disabled:opacity-50"
-                >
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Baixar Pacote Completo (.ZIP)</span>
-                </button>
-              </div>
-            </div>
-          </div>
+          <AdminExportTab
+            isZipping={isZipping}
+            zipSuccess={zipSuccess}
+            zipError={zipError}
+            onDownloadZip={handleDownloadZip}
+          />
         )}
 
       </div>

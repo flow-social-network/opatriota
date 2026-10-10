@@ -25,7 +25,7 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
 }) => {
   const initialPlan = plans.find((plan) => plan.id === selectedPlanId) ?? plans[0];
   const [step, setStep] = useState<CheckoutStep>(1);
-  const [planId, setPlanId] = useState(initialPlan?.id ?? 'gratuito');
+  const [planId, setPlanId] = useState<string>(initialPlan?.id ?? 'gratuito');
   const [cycle, setCycle] = useState<'monthly' | 'annual'>(initialPlan?.id === 'premium' ? 'annual' : 'monthly');
   const [name, setName] = useState(currentUser?.name ?? '');
   const [email, setEmail] = useState(currentUser?.email ?? '');

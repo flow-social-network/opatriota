@@ -1,16 +1,19 @@
 import { initializeApp, getApps, getApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage, isSupported } from 'firebase/messaging';
-import { getFirestore, collection, addDoc, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { api } from './apiClient';
 
-const firebaseApp = getApps().length ? getApp() : initializeApp({
-  apiKey: 'AIzaSyAM7XqRKi2DWNvEpwZZTg99QGgq75_FWgc',
-  authDomain: 'o-patriota-5db52.firebaseapp.com',
-  projectId: 'o-patriota-5db52',
-  storageBucket: 'o-patriota-5db52.firebasestorage.app',
-  messagingSenderId: '144044011965',
-  appId: '1:144044011965:web:6da58292d47845e931e2d4'
-});
-const firestoreDb = getFirestore(firebaseApp);
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+};
+const hasFirebaseConfig = Object.values(firebaseConfig).every(Boolean);
+const firebaseApp = hasFirebaseConfig
+  ? (getApps().length ? getApp() : initializeApp(firebaseConfig))
+  : null;
 import { PushSubscriber, PushNotificationCampaign } from '../types';
 
 // VAPID Web Push Public Key provided for O Patriota
@@ -99,6 +102,7 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
     const registration = await registerPushServiceWorker();
 
     // 2. Obtain FCM messaging instance
+    if (!firebaseApp) throw new Error('Firebase não está configurado.');
     const messaging = getMessaging(firebaseApp);
     const vapidKey = customVapidKey || DEFAULT_VAPID_PUBLIC_KEY;
 
@@ -146,17 +150,14 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
       }
     } catch (e) {}
 
-    // 7. Persist to Firestore collection 'push_subscribers'
+    // 7. Persist through the API so the active database provider owns the record.
     try {
-      const colRef = collection(firestoreDb, 'push_subscribers');
-      await addDoc(colRef, {
+      await api.post('/push-subscriptions', {
         ...subscriberData,
-        createdAt: serverTimestamp(),
         vapidPublicKey: vapidKey
       });
-    } catch (firestoreError) {
-      // Graceful fallback: local token is active
-      console.info('[WebPush] Token registrado localmente (Firestore pendente de regras).');
+    } catch (apiError) {
+      console.info('[WebPush] Token mantido localmente; a API ainda não persistiu a inscrição.');
     }
 
     return {

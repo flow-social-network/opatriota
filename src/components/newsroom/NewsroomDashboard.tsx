@@ -17,39 +17,26 @@ import { PagesManager } from '../admin/PagesManager';
 import { CategoriesManager } from '../admin/CategoriesManager';
 import { MenusManager } from '../admin/MenusManager';
 import { OfficialSourcesHub } from '../admin/OfficialSourcesHub';
-import { 
-  classifyLeadFactualStatus, 
-  isGloboSource, 
-  EDITORIAL_POLICY_CONFIG 
-} from '../../utils/editorialPolicy';
+import { isGloboSource } from '../../utils/editorialPolicy';
 import { 
   FileText, 
   Plus, 
-  Edit3, 
   CheckCircle, 
   AlertTriangle, 
-  Clock, 
-  Send, 
   ArrowLeft, 
-  Search, 
-  Sparkles, 
   Image as ImageIcon, 
-  ShieldAlert, 
-  Layers, 
-  Eye, 
   BookOpen, 
-  Trash2, 
   UserCheck, 
   SlidersHorizontal,
-  Upload,
-  Calendar,
-  Lock,
-  ExternalLink,
-  MessageSquareQuote,
   Globe,
   Compass,
   Menu
 } from 'lucide-react';
+import { NewsroomOverviewTab } from './NewsroomOverviewTab';
+import { NewsroomArticlesTab } from './NewsroomArticlesTab';
+import { NewsroomEditorTab } from './NewsroomEditorTab';
+import { NewsroomMediaTab } from './NewsroomMediaTab';
+import { CorrectionRequestModal } from './CorrectionRequestModal';
 
 interface NewsroomDashboardProps {
   articles: Article[];
@@ -501,6 +488,14 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     showFeedback('O envio de ficheiros ainda não está ligado a um armazenamento de mídia. Nenhum ficheiro foi enviado.', 'error');
   };
 
+  const handleUseMedia = (med: MediaItem) => {
+    setFormImageUrl(med.url);
+    setFormImageCaption(med.caption || '');
+    setFormImageCredits(med.credits || '');
+    showFeedback(`Imagem "${med.name}" selecionada como capa!`);
+    setActiveTab('editor');
+  };
+
   // Filtered articles list
   const filteredArticles = articles.filter((a) => {
     const matchesStatus = statusFilter === 'TODAS' || a.editorialStatus === statusFilter;
@@ -628,575 +623,73 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
         {/* TAB 1: PAINEL GERAL & MÉTRICAS */}
         {activeTab === 'painel' && (
-          <div className="space-y-6">
-            {/* Real Status Metrics Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-              <div className="bg-white p-4 rounded border border-[#D9DEE7] border-l-4 border-l-[#5D6673] shadow-xs">
-                <span className="text-[10px] font-bold text-[#5D6673] uppercase tracking-wider block">Em Rascunho</span>
-                <span className="text-2xl font-black text-[#17202A] block mt-1">{countRascunho}</span>
-                <span className="text-[10px] text-[#5D6673]">Em produção inicial</span>
-              </div>
-
-              <div className="bg-white p-4 rounded border border-[#D9DEE7] border-l-4 border-l-[#0B5FFF] shadow-xs">
-                <span className="text-[10px] font-bold text-[#0B5FFF] uppercase tracking-wider block">Aguardando Revisão</span>
-                <span className="text-2xl font-black text-[#0B5FFF] block mt-1">{countEmRevisao}</span>
-                <span className="text-[10px] text-[#0B5FFF] font-semibold">Exige parecer editorial</span>
-              </div>
-
-              <div className="bg-white p-4 rounded border border-[#D9DEE7] border-l-4 border-l-[#D97706] shadow-xs">
-                <span className="text-[10px] font-bold text-[#D97706] uppercase tracking-wider block">Com Correções</span>
-                <span className="text-2xl font-black text-[#D97706] block mt-1">{countCorrecoes}</span>
-                <span className="text-[10px] text-[#D97706]">Devolvidas ao autor</span>
-              </div>
-
-              <div className="bg-white p-4 rounded border border-[#D9DEE7] border-l-4 border-l-[#16803C] shadow-xs">
-                <span className="text-[10px] font-bold text-[#16803C] uppercase tracking-wider block">Aprovadas</span>
-                <span className="text-2xl font-black text-[#16803C] block mt-1">{countAprovadas}</span>
-                <span className="text-[10px] text-[#16803C] font-semibold">Prontas p/ publicação</span>
-              </div>
-
-              <div className="bg-white p-4 rounded border border-[#D9DEE7] border-l-4 border-l-[#2563EB] shadow-xs">
-                <span className="text-[10px] font-bold text-[#2563EB] uppercase tracking-wider block">Agendadas</span>
-                <span className="text-2xl font-black text-[#2563EB] block mt-1">{countAgendadas}</span>
-                <span className="text-[10px] text-[#2563EB]">Fila de disparo</span>
-              </div>
-
-              <div className="bg-white p-4 rounded border border-[#D9DEE7] border-l-4 border-l-[#0B2345] shadow-xs">
-                <span className="text-[10px] font-bold text-[#0B2345] uppercase tracking-wider block">Publicadas</span>
-                <span className="text-2xl font-black text-[#0B2345] block mt-1">{countPublicadas}</span>
-                <span className="text-[10px] text-[#0B2345] font-semibold">Ao vivo no portal</span>
-              </div>
-            </div>
-
-            {/* Editorial Policy Reminder */}
-            <div className="p-4 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] rounded text-xs flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <ShieldAlert className="w-4 h-4 shrink-0" />
-                <span>
-                  <strong>POLÍTICA DE INTEGRIDADE:</strong> Toda publicação exige revisão independente. Um jornalista não pode aprovar a própria matéria.
-                </span>
-              </div>
-              <span className="font-mono text-[10px] uppercase font-bold bg-[#16803C] text-white px-2 py-0.5 rounded">
-                Regra Editorial Ativa
-              </span>
-            </div>
-
-            {/* Items Waiting Review */}
-            <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-serif text-base font-bold text-[#0B2345]">
-                  Fila Prioritária de Revisão Editorial
-                </h3>
-                <span className="text-xs text-[#5D6673]">Apenas Editores e Revisores podem aprovar</span>
-              </div>
-
-              <div className="divide-y divide-[#D9DEE7]">
-                {articles.filter(a => a.editorialStatus === 'EM REVISÃO' || a.editorialStatus === 'CORREÇÕES').map((art) => (
-                  <div key={art.id} className="py-3 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 text-[10px] font-bold text-[#5D6673] uppercase mb-1">
-                        <span className="text-[#0B5FFF]">{art.kicker}</span>
-                        <span>•</span>
-                        <span>Autor: {art.author}</span>
-                        <span>•</span>
-                        <span className={`px-1.5 py-0.2 rounded font-mono ${
-                          art.editorialStatus === 'EM REVISÃO' ? 'bg-[#EFF6FF] text-[#2563EB]' : 'bg-[#FEF3F2] text-[#B42318]'
-                        }`}>
-                          {art.editorialStatus}
-                        </span>
-                      </div>
-                      <h4 className="font-serif text-sm font-bold text-[#0B2345] mb-1">
-                        {art.title}
-                      </h4>
-                      {art.reviewNotes && (
-                        <p className="text-[11px] text-[#B42318] italic bg-[#FEF3F2] p-2 rounded border border-[#B42318]/20 mt-1">
-                          Nota do Revisor: {art.reviewNotes}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex items-center gap-2 shrink-0">
-                      <button
-                        onClick={() => handleOpenEdit(art)}
-                        className="px-3 py-1.5 border border-[#D9DEE7] hover:border-[#0B2345] rounded font-bold transition cursor-pointer"
-                      >
-                        Abrir Texto
-                      </button>
-
-                      {/* Approve button */}
-                      <button
-                        onClick={() => handleApprove(art)}
-                        className="px-3 py-1.5 bg-[#16803C] hover:bg-[#22A447] text-white rounded font-bold transition cursor-pointer"
-                        title={art.authorId === currentUser.id ? 'Você é o autor desta matéria e não pode aprová-la' : 'Aprovar matéria'}
-                      >
-                        Aprovar
-                      </button>
-
-                      {/* Request corrections */}
-                      <button
-                        onClick={() => handleOpenCorrectionModal(art)}
-                        className="px-3 py-1.5 bg-[#D97706] hover:bg-amber-600 text-white rounded font-bold transition cursor-pointer"
-                      >
-                        Pedir Correção
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <NewsroomOverviewTab
+            articles={articles}
+            currentUser={currentUser}
+            countRascunho={countRascunho}
+            countEmRevisao={countEmRevisao}
+            countCorrecoes={countCorrecoes}
+            countAprovadas={countAprovadas}
+            countAgendadas={countAgendadas}
+            countPublicadas={countPublicadas}
+            onOpenEdit={handleOpenEdit}
+            onApprove={handleApprove}
+            onRequestCorrection={handleOpenCorrectionModal}
+          />
         )}
 
         {/* TAB 2: TODAS AS MATÉRIAS & FILTROS */}
         {activeTab === 'materias' && (
-          <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[#0B2345]">
-                  Arquivo e Gestão de Matérias
-                </h3>
-                <p className="text-xs text-[#5D6673]">
-                  Pesquise, edite, envie para revisão e publique matérias do portal.
-                </p>
-              </div>
-
-              {/* Filters */}
-              <div className="flex flex-wrap items-center gap-3 text-xs">
-                <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-[#5D6673] absolute left-2.5 top-2.5" />
-                  <input
-                    type="text"
-                    placeholder="Filtrar por título ou autor..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-8 pr-3 py-1.5 border border-[#D9DEE7] rounded text-xs w-48 sm:w-60 focus:outline-none focus:border-[#0B5FFF]"
-                  />
-                </div>
-
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value)}
-                  className="border border-[#D9DEE7] p-1.5 rounded text-xs focus:outline-none"
-                >
-                  <option value="TODAS">Todos os Status</option>
-                  <option value="PUBLICADA">Publicada</option>
-                  <option value="EM REVISÃO">Em Revisão</option>
-                  <option value="CORREÇÕES">Correções</option>
-                  <option value="APROVADA">Aprovada</option>
-                  <option value="EM REDAÇÃO">Em Redação</option>
-                </select>
-
-                <select
-                  value={categoryFilter}
-                  onChange={(e) => setCategoryFilter(e.target.value)}
-                  className="border border-[#D9DEE7] p-1.5 rounded text-xs focus:outline-none"
-                >
-                  <option value="TODAS">Todas as Editorias</option>
-                  <option value="politica">Política</option>
-                  <option value="brasil">Brasil</option>
-                  <option value="economia">Economia</option>
-                  <option value="seguranca">Segurança</option>
-                  <option value="saude">Saúde</option>
-                  <option value="opiniao">Opinião</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Articles Table */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-xs text-left">
-                <thead className="bg-[#F7F8FA] border-b border-[#D9DEE7] text-[#5D6673] uppercase text-[10px] font-bold">
-                  <tr>
-                    <th className="py-2.5 px-3">Título da Matéria</th>
-                    <th className="py-2.5 px-3">Autor</th>
-                    <th className="py-2.5 px-3">Editoria</th>
-                    <th className="py-2.5 px-3">Acesso</th>
-                    <th className="py-2.5 px-3">Status</th>
-                    <th className="py-2.5 px-3 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#D9DEE7]">
-                  {filteredArticles.map((art) => (
-                    <tr key={art.id} className="hover:bg-[#F7F8FA]">
-                      <td className="py-3 px-3 max-w-md">
-                        <strong className="block text-[#0B2345] font-serif text-xs">
-                          {art.title}
-                        </strong>
-                        <span className="text-[10px] text-[#5D6673] block truncate">
-                          {art.subtitle}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-[#5D6673]">{art.author}</td>
-                      <td className="py-3 px-3 uppercase text-[10px] font-bold text-[#0B5FFF]">{art.category}</td>
-                      <td className="py-3 px-3">
-                        <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded uppercase ${
-                          art.accessLevel === 'premium'
-                            ? 'bg-[#FFCC29] text-[#17202A]'
-                            : art.accessLevel === 'assinante'
-                            ? 'bg-[#EFF6FF] text-[#2563EB]'
-                            : 'bg-[#F1F3F5] text-[#5D6673]'
-                        }`}>
-                          {art.accessLevel}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className={`text-[10px] font-bold font-mono px-2 py-0.5 rounded ${
-                          art.editorialStatus === 'PUBLICADA'
-                            ? 'bg-[#EBF7EE] text-[#16803C]'
-                            : art.editorialStatus === 'EM REVISÃO'
-                            ? 'bg-[#EFF6FF] text-[#2563EB]'
-                            : art.editorialStatus === 'CORREÇÕES'
-                            ? 'bg-[#FEF3F2] text-[#B42318]'
-                            : art.editorialStatus === 'APROVADA'
-                            ? 'bg-[#EBF7EE] text-[#16803C]'
-                            : 'bg-slate-100 text-slate-700'
-                        }`}>
-                          {art.editorialStatus}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-right space-x-1 whitespace-nowrap">
-                        <button
-                          onClick={() => handleOpenEdit(art)}
-                          className="px-2 py-1 border border-[#D9DEE7] hover:border-[#0B2345] rounded font-bold text-[11px] cursor-pointer"
-                        >
-                          Editar
-                        </button>
-                        {art.editorialStatus === 'APROVADA' && (
-                          <button
-                            onClick={() => handlePublish(art)}
-                            className="px-2 py-1 bg-[#16803C] hover:bg-[#22A447] text-white rounded font-bold text-[11px] cursor-pointer"
-                          >
-                            Publicar
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <NewsroomArticlesTab
+            filteredArticles={filteredArticles}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            onOpenEdit={handleOpenEdit}
+            onPublish={handlePublish}
+          />
         )}
 
         {/* TAB 3: EDITOR DE MATÉRIAS (CRIAR / EDITAR) */}
         {activeTab === 'editor' && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            
-            {/* LEFT: MAIN FORM */}
-            <form onSubmit={handleSaveDraft} className="lg:col-span-8 bg-white p-6 sm:p-8 rounded border border-[#D9DEE7] shadow-xs space-y-6 text-xs">
-              
-              <div className="flex items-center justify-between pb-4 border-b border-[#D9DEE7]">
-                <div>
-                  <h3 className="font-serif text-xl font-bold text-[#0B2345]">
-                    {isCreatingNew ? 'Nova Reportagem' : `Editando: ${editingArticle?.title.substring(0, 40)}...`}
-                  </h3>
-                  <span className="text-[11px] text-[#5D6673]">
-                    Status atual: <strong>{editingArticle?.editorialStatus || 'EM REDAÇÃO'}</strong> • Autor: <strong>{editingArticle?.author || currentUser.name}</strong>
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button
-                    type="submit"
-                    className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white font-bold px-4 py-2 rounded transition cursor-pointer"
-                  >
-                    Salvar Rascunho
-                  </button>
-
-                  {editingArticle && (
-                    <button
-                      type="button"
-                      onClick={handleSubmitToReview}
-                      className="bg-[#16803C] hover:bg-[#22A447] text-white font-bold px-4 py-2 rounded transition cursor-pointer flex items-center gap-1.5"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                      <span>Enviar p/ Revisão</span>
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Title & Subtitle */}
-              <div>
-                <label className="block font-bold mb-1 text-[#0B2345]">Título da Matéria (Manchete):</label>
-                <input
-                  type="text"
-                  placeholder="Ex: Congresso avança em propostas para modernização da economia..."
-                  value={formTitle}
-                  onChange={(e) => setFormTitle(e.target.value)}
-                  className="w-full border border-[#D9DEE7] p-2.5 rounded font-serif text-sm font-bold text-[#0B2345] focus:outline-none focus:border-[#0B5FFF]"
-                  required
-                />
-
-                {/* Real-time Factual Status Evaluation */}
-                {formTitle.trim().length > 5 && (() => {
-                  const leadAnalysis = classifyLeadFactualStatus(formTitle, formSubtitle);
-                  return (
-                    <div className="mt-2 p-2 rounded-lg border text-[11px] flex items-center justify-between gap-2 bg-slate-50 border-slate-200">
-                      <div className="flex items-center gap-1.5">
-                        <span className="font-semibold text-[#0B2345]">Classificação Factual:</span>
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${leadAnalysis.badgeClass}`}>
-                          {leadAnalysis.label}
-                        </span>
-                      </div>
-                      <span className="text-[10px] text-[#5D6673] hidden sm:inline">
-                        {leadAnalysis.recommendation}
-                      </span>
-                    </div>
-                  );
-                })()}
-              </div>
-
-              <div>
-                <label className="block font-bold mb-1 text-[#0B2345]">Subtítulo (Linha Fina / Resumo):</label>
-                <textarea
-                  rows={2}
-                  placeholder="Resumo explicativo do acontecimento..."
-                  value={formSubtitle}
-                  onChange={(e) => setFormSubtitle(e.target.value)}
-                  className="w-full border border-[#D9DEE7] p-2.5 rounded focus:outline-none focus:border-[#0B5FFF]"
-                />
-              </div>
-
-              {/* Body Content */}
-              <div>
-                <label className="block font-bold mb-1 text-[#0B2345]">Corpo da Matéria:</label>
-                <textarea
-                  rows={12}
-                  placeholder="Texto completo da reportagem, com citações, dados e apuração circunstanciada..."
-                  value={formContent}
-                  onChange={(e) => setFormContent(e.target.value)}
-                  className="w-full border border-[#D9DEE7] p-3 rounded font-sans leading-relaxed focus:outline-none focus:border-[#0B5FFF]"
-                  required
-                />
-              </div>
-
-              {/* Sources & References */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block font-bold mb-1 text-[#0B2345]">Fontes Primárias Consultadas (1 por linha):</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Ex: Diário Oficial da União nº 198&#10;Relatório CNI 2026"
-                    value={formSources}
-                    onChange={(e) => setFormSources(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                  />
-
-                  {/* Real-time Globo Restriction Alert */}
-                  {isGloboSource(formSources) && (
-                    <div className="mt-2 p-2.5 bg-rose-50 border border-rose-300 rounded-lg text-rose-900 text-[11px] flex items-start gap-2">
-                      <ShieldAlert className="w-3.5 h-3.5 text-rose-600 shrink-0 mt-0.5" />
-                      <div>
-                        <strong className="block text-rose-800 font-bold">
-                          RESTRIÇÃO EDITORIAL — GRUPO GLOBO
-                        </strong>
-                        <p className="mt-0.5 text-[10px] text-rose-700 leading-snug">
-                          Conforme o Adendo ao Manual de Fontes de O PATRIOTA, publicações da Rede Globo não podem ser utilizadas como sustentação factual. A matéria deve citar documentos originais ou fontes primárias oficiais.
-                        </p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block font-bold mb-1 text-[#0B2345]">Tags / Palavras-Chave (separadas por vírgula):</label>
-                  <textarea
-                    rows={3}
-                    placeholder="Congresso, Economia, Trabalho, Brasília"
-                    value={formTags}
-                    onChange={(e) => setFormTags(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                  />
-                </div>
-              </div>
-
-              {/* SEO Settings */}
-              <div className="p-4 bg-[#F7F8FA] border border-[#D9DEE7] rounded space-y-3">
-                <h4 className="font-bold text-[#0B2345] uppercase text-[11px]">Metadados & SEO Técnico</h4>
-                <div>
-                  <label className="block mb-1 font-semibold">Meta Title (Google / Redes Sociais):</label>
-                  <input
-                    type="text"
-                    value={formMetaTitle}
-                    onChange={(e) => setFormMetaTitle(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block mb-1 font-semibold">Meta Description:</label>
-                  <input
-                    type="text"
-                    value={formMetaDesc}
-                    onChange={(e) => setFormMetaDesc(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded bg-white"
-                  />
-                </div>
-              </div>
-
-              {/* Review Notes if any */}
-              {editingArticle?.reviewNotes && (
-                <div className="p-4 bg-[#FEF3F2] border border-[#B42318]/30 text-[#B42318] rounded">
-                  <strong className="block font-bold mb-1">Orientações de Correção Pendentes:</strong>
-                  <p>{editingArticle.reviewNotes}</p>
-                </div>
-              )}
-            </form>
-
-            {/* RIGHT SIDEBAR: SETTINGS & AI ASSISTANT */}
-            <div className="lg:col-span-4 space-y-6">
-              
-              {/* Card: Classification & Access Level */}
-              <div className="bg-white p-5 rounded border border-[#D9DEE7] shadow-xs space-y-4 text-xs">
-                <h4 className="font-bold text-[#0B2345] uppercase tracking-wider text-[11px] border-b border-[#D9DEE7] pb-2">
-                  Configurações de Publicação
-                </h4>
-
-                <div>
-                  <label className="block font-semibold mb-1">Editoria:</label>
-                  <select
-                    value={formCategory}
-                    onChange={(e) => setFormCategory(e.target.value as CategorySlug)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none"
-                  >
-                    <option value="politica">Política Nacional</option>
-                    <option value="brasil">Brasil</option>
-                    <option value="economia">Economia</option>
-                    <option value="seguranca">Segurança Pública</option>
-                    <option value="saude">Saúde</option>
-                    <option value="cultura">Cultura</option>
-                    <option value="opiniao">Opinião</option>
-                    <option value="checagem">Checagem de Fatos</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-1">Chapéu / Kicker Editorial:</label>
-                  <input
-                    type="text"
-                    value={formKicker}
-                    onChange={(e) => setFormKicker(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none"
-                  />
-                </div>
-
-                {/* Content Access Level / Paywall Config */}
-                <div>
-                  <label className="block font-semibold mb-1">Nível de Acesso (Paywall):</label>
-                  <select
-                    value={formAccessLevel}
-                    onChange={(e) => setFormAccessLevel(e.target.value as ContentAccessLevel)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none font-bold text-[#0B2345]"
-                  >
-                    <option value="aberto">Aberto (Acesso Geral Livre)</option>
-                    <option value="assinante">Exclusivo para Assinantes (Digital/Premium)</option>
-                    <option value="premium">Assinante Premium (Inteligência & Ensaio)</option>
-                  </select>
-                </div>
-
-                {/* Featured Image Selection */}
-                <div>
-                  <label className="block font-semibold mb-1">Imagem Destacada:</label>
-                  <div className="h-28 rounded overflow-hidden border border-[#D9DEE7] mb-2 bg-slate-100">
-                    <img src={formImageUrl} alt="Imagem destacada" className="w-full h-full object-cover" />
-                  </div>
-                  <input
-                    type="text"
-                    placeholder="Legenda da imagem..."
-                    value={formImageCaption}
-                    onChange={(e) => setFormImageCaption(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-1.5 rounded mb-1 text-[11px]"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Créditos da fotografia..."
-                    value={formImageCredits}
-                    onChange={(e) => setFormImageCredits(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-1.5 rounded text-[11px]"
-                  />
-                </div>
-              </div>
-
-              {/* Card: AI Editorial Assistant */}
-              <div className="bg-[#0B2345] text-white p-5 rounded border border-[#07172E] shadow-xs space-y-4 text-xs">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#FFCC29]" />
-                    <h4 className="font-bold text-xs uppercase tracking-wider text-white">
-                      Assistente IA Editorial
-                    </h4>
-                  </div>
-                  <span className="text-[10px] text-[#FFCC29] font-mono">Gemini API Ready</span>
-                </div>
-
-                <p className="text-[11px] text-white/80 leading-relaxed">
-                  Auxilia na formulação de títulos de impacto, análise de clareza textual e auditoria de fontes faltantes sem inventar declarações ou dados.
-                </p>
-
-                <button
-                  type="button"
-                  onClick={handleRunAiAssistant}
-                  disabled={aiLoading}
-                  className="w-full bg-[#16803C] hover:bg-[#22A447] text-white font-bold py-2 rounded transition cursor-pointer flex items-center justify-center gap-2"
-                >
-                  <Sparkles className={`w-3.5 h-3.5 ${aiLoading ? 'animate-spin' : ''}`} />
-                  <span>{aiLoading ? 'Analisando texto...' : 'Auditar e Sugerir Títulos'}</span>
-                </button>
-
-                {aiSuggestions && (
-                  <div className="space-y-3 pt-3 border-t border-white/10 text-white/90">
-                    <div>
-                      <strong className="block text-[#FFCC29] text-[11px] mb-1">Sugestões de Título Ético:</strong>
-                      <ul className="space-y-1">
-                        {aiSuggestions.titles?.map((t, idx) => (
-                          <li
-                            key={idx}
-                            onClick={() => setFormTitle(t)}
-                            className="p-1.5 bg-white/10 hover:bg-white/20 rounded cursor-pointer text-[11px] transition"
-                            title="Clique para aplicar este título"
-                          >
-                            • {t}
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div>
-                      <strong className="block text-[#FFCC29] text-[11px] mb-1">Fontes a Verificar:</strong>
-                      <ul className="space-y-1 text-[11px] text-white/80">
-                        {aiSuggestions.missingSources?.map((s, idx) => (
-                          <li key={idx}>⚠️ {s}</li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="pt-2 text-[10px] text-white/60 italic">
-                      Nota de Integridade: As sugestões da IA são consultivas. Nenhuma matéria é publicada sem validação humana.
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              {/* Card: Audit Trail */}
-              {editingArticle?.auditLog && editingArticle.auditLog.length > 0 && (
-                <div className="bg-white p-5 rounded border border-[#D9DEE7] shadow-xs space-y-3 text-xs">
-                  <h4 className="font-bold text-[#0B2345] uppercase tracking-wider text-[11px] border-b border-[#D9DEE7] pb-2">
-                    Histórico & Auditoria
-                  </h4>
-                  <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
-                    {editingArticle.auditLog.map((log) => (
-                      <div key={log.id} className="p-2 bg-[#F7F8FA] rounded border border-[#D9DEE7] text-[11px]">
-                        <div className="font-bold text-[#0B2345]">{log.action}</div>
-                        <div className="text-[10px] text-[#5D6673]">{log.userName} ({log.userRole}) • {log.timestamp}</div>
-                        {log.notes && <div className="text-[10px] text-[#17202A] italic mt-1">{log.notes}</div>}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-            </div>
-          </div>
+          <NewsroomEditorTab
+            editingArticle={editingArticle}
+            isCreatingNew={isCreatingNew}
+            currentUser={currentUser}
+            formTitle={formTitle}
+            setFormTitle={setFormTitle}
+            formSubtitle={formSubtitle}
+            setFormSubtitle={setFormSubtitle}
+            formContent={formContent}
+            setFormContent={setFormContent}
+            formCategory={formCategory}
+            setFormCategory={setFormCategory}
+            formKicker={formKicker}
+            setFormKicker={setFormKicker}
+            formImageUrl={formImageUrl}
+            formImageCaption={formImageCaption}
+            setFormImageCaption={setFormImageCaption}
+            formImageCredits={formImageCredits}
+            setFormImageCredits={setFormImageCredits}
+            formAccessLevel={formAccessLevel}
+            setFormAccessLevel={setFormAccessLevel}
+            formTags={formTags}
+            setFormTags={setFormTags}
+            formSources={formSources}
+            setFormSources={setFormSources}
+            formMetaTitle={formMetaTitle}
+            setFormMetaTitle={setFormMetaTitle}
+            formMetaDesc={formMetaDesc}
+            setFormMetaDesc={setFormMetaDesc}
+            aiSuggestions={aiSuggestions}
+            aiLoading={aiLoading}
+            onSaveDraft={handleSaveDraft}
+            onSubmitToReview={handleSubmitToReview}
+            onRunAiAssistant={handleRunAiAssistant}
+          />
         )}
 
         {/* TAB 4: CENTRAL DE FONTES OFICIAIS */}
@@ -1211,111 +704,19 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
         {/* TAB 5: BIBLIOTECA DE MÍDIA */}
         {activeTab === 'midia' && (
-          <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[#0B2345]">
-                  Biblioteca de Mídia & Fotografias Jornalísticas
-                </h3>
-                <p className="text-xs text-[#5D6673]">
-                  Imagens autorizadas para uso com créditos e legendas obrigatórias.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setMediaUploadModal(true)}
-                className="flex items-center gap-1.5 bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold px-3.5 py-2 rounded transition cursor-pointer"
-              >
-                <Upload className="w-4 h-4" />
-                <span>Enviar Imagem</span>
-              </button>
-            </div>
-
-            {/* Media Upload Modal */}
-            {mediaUploadModal && (
-              <form onSubmit={handleMediaUpload} className="p-5 bg-[#F7F8FA] border border-[#D9DEE7] rounded space-y-3 text-xs max-w-lg">
-                <h4 className="font-bold text-[#0B2345] uppercase">Cadastrar Nova Imagem</h4>
-                <div>
-                  <label className="block font-semibold mb-1">Nome do Arquivo / Título:</label>
-                  <input
-                    type="text"
-                    placeholder="Ex: plenário_camara_votacao.jpg"
-                    value={newMediaName}
-                    onChange={(e) => setNewMediaName(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded bg-white"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold mb-1">Legenda Padrão:</label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Sessão deliberativa no plenário da Câmara dos Deputados"
-                    value={newMediaCaption}
-                    onChange={(e) => setNewMediaCaption(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded bg-white"
-                  />
-                </div>
-                <div>
-                  <label className="block font-semibold mb-1">Créditos da Fotografia:</label>
-                  <input
-                    type="text"
-                    placeholder="Ex: Agência Câmara / Lula Marques"
-                    value={newMediaCredits}
-                    onChange={(e) => setNewMediaCredits(e.target.value)}
-                    className="w-full border border-[#D9DEE7] p-2 rounded bg-white"
-                  />
-                </div>
-                <div className="flex justify-end gap-2 pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setMediaUploadModal(false)}
-                    className="px-3 py-1.5 border border-[#D9DEE7] rounded font-bold cursor-pointer"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-1.5 bg-[#16803C] text-white rounded font-bold cursor-pointer"
-                  >
-                    Salvar na Biblioteca
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {/* Media Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-              {mediaList.map((med) => (
-                <div key={med.id} className="p-3 bg-[#F7F8FA] rounded border border-[#D9DEE7] flex flex-col justify-between">
-                  <div>
-                    <div className="h-32 rounded overflow-hidden mb-2 bg-slate-200">
-                      <img src={med.url} alt={med.name} className="w-full h-full object-cover" />
-                    </div>
-                    <strong className="block text-xs font-bold text-[#0B2345] truncate">{med.name}</strong>
-                    <p className="text-[11px] text-[#5D6673] truncate">{med.caption || 'Sem legenda'}</p>
-                    <span className="text-[10px] text-[#5D6673] block mt-1">Créditos: {med.credits}</span>
-                  </div>
-
-                  <div className="mt-3 pt-2 border-t border-[#D9DEE7] flex justify-between items-center text-[11px]">
-                    <span className="text-[#5D6673]">{(med.sizeBytes / 1024).toFixed(0)} KB</span>
-                    <button
-                      onClick={() => {
-                        setFormImageUrl(med.url);
-                        setFormImageCaption(med.caption || '');
-                        setFormImageCredits(med.credits || '');
-                        showFeedback(`Imagem "${med.name}" selecionada como capa!`);
-                        setActiveTab('editor');
-                      }}
-                      className="text-[#0B5FFF] font-bold hover:underline cursor-pointer"
-                    >
-                      Usar no Artigo
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          <NewsroomMediaTab
+            mediaList={mediaList}
+            mediaUploadModal={mediaUploadModal}
+            setMediaUploadModal={setMediaUploadModal}
+            newMediaName={newMediaName}
+            setNewMediaName={setNewMediaName}
+            newMediaCaption={newMediaCaption}
+            setNewMediaCaption={setNewMediaCaption}
+            newMediaCredits={newMediaCredits}
+            setNewMediaCredits={setNewMediaCredits}
+            onMediaUpload={handleMediaUpload}
+            onUseMedia={handleUseMedia}
+          />
         )}
 
         {/* TAB: GESTOR DE PÁGINAS & MODELOS */}
@@ -1351,61 +752,15 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
       {/* MODAL: SOLICITAÇÃO DE CORREÇÕES */}
       {correctionModalOpen && targetArticleForCorrection && (
-        <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg max-w-lg w-full p-6 shadow-xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-[#D9DEE7]">
-              <h3 className="font-serif text-lg font-bold text-[#0B2345]">
-                Solicitar Correções ao Repórter
-              </h3>
-              <button
-                onClick={() => setCorrectionModalOpen(false)}
-                className="text-gray-400 hover:text-gray-700 font-bold p-1"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-[#5D6673]">
-              Matéria: <strong>"{targetArticleForCorrection.title}"</strong> (Autor: {targetArticleForCorrection.author})
-            </p>
-
-            {correctionError && (
-              <div className="p-2.5 bg-red-50 border border-red-200 text-[#B42318] text-xs rounded font-medium flex items-center justify-between">
-                <span>{correctionError}</span>
-                <button type="button" onClick={() => setCorrectionError(null)} className="text-red-400 hover:text-red-700">✕</button>
-              </div>
-            )}
-
-            <div>
-              <label className="block text-xs font-bold mb-1 text-[#0B2345]">
-                Orientações Editoriais e Ajustes Obrigatórios:
-              </label>
-              <textarea
-                rows={4}
-                placeholder="Indique com clareza quais pontos devem ser retificados (ex: checar dados oficiais, melhorar título, incluir posição do ministério)..."
-                value={correctionNotes}
-                onChange={(e) => setCorrectionNotes(e.target.value)}
-                className="w-full border border-[#D9DEE7] p-2.5 rounded text-xs focus:outline-none focus:border-[#0B5FFF]"
-                required
-              />
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => setCorrectionModalOpen(false)}
-                className="px-4 py-2 border border-[#D9DEE7] text-xs font-bold rounded cursor-pointer"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleConfirmCorrection}
-                className="px-4 py-2 bg-[#D97706] hover:bg-amber-600 text-white text-xs font-bold rounded transition cursor-pointer"
-              >
-                Devolver para Correção
-              </button>
-            </div>
-          </div>
-        </div>
+        <CorrectionRequestModal
+          targetArticle={targetArticleForCorrection}
+          correctionNotes={correctionNotes}
+          setCorrectionNotes={setCorrectionNotes}
+          correctionError={correctionError}
+          setCorrectionError={setCorrectionError}
+          onClose={() => setCorrectionModalOpen(false)}
+          onConfirm={handleConfirmCorrection}
+        />
       )}
 
     </div>

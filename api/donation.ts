@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { firestoreWrite, json, mpRequest, newId, readBody, validEmail } from './_lib/billing';
+import { json, mpRequest, newId, readBody, validEmail } from './_lib/billing';
+import { documentWrite } from './_lib/storage';
 
 export default async function handler(req: IncomingMessage & { method?:string; headers:any; body?:any },res:ServerResponse & {statusCode:number;setHeader(name:string,value:string):void;end(body?:string):void}) {
  if(req.method!=='POST'){res.setHeader('Allow','POST');return json(res,405,{error:'METHOD_NOT_ALLOWED'});}
@@ -17,7 +18,7 @@ export default async function handler(req: IncomingMessage & { method?:string; h
   const siteUrl=configuredSiteUrl.replace(/\/$/,'');
   const donationId=newId();
   const donation={donationId,donorName:donorName||'Doador não identificado',donorEmail:donorEmail||null,amount:Number(amount.toFixed(2)),currency:'BRL',status:'pending',message:message||null,messageModerationStatus:message?'pending_review':'not_provided',createdAt:new Date().toISOString(),provider:'mercadopago'};
-  await firestoreWrite('donations',donationId,donation,false);
+    await documentWrite('donations',donationId,donation,false);
   const preference:any={
    items:[{id:'donation-'+donationId,title:'Contribuição voluntária — O Patriota',quantity:1,currency_id:'BRL',unit_price:Number(amount.toFixed(2))}],
    external_reference:'donation:'+donationId,
@@ -30,8 +31,8 @@ export default async function handler(req: IncomingMessage & { method?:string; h
   if(donorEmail) preference.payer={email:donorEmail,name:donorName||undefined};
   const response=await mpRequest('/checkout/preferences',{method:'POST',headers:{'X-Idempotency-Key':donationId},body:JSON.stringify(preference)});
   const data:any=await response.json();
-  if(!response.ok||!data.init_point){await firestoreWrite('donations',donationId,{status:'checkout_creation_failed',updatedAt:new Date().toISOString()});return json(res,502,{error:'PAYMENT_PROVIDER_ERROR',message:'Não foi possível iniciar a contribuição. Tente novamente.'});}
-  await firestoreWrite('donations',donationId,{preferenceId:String(data.id),checkoutUrl:data.init_point,updatedAt:new Date().toISOString()});
+    if(!response.ok||!data.init_point){await documentWrite('donations',donationId,{status:'checkout_creation_failed',updatedAt:new Date().toISOString()});return json(res,502,{error:'PAYMENT_PROVIDER_ERROR',message:'Não foi possível iniciar a contribuição. Tente novamente.'});}
+    await documentWrite('donations',donationId,{preferenceId:String(data.id),checkoutUrl:data.init_point,updatedAt:new Date().toISOString()});
   return json(res,201,{donationId,checkoutUrl:process.env.MERCADOPAGO_ACCESS_TOKEN?.startsWith('TEST-')?(data.sandbox_init_point||data.init_point):data.init_point,amount:Number(amount.toFixed(2)),currency:'BRL',status:'pending'});
  } catch(error:any) {
   const message=String(error?.message||'');

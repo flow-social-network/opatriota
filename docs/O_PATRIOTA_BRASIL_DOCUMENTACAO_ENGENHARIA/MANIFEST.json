@@ -1,0 +1,23 @@
+{
+  "project": "O Patriota Brasil",
+  "repository": "flow-social-network/opatriota",
+  "reference_branch": "main",
+  "reference_tree_commit": "6f163f645fba855825b1ac8a6405390fc32c6bcf",
+  "date": "2026-10-10",
+  "documents": [
+    "ARCHITECTURE.md",
+    "AUDIT_REPORT.md",
+    "DATABASE_INTEGRATIONS.md",
+    "DEPLOYMENT_TESTING.md",
+    "FEATURE_API_INVENTORY.md",
+    "README.md",
+    "REMEDIATION_RUNBOOK.md",
+    "SECURITY_AUTH.md",
+    "TRACEABILITY.md"
+  ],
+  "scope": "documentação técnica inicial baseada em evidências acessíveis",
+  "tests_executed": false,
+  "frontend_modified": false,
+  "production_deploy": false,
+  "production_migrations": false
+}

@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { CATALOG, firestoreWrite, json, mpRequest, newId, readBody, validEmail, verifyFirebaseIdToken, type BillingCycle, type PlanId } from './_lib/billing';
+import { CATALOG, json, mpRequest, newId, readBody, validEmail, verifyFirebaseIdToken, type BillingCycle, type PlanId } from './_lib/billing';
+import { documentWrite } from './_lib/storage';
 
 export default async function handler(req: IncomingMessage & { method?: string; headers: any; body?: any }, res: ServerResponse & { statusCode: number; setHeader(name:string,value:string):void; end(body?:string):void }) {
   if (req.method !== 'POST') { res.setHeader('Allow','POST'); return json(res,405,{error:'METHOD_NOT_ALLOWED'}); }
@@ -21,7 +22,7 @@ export default async function handler(req: IncomingMessage & { method?: string; 
     const siteUrl=configuredSiteUrl.replace(/\/$/,'');
     const orderId=newId();
     const order={orderId,uid:user?.localId||null,customerName:name,customerEmail:email,planId,planName:plan.name,cycle,amount,status:'pending',paymentProvider:'mercadopago',createdAt:new Date().toISOString(),paymentMethod:body.paymentMethod};
-    await firestoreWrite('checkoutOrders',orderId,order,false);
+    await documentWrite('checkoutOrders',orderId,order,false);
     const preference:any={
       items:[{id:planId+'-'+cycle,title:'O PATRIOTA — '+plan.name+' ('+(cycle==='annual'?'anual':'mensal')+')',quantity:1,currency_id:'BRL',unit_price:amount}],
       payer:{name,email},
@@ -36,10 +37,10 @@ export default async function handler(req: IncomingMessage & { method?: string; 
     const response=await mpRequest('/checkout/preferences',{method:'POST',headers:{'X-Idempotency-Key':orderId},body:JSON.stringify(preference)});
     const data:any=await response.json();
     if(!response.ok || !data.init_point) {
-      await firestoreWrite('checkoutOrders',orderId,{status:'checkout_creation_failed',providerErrorStatus:response.status,updatedAt:new Date().toISOString()});
+      await documentWrite('checkoutOrders',orderId,{status:'checkout_creation_failed',providerErrorStatus:response.status,updatedAt:new Date().toISOString()});
       return json(res,502,{error:'PAYMENT_PROVIDER_ERROR',message:'Não foi possível iniciar o pagamento. Tente novamente mais tarde.'});
     }
-    await firestoreWrite('checkoutOrders',orderId,{preferenceId:data.id,checkoutUrl:data.init_point,sandboxCheckoutUrl:data.sandbox_init_point||null,updatedAt:new Date().toISOString()});
+    await documentWrite('checkoutOrders',orderId,{preferenceId:data.id,checkoutUrl:data.init_point,sandboxCheckoutUrl:data.sandbox_init_point||null,updatedAt:new Date().toISOString()});
     return json(res,201,{orderId,checkoutUrl:process.env.MERCADOPAGO_ACCESS_TOKEN?.startsWith('TEST-')?(data.sandbox_init_point||data.init_point):data.init_point,amount,currency:'BRL',status:'pending'});
   } catch(error:any) {
     const message=String(error?.message||'');

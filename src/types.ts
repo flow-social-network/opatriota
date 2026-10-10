@@ -511,6 +511,8 @@ export interface PushNotificationCampaign {
   sentAt: string;
   recipientCount: number;
   status: 'enviado' | 'rascunho' | 'falha';
+  sentCount?: number;
+  failedCount?: number;
 }
 
 export interface MarketTickerConfig {

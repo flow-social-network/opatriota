@@ -12,8 +12,22 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   articles,
   onSelectArticle
 }) => {
-  const leadArticle = articles[0]; // Congresso avança
-  const sideArticles = [articles[1], articles[2], articles[3]]; // PIB, Segurança, Farmácia Popular
+  const leadArticle = articles[0];
+  const sideArticles = articles.slice(1, 4);
+
+  if (!leadArticle) {
+    return (
+      <section className="mb-10 border-y border-[#D9DEE7] py-10">
+        <p className="text-[11px] font-bold uppercase text-[#0B5FFF]">O Patriota</p>
+        <h2 className="mt-2 font-serif text-2xl font-bold text-[#0B2345]">
+          Nenhuma matéria publicada no momento
+        </h2>
+        <p className="mt-2 text-sm text-[#5D6673]">
+          As notícias serão exibidas aqui quando o conteúdo estiver disponível.
+        </p>
+      </section>
+    );
+  }
 
   return (
     <section className="mb-10 select-none">

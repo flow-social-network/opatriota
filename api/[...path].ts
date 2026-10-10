@@ -1,8 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
+import { createHash } from 'node:crypto';
 import {
-  firestoreDelete, firestoreGet, firestoreList, firestoreWrite,
   json, newId, readBody, validEmail, verifyFirebaseIdToken
 } from './_lib/billing';
+import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
 
 type Req = IncomingMessage & { method?: string; headers: Record<string, string | string[] | undefined>; body?: unknown };
 type Res = ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void };
@@ -25,7 +26,7 @@ async function getIdentity(req: Req): Promise<{ uid: string; email: string; role
   const user = await verifyFirebaseIdToken(header.slice(7));
   const uid = String(user.localId || user.uid || '');
   if (!uid) return null;
-  const roleRecord = await firestoreGet('userRoles', uid);
+  const roleRecord = await documentGet('userRoles', uid);
   return { uid, email: String(user.email || ''), role: String(roleRecord?.role || 'leitor_gratuito') };
 }
 function requireRole(identity: { role: string } | null, allowed: Set<string>, res: Res): boolean {
@@ -68,7 +69,7 @@ export default async function handler(req: Req, res: Res) {
     if (path === 'me' && method === 'PATCH') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       const body = cleanObject(await readBody(req));
-      const current = await firestoreGet('userProfiles', identity.uid) || {};
+      const current = await documentGet('userProfiles', identity.uid) || {};
       const next: Record<string, unknown> = { ...current, id: identity.uid, email: identity.email, updatedAt: new Date().toISOString() };
       if (body.name !== undefined) {
         const name = String(body.name).trim().slice(0, 120);
@@ -84,28 +85,28 @@ export default async function handler(req: Req, res: Res) {
           factChecks: Boolean(prefs.factChecks), weeklyDigest: Boolean(prefs.weeklyDigest)
         };
       }
-      await firestoreWrite('userProfiles', identity.uid, next);
+      await documentWrite('userProfiles', identity.uid, next);
       return json(res, 200, { ...next, role: identity.role });
     }
     if (path === 'me' && method === 'GET') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
-      const profile = await firestoreGet('userProfiles', identity.uid);
+      const profile = await documentGet('userProfiles', identity.uid);
       return json(res, 200, { id: identity.uid, email: identity.email, role: identity.role, ...(profile || {}) });
     }
     if (path === 'me/bookmarks' && (method === 'GET' || method === 'PUT')) {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       if (method === 'GET') {
-        const record = await firestoreGet('userBookmarks', identity.uid);
+        const record = await documentGet('userBookmarks', identity.uid);
         return json(res, 200, record || { bookmarks: [] });
       }
       const body = cleanObject(req.body || await readBody(req));
       const bookmarks = Array.isArray(body.bookmarks) ? [...new Set(body.bookmarks.filter((id: unknown) => typeof id === 'string').slice(0, 2000))] : [];
-      await firestoreWrite('userBookmarks', identity.uid, { bookmarks, updatedAt: new Date().toISOString() });
+      await documentWrite('userBookmarks', identity.uid, { bookmarks, updatedAt: new Date().toISOString() });
       return json(res, 200, { bookmarks });
     }
     if (path === 'me/payments' && method === 'GET') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
-      const orders = await firestoreList('checkoutOrders');
+      const orders = await documentList('checkoutOrders');
       const payments = orders.filter(order => order.uid === identity!.uid).map(order => ({
         id: String(order.orderId || order.id),
         date: String(order.createdAt || ''),
@@ -118,12 +119,45 @@ export default async function handler(req: Req, res: Res) {
     }
     if (path === 'me/subscription' && method === 'GET') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
-      const profile = await firestoreGet('userSubscriptions', identity.uid);
-      return json(res, 200, profile || { plan: 'gratuito', status: 'inativo', autoRenew: false });
+      const sub = await documentGet('subscriptions', identity.uid);
+      if (sub && sub.status === 'active') {
+        return json(res, 200, {
+          plan: sub.planId || 'gratuito',
+          status: 'ativo',
+          validUntil: sub.validUntil || sub.activatedAt,
+          autoRenew: sub.autoRenew !== false,
+          provider: sub.provider,
+          amount: sub.amount,
+          billingCycle: sub.billingCycle,
+        });
+      }
+      return json(res, 200, { plan: 'gratuito', status: 'inativo', autoRenew: false });
+    }
+    if (path === 'push-subscriptions' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const token = String(body.token || '');
+      if (token.length < 20 || token.length > 4096) {
+        return json(res, 400, { error: 'INVALID_PUSH_TOKEN', message: 'A inscrição de notificações é inválida.' });
+      }
+      const id = createHash('sha256').update(token).digest('hex');
+      const existing = await documentGet('pushSubscriptions', id);
+      const now = new Date().toISOString();
+      await documentWrite('pushSubscriptions', id, {
+        id,
+        token,
+        subscribedAt: String(body.subscribedAt || now).slice(0, 40),
+        userAgent: String(body.userAgent || '').slice(0, 150),
+        deviceType: ['desktop', 'mobile', 'tablet'].includes(body.deviceType) ? body.deviceType : 'desktop',
+        vapidPublicKey: String(body.vapidPublicKey || '').slice(0, 300),
+        active: true,
+        createdAt: existing?.createdAt || now,
+        updatedAt: now,
+      }, false);
+      return json(res, existing ? 200 : 201, { success: true });
     }
     if (path === 'admin/push-campaigns' && method === 'GET') {
       if (!requireRole(identity, ADMINS, res)) return;
-      const campaigns = await firestoreList('pushCampaigns');
+      const campaigns = await documentList('pushCampaigns');
       campaigns.sort((a, b) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
       return json(res, 200, campaigns.slice(0, 100));
     }
@@ -137,7 +171,7 @@ export default async function handler(req: Req, res: Res) {
       if (!targetUrl.startsWith('/') && !/^https:\/\//i.test(targetUrl)) return json(res, 400, { error: 'INVALID_PUSH_URL', message: 'O destino deve ser uma rota local ou URL HTTPS.' });
       const account = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || '{}');
       if (!account.project_id) return json(res, 503, { error: 'PUSH_NOT_CONFIGURED', message: 'O Firebase Admin precisa ser configurado no servidor.' });
-      const subscriptions = await firestoreList('pushSubscriptions');
+      const subscriptions = await documentList('pushSubscriptions');
       const tokens = [...new Set(subscriptions.filter(item => item.active !== false && typeof item.token === 'string' && item.token.length > 20).map(item => item.token))];
       if (!tokens.length) return json(res, 409, { error: 'NO_PUSH_SUBSCRIBERS', message: 'Não existem dispositivos inscritos e persistidos para receber notificações.' });
       const accessToken = await (async () => {
@@ -164,13 +198,13 @@ export default async function handler(req: Req, res: Res) {
       const failedCount = results.length - sentCount;
       const id = newId();
       const campaign = { id, title, body: message, url: targetUrl, recipientCount: tokens.length, sentCount, failedCount, status: failedCount ? 'partial' : 'sent', createdAt: new Date().toISOString(), createdBy: identity!.uid };
-      await firestoreWrite('pushCampaigns', id, campaign, false);
+      await documentWrite('pushCampaigns', id, campaign, false);
       return json(res, failedCount ? 207 : 201, campaign);
     }
     if (path === 'editorial/sources/sync' && method === 'POST') {
       if (!requireRole(identity, STAFF, res)) return;
-      const sources = await firestoreList('editorialSources');
-      const existingQueue = await firestoreList('editorialQueue');
+      const sources = await documentList('editorialSources');
+      const existingQueue = await documentList('editorialQueue');
       const seen = new Set(existingQueue.map(item => String(item.canonicalUrl || item.originalUrl || '').trim()).filter(Boolean));
       const updatedSources: any[] = [];
       const newItems: any[] = [];
@@ -217,16 +251,16 @@ export default async function handler(req: Req, res: Res) {
               dedupStatus: 'NOVO', dedupReason: 'Importado de feed RSS/Atom; revisão editorial pendente.',
               editorialStatus: 'RECEBIDA'
             };
-            await firestoreWrite('editorialQueue', String(id), record, false);
+            await documentWrite('editorialQueue', String(id), record, false);
             newItems.push(record);
             imported++;
           }
           const updated = { ...source, lastPolled: new Date().toISOString(), lastSuccess: new Date().toISOString(), lastError: null, itemsReceived: Number(source.itemsReceived || 0) + imported };
-          await firestoreWrite('editorialSources', String(source.id), updated);
+          await documentWrite('editorialSources', String(source.id), updated);
           updatedSources.push(updated);
         } catch (error) {
           const updated = { ...source, lastPolled: new Date().toISOString(), lastError: String((error as Error)?.message || 'Falha ao consultar feed').slice(0, 300) };
-          await firestoreWrite('editorialSources', String(source.id), updated);
+          await documentWrite('editorialSources', String(source.id), updated);
           updatedSources.push(updated);
         }
       }
@@ -275,21 +309,21 @@ export default async function handler(req: Req, res: Res) {
       const body = cleanObject(await readBody(req));
       const email = String(body.email || '').trim().toLowerCase();
       if (!validEmail(email) || body.consent !== true) return json(res, 400, { error: 'INVALID_NEWSLETTER_SUBSCRIPTION', message: 'Informe um e-mail válido e confirme o consentimento.' });
-      const existing = (await firestoreList('newsletterSubscriptions')).find(row => String(row.email).toLowerCase() === email);
+      const existing = (await documentList('newsletterSubscriptions')).find(row => String(row.email).toLowerCase() === email);
       const id = existing?.id || newId();
-      await firestoreWrite('newsletterSubscriptions', id, { id, email, consent: true, status: 'active', updatedAt: new Date().toISOString(), createdAt: existing?.createdAt || new Date().toISOString() });
+      await documentWrite('newsletterSubscriptions', id, { id, email, consent: true, status: 'active', updatedAt: new Date().toISOString(), createdAt: existing?.createdAt || new Date().toISOString() });
       return json(res, existing ? 200 : 201, { id, status: 'active' });
     }
     if (path === 'site-settings/menu' || path === 'site-settings') {
       const key = path.endsWith('/menu') ? 'menu' : 'portal';
       if (method === 'GET') {
-        const record = await firestoreGet('siteSettings', key);
+        const record = await documentGet('siteSettings', key);
         return json(res, 200, record?.value || (key === 'menu' ? { mainNav: [], topBar: [], footerCol1: [], footerCol2: [], footerCol3: [] } : {}));
       }
       if (method === 'PATCH' || method === 'PUT') {
         if (!requireRole(identity, ADMINS, res)) return;
         const value = cleanObject(await readBody(req));
-        await firestoreWrite('siteSettings', key, { value, updatedAt: new Date().toISOString(), updatedBy: identity!.uid });
+        await documentWrite('siteSettings', key, { value, updatedAt: new Date().toISOString(), updatedBy: identity!.uid });
         return json(res, 200, value);
       }
       res.setHeader('Allow', 'GET, PATCH, PUT');
@@ -303,12 +337,12 @@ export default async function handler(req: Req, res: Res) {
 
     if (method === 'GET' && !resource.id) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;
-      let records = await firestoreList(resource.collection);
+      let records = await documentList(resource.collection);
       if (!isEditorial) records = publicRecords(resource.collection, records);
       return json(res, 200, records);
     }
     if (method === 'GET' && resource.id) {
-      const record = await firestoreGet(resource.collection, resource.id);
+      const record = await documentGet(resource.collection, resource.id);
       if (!record) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
       if (resource.collection === 'articles' && record.editorialStatus !== 'PUBLICADA' && !requireRole(identity, STAFF, res)) return;
       return json(res, 200, record);
@@ -317,15 +351,15 @@ export default async function handler(req: Req, res: Res) {
       if (!requireRole(identity, required, res)) return;
       if (method === 'DELETE') {
         if (!resource.id) return json(res, 400, { error: 'RESOURCE_ID_REQUIRED', message: 'Informe o identificador do registro.' });
-        await firestoreDelete(resource.collection, resource.id);
+        await documentDelete(resource.collection, resource.id);
         return json(res, 204, null);
       }
       const body = cleanObject(await readBody(req));
       if (resource.collection === 'articles' && method === 'POST' && (!String(body.title || '').trim() || !String(body.content || '').trim())) return json(res, 400, { error: 'INVALID_ARTICLE', message: 'Título e conteúdo são obrigatórios.' });
       const id = resource.id || String(body.id || newId());
       const record = { ...body, id, updatedAt: new Date().toISOString(), ...(method === 'POST' ? { createdAt: new Date().toISOString() } : {}) };
-      if (method === 'POST' && await firestoreGet(resource.collection, id)) return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe um registro com este identificador.' });
-      await firestoreWrite(resource.collection, id, record, method !== 'POST');
+      if (method === 'POST' && await documentGet(resource.collection, id)) return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe um registro com este identificador.' });
+      await documentWrite(resource.collection, id, record, method !== 'POST');
       return json(res, method === 'POST' ? 201 : 200, record);
     }
     res.setHeader('Allow', 'GET, POST, PATCH, PUT, DELETE');

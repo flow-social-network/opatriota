@@ -265,7 +265,7 @@ export async function savePortalSettings(settings: PortalSettings): Promise<{ su
  */
 export async function subscribeToNewsletter(email: string, name?: string): Promise<{ success: boolean; message: string }> {
   const cleanEmail = email.trim().toLowerCase();
-  if (!cleanEmail || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(cleanEmail)) {
+  if (!cleanEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
     return { success: false, message: 'Por favor, insira um endereço de e-mail válido.' };
   }
 

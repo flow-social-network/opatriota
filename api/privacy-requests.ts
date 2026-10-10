@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { firestoreWrite, json, newId, readBody, validEmail } from './_lib/billing';
+import { json, newId, readBody, validEmail } from './_lib/billing';
+import { documentWrite } from './_lib/storage';
 
 export default async function handler(req: IncomingMessage & { method?: string; headers: any; body?: any }, res: ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void }) {
   if (req.method !== 'POST') {
@@ -23,7 +24,7 @@ export default async function handler(req: IncomingMessage & { method?: string; 
       requestType: body.requestType, details, status: 'recebido',
       createdAt: new Date().toISOString()
     };
-    await firestoreWrite('privacyRequests', id, request, false);
+    await documentWrite('privacyRequests', id, request, false);
     return json(res, 201, { id, protocol, status: 'recebido' });
   } catch (error) {
     console.error('privacy request failed:', error instanceof Error ? error.message : 'unknown error');

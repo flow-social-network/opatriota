@@ -15,18 +15,18 @@ import {
   Shield, 
   LogOut, 
   ArrowLeft, 
-  CheckCircle2, 
-  AlertCircle, 
-  Download, 
-  ExternalLink,
-  Lock,
-  Mail,
-  KeyRound,
-  Trash2,
-  Sparkles,
-  ChevronRight,
-  ShieldCheck
+  Sparkles
 } from 'lucide-react';
+import { SubscriberLoginTab } from './SubscriberLoginTab';
+import { SubscriberRegisterTab } from './SubscriberRegisterTab';
+import { SubscriberPasswordResetTab } from './SubscriberPasswordResetTab';
+import { SubscriberDashboardTab } from './SubscriberDashboardTab';
+import { SubscriberSubscriptionTab } from './SubscriberSubscriptionTab';
+import { SubscriberPaymentsTab } from './SubscriberPaymentsTab';
+import { SubscriberFavoritesTab } from './SubscriberFavoritesTab';
+import { SubscriberProfileTab } from './SubscriberProfileTab';
+import { SubscriberNotificationsTab } from './SubscriberNotificationsTab';
+import { SubscriberPrivacyTab } from './SubscriberPrivacyTab';
 
 interface SubscriberPortalProps {
   currentUser: UserSession | null;
@@ -233,6 +233,32 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
     downloadAnchor.remove();
   };
 
+  const handleToggleNotifPref = (key: keyof UserSession['notificationPrefs'], checked: boolean) => {
+    setNotifPrefs({ ...notifPrefs, [key]: checked });
+  };
+
+  const handleSaveNotifications = () => {
+    if (!currentUser) return;
+    currentUser.notificationPrefs = notifPrefs;
+    setNotifSaved(true);
+    setTimeout(() => setNotifSaved(false), 3000);
+  };
+
+  const handleRequestAccountDeletion = () => {
+    if (confirm('Tem certeza de que deseja solicitar a exclusão de sua conta? Esta ação é irreversível.')) {
+      void api.post<{ protocol: string }>('/privacy-requests', {
+        name: currentUser?.name, email: currentUser?.email,
+        requestType: 'exclusao',
+        details: 'Solicitação de exclusão de conta, perfil e dados pessoais vinculados ao utilizador autenticado.'
+      }, { auth: false }).then(result => {
+        setDeletionProtocol(result.protocol);
+        setDeletionRequested(true);
+      }).catch(error => {
+        setLoginError(error instanceof Error ? error.message : 'Não foi possível registrar o pedido de exclusão.');
+      });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F7F8FA] text-[#17202A] select-none py-4 sm:py-6">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
@@ -283,227 +309,46 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
 
             {/* TAB: LOGIN */}
             {currentSubpage === 'entrar' && (
-              <div>
-                <div className="text-center mb-6">
-                  <h2 className="font-serif text-2xl font-bold text-[#0B2345]">Acesse sua Conta</h2>
-                  <p className="text-xs text-[#5D6673] mt-1">
-                    Informe seu e-mail e senha para ler conteúdos exclusivos e gerenciar sua assinatura.
-                  </p>
-                </div>
-
-                {loginError && (
-                  <div className="mb-4 p-3 bg-[#FEF3F2] border border-[#B42318]/30 text-[#B42318] text-xs rounded flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>{loginError}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleLoginSubmit} className="space-y-4 text-xs">
-                  <div>
-                    <label className="block font-semibold mb-1">E-mail Cadastrado:</label>
-                    <div className="relative">
-                      <Mail className="w-4 h-4 text-[#5D6673] absolute left-3 top-2.5" />
-                      <input
-                        type="email"
-                        placeholder="seu.email@exemplo.com.br"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        className="w-full border border-[#D9DEE7] pl-9 pr-3 py-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="font-semibold">Senha:</label>
-                      <button
-                        type="button"
-                        onClick={() => setCurrentSubpage('recuperar-senha')}
-                        className="text-[11px] text-[#0B5FFF] hover:underline"
-                      >
-                        Esqueceu a senha?
-                      </button>
-                    </div>
-                    <div className="relative">
-                      <KeyRound className="w-4 h-4 text-[#5D6673] absolute left-3 top-2.5" />
-                      <input
-                        type="password"
-                        placeholder="••••••••"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        className="w-full border border-[#D9DEE7] pl-9 pr-3 py-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                        required
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold py-2.5 rounded transition shadow-xs cursor-pointer"
-                  >
-                    ENTRAR NO PORTAL
-                  </button>
-                </form>
-
-              </div>
+              <SubscriberLoginTab
+                loginError={loginError}
+                loginEmail={loginEmail}
+                loginPassword={loginPassword}
+                onEmailChange={setLoginEmail}
+                onPasswordChange={setLoginPassword}
+                onSubmit={handleLoginSubmit}
+                onForgotPassword={() => setCurrentSubpage('recuperar-senha')}
+              />
             )}
 
             {/* TAB: REGISTER */}
             {currentSubpage === 'cadastro' && (
-              <div>
-                <div className="text-center mb-6">
-                  <h2 className="font-serif text-2xl font-bold text-[#0B2345]">Crie sua Conta Gratuita</h2>
-                  <p className="text-xs text-[#5D6673] mt-1">
-                    Cadastre-se para salvar matérias, receber informativos e assinar conteúdos exclusivos.
-                  </p>
-                </div>
-
-                {regSuccess && (
-                  <div className="mb-4 p-3 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] text-xs rounded flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>Conta criada com sucesso! Redirecionando para seu painel...</span>
-                  </div>
-                )}
-
-                {regError && (
-                  <div className="mb-4 p-3 bg-[#FEF3F2] border border-[#B42318]/30 text-[#B42318] text-xs rounded flex items-start gap-2">
-                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                    <span>{regError}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleRegisterSubmit} className="space-y-4 text-xs">
-                  <div>
-                    <label className="block font-semibold mb-1">Nome Completo:</label>
-                    <input
-                      type="text"
-                      placeholder="Ex: João da Silva"
-                      value={regName}
-                      onChange={(e) => setRegName(e.target.value)}
-                      className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold mb-1">E-mail Válido:</label>
-                    <input
-                      type="email"
-                      placeholder="seu.email@exemplo.com.br"
-                      value={regEmail}
-                      onChange={(e) => setRegEmail(e.target.value)}
-                      className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold mb-1">Senha de Acesso (mínimo 6 dígitos):</label>
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={regPassword}
-                      onChange={(e) => setRegPassword(e.target.value)}
-                      className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block font-semibold mb-1">Confirmação de Senha:</label>
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={regPasswordConfirm}
-                      onChange={(e) => setRegPasswordConfirm(e.target.value)}
-                      className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                      required
-                    />
-                  </div>
-
-                  <div className="flex items-start gap-2 pt-1">
-                    <input
-                      type="checkbox"
-                      id="terms"
-                      checked={regTermsAccepted}
-                      onChange={(e) => setRegTermsAccepted(e.target.checked)}
-                      className="mt-0.5"
-                    />
-                    <label htmlFor="terms" className="text-[11px] text-[#5D6673] leading-snug">
-                      Concordo com os Termos de Uso e a Política de Privacidade de O Patriota em conformidade com a LGPD.
-                    </label>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold py-2.5 rounded transition shadow-xs cursor-pointer"
-                  >
-                    CONCLUIR CADASTRO
-                  </button>
-                </form>
-              </div>
+              <SubscriberRegisterTab
+                regSuccess={regSuccess}
+                regError={regError}
+                regName={regName}
+                regEmail={regEmail}
+                regPassword={regPassword}
+                regPasswordConfirm={regPasswordConfirm}
+                regTermsAccepted={regTermsAccepted}
+                onNameChange={setRegName}
+                onEmailChange={setRegEmail}
+                onPasswordChange={setRegPassword}
+                onPasswordConfirmChange={setRegPasswordConfirm}
+                onTermsChange={setRegTermsAccepted}
+                onSubmit={handleRegisterSubmit}
+              />
             )}
 
             {/* TAB: PASSWORD RESET */}
             {currentSubpage === 'recuperar-senha' && (
-              <div>
-                <div className="text-center mb-6">
-                  <h2 className="font-serif text-2xl font-bold text-[#0B2345]">Recuperação de Senha</h2>
-                  <p className="text-xs text-[#5D6673] mt-1">
-                    Insira o e-mail cadastrado. Um link de redefinição com token seguro de uso único será enviado.
-                  </p>
-                </div>
-
-                {resetSent ? (
-                  <div className="p-4 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] text-xs rounded space-y-3 text-center">
-                    <CheckCircle2 className="w-8 h-8 mx-auto" />
-                    <p className="font-semibold">
-                      Link de recuperação enviado com sucesso para: <strong>{resetEmail}</strong>
-                    </p>
-                    <p className="text-[11px] text-[#5D6673]">
-                      Verifique sua caixa de entrada e pasta de spam. O token é válido por 30 minutos.
-                    </p>
-                    <button
-                      onClick={() => { setResetSent(false); setCurrentSubpage('entrar'); }}
-                      className="mt-2 text-xs font-bold text-[#0B2345] underline"
-                    >
-                      Voltar para o Login
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handlePasswordReset} className="space-y-4 text-xs">
-                    <div>
-                      <label className="block font-semibold mb-1">Seu E-mail Cadastrado:</label>
-                      <input
-                        type="email"
-                        placeholder="seu.email@exemplo.com.br"
-                        value={resetEmail}
-                        onChange={(e) => setResetEmail(e.target.value)}
-                        className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                        required
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="w-full bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold py-2.5 rounded transition cursor-pointer"
-                    >
-                      ENVIAR LINK DE REDEFINIÇÃO
-                    </button>
-
-                    <div className="text-center pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setCurrentSubpage('entrar')}
-                        className="text-xs text-[#5D6673] hover:text-[#0B2345]"
-                      >
-                        ← Voltar para o Login
-                      </button>
-                    </div>
-                  </form>
-                )}
-              </div>
+              <SubscriberPasswordResetTab
+                resetEmail={resetEmail}
+                resetSent={resetSent}
+                onEmailChange={setResetEmail}
+                onSubmit={handlePasswordReset}
+                onBackToLogin={() => setCurrentSubpage('entrar')}
+                onBackToLoginAfterSent={() => { setResetSent(false); setCurrentSubpage('entrar'); }}
+              />
             )}
           </div>
         ) : (
@@ -581,522 +426,71 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
               
               {/* SUBPAGE: DASHBOARD GERAL */}
               {currentSubpage === 'dashboard' && (
-                <div className="space-y-5">
-                  {/* Greeting Box */}
-                  <div className="p-5 bg-[#0B2345] text-white rounded border border-[#07172E] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div>
-                      <span className="text-[10px] font-bold text-[#FFCC29] uppercase tracking-wider block mb-1">
-                        ÁREA DO LEITOR O PATRIOTA
-                      </span>
-                      <h2 className="font-serif text-2xl font-bold">
-                        Olá, {currentUser.name}!
-                      </h2>
-                      <p className="text-xs text-white/80 mt-1 max-w-xl leading-relaxed">
-                        Bem-vindo ao seu ambiente personalizado. Aqui você gerencia sua assinatura, acessa notícias salvas e configura seus alertas editoriais.
-                      </p>
-                    </div>
-
-                    <div className="shrink-0">
-                      <span className="bg-[#16803C] text-white text-xs font-bold px-3 py-1.5 rounded uppercase tracking-wider inline-block">
-                        Status: Ativo
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Quick Cards Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-                    <div className="p-4 rounded border border-[#D9DEE7] bg-[#F7F8FA]">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#5D6673]">Plano Atual</span>
-                        <Sparkles className="w-4 h-4 text-[#0B5FFF]" />
-                      </div>
-                      <div className="text-lg font-black text-[#0B2345] uppercase">
-                        {currentUser.subscription.plan}
-                      </div>
-                      <button
-                        onClick={() => setCurrentSubpage('assinatura')}
-                        className="text-[11px] font-bold text-[#0B5FFF] hover:underline mt-2 inline-block cursor-pointer"
-                      >
-                        Gerenciar ou alterar plano →
-                      </button>
-                    </div>
-
-                    <div className="p-4 rounded border border-[#D9DEE7] bg-[#F7F8FA]">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#5D6673]">Notícias Salvas</span>
-                        <Bookmark className="w-4 h-4 text-[#16803C]" />
-                      </div>
-                      <div className="text-lg font-black text-[#0B2345]">
-                        {currentUser.bookmarks.length} Matérias
-                      </div>
-                      <button
-                        onClick={() => setCurrentSubpage('favoritos')}
-                        className="text-[11px] font-bold text-[#0B5FFF] hover:underline mt-2 inline-block cursor-pointer"
-                      >
-                        Ver lista de leitura →
-                      </button>
-                    </div>
-
-                    <div className="p-4 rounded border border-[#D9DEE7] bg-[#F7F8FA]">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-xs font-bold text-[#5D6673]">Membro Desde</span>
-                        <ShieldCheck className="w-4 h-4 text-[#FFCC29]" />
-                      </div>
-                      <div className="text-lg font-black text-[#0B2345]">
-                        {currentUser.createdAt}
-                      </div>
-                      <span className="text-[11px] text-[#5D6673] mt-2 inline-block">
-                        Conta verificada por e-mail
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Recent Bookmarks on Dashboard */}
-                  <div>
-                    <div className="flex items-center justify-between mb-3 border-b border-[#D9DEE7] pb-2">
-                      <h3 className="font-serif text-base font-bold text-[#0B2345]">
-                        Suas Notícias Salvas Recentemente
-                      </h3>
-                      <button
-                        onClick={() => setCurrentSubpage('favoritos')}
-                        className="text-xs font-bold text-[#0B5FFF] hover:underline cursor-pointer"
-                      >
-                        Ver todas ({currentUser.bookmarks.length})
-                      </button>
-                    </div>
-
-                    {bookmarkedArticles.length === 0 ? (
-                      <p className="text-xs text-[#5D6673] italic py-4">
-                        Você ainda não salvou nenhuma notícia. Clique no ícone de marcador nas reportagens para ler depois.
-                      </p>
-                    ) : (
-                      <div className="divide-y divide-[#D9DEE7]">
-                        {bookmarkedArticles.slice(0, 3).map((art) => (
-                          <div key={art.id} className="py-3 flex items-center justify-between gap-4">
-                            <div>
-                              <span className="text-[10px] font-bold text-[#0B5FFF] uppercase block mb-0.5">
-                                {art.kicker}
-                              </span>
-                              <h4 className="font-serif text-sm font-bold text-[#0B2345] hover:text-[#0B5FFF] cursor-pointer" onClick={() => onSelectArticle(art)}>
-                                {art.title}
-                              </h4>
-                            </div>
-                            <button
-                              onClick={() => onSelectArticle(art)}
-                              className="text-xs font-bold text-[#0B2345] hover:text-[#0B5FFF] shrink-0 cursor-pointer"
-                            >
-                              Ler Matéria →
-                            </button>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <SubscriberDashboardTab
+                  currentUser={currentUser}
+                  bookmarkedArticles={bookmarkedArticles}
+                  onSelectArticle={onSelectArticle}
+                  onNavigate={setCurrentSubpage}
+                />
               )}
 
               {/* SUBPAGE: ASSINATURA */}
               {currentSubpage === 'assinatura' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-[#0B2345]">Planos de Assinatura</h3>
-                    <p className="text-xs text-[#5D6673] mt-1">
-                      Escolha a modalidade que melhor se adapta à sua rotina de leitura e fortaleça o jornalismo nacional independente.
-                    </p>
-                  </div>
-
-                  {planSuccessMsg && (
-                    <div className="p-3 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] text-xs rounded flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0" />
-                      <span>{planSuccessMsg}</span>
-                    </div>
-                  )}
-
-                  {/* Plan Cards Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
-                    {subscriptionPlans.map((plan) => {
-                      const isCurrent = activePlanId === plan.id;
-                      return (
-                        <div
-                          key={plan.id}
-                          className={`rounded border p-6 flex flex-col justify-between transition-all ${
-                            isCurrent
-                              ? 'border-[#0B2345] bg-[#F7F8FA] ring-2 ring-[#0B2345]/20 shadow-md'
-                              : 'border-[#D9DEE7] bg-white hover:border-[#0B5FFF]'
-                          }`}
-                        >
-                          <div>
-                            {plan.badge && (
-                              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded inline-block mb-3 ${
-                                plan.id === 'premium' ? 'bg-[#FFCC29] text-[#17202A]' : 'bg-[#0B2345] text-white'
-                              }`}>
-                                {plan.badge}
-                              </span>
-                            )}
-                            <h4 className="font-serif text-lg font-bold text-[#0B2345] mb-1">
-                              {plan.name}
-                            </h4>
-                            <p className="text-xs text-[#5D6673] mb-4 min-h-[32px]">
-                              {plan.description}
-                            </p>
-
-                            <div className="mb-6">
-                              <span className="text-2xl font-black text-[#0B2345]">
-                                {plan.priceMonthly === 0 ? 'Grátis' : `R$ ${plan.priceMonthly.toFixed(2)}`}
-                              </span>
-                              {plan.priceMonthly > 0 && <span className="text-xs text-[#5D6673]"> /mês</span>}
-                            </div>
-
-                            <ul className="space-y-2 text-xs text-[#5D6673] mb-6">
-                              {plan.benefits.map((b, idx) => (
-                                <li key={idx} className="flex items-start gap-2">
-                                  <CheckCircle2 className="w-3.5 h-3.5 text-[#16803C] shrink-0 mt-0.5" />
-                                  <span>{b}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-
-                          <div>
-                            {isCurrent ? (
-                              <div className="w-full text-center py-2 bg-[#EBF7EE] text-[#16803C] font-bold text-xs rounded border border-[#16803C]/30">
-                                ✓ SEU PLANO ATIVO
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => { void handleChangePlan(plan.id); }}
-                                className="w-full bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold py-2.5 rounded transition cursor-pointer"
-                              >
-                                {plan.id === 'gratuito' ? 'MUDAR PARA GRÁTIS' : `ASSINAR ${plan.name.toUpperCase()}`}
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <SubscriberSubscriptionTab
+                  plans={subscriptionPlans}
+                  activePlanId={activePlanId}
+                  successMessage={planSuccessMsg}
+                  onChangePlan={(planId) => { void handleChangePlan(planId); }}
+                />
               )}
 
               {/* SUBPAGE: HISTÓRICO DE PAGAMENTOS */}
               {currentSubpage === 'pagamentos' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-[#0B2345]">Histórico de Pagamentos</h3>
-                    <p className="text-xs text-[#5D6673] mt-1">
-                      Comprovantes de faturamento e notas fiscais eletrônicas de sua assinatura.
-                    </p>
-                  </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-xs text-left">
-                      <thead className="bg-[#F7F8FA] border-b border-[#D9DEE7] text-[#5D6673] uppercase text-[10px] font-bold">
-                        <tr>
-                          <th className="py-2.5 px-3">Data</th>
-                          <th className="py-2.5 px-3">Plano / Descrição</th>
-                          <th className="py-2.5 px-3">Valor</th>
-                          <th className="py-2.5 px-3">Nota Fiscal</th>
-                          <th className="py-2.5 px-3">Situação</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-[#D9DEE7]">
-                        {payments.map((p) => (
-                          <tr key={p.id} className="hover:bg-[#F7F8FA]">
-                            <td className="py-3 px-3 font-semibold">{p.date}</td>
-                            <td className="py-3 px-3">{p.planName}</td>
-                            <td className="py-3 px-3 font-bold text-[#0B2345]">R$ {p.amount.toFixed(2)}</td>
-                            <td className="py-3 px-3 font-mono text-[11px] text-[#5D6673]">{p.invoiceNumber}</td>
-                            <td className="py-3 px-3">
-                              <span className="bg-[#EBF7EE] text-[#16803C] text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                                Concluído
-                              </span>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
+                <SubscriberPaymentsTab payments={payments} />
               )}
 
               {/* SUBPAGE: NOTÍCIAS SALVAS / FAVORITOS */}
               {currentSubpage === 'favoritos' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-[#0B2345]">Notícias Salvas nos Favoritos</h3>
-                    <p className="text-xs text-[#5D6673] mt-1">
-                      Reportagens marcadas para consulta ou leitura aprofundada posterior.
-                    </p>
-                  </div>
-
-                  {bookmarkedArticles.length === 0 ? (
-                    <div className="p-8 text-center bg-[#F7F8FA] rounded border border-[#D9DEE7] text-xs text-[#5D6673]">
-                      <Bookmark className="w-8 h-8 mx-auto mb-2 text-slate-400" />
-                      <p className="font-semibold text-sm text-[#0B2345]">Nenhum artigo salvo até o momento.</p>
-                      <p className="mt-1">Ao navegar pelo portal, clique no marcador para salvar artigos nesta lista.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {bookmarkedArticles.map((art) => (
-                        <div
-                          key={art.id}
-                          className="p-4 rounded border border-[#D9DEE7] hover:border-[#0B5FFF] transition flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#F7F8FA]"
-                        >
-                          <div className="flex gap-4 items-center">
-                            <img
-                              src={art.imageUrl}
-                              alt={art.title}
-                              className="w-16 h-14 object-cover rounded shrink-0 border border-[#D9DEE7]"
-                            />
-                            <div>
-                              <span className="text-[10px] font-bold text-[#0B5FFF] uppercase block">
-                                {art.kicker}
-                              </span>
-                              <h4
-                                className="font-serif text-sm font-bold text-[#0B2345] hover:text-[#0B5FFF] cursor-pointer"
-                                onClick={() => onSelectArticle(art)}
-                              >
-                                {art.title}
-                              </h4>
-                              <span className="text-[11px] text-[#5D6673]">
-                                {art.readTimeMinutes} min de leitura • {art.publishedAt}
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center gap-2 shrink-0">
-                            <button
-                              onClick={() => onSelectArticle(art)}
-                              className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold px-3 py-1.5 rounded transition cursor-pointer"
-                            >
-                              Ler Matéria
-                            </button>
-                            <button
-                              onClick={() => handleRemoveBookmark(art.id)}
-                              className="p-1.5 text-[#5D6673] hover:text-[#B42318] rounded border border-[#D9DEE7] bg-white transition cursor-pointer"
-                              title="Remover dos favoritos"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                <SubscriberFavoritesTab
+                  bookmarkedArticles={bookmarkedArticles}
+                  onSelectArticle={onSelectArticle}
+                  onRemoveBookmark={handleRemoveBookmark}
+                />
               )}
 
               {/* SUBPAGE: DADOS CADASTRAIS */}
               {currentSubpage === 'perfil' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-[#0B2345]">Dados Pessoais</h3>
-                    <p className="text-xs text-[#5D6673] mt-1">
-                      Edite seus dados cadastrais conforme a Lei Geral de Proteção de Dados (LGPD).
-                    </p>
-                  </div>
-
-                  {profileSaved && (
-                    <div className="p-3 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] text-xs rounded flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0" />
-                      <span>Dados pessoais atualizados com sucesso!</span>
-                    </div>
-                  )}
-
-                  <form onSubmit={handleSaveProfile} className="space-y-4 text-xs max-w-lg">
-                    <div>
-                      <label className="block font-semibold mb-1">Nome Completo:</label>
-                      <input
-                        type="text"
-                        value={profileName}
-                        onChange={(e) => setProfileName(e.target.value)}
-                        className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                        required
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-semibold mb-1">E-mail Cadastrado:</label>
-                      <input
-                        type="email"
-                        value={currentUser.email}
-                        disabled
-                        className="w-full border border-[#D9DEE7] p-2 rounded bg-slate-100 text-[#5D6673] cursor-not-allowed"
-                      />
-                      <span className="text-[10px] text-[#5D6673]">Para trocar o e-mail, entre em contato com a equipe de suporte.</span>
-                    </div>
-
-                    <div>
-                      <label className="block font-semibold mb-1">Telefone / WhatsApp (opcional):</label>
-                      <input
-                        type="text"
-                        value={profilePhone}
-                        onChange={(e) => setProfilePhone(e.target.value)}
-                        className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block font-semibold mb-1">Breve Biografia / Cidade:</label>
-                      <textarea
-                        rows={3}
-                        value={profileBio}
-                        onChange={(e) => setProfileBio(e.target.value)}
-                        className="w-full border border-[#D9DEE7] p-2 rounded focus:outline-none focus:border-[#0B5FFF]"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold px-5 py-2.5 rounded transition cursor-pointer"
-                    >
-                      SALVAR ALTERAÇÕES
-                    </button>
-                  </form>
-                </div>
+                <SubscriberProfileTab
+                  currentUser={currentUser}
+                  profileName={profileName}
+                  profilePhone={profilePhone}
+                  profileBio={profileBio}
+                  profileSaved={profileSaved}
+                  onNameChange={setProfileName}
+                  onPhoneChange={setProfilePhone}
+                  onBioChange={setProfileBio}
+                  onSubmit={handleSaveProfile}
+                />
               )}
 
               {/* SUBPAGE: PREFERÊNCIAS DE ALERTAS */}
               {currentSubpage === 'notificacoes' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-[#0B2345]">Preferências de Notificações</h3>
-                    <p className="text-xs text-[#5D6673] mt-1">
-                      Defina os canais e a periodicidade dos informativos editoriais.
-                    </p>
-                  </div>
-
-                  {notifSaved && (
-                    <div className="p-3 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] text-xs rounded flex items-center gap-2">
-                      <CheckCircle2 className="w-4 h-4 shrink-0" />
-                      <span>Preferências de notificação salvas com sucesso!</span>
-                    </div>
-                  )}
-
-                  <div className="space-y-4 text-xs divide-y divide-[#D9DEE7]">
-                    <div className="pt-2 flex items-center justify-between">
-                      <div>
-                        <strong className="block text-[#0B2345]">Alertas de Últimas Notícias (Breaking News)</strong>
-                        <span className="text-[#5D6673]">Avisos urgentes de acontecimentos de impacto nacional.</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={notifPrefs.breakingNews}
-                        onChange={(e) => setNotifPrefs({ ...notifPrefs, breakingNews: e.target.checked })}
-                        className="w-4 h-4 text-[#0B2345]"
-                      />
-                    </div>
-
-                    <div className="pt-4 flex items-center justify-between">
-                      <div>
-                        <strong className="block text-[#0B2345]">Resumo Diário da Manhã (Briefing de Brasília)</strong>
-                        <span className="text-[#5D6673]">E-mail às 7h com as principais manchetes da Esplanada e dos Ministérios.</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={notifPrefs.dailyBrief}
-                        onChange={(e) => setNotifPrefs({ ...notifPrefs, dailyBrief: e.target.checked })}
-                        className="w-4 h-4 text-[#0B2345]"
-                      />
-                    </div>
-
-                    <div className="pt-4 flex items-center justify-between">
-                      <div>
-                        <strong className="block text-[#0B2345]">Dossiês da Agência de Checagem</strong>
-                        <span className="text-[#5D6673]">Verificações de fatos e desmentidos de boatos virais.</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={notifPrefs.factChecks}
-                        onChange={(e) => setNotifPrefs({ ...notifPrefs, factChecks: e.target.checked })}
-                        className="w-4 h-4 text-[#0B2345]"
-                      />
-                    </div>
-
-                    <div className="pt-4 flex items-center justify-between">
-                      <div>
-                        <strong className="block text-[#0B2345]">Carta Semanal dos Editores</strong>
-                        <span className="text-[#5D6673]">Análises de fundo sobre geopolítica e economia aos sábados.</span>
-                      </div>
-                      <input
-                        type="checkbox"
-                        checked={notifPrefs.weeklyDigest}
-                        onChange={(e) => setNotifPrefs({ ...notifPrefs, weeklyDigest: e.target.checked })}
-                        className="w-4 h-4 text-[#0B2345]"
-                      />
-                    </div>
-                  </div>
-
-                  <button
-                    onClick={() => {
-                      currentUser.notificationPrefs = notifPrefs;
-                      setNotifSaved(true);
-                      setTimeout(() => setNotifSaved(false), 3000);
-                    }}
-                    className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold px-5 py-2.5 rounded transition cursor-pointer"
-                  >
-                    SALVAR PREFERÊNCIAS
-                  </button>
-                </div>
+                <SubscriberNotificationsTab
+                  notifPrefs={notifPrefs}
+                  notifSaved={notifSaved}
+                  onTogglePref={handleToggleNotifPref}
+                  onSave={handleSaveNotifications}
+                />
               )}
 
               {/* SUBPAGE: PRIVACIDADE & LGPD */}
               {currentSubpage === 'privacidade' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="font-serif text-xl font-bold text-[#0B2345]">Privacidade e Gestão de Dados (LGPD)</h3>
-                    <p className="text-xs text-[#5D6673] mt-1">
-                      Em conformidade com a Lei nº 13.709/2018, você possui controle absoluto sobre seus dados.
-                    </p>
-                  </div>
-
-                  <div className="p-4 bg-[#F7F8FA] border border-[#D9DEE7] rounded space-y-3 text-xs">
-                    <strong className="text-[#0B2345] block font-semibold">1. Portabilidade e Exportação de Dados</strong>
-                    <p className="text-[#5D6673]">
-                      Baixe uma cópia estruturada em formato JSON de todos os seus dados pessoais, histórico de assinaturas e preferências armazenadas no sistema.
-                    </p>
-                    <button
-                      onClick={handleExportData}
-                      className="inline-flex items-center gap-1.5 bg-white border border-[#D9DEE7] hover:border-[#0B2345] text-[#0B2345] font-bold px-3 py-1.5 rounded transition cursor-pointer"
-                    >
-                      <Download className="w-3.5 h-3.5" />
-                      <span>Exportar Meus Dados (JSON)</span>
-                    </button>
-                  </div>
-
-                  <div className="p-4 bg-[#FEF3F2] border border-[#B42318]/30 rounded space-y-3 text-xs">
-                    <strong className="text-[#B42318] block font-semibold">2. Direito ao Esquecimento / Exclusão de Conta</strong>
-                    <p className="text-[#5D6673]">
-                      Ao solicitar a exclusão de sua conta, seus dados de perfil, favoritos e sessões ativas serão permanentemente apagados dos servidores de O Patriota, mantendo-se apenas os registros contábeis estritamente exigidos pela legislação fiscal brasileira.
-                    </p>
-
-                    {deletionRequested ? (
-                      <div className="p-3 bg-white border border-[#B42318] text-[#B42318] font-bold rounded">
-                        ✓ Solicitação de exclusão protocolada sob o código {deletionProtocol}. O prazo será informado pela equipe após análise.
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          if (confirm('Tem certeza de que deseja solicitar a exclusão de sua conta? Esta ação é irreversível.')) {
-                            void api.post<{ protocol: string }>('/privacy-requests', {
-                              name: currentUser?.name, email: currentUser?.email,
-                              requestType: 'exclusao',
-                              details: 'Solicitação de exclusão de conta, perfil e dados pessoais vinculados ao utilizador autenticado.'
-                            }, { auth: false }).then(result => {
-                              setDeletionProtocol(result.protocol);
-                              setDeletionRequested(true);
-                            }).catch(error => {
-                              setLoginError(error instanceof Error ? error.message : 'Não foi possível registrar o pedido de exclusão.');
-                            });
-                          }
-                        }}
-                        className="bg-[#B42318] hover:bg-red-700 text-white font-bold px-3.5 py-2 rounded transition cursor-pointer"
-                      >
-                        SOLICITAR EXCLUSÃO DEFINITIVA DA CONTA
-                      </button>
-                    )}
-                  </div>
-                </div>
+                <SubscriberPrivacyTab
+                  deletionRequested={deletionRequested}
+                  deletionProtocol={deletionProtocol}
+                  onExportData={handleExportData}
+                  onRequestDeletion={handleRequestAccountDeletion}
+                />
               )}
 
             </main>

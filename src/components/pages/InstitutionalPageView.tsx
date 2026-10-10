@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { InstitutionalPage } from '../../types';
 import { Breadcrumbs } from './Breadcrumbs';
+import { sanitizeHtml } from '../../utils/sanitizeHtml';
 import { 
   Calendar, 
   Clock, 
@@ -264,7 +265,7 @@ export const InstitutionalPageView: React.FC<InstitutionalPageViewProps> = ({
                 prose-li:leading-relaxed
                 prose-strong:text-[#0B2345] prose-strong:font-bold
                 prose-a:text-[#0B5FFF] prose-a:font-semibold prose-a:underline hover:prose-a:text-[#0B2345]"
-              dangerouslySetInnerHTML={{ __html: page.content }}
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(page.content) }}
             />
 
             {/* End of Document Seal */}

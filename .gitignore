@@ -33,3 +33,6 @@ google-services-info.local.json
 .user/
 .tsbuildinfo
 .vscode/*
+.vercel
+.env.local
+.env.*.local
