@@ -848,6 +848,18 @@ export const INITIAL_CATEGORIES: CategoryDetail[] = [
   },
   {
     id: 'cat-11',
+    slug: 'receita',
+    name: 'Receitas',
+    description: 'Tutoriais culinários, dicas de gastronomia e receitas tradicionais brasileiras.',
+    introText: 'Descubra receitas familiares, técnicas de preparo e pratos típicos da culinária brasileira.',
+    bannerImage: '/images/news_receitas.jpg',
+    seoTitle: 'Receitas — Culinária e Gastronomia no Brasil | O Patriota',
+    seoDescription: 'Receitas familiares, dicas de gastronomia e pratos típicos da culinária brasileira.',
+    active: true,
+    order: 11
+  },
+  {
+    id: 'cat-12',
     slug: 'esportes',
     name: 'Esportes',
     description: 'Futebol nacional, atletas brasileiros em competições internacionais, modalidades olímpicas e formação esportiva de base.',

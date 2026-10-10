@@ -10,7 +10,8 @@ export type CategorySlug =
   | 'tecnologia'
   | 'mundo'
   | 'opiniao'
-  | 'checagem';
+  | 'checagem'
+  | 'receita';
 
 export type FactVerdict = 
   | 'VERDADEIRO'

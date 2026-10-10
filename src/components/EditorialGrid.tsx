@@ -26,6 +26,10 @@ export const EditorialGrid: React.FC<EditorialGridProps> = ({
         return 'bg-[#0B2345] text-white';
       case 'opiniao':
         return 'bg-[#FFCC29] text-[#17202A]';
+      case 'receita':
+        return 'bg-[#4A6B2F] text-white';
+      case 'tecnologia':
+        return 'bg-[#6B4CFF] text-white';
       default:
         return 'bg-[#0B2345] text-white';
     }
