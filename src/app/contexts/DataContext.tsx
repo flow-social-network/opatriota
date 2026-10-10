@@ -38,6 +38,7 @@ interface DataContextValue {
   lgpdRequests: LgpdRequest[];
   portalSettings: PortalSettings;
   dataLoading: boolean;
+  dataError: string | null;
 
   // Setters (exposed for admin/newsroom panels)
   setArticles: Dispatch<SetStateAction<Article[]>>;
@@ -86,6 +87,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const [portalSettings, setPortalSettingsState] = useState<PortalSettings>(DEFAULT_PORTAL_SETTINGS);
   const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
 
   // Load portal settings on mount
   useEffect(() => {
@@ -107,9 +109,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     const load = async <T,>(path: string, setter: (value: T) => void, auth = false) => {
       try {
         const result = await api.get<T>(path, { auth });
-        if (active) setter(result);
+        if (active) {
+          setter(result);
+          if (path === '/articles') setDataError(null);
+        }
       } catch (error) {
         console.error('Falha ao carregar ' + path, error);
+        if (active && path === '/articles') {
+          setDataError(error instanceof Error ? error.message : 'Não foi possível carregar as notícias.');
+        }
       }
     };
     setDataLoading(true);
@@ -228,7 +236,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       value={{
         articles, factChecks, sources, queueItems, pages, categories, authors,
         menuConfig, subscriptionPlans, contactSubmissions, lgpdRequests,
-        portalSettings, dataLoading,
+        portalSettings, dataLoading, dataError,
         setArticles, setSources, setQueueItems, setPages, setCategories,
         setMenuConfig, setContactSubmissions, setLgpdRequests,
         updateArticles, updateSources, updateQueue,
