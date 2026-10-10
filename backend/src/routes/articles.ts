@@ -26,7 +26,7 @@ router.get("/", asyncHandler(async (req, res) => {
       skip: (page - 1) * pageSize,
       take: pageSize,
       select: {
-        id: true, slug: true, title: true, excerpt: true, heroImageUrl: true,
+        id: true, slug: true, title: true, excerpt: true, heroImageUrl: true, heroImageSourceUrl: true, heroImageCredit: true,
         publishedAt: true, seoTitle: true, seoDescription: true,
         author: { select: { displayName: true } },
         category: { select: { slug: true, name: true } },

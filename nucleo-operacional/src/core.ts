@@ -142,7 +142,7 @@ async function pollSource(sourceId:string):Promise<void> {
     throw error;
   }
 }
-async function writeAndGuard(taskId:string,ingestionItemId:string):Promise<void> {
+async function writeAndGuard(taskId:string,ingestionItemId:string,forceCorrection=false,correctionRound=0):Promise<void> {
   const item=await prisma.ingestionItem.findUnique({where:{id:ingestionItemId},include:{source:true}});
   if(!item) throw new Error("Item de ingestão não encontrado.");
   const payload=item.payload as unknown as FeedItem;
@@ -169,6 +169,20 @@ async function writeAndGuard(taskId:string,ingestionItemId:string):Promise<void>
       heroImageCredit:payload.imageCredit||null,
       sources:{create:{sourceId:item.sourceId,note:"Fonte original da ingestão automatizada; confirmar atribuição e permissões antes da publicação."}}}});
   }
+  if(forceCorrection && article) {
+    if(article.status!==ArticleStatus.DRAFT) throw new Error("Correção automática bloqueada: a matéria já não está em rascunho.");
+    const previous=article.riskAssessment as unknown as Partial<GuardianReport>|null;
+    const instructions=Array.isArray(previous?.correctionInstructions)?previous.correctionInstructions.map(String):[];
+    const correctionInput={currentDraft:{title:article.title,excerpt:article.excerpt,body:article.body},source:{name:item.source.name,url:item.source.url,articleUrl:item.canonicalUrl,title:payload.title,summary:payload.summary},findings:previous?.findings??[],instructions};
+    const corrected=await runAgent<Draft>(taskId,AgentType.EDITORIAL_WRITER,correctionInput,async()=>{
+      const r=await askModel("És o agente redator a corrigir um rascunho sinalizado pelo Guardião. Corrige apenas os problemas listados, não acrescentes factos ausentes nem inventes contexto, preserva atribuição à fonte e não copies integralmente texto protegido. Se o problema exigir confirmação factual ou jurídica externa, não inventes solução; deixa a limitação explícita. Devolve JSON {title,excerpt,body}.",correctionInput);
+      const title=asString(r.title,article.title),body=asString(r.body);
+      if(!body) throw new Error("A correção editorial devolveu corpo vazio.");
+      return {title:title.slice(0,240),excerpt:asString(r.excerpt,article.excerpt||"").slice(0,1000),body:body.slice(0,100000),slug:article.slug};
+    });
+    article=await prisma.article.update({where:{id:article.id},data:{title:corrected.title,excerpt:corrected.excerpt||null,body:corrected.body,
+      version:{increment:1},riskAssessment:Prisma.DbNull,humanApprovedAt:null,humanApprovedById:null}});
+  }
   const guardianInput={article:{title:article.title,excerpt:article.excerpt,body:article.body,canonicalUrl:item.canonicalUrl},
     source:{name:item.source.name,url:item.source.url,originalItemUrl:item.canonicalUrl,title:payload.title,summary:payload.summary},
     image:{url:payload.imageUrl||null,credit:payload.imageCredit||null}};
@@ -182,6 +196,15 @@ async function writeAndGuard(taskId:string,ingestionItemId:string):Promise<void>
   });
   await prisma.article.update({where:{id:article.id},data:{riskLevel:toRisk(report.riskLevel),
     riskAssessment:jsonInput({...report,checkedAt:new Date().toISOString(),sourceUrl:item.canonicalUrl,agent:"SYSTEM_GUARDIAN"})}});
+  if(report.decision==="NEEDS_CORRECTION" && (report.riskLevel==="LOW"||report.riskLevel==="MEDIUM") && correctionRound<1) {
+    try {
+      await prisma.operationalTask.create({data:{taskType:"WRITE_AND_GUARD_DRAFT",
+        payload:{ingestionItemId:item.id,forceCorrection:true,correctionRound:correctionRound+1},
+        idempotencyKey:`redraft:${article.id}:v${article.version}`}});
+    } catch(error) {
+      if(!(error instanceof Prisma.PrismaClientKnownRequestError)||error.code!=="P2002") throw error;
+    }
+  }
   await prisma.ingestionItem.update({where:{id:item.id},data:{status:IngestionStatus.REVIEWED,errorMessage:null}});
   await prisma.auditEvent.create({data:{action:"OPERATIONAL_DRAFT_CREATED_AND_GUARDED",entityType:"Article",entityId:article.id,
     metadata:jsonInput({taskId,ingestionItemId:item.id,sourceId:item.sourceId,sourceUrl:item.canonicalUrl,guardianDecision:report.decision,riskLevel:report.riskLevel})}});
@@ -195,7 +218,7 @@ async function processTask(id:string):Promise<void> {
   try {
     const payload=task.payload as Record<string,unknown>;
     if(task.taskType==="POLL_SOURCE") { const sourceId=asString(payload.sourceId); if(!sourceId) throw new Error("Tarefa sem sourceId."); await pollSource(sourceId); }
-    else if(task.taskType==="WRITE_AND_GUARD_DRAFT") { const itemId=asString(payload.ingestionItemId); if(!itemId) throw new Error("Tarefa sem ingestionItemId."); await writeAndGuard(task.id,itemId); }
+    else if(task.taskType==="WRITE_AND_GUARD_DRAFT") { const itemId=asString(payload.ingestionItemId); if(!itemId) throw new Error("Tarefa sem ingestionItemId."); await writeAndGuard(task.id,itemId,payload.forceCorrection===true,Number(payload.correctionRound??0)); }
     else throw new Error(`Tipo de tarefa desconhecido: ${task.taskType}`);
     await prisma.operationalTask.update({where:{id},data:{status:OperationalTaskStatus.SUCCEEDED,finishedAt:new Date(),lastError:null}});
   } catch(error) {
