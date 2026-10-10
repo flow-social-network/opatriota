@@ -1,6 +1,6 @@
 import { documentDelete, documentGet, documentList, documentWrite } from '../_lib/storage';
 import {
-  ApiRequest, ApiResponse, EDITOR_ROLES, STAFF_ROLES, canReadPaidContent,
+  ApiRequest, ApiResponse, EDITOR_ROLES, STAFF_ROLES, hasPaidAccess, paidAccessLevel,
   identityFromRequest, isOpenArticle, isPublicArticle, readRequestBody, sendJson,
 } from '../_lib/editorial-access';
 
@@ -26,7 +26,8 @@ export default async function handler(req: ApiRequest & { query?: Record<string,
 
     if (method === 'GET') {
       if (!staff && !isPublicArticle(article)) return sendJson(res, 404, { error: 'NOT_FOUND' });
-      if (!staff && !isOpenArticle(article) && !(await canReadPaidContent(identity))) {
+      const paidLevel = await paidAccessLevel(identity);
+      if (!staff && !isOpenArticle(article) && !hasPaidAccess(article.accessLevel, paidLevel)) {
         const { content: _content, body: _body, htmlContent: _htmlContent, fullText: _fullText, ...teaser } = article;
         return sendJson(res, 403, { error: 'SUBSCRIPTION_REQUIRED', message: 'Esta matéria exige uma assinatura ativa.', article: teaser });
       }
