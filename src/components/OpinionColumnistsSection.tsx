@@ -20,7 +20,8 @@ export const OpinionColumnistsSection: React.FC<OpinionColumnistsSectionProps> =
     (a) => a.category === 'opiniao' || a.kicker?.includes('OPINIÃO') || a.tags?.includes('Opinião')
   );
 
-  const displayArticles = opinionArticles.length > 0 ? opinionArticles : articles.slice(9, 13);
+  const displayArticles = opinionArticles.slice(0, 4);
+  if (displayArticles.length === 0) return null;
 
   return (
     <section className="mb-12 select-none" aria-label="Opinião e Análise">
