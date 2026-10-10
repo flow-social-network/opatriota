@@ -43,16 +43,27 @@ export async function identityFromRequest(req: ApiRequest): Promise<Identity | n
   }
 }
 
-export async function canReadPaidContent(identity: Identity | null): Promise<boolean> {
-  if (!identity) return false;
-  if (STAFF_ROLES.has(identity.role)) return true;
+export type PaidAccessLevel = 'none' | 'assinante' | 'premium';
+
+export async function paidAccessLevel(identity: Identity | null): Promise<PaidAccessLevel> {
+  if (!identity) return 'none';
+  if (STAFF_ROLES.has(identity.role) || identity.role === 'assinante_premium') return 'premium';
+  if (identity.role === 'assinante_digital') return 'assinante';
   const subscription = await documentGet('subscriptions', identity.uid);
-  if (!subscription || subscription.status !== 'active') return false;
+  if (!subscription || subscription.status !== 'active') return 'none';
   if (subscription.validUntil) {
     const expires = Date.parse(String(subscription.validUntil));
-    if (Number.isFinite(expires) && expires < Date.now()) return false;
+    if (Number.isFinite(expires) && expires < Date.now()) return 'none';
   }
-  return true;
+  const plan = String(subscription.planId || '').toLowerCase();
+  return plan.includes('premium') ? 'premium' : 'assinante';
+}
+
+export function hasPaidAccess(requiredLevel: unknown, paidLevel: PaidAccessLevel): boolean {
+  const required = String(requiredLevel || 'aberto').toLowerCase();
+  if (required === 'aberto' || required === 'open' || required === 'free') return true;
+  if (paidLevel === 'premium') return true;
+  return required !== 'premium' && paidLevel === 'assinante';
 }
 
 export function isPublicArticle(article: Record<string, any>): boolean {
