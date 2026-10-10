@@ -20,10 +20,10 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
       <section className="mb-10 border-y border-[#D9DEE7] py-10">
         <p className="text-[11px] font-bold uppercase text-[#0B5FFF]">O Patriota</p>
         <h2 className="mt-2 font-serif text-2xl font-bold text-[#0B2345]">
-          Nenhuma matéria publicada no momento
+          Nenhuma manchete disponível
         </h2>
         <p className="mt-2 text-sm text-[#5D6673]">
-          As notícias serão exibidas aqui quando o conteúdo estiver disponível.
+          A manchete será exibida assim que houver uma matéria publicada e disponível na API.
         </p>
       </section>
     );
@@ -76,7 +76,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           {/* Hero Image */}
           <ArticleImage
             src={leadArticle.imageUrl}
-            alt="Congresso Nacional em Brasília"
+            alt={leadArticle.imageCaption || leadArticle.title}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-95"
           />
 
