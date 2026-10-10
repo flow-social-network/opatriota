@@ -1,8 +1,35 @@
+# Dependencies
 node_modules/
-build/
+pnpm-lock.yaml
+
+# Environment variables
+.env
+
+# Prisma
+.prisma/
+schema.prisma
+
+# Build output
 dist/
-coverage/
-.DS_Store
+/dist*
+
+# Logs
 *.log
-.env*
-!.env.example
+logs/
+
+# Uploads
+uploads/
+
+# Firebase
+.firebaserc
+firestore-debug.log
+
+# SDK App Files
+# https://github.com/GoogleCloudPlatform/nodejs-samples/blob/master/google-auth/nodejs/.gitignore
+google-services-info.local.json
+
+# IDE
+.vscode/
+.user/
+.tsbuildinfo
+.vscode/*
