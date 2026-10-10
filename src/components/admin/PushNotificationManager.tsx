@@ -61,7 +61,9 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
     isPushNotificationSupported().then(setIsSupportedState);
     setPermissionState(getPushPermissionStatus());
     setStoredToken(getStoredPushToken());
-    void api.get<PushNotificationCampaign[]>('/admin/push-campaigns').then(setCampaigns).catch(error => {\n      console.error('Falha ao carregar campanhas persistidas:', error);\n    });
+    void api.get<PushNotificationCampaign[]>('/admin/push-campaigns').then(setCampaigns).catch(error => {
+      console.error('Falha ao carregar campanhas persistidas:', error);
+    });
   }, []);
 
   const handleSaveConfig = (e: React.FormEvent) => {
