@@ -22,6 +22,8 @@ test('only published institutional pages are public', () => {
   assert.equal(isPublicPage({ status: 'publicada' }), true);
   assert.equal(isPublicPage({ status: 'publicado' }), true);
   assert.equal(isPublicPage({ published: true }), true);
+  assert.equal(isPublicPage({ status: 'rascunho', published: true }), false);
+  assert.equal(isPublicPage({ status: 'despublicada', published: true }), false);
   assert.equal(isPublicPage({ status: 'rascunho' }), false);
   assert.equal(isPublicPage({ status: 'despublicada' }), false);
 });
