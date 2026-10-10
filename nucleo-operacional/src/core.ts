@@ -4,7 +4,7 @@ import { Prisma, PrismaClient, AgentRunStatus, AgentType, ArticleStatus, Editori
 
 const prisma = new PrismaClient({ log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"] });
 const MAX_FEED_BYTES = 3_000_000;
-const editorialRoles = [UserRole.JOURNALIST, UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN];
+const editorialRoles: UserRole[] = [UserRole.JOURNALIST, UserRole.EDITOR, UserRole.CHIEF_EDITOR, UserRole.ADMIN];
 type FeedItem = { title: string; link: string; summary: string; publishedAt: string | null; imageUrl: string | null; imageCredit: string | null; externalId: string | null };
 type Draft = { title: string; excerpt: string; body: string; slug: string; categorySlug?: string | null };
 type GuardianReport = { riskLevel: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL"; decision: "READY_FOR_HUMAN_REVIEW" | "NEEDS_CORRECTION"; findings: unknown[]; attributionOk: boolean; imageCreditOk: boolean; correctionInstructions: string[]; summary: string };
@@ -174,17 +174,18 @@ async function writeAndGuard(taskId:string,ingestionItemId:string,forceCorrectio
       sources:{create:{sourceId:item.sourceId,note:"Fonte original da ingestão automatizada; confirmar atribuição e permissões antes da publicação."}}}});
   }
   if(forceCorrection && article) {
-    if(article.status!==ArticleStatus.DRAFT) throw new Error("Correção automática bloqueada: a matéria já não está em rascunho.");
-    const previous=article.riskAssessment as unknown as Partial<GuardianReport>|null;
+    const currentArticle=article;
+    if(currentArticle.status!==ArticleStatus.DRAFT) throw new Error("Correção automática bloqueada: a matéria já não está em rascunho.");
+    const previous=currentArticle.riskAssessment as unknown as Partial<GuardianReport>|null;
     const instructions=Array.isArray(previous?.correctionInstructions)?previous.correctionInstructions.map(String):[];
-    const correctionInput={currentDraft:{title:article.title,excerpt:article.excerpt,body:article.body},source:{name:item.source.name,url:item.source.url,articleUrl:item.canonicalUrl,title:payload.title,summary:payload.summary},findings:previous?.findings??[],instructions};
+    const correctionInput={currentDraft:{title:currentArticle.title,excerpt:currentArticle.excerpt,body:currentArticle.body},source:{name:item.source.name,url:item.source.url,articleUrl:item.canonicalUrl,title:payload.title,summary:payload.summary},findings:previous?.findings??[],instructions};
     const corrected=await runAgent<Draft>(taskId,AgentType.EDITORIAL_WRITER,correctionInput,async()=>{
       const r=await askModel("És o agente redator a corrigir um rascunho sinalizado pelo Guardião. Corrige apenas os problemas listados, não acrescentes factos ausentes nem inventes contexto, preserva atribuição à fonte e não copies integralmente texto protegido. Se o problema exigir confirmação factual ou jurídica externa, não inventes solução; deixa a limitação explícita. Devolve JSON {title,excerpt,body}.",correctionInput);
-      const title=asString(r.title,article.title),body=asString(r.body);
+      const title=asString(r.title,currentArticle.title),body=asString(r.body);
       if(!body) throw new Error("A correção editorial devolveu corpo vazio.");
-      return {title:title.slice(0,240),excerpt:asString(r.excerpt,article.excerpt||"").slice(0,1000),body:body.slice(0,100000),slug:article.slug};
+      return {title:title.slice(0,240),excerpt:asString(r.excerpt,currentArticle.excerpt||"").slice(0,1000),body:body.slice(0,100000),slug:currentArticle.slug};
     });
-    article=await prisma.article.update({where:{id:article.id},data:{title:corrected.title,excerpt:corrected.excerpt||null,body:corrected.body,
+    article=await prisma.article.update({where:{id:currentArticle.id},data:{title:corrected.title,excerpt:corrected.excerpt||null,body:corrected.body,
       version:{increment:1},riskAssessment:Prisma.DbNull,humanApprovedAt:null,humanApprovedById:null}});
   }
   const guardianInput={article:{title:article.title,excerpt:article.excerpt,body:article.body,canonicalUrl:item.canonicalUrl},
