@@ -22,7 +22,6 @@ export const FCM_PROJECT_ID = 'o-patriota-5db52';
 
 const LOCAL_PUSH_TOKEN_KEY = 'o_patriota_push_token_v1';
 const LOCAL_PUSH_SUBSCRIBERS_KEY = 'o_patriota_push_subscribers_v1';
-const LOCAL_PUSH_CAMPAIGNS_KEY = 'o_patriota_push_campaigns_v1';
 
 /**
  * Checks if browser supports Web Push Notifications & Service Worker.
