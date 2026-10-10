@@ -26,7 +26,7 @@ router.get("/", asyncHandler(async (req, res) => {
       skip: (page - 1) * pageSize,
       take: pageSize,
       select: {
-        id: true, slug: true, title: true, excerpt: true, heroImageUrl: true, heroImageSourceUrl: true, heroImageCredit: true,
+        id: true, slug: true, title: true, excerpt: true, heroImageUrl: true, heroImageSourceUrl: true, heroImageCredit: true, canonicalUrl: true,
         publishedAt: true, seoTitle: true, seoDescription: true,
         author: { select: { displayName: true } },
         category: { select: { slug: true, name: true } },
@@ -41,7 +41,7 @@ router.get("/:slug", asyncHandler(async (req, res) => {
   const article = await prisma.article.findFirst({
     where: { slug: req.params.slug, status: ArticleStatus.PUBLISHED, publishedAt: { lte: new Date() } },
     select: {
-      id: true, slug: true, title: true, excerpt: true, body: true, heroImageUrl: true, heroImageSourceUrl: true, heroImageCredit: true,
+      id: true, slug: true, title: true, excerpt: true, body: true, heroImageUrl: true, heroImageSourceUrl: true, heroImageCredit: true, canonicalUrl: true,
       publishedAt: true, seoTitle: true, seoDescription: true, isSubscriberOnly: true,
       author: { select: { displayName: true } },
       category: { select: { slug: true, name: true } },
