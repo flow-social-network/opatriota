@@ -147,6 +147,10 @@ async function writeAndGuard(taskId:string,ingestionItemId:string,forceCorrectio
   if(!item) throw new Error("Item de ingestão não encontrado.");
   const payload=item.payload as unknown as FeedItem;
   let article=await prisma.article.findFirst({where:{canonicalUrl:item.canonicalUrl}});
+  if(article && article.status!==ArticleStatus.DRAFT) {
+    await prisma.ingestionItem.update({where:{id:item.id},data:{status:IngestionStatus.REVIEWED,errorMessage:null}});
+    return;
+  }
   if(!article) {
     const authorId=process.env.OPERATIONAL_AUTHOR_ID;
     if(!authorId) throw new Error("Defina OPERATIONAL_AUTHOR_ID com o ID de um utilizador editorial existente; o núcleo não cria contas nem privilégios.");
@@ -187,15 +191,16 @@ async function writeAndGuard(taskId:string,ingestionItemId:string,forceCorrectio
     source:{name:item.source.name,url:item.source.url,originalItemUrl:item.canonicalUrl,title:payload.title,summary:payload.summary},
     image:{url:payload.imageUrl||null,credit:payload.imageCredit||null}};
   const report=await runAgent<GuardianReport>(taskId,AgentType.SYSTEM_GUARDIAN,guardianInput,async()=>{
-    const r=await askModel("És o Agente Guardião do O Patriota Brasil. Revê proveniência, correspondência entre rascunho e dados de origem, atribuição e riscos aparentes. Uma publicação de uma fonte não prova automaticamente todas as alegações: não declares verificação independente sem evidência. Sinaliza alegações lesivas sem suporte, conteúdo que exceda o resumo e créditos de imagem ausentes. Não emitas parecer jurídico. Nunca aproves publicação: exige revisão humana. Devolve JSON {riskLevel:LOW|MEDIUM|HIGH|CRITICAL,decision:READY_FOR_HUMAN_REVIEW|NEEDS_CORRECTION,findings:[{level,issue,evidence,recommendation}],attributionOk:boolean,imageCreditOk:boolean,correctionInstructions:string[],summary:string}. Não inventes fotógrafo; se não houver crédito explícito, assinala-o.",guardianInput);
+    const r=await askModel("És o Agente Guardião do O Patriota Brasil. Verifica se o rascunho representa fielmente o conteúdo e o contexto fornecidos pela fonte original, se atribui a origem de forma transparente e se preserva os links. A fonte original é responsável pelo seu conteúdo publicado; o nosso dever é não distorcer a matéria, não remover a atribuição e não apresentar como verificação independente aquilo que apenas foi retransmitido. Não declares uma notícia falsa sem evidência concreta de contradição. Sinaliza alegações graves ou lesivas sem suporte no material recebido, conteúdo acrescentado pelo redator, riscos aparentes de privacidade/difamação e créditos de imagem ausentes. Não emitas parecer jurídico. Nunca aproves publicação: exige revisão humana. Devolve JSON {riskLevel:LOW|MEDIUM|HIGH|CRITICAL,decision:READY_FOR_HUMAN_REVIEW|NEEDS_CORRECTION,findings:[{level,issue,evidence,recommendation}],attributionOk:boolean,imageCreditOk:boolean,correctionInstructions:string[],summary:string}. Não inventes fotógrafo; se não houver crédito explícito, assinala-o.",guardianInput);
     const risk=["LOW","MEDIUM","HIGH","CRITICAL"].includes(String(r.riskLevel))?String(r.riskLevel):"MEDIUM";
     return {riskLevel:risk as GuardianReport["riskLevel"],decision:r.decision==="READY_FOR_HUMAN_REVIEW"?"READY_FOR_HUMAN_REVIEW":"NEEDS_CORRECTION",
       findings:Array.isArray(r.findings)?r.findings:[],attributionOk:r.attributionOk===true,imageCreditOk:r.imageCreditOk===true,
       correctionInstructions:Array.isArray(r.correctionInstructions)?r.correctionInstructions.map(String):[],
       summary:asString(r.summary,"Revisão preliminar concluída; aprovação humana continua obrigatória.")};
   });
-  await prisma.article.update({where:{id:article.id},data:{riskLevel:toRisk(report.riskLevel),
-    riskAssessment:jsonInput({...report,checkedAt:new Date().toISOString(),sourceUrl:item.canonicalUrl,agent:"SYSTEM_GUARDIAN"})}});
+  const readyForHumanReview=report.decision==="READY_FOR_HUMAN_REVIEW" && report.riskLevel!=="HIGH" && report.riskLevel!=="CRITICAL";
+  await prisma.article.update({where:{id:article.id},data:{status:readyForHumanReview?ArticleStatus.IN_REVIEW:ArticleStatus.DRAFT,riskLevel:toRisk(report.riskLevel),
+    riskAssessment:jsonInput({...report,checkedAt:new Date().toISOString(),sourceUrl:item.canonicalUrl,agent:"SYSTEM_GUARDIAN",humanApprovalRequired:true})}});
   if(report.decision==="NEEDS_CORRECTION" && (report.riskLevel==="LOW"||report.riskLevel==="MEDIUM") && correctionRound<1) {
     try {
       await prisma.operationalTask.create({data:{taskType:"WRITE_AND_GUARD_DRAFT",
