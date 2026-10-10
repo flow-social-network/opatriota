@@ -45,15 +45,35 @@ export async function identityFromRequest(req: ApiRequest): Promise<Identity | n
 
 export type PaidAccessLevel = 'none' | 'assinante' | 'premium';
 
+function calculateExpiry(startValue: string, cycle: unknown): number | null {
+  const date = new Date(startValue);
+  if (!Number.isFinite(date.getTime())) return null;
+  if (cycle === 'annual') {
+    date.setUTCFullYear(date.getUTCFullYear() + 1);
+  } else {
+    const day = date.getUTCDate();
+    date.setUTCDate(1);
+    date.setUTCMonth(date.getUTCMonth() + 1);
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+    date.setUTCDate(Math.min(day, lastDay));
+  }
+  return date.getTime();
+}
+
 export async function paidAccessLevel(identity: Identity | null): Promise<PaidAccessLevel> {
   if (!identity) return 'none';
   if (STAFF_ROLES.has(identity.role)) return 'premium';
   const subscription = await documentGet('subscriptions', identity.uid);
   if (!subscription || subscription.status !== 'active') return 'none';
-  if (subscription.validUntil) {
-    const expires = Date.parse(String(subscription.validUntil));
-    if (Number.isFinite(expires) && expires < Date.now()) return 'none';
-  }
+
+  const expiry = subscription.validUntil
+    ? Date.parse(String(subscription.validUntil))
+    : calculateExpiry(String(subscription.activatedAt || ''), subscription.billingCycle);
+  // Legacy records without a stored expiry are bounded by the recorded activation
+  // date and billing cycle. Missing activation data fails closed instead of granting
+  // an unbounded subscription.
+  if (!Number.isFinite(expiry) || expiry === null || expiry < Date.now()) return 'none';
+
   const plan = String(subscription.planId || '').toLowerCase();
   return plan.includes('premium') ? 'premium' : 'assinante';
 }
