@@ -1,0 +1,1 @@
+export const metadata={title:"Institucional"}; export default function Page(){return <main className="site-shell" style={{paddingTop:"2rem"}}><h1 className="page-title">Institucional</h1><p>Conheça a missão editorial do O Patriota Brasil, as nossas diretrizes de transparência, atribuição de fontes e política de correções.</p></main>;}

@@ -91,3 +91,8 @@ A integração Efí existente em `server/` permanece legado não conectado às r
 - Configuração operacional da redação, login Google, conexão Facebook para publicação e prévias com marca do jornal: [docs/NEWSROOM_SOCIAL_PUBLISHING.md](docs/NEWSROOM_SOCIAL_PUBLISHING.md).
 - Contrato OpenAPI preliminar: [docs/contracts/openapi.yaml](docs/contracts/openapi.yaml). As rotas documentadas são contratos-alvo; não significam que todas estejam implementadas.
 - O arquivo .env.example contém somente nomes/placeholders. Não inserir credenciais reais no repositório.
+
+
+## Migração para Next.js
+
+O projeto está a criar uma aplicação Next App Router em paralelo, em `src/app/`, que lê notícias reais da API Express através de `OPATRIOTA_API_URL`. Os comandos atuais `dev`/`build` continuam a usar Vite até haver paridade e testes de ponta a ponta; Next usa `next:dev`, `next:build`, `next:start` e `next:check`. O legado WordPress foi arquivado, com mapa de portagem em `docs/migration/wordpress-to-next.md` e `backend/README-WORDPRESS-PORT.md`.

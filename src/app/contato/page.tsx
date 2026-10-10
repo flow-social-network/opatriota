@@ -1,0 +1,1 @@
+export const metadata={title:"Contato"}; export default function Page(){return <main className="site-shell" style={{paddingTop:"2rem"}}><h1 className="page-title">Contato</h1><p>Canal institucional do O Patriota Brasil.</p><p>O envio só será confirmado quando o endpoint real de contato e o serviço de entrega estiverem integrados; esta rota não simula envio.</p></main>;}

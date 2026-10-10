@@ -1,0 +1,1 @@
+export const metadata={title:"Privacidade e LGPD"}; export default function Page(){return <main className="site-shell" style={{paddingTop:"2rem"}}><h1 className="page-title">Privacidade e LGPD</h1><p>Informações sobre tratamento de dados pessoais, direitos dos titulares e canais de contacto.</p></main>;}

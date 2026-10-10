@@ -1,0 +1,1 @@
+export const metadata={title:"Enviar sugestão de checagem"}; export default function Page(){return <main className="site-shell" style={{paddingTop:"2rem"}}><h1 className="page-title">Enviar sugestão de checagem</h1><p>O formulário será habilitado quando estiver ligado a um endpoint real com validação, persistência e proteção contra abuso.</p></main>;}

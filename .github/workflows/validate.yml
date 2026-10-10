@@ -28,5 +28,9 @@ jobs:
         run: pnpm backend:check
       - name: Type-check operational core
         run: pnpm core:check
-      - name: Build frontend
+      - name: Build frontend (current Vite app)
         run: pnpm build
+      - name: Type-check Next.js migration
+        run: pnpm next:check
+      - name: Build Next.js migration
+        run: pnpm next:build

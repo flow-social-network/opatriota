@@ -1,0 +1,1 @@
+export const metadata={title:"Minha conta"}; export default function Page(){return <main className="site-shell" style={{paddingTop:"2rem"}}><h1 className="page-title">Minha conta</h1><p>Área privada: a autenticação e a sessão serão validadas no servidor antes de habilitar operações da conta.</p></main>;}

@@ -1,0 +1,1 @@
+export default function NotFound(){return <main className="site-shell" style={{paddingTop:"3rem"}}><h1 className="page-title">Página não encontrada</h1><p>O endereço solicitado não existe no O Patriota Brasil.</p></main>;}

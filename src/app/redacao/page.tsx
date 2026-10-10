@@ -1,0 +1,1 @@
+export const metadata={title:"Redação"}; export default function Page(){return <main className="site-shell" style={{paddingTop:"2rem"}}><h1 className="page-title">Redação</h1><p>Área editorial: tarefas de redação, revisão e aprovação devem ser executadas pelas APIs autenticadas do backend.</p></main>;}

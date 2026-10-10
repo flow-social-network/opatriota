@@ -1,0 +1,1 @@
+export const metadata={title:"Checagem de fatos"}; export default function Page(){return <main className="site-shell" style={{paddingTop:"2rem"}}><h1 className="page-title">Checagem de fatos</h1><p>Esta página será conectada aos dados reais de checagem e às respetivas evidências de origem.</p></main>;}
