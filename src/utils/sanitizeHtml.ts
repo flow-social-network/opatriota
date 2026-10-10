@@ -6,15 +6,14 @@ export function sanitizeHtml(dirty: string): string {
   if (!dirty) return '';
 
   if (typeof document === 'undefined') {
-    // SSR fallback: remove blocos perigosos por regex
+    // Without a standards-compliant HTML parser, fail closed: render the CMS
+    // value as text rather than trying to sanitize arbitrary HTML with regex.
     return dirty
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed\b[^>]*>/gi, '')
-      .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-      .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
-      .replace(/javascript\s*:/gi, '');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   const parser = new DOMParser();
@@ -35,7 +34,7 @@ export function sanitizeHtml(dirty: string): string {
   const ALLOWED_ATTRS: Record<string, Set<string>> = {
     a: new Set(['href', 'title', 'target', 'rel']),
     img: new Set(['src', 'alt', 'title', 'width', 'height', 'loading']),
-    source: new Set(['src', 'srcset', 'media', 'type']),
+    source: new Set(['src', 'media', 'type']),
     video: new Set(['src', 'controls', 'poster', 'width', 'height']),
     audio: new Set(['src', 'controls']),
     track: new Set(['src', 'kind', 'srclang', 'label']),
@@ -94,10 +93,16 @@ export function sanitizeHtml(dirty: string): string {
           continue;
         }
 
-        // Bloqueia javascript: e data: URLs perigosas
-        if ((name === 'href' || name === 'src') && /^\s*(javascript|data:text\/html|vbscript)/i.test(value)) {
-          child.removeAttribute(attr.name);
-          continue;
+        // Allow only safe URL schemes. Relative URLs are allowed; active content
+        // schemes (javascript:, data:, vbscript:, file:) are always rejected.
+        if (name === 'href' || name === 'src' || name === 'poster') {
+          const trimmed = value.trim();
+          const hasScheme = /^[a-z][a-z0-9+.-]*:/i.test(trimmed);
+          const safeScheme = /^(https?:|mailto:|tel:)/i.test(trimmed);
+          if (/^(javascript:|data:|vbscript:|file:)/i.test(trimmed) || (hasScheme && !safeScheme)) {
+            child.removeAttribute(attr.name);
+            continue;
+          }
         }
 
         // Links externos: força rel seguro
