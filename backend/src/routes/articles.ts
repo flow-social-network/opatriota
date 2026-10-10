@@ -50,7 +50,7 @@ router.get("/:slug", asyncHandler(async (req, res) => {
     select: {
       id: true, slug: true, title: true, excerpt: true, body: true, heroImageUrl: true, heroImageSourceUrl: true, heroImageCredit: true, canonicalUrl: true,
       publishedAt: true, seoTitle: true, seoDescription: true, isSubscriberOnly: true,
-      author: { select: { displayName: true } },
+      author: { select: { displayName: true, disabledAt: true, journalistProfile: { select: { slug: true, status: true, verifiedAt: true, expiresAt: true } } } },
       category: { select: { slug: true, name: true } },
       sources: { include: { source: { select: { name: true, url: true, kind: true } } } },
       factChecks: { select: { claim: true, verdict: true, methodology: true, reviewedAt: true } },
