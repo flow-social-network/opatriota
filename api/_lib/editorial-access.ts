@@ -47,8 +47,7 @@ export type PaidAccessLevel = 'none' | 'assinante' | 'premium';
 
 export async function paidAccessLevel(identity: Identity | null): Promise<PaidAccessLevel> {
   if (!identity) return 'none';
-  if (STAFF_ROLES.has(identity.role) || identity.role === 'assinante_premium') return 'premium';
-  if (identity.role === 'assinante_digital') return 'assinante';
+  if (STAFF_ROLES.has(identity.role)) return 'premium';
   const subscription = await documentGet('subscriptions', identity.uid);
   if (!subscription || subscription.status !== 'active') return 'none';
   if (subscription.validUntil) {
