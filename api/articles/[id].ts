@@ -45,8 +45,8 @@ export default async function handler(req: ApiRequest & { query?: Record<string,
     const body = await readRequestBody(req);
     const next = { ...article, ...body, id: recordId, updatedAt: new Date().toISOString() };
     if (!editor) {
-      next.editorialStatus = article.editorialStatus === 'PUBLICADA' ? 'PUBLICADA' : 'EM REDAÇÃO';
-      next.status = article.status === 'publicada' || article.status === 'publicado' ? article.status : 'rascunho';
+      next.editorialStatus = 'EM REVISÃO';
+      next.status = 'rascunho';
       next.createdBy = article.createdBy || identity.uid;
       next.authorId = article.authorId || identity.uid;
     }
