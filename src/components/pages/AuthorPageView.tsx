@@ -10,7 +10,6 @@ import {
   Calendar, 
   FileText, 
   ArrowRight,
-  ShieldCheck,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -33,9 +32,10 @@ export const AuthorPageView: React.FC<AuthorPageViewProps> = ({
   const [currentPage, setCurrentPage] = useState(1);
 
   // Filter articles written by this author (match by author name or authorId)
+  const normalizedAuthorName = author.name.trim().toLocaleLowerCase('pt-BR');
   const authorArticles = articles.filter(
-    (a) => a.author.toLowerCase().includes(author.name.toLowerCase()) || 
-           a.authorId === author.id
+    (article) => article.author.trim().toLocaleLowerCase('pt-BR') === normalizedAuthorName ||
+      article.authorId === author.id
   );
 
   const totalPages = Math.ceil(authorArticles.length / ITEMS_PER_PAGE) || 1;
@@ -70,12 +70,7 @@ export const AuthorPageView: React.FC<AuthorPageViewProps> = ({
               alt={author.name}
               className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-[#0B2345] shadow-md"
             />
-            <span 
-              className="absolute bottom-1 right-1 bg-[#16803C] text-white p-1.5 rounded-full shadow-xs"
-              title="Jornalista credenciado e auditado"
-            >
-              <ShieldCheck className="w-5 h-5" />
-            </span>
+
           </div>
 
           <div className="flex-1 text-center md:text-left">
@@ -94,8 +89,11 @@ export const AuthorPageView: React.FC<AuthorPageViewProps> = ({
               {author.name}
             </h1>
 
-            <p className="text-sm md:text-base text-[#404B5A] leading-relaxed max-w-3xl mb-6">
+            <p className="text-sm md:text-base text-[#404B5A] leading-relaxed max-w-3xl mb-3">
               {author.bio}
+            </p>
+            <p className="text-xs text-[#717E8E] max-w-3xl mb-6">
+              Este é um perfil editorial do O Patriota. A sua existência, por si só, não constitui credencial oficial nem comprova registro profissional externo.
             </p>
 
             <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-xs pt-4 border-t border-[#EAECEF]">

@@ -22,7 +22,6 @@ export const FCM_PROJECT_ID = 'o-patriota-5db52';
 
 const LOCAL_PUSH_TOKEN_KEY = 'o_patriota_push_token_v1';
 const LOCAL_PUSH_SUBSCRIBERS_KEY = 'o_patriota_push_subscribers_v1';
-const LOCAL_PUSH_CAMPAIGNS_KEY = 'o_patriota_push_campaigns_v1';
 
 /**
  * Checks if browser supports Web Push Notifications & Service Worker.
@@ -189,55 +188,27 @@ export function getStoredPushToken(): string | null {
 }
 
 /**
- * List registered push campaigns
+ * Campaign history is server-owned. This legacy synchronous helper intentionally
+ * returns no campaigns; the admin panel must load /admin/push-campaigns from the API.
  */
 export function getPushCampaigns(): PushNotificationCampaign[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(LOCAL_PUSH_CAMPAIGNS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-
-  // Initial seed campaigns for demonstration
-  return [
-    {
-      id: 'camp-1',
-      title: 'URGENTE: Nova votação no Congresso Nacional',
-      body: 'Plenário inicia análise de projeto com impacto direto na economia e liberdades civis.',
-      url: '/artigo/votacao-congresso',
-      sentAt: '08/10/2026 14:32',
-      recipientCount: 1420,
-      status: 'enviado'
-    },
-    {
-      id: 'camp-2',
-      title: 'ALERTA METEOROLÓGICO: Defesa Civil RS',
-      body: 'Inmet emite alerta meteorológico para capitais do Sul e Sudeste nesta quinta-feira.',
-      url: '/artigo/alerta-meteorologico-inmet',
-      sentAt: '07/10/2026 09:15',
-      recipientCount: 1380,
-      status: 'enviado'
-    }
-  ];
+  return [];
 }
 
 /**
- * Records a new push campaign broadcast
+ * Legacy compatibility helper. It creates a draft value only and never claims
+ * that a notification was sent or that the campaign was persisted.
  */
 export function recordPushCampaign(campaign: Omit<PushNotificationCampaign, 'id' | 'sentAt'>): PushNotificationCampaign {
-  const newCamp: PushNotificationCampaign = {
+  return {
     ...campaign,
-    id: `camp-${Date.now()}`,
-    sentAt: new Date().toLocaleString('pt-BR')
+    id: `draft-${Date.now()}`,
+    sentAt: '',
+    status: 'rascunho',
+    recipientCount: 0,
+    sentCount: 0,
+    failedCount: 0,
   };
-
-  try {
-    const list = getPushCampaigns();
-    list.unshift(newCamp);
-    localStorage.setItem(LOCAL_PUSH_CAMPAIGNS_KEY, JSON.stringify(list));
-  } catch (e) {}
-
-  return newCamp;
 }
 
 /**

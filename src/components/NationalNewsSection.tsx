@@ -19,7 +19,7 @@ export const NationalNewsSection: React.FC<NationalNewsSectionProps> = ({
   // Select national coverage articles (skip lead article)
   const nationalArticles = articles.filter(
     (a) => a.category === 'brasil' || a.category === 'politica' || a.category === 'seguranca'
-  ).slice(1, 7);
+  ).slice(0, 6);
 
   const trendingArticles = articles.slice(0, 4);
 

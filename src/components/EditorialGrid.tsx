@@ -11,7 +11,7 @@ export const EditorialGrid: React.FC<EditorialGridProps> = ({
   articles,
   onSelectArticle
 }) => {
-  // Articles from index 4 to 9 match the 6 cards in the reference
+  // The hero consumes the lead and up to three side stories; continue the feed after them.
   const gridCards = articles.slice(4, 10);
 
   const getBadgeColor = (category: string) => {
@@ -44,7 +44,7 @@ export const EditorialGrid: React.FC<EditorialGridProps> = ({
             <article
               key={article.id}
               onClick={() => onSelectArticle(article)}
-              className="bg-white border border-[#D9DEE7] rounded overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 min-w-0"
+              className="bg-white border border-[#D9DEE7] rounded overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-shadow duration-300 min-w-0"
             >
               {/* Thumbnail with Badge */}
               <div className="relative aspect-[4/3] w-full overflow-hidden bg-slate-100">

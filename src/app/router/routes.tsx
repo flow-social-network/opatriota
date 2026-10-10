@@ -6,10 +6,12 @@ import { RequireAuth, RequireRole } from './routeGuards';
 
 // ─── Páginas públicas (carregamento imediato — já no bundle) ───
 import HomePage from '../../pages/public/HomePage';
+import RecipesPage from '../../pages/public/RecipesPage';
 import ArticlePage from '../../pages/public/ArticlePage';
 import CategoryPage from '../../pages/public/CategoryPage';
 import SearchPage from '../../pages/public/SearchPage';
 import CheckoutPage from '../../pages/public/CheckoutPage';
+import InstitutionalInfoPage from '../../pages/public/InstitutionalInfoPage';
 import {
   ArchivePage,
   ContactPage,
@@ -55,10 +57,25 @@ export const router = createBrowserRouter([
       { path: '/autor/:slug', element: <AuthorPage /> },
       { path: '/busca', element: <SearchPage /> },
       { path: '/arquivo', element: <ArchivePage /> },
+      { path: '/receitas', element: <RecipesPage /> },
       { path: '/contato', element: <ContactPage /> },
       { path: '/gestao-de-dados', element: <LgpdPage /> },
+      { path: '/sobre-o-patriota', element: <InstitutionalInfoPage /> },
+      { path: '/sobre', element: <InstitutionalInfoPage /> },
+      { path: '/principios-editoriais', element: <InstitutionalInfoPage /> },
+      { path: '/principios', element: <InstitutionalInfoPage /> },
+      { path: '/expediente', element: <InstitutionalInfoPage /> },
+      { path: '/fontes-e-metodologia', element: <InstitutionalInfoPage /> },
+      { path: '/politica-de-correcoes', element: <InstitutionalInfoPage /> },
+      { path: '/politica-de-privacidade', element: <InstitutionalInfoPage /> },
+      { path: '/termos-de-uso', element: <InstitutionalInfoPage />,
+      },
+      { path: '/seguranca-da-informacao', element: <InstitutionalInfoPage /> },
+      { path: '/contrato-de-assinatura', element: <InstitutionalInfoPage /> },
+      { path: '/contrato', element: <InstitutionalInfoPage /> },
       { path: '/planos', element: <PlansPage /> },
       { path: '/checkout', element: <CheckoutPage /> },
+      { path: '/apoie-o-jornal', element: <PlansPage /> },
       { path: '/verificacao', element: <FactCheckPage /> },
       { path: '/checagem', element: <FactCheckPage /> },
 
@@ -69,6 +86,7 @@ export const router = createBrowserRouter([
       // ─── Acesso negado / 404 ───
       { path: '/acesso-negado', element: <LazyPanel><AccessDeniedPage /></LazyPanel> },
       { path: '/404', element: <NotFound /> },
+      { path: '/:slug', element: <CustomPage /> },
       { path: '*', element: <NotFound /> },
     ],
   },

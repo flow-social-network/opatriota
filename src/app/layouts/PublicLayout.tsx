@@ -21,6 +21,8 @@ export function PublicLayout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [supportOpen, setSupportOpen] = React.useState(false);
+  const [searchDraft, setSearchDraft] = React.useState(new URLSearchParams(location.search).get('q') || '');
+  React.useEffect(() => { setSearchDraft(new URLSearchParams(location.search).get('q') || ''); }, [location.search]);
 
   const handleSelectCategory = (cat: CategorySlug) => {
     if (cat === 'checagem') navigate('/verificacao');
@@ -36,6 +38,11 @@ export function PublicLayout() {
       case 'planos': case 'apoie-o-jornal': return navigate('/planos');
       case 'contato': return navigate('/contato');
       case 'gestao-de-dados': return navigate('/gestao-de-dados');
+      case 'sobre': case 'sobre-o-patriota': case 'principios': case 'principios-editoriais':
+      case 'expediente': case 'expediente-e-redacao': case 'fontes-e-metodologia': case 'politica-de-correcoes':
+      case 'politica-de-privacidade': case 'termos-de-uso': case 'seguranca-da-informacao':
+      case 'contrato': case 'contrato-de-assinatura': case 'contrato-assinatura':
+        return navigate('/' + slug);
       case 'arquivo': return navigate('/arquivo');
       case 'busca': return navigate('/busca');
       case 'checagem': return navigate('/verificacao');
@@ -69,9 +76,9 @@ export function PublicLayout() {
         onGoogleLogout={handleGoogleLogout}
         onNavigatePage={handleNavigatePage}
         currentUser={currentUser}
-        searchQuery={new URLSearchParams(location.search).get('q') || ''}
-        onSearchChange={() => { /* controlado pelo SearchPage */ }}
-        onSearchSubmit={() => navigate('/busca')}
+        searchQuery={searchDraft}
+        onSearchChange={setSearchDraft}
+        onSearchSubmit={() => navigate(searchDraft.trim() ? `/busca?q=${encodeURIComponent(searchDraft.trim())}` : '/busca')}
         portalSettings={portalSettings}
       />
 

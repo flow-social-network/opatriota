@@ -24,7 +24,15 @@
   html {
     min-width: 320px;
     scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
+
+  html::-webkit-scrollbar, body::-webkit-scrollbar { display: none; width: 0; height: 0; }
+
+  /* Scroll remains available on touch and wheel; only the visual scrollbar is hidden. */
+  .weather-bar-scroll, .city-strip, .ticker-scroll { scrollbar-width: none; -ms-overflow-style: none; }
+  .weather-bar-scroll::-webkit-scrollbar, .city-strip::-webkit-scrollbar, .ticker-scroll::-webkit-scrollbar { display: none; }
 
   body {
     background-color: #f7f8fa;
@@ -212,3 +220,13 @@
     display: none !important;
   }
 }
+
+
+/* Header controls: compact, rounded and stable at desktop and mobile widths. */
+.site-utility-bar button { flex-shrink: 0; }
+.site-utility-bar form { max-width: 100%; }
+.site-utility-bar form input { min-height: 0; }
+.site-utility-bar button, .site-utility-bar a { -webkit-tap-highlight-color: transparent; }
+
+/* News images reserve their space before loading to prevent layout shifts. */
+article img, main img { content-visibility: auto; }
