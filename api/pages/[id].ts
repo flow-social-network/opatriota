@@ -1,6 +1,6 @@
 import { documentDelete, documentGet, documentList, documentWrite } from '../_lib/storage';
 import {
-  ApiRequest, ApiResponse, EDITOR_ROLES, identityFromRequest,
+  type ApiRequest, type ApiResponse, EDITOR_ROLES, identityFromRequest,
   isPublicPage, readRequestBody, sendJson,
 } from '../_lib/editorial-access';
 
