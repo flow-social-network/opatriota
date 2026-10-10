@@ -83,6 +83,7 @@ router.post("/:userId/verify",asyncHandler(async(req,res)=>{
   expiresAt=new Date(req.body.expiresAt);if(expiresAt<=new Date())throw new HttpError(400,"VALIDATION_ERROR","expiresAt must be in the future");
  }
  const evidenceReference=optionalText(req.body?.evidenceReference,"evidenceReference",1000)??current.evidenceReference;
+ if(!evidenceReference)throw new HttpError(400,"VERIFICATION_EVIDENCE_REQUIRED","Record an internal evidence reference before confirming this affiliation");
  const user=actor(res);
  const profile=await prisma.$transaction(async tx=>{
   const saved=await tx.journalistProfile.update({where:{userId},data:{status:JournalistVerificationStatus.VERIFIED,verifiedAt:new Date(),verifiedById:user.id,expiresAt,evidenceReference},select:{id:true,userId:true,slug:true,credentialCode:true,status:true,verifiedAt:true,expiresAt:true}});
