@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { hasPaidAccess, isOpenArticle, isPublicArticle, isPublicPage } from '../api/_lib/editorial-access';
+import { sanitizeHtml } from '../src/utils/sanitizeHtml';
 
 test('only editorially published articles are public', () => {
   assert.equal(isPublicArticle({ editorialStatus: 'PUBLICADA' }), true);
@@ -31,4 +32,11 @@ test('digital subscriptions do not unlock premium-only articles', () => {
   assert.equal(hasPaidAccess('premium', 'premium'), true);
   assert.equal(hasPaidAccess('aberto', 'none'), true);
   assert.equal(hasPaidAccess('premium', 'none'), false);
+});
+
+test('server-side sanitizer escapes HTML when no DOM parser is available', () => {
+  assert.equal(
+    sanitizeHtml('<img src=x onerror=alert(1)>'),
+    '&lt;img src=x onerror=alert(1)&gt;'
+  );
 });
