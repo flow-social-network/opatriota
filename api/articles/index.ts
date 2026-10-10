@@ -26,6 +26,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
           return { ...teaser, premiumLocked: true };
         })
         .sort((a, b) => {
+          const priorityRank = (value: unknown) => value === 'alta' ? 3 : value === 'media' ? 2 : 1;
+          const priorityDifference = priorityRank(b.priority) - priorityRank(a.priority);
+          if (priorityDifference !== 0) return priorityDifference;
           const dateA = Date.parse(String(a.publishedAt || a.updatedAt || a.createdAt || ''));
           const dateB = Date.parse(String(b.publishedAt || b.updatedAt || b.createdAt || ''));
           return (Number.isFinite(dateB) ? dateB : 0) - (Number.isFinite(dateA) ? dateA : 0);
