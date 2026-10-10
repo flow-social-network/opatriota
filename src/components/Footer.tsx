@@ -173,6 +173,11 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
+                <button onClick={() => onNavigatePage('contrato-de-assinatura')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Contrato de Assinatura
+                </button>
+              </li>
+              <li>
                 <button onClick={() => onNavigatePage('gestao-de-dados')} className="hover:text-white hover:underline transition cursor-pointer">
                   Gestão de Dados (LGPD)
                 </button>
