@@ -20,7 +20,7 @@ Definir no ambiente do worker:
 - `CORE_POLL_INTERVAL_MS`: intervalo do worker (padrão 15000 ms).
 - `CORE_BATCH_SIZE`: máximo de tarefas por ciclo (padrão 5).
 
-Sem a configuração real da API de IA, as tarefas falham explicitamente e ficam registadas; não existem respostas simuladas.
+Sem a configuração real da API de IA, as tarefas falham explicitamente e ficam registadas; não existem respostas simuladas. O núcleo também aceita a configuração existente FACTCHECK_AI_API_URL, FACTCHECK_AI_API_KEY e FACTCHECK_AI_MODEL como alternativa.
 
 ## Execução
 
@@ -47,3 +47,8 @@ O worker deve executar como processo/worker online separado. Não o manter dentr
 ## Limitações e validação pendente
 
 Esta é uma primeira implementação de núcleo. Ainda exige geração do Prisma Client, validação do schema, typecheck, testes de integração e configuração real do fornecedor de IA e do worker online. O endpoint de status demonstra dados consultados na base de dados, mas não prova por si só que o processo worker esteja ativo.
+
+
+## NotebookLM
+
+A auditoria desta branch não encontrou uma integração programática de NotebookLM no código. O núcleo não simula chamadas a esse serviço. Antes de integrar, é necessário identificar o fluxo/acesso existente e confirmar um método suportado; até lá, o núcleo usa a API de IA configurada acima e mantém URLs e evidências de origem.

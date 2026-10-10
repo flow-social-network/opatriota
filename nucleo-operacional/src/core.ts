@@ -64,8 +64,10 @@ function parseModelJson(raw:unknown):Record<string,unknown> {
   catch { throw new Error("A API de IA não devolveu JSON válido."); }
 }
 async function askModel(system:string,input:unknown):Promise<Record<string,unknown>> {
-  const url=process.env.OPATRIOTA_AI_API_URL, key=process.env.OPATRIOTA_AI_API_KEY, model=process.env.OPATRIOTA_AI_MODEL;
-  if(!url||!key||!model) throw new Error("IA não configurada: defina OPATRIOTA_AI_API_URL, OPATRIOTA_AI_API_KEY e OPATRIOTA_AI_MODEL no ambiente do worker.");
+  const url=process.env.OPATRIOTA_AI_API_URL || process.env.FACTCHECK_AI_API_URL;
+  const key=process.env.OPATRIOTA_AI_API_KEY || process.env.FACTCHECK_AI_API_KEY;
+  const model=process.env.OPATRIOTA_AI_MODEL || process.env.FACTCHECK_AI_MODEL;
+  if(!url||!key||!model) throw new Error("IA não configurada: defina OPATRIOTA_AI_API_URL/KEY/MODEL ou reutilize FACTCHECK_AI_API_URL/KEY/MODEL no ambiente do worker.");
   const response=await fetch(url,{method:"POST",headers:{"Content-Type":"application/json",Authorization:`Bearer ${key}`},
     body:JSON.stringify({model,temperature:0.2,messages:[{role:"system",content:system},{role:"user",content:JSON.stringify(input)}]}),
     signal:AbortSignal.timeout(45_000)});
