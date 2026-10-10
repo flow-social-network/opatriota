@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Logo } from './Logo';
 import { CategorySlug, UserSession, PortalSettings, SocialPlatform } from '../types';
 import { 
@@ -71,6 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSearchSubmit,
   portalSettings
 }) => {
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(BRAZIL_CAPITALS_WEATHER[0]);
@@ -188,7 +190,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="max-w-[1360px] mx-auto flex flex-col xl:flex-row xl:flex-nowrap xl:items-center xl:justify-between gap-y-2 py-2">
           {/* Left: Date & Dynamic Weather from INMET */}
           <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 text-[11px] sm:text-xs xl:flex-nowrap">
-            <span className="font-semibold text-[#17202A]">Brasília, 8 de outubro de 2026</span>
+            <span className="font-semibold text-[#17202A]">{new Intl.DateTimeFormat('pt-BR', { timeZone: 'America/Sao_Paulo', weekday: 'short', day: '2-digit', month: 'long', year: 'numeric' }).format(new Date()).replace(/^\w/, (letter) => letter.toUpperCase())}</span>
             <span className="text-[#D9DEE7] hidden sm:inline">|</span>
 
             {/* DYNAMIC WEATHER PILL (Open-Meteo live / INMET stations reference) */}
@@ -249,19 +251,21 @@ export const Header: React.FC<HeaderProps> = ({
             {/* Search Input Box */}
             <form 
               onSubmit={(e) => { e.preventDefault(); onSearchSubmit(); }}
-              className="flex min-w-0 items-center border border-[#D9DEE7] bg-white rounded overflow-hidden h-8"
+              className="flex min-w-0 items-center border border-[#D9DEE7] bg-white rounded-full overflow-hidden h-8 shadow-sm focus-within:border-[#0B5FFF] focus-within:ring-2 focus-within:ring-[#0B5FFF]/10"
             >
+              <Search className="ml-3 h-3.5 w-3.5 shrink-0 text-[#7B8794]" aria-hidden="true" />
               <input
                 type="text"
+                aria-label="Buscar notícias"
                 placeholder="Buscar notícias..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange(e.target.value)}
-                className="px-2.5 py-1 text-xs text-[#17202A] placeholder-[#5D6673] w-28 sm:w-36 lg:w-44 focus:outline-none"
+                className="min-w-0 px-2 py-1 text-xs text-[#17202A] placeholder-[#5D6673] w-24 sm:w-32 lg:w-36 focus:outline-none bg-transparent"
               />
               <button
                 type="submit"
                 aria-label="Buscar"
-                className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white px-2.5 h-full flex items-center justify-center transition-colors"
+                className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white px-3 h-full flex items-center justify-center transition-colors rounded-r-full"
               >
                 <Search className="w-3 h-3" />
               </button>
@@ -286,7 +290,7 @@ export const Header: React.FC<HeaderProps> = ({
             {currentUser ? (
               <button
                 onClick={() => onOpenSubscriberArea('dashboard')}
-                className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
+                className="flex items-center gap-1.5 bg-white border border-[#0B2345] hover:bg-[#0B2345] hover:text-white text-[#0B2345] text-[10px] font-bold px-2.5 py-1.5 rounded-full transition-colors shadow-2xs cursor-pointer whitespace-nowrap"
                 title="Abrir minha conta"
               >
                 {currentUser.avatarUrl ? <img src={currentUser.avatarUrl} alt="" className="w-4 h-4 rounded-full object-cover" /> : <User className="w-3 h-3" />}
@@ -309,7 +313,7 @@ export const Header: React.FC<HeaderProps> = ({
               <>
                 <button
                   onClick={onOpenNewsroom}
-                  className="flex items-center gap-1.5 bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-[11px] font-bold px-2.5 py-1 rounded transition-colors shadow-2xs cursor-pointer"
+                  className="flex items-center gap-1.5 bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-[10px] font-bold px-2.5 py-1.5 rounded-full transition-colors shadow-2xs cursor-pointer whitespace-nowrap"
                   title="Acessar Esteira Editorial e Gestão de Matérias"
                 >
                   <PenTool className="w-3 h-3 text-[#FFCC29]" />
@@ -403,13 +407,36 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               );
             })}
+            <div className="relative group">
+              <button type="button" aria-haspopup="true" className="flex items-center gap-1 px-3 py-3 text-[11px] xl:text-xs font-bold tracking-wider uppercase text-white/90 hover:text-white hover:bg-[#0E2C56] whitespace-nowrap">
+                MAIS <ChevronDown className="h-3 w-3" />
+              </button>
+              <div className="absolute right-0 top-full z-[70] hidden min-w-56 rounded-b-lg border border-white/10 bg-[#07172E] p-2 shadow-xl group-hover:block group-focus-within:block">
+                {[
+                  ['Sobre O Patriota', '/sobre-o-patriota'],
+                  ['Princípios editoriais', '/principios-editoriais'],
+                  ['Expediente', '/expediente'],
+                  ['Fontes e metodologia', '/fontes-e-metodologia'],
+                  ['Política de correções', '/politica-de-correcoes'],
+                  ['Planos e assinaturas', '/planos'],
+                  ['Contrato de assinatura', '/contrato-de-assinatura'],
+                  ['Privacidade', '/politica-de-privacidade'],
+                  ['Termos de uso', '/termos-de-uso'],
+                  ['Contato', '/contato'],
+                ].map(([label, href]) => (
+                  <button key={href} type="button" onClick={() => navigate(href)} className="block min-h-0 w-full rounded px-3 py-2 text-left text-xs font-semibold text-white/85 hover:bg-white/10 hover:text-[#FFCC29]">
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           {/* Right Action: APOIE O JORNAL / ASSINATURA */}
           <div className="py-2 flex items-center gap-2">
             <button
               onClick={onOpenSupport}
-              className="bg-[#16803C] hover:bg-[#22A447] text-white text-[11px] xl:text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+              className="bg-[#16803C] hover:bg-[#22A447] text-white text-[10px] xl:text-[11px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
             >
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>APOIE O JORNAL</span>
