@@ -10,6 +10,7 @@ import articleRoutes from "./routes/articles.js";
 import categoryRoutes from "./routes/categories.js";
 import pushRoutes from "./routes/push.js";
 import notificationRoutes from "./routes/notifications.js";
+import operationalCoreRoutes from "./routes/operational-core.js";
 
 export const app = express();
 
@@ -45,6 +46,7 @@ app.use("/api/articles", articleRoutes);
 app.use("/api/categories", categoryRoutes);
 app.use("/api/push", pushRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/operational-core", operationalCoreRoutes);
 
 app.use((_req, res) => res.status(404).json({ error: { code: "NOT_FOUND", message: "Route not found" } }));
 

@@ -14,7 +14,9 @@
     "backend:check": "tsc --noEmit -p backend/tsconfig.json",
     "backend:setup": "bash scripts/setup-backend.sh",
     "db:validate": "prisma validate --schema prisma/schema.prisma",
-    "db:generate": "prisma generate --schema prisma/schema.prisma"
+    "db:generate": "prisma generate --schema prisma/schema.prisma",
+    "core:worker": "tsx nucleo-operacional/src/worker.ts",
+    "core:check": "tsc --noEmit -p nucleo-operacional/tsconfig.json"
   },
   "dependencies": {
     "@google/genai": "^2.4.0",
