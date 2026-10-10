@@ -81,6 +81,7 @@ enum IngestionStatus {
 model User {
   id String @id @default(cuid())
   email String @unique
+  firebaseUid String? @unique
   passwordHash String?
   displayName String
   role UserRole @default(READER)
@@ -159,6 +160,7 @@ model Article {
   @@index([status, publishedAt(sort: Desc)])
   @@index([categoryId, status, publishedAt(sort: Desc)])
   @@index([authorId, updatedAt(sort: Desc)])
+  @@index([humanApprovedById])
   @@map("articles")
 }
 model ArticleReview {
