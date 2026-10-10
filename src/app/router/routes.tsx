@@ -11,6 +11,7 @@ import ArticlePage from '../../pages/public/ArticlePage';
 import CategoryPage from '../../pages/public/CategoryPage';
 import SearchPage from '../../pages/public/SearchPage';
 import CheckoutPage from '../../pages/public/CheckoutPage';
+import InstitutionalInfoPage from '../../pages/public/InstitutionalInfoPage';
 import {
   ArchivePage,
   ContactPage,
@@ -59,6 +60,19 @@ export const router = createBrowserRouter([
       { path: '/receitas', element: <RecipesPage /> },
       { path: '/contato', element: <ContactPage /> },
       { path: '/gestao-de-dados', element: <LgpdPage /> },
+      { path: '/sobre-o-patriota', element: <InstitutionalInfoPage /> },
+      { path: '/sobre', element: <InstitutionalInfoPage /> },
+      { path: '/principios-editoriais', element: <InstitutionalInfoPage /> },
+      { path: '/principios', element: <InstitutionalInfoPage /> },
+      { path: '/expediente', element: <InstitutionalInfoPage /> },
+      { path: '/fontes-e-metodologia', element: <InstitutionalInfoPage /> },
+      { path: '/politica-de-correcoes', element: <InstitutionalInfoPage /> },
+      { path: '/politica-de-privacidade', element: <InstitutionalInfoPage /> },
+      { path: '/termos-de-uso', element: <InstitutionalInfoPage />,
+      },
+      { path: '/seguranca-da-informacao', element: <InstitutionalInfoPage /> },
+      { path: '/contrato-de-assinatura', element: <InstitutionalInfoPage /> },
+      { path: '/contrato', element: <InstitutionalInfoPage /> },
       { path: '/planos', element: <PlansPage /> },
       { path: '/checkout', element: <CheckoutPage /> },
       { path: '/verificacao', element: <FactCheckPage /> },
