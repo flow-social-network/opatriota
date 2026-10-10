@@ -15,7 +15,7 @@ import { SubscriberPortal } from './components/subscriber/SubscriberPortal';
 import { NewsroomDashboard } from './components/newsroom/NewsroomDashboard';
 import { SupportModal } from './components/SupportModal';
 import { AuthModal } from './components/AuthModal';
-import { observeAuth, signInWithGoogle, signOutFromFirebase } from './services/firebaseAuthService';
+import { getFirebaseAuthErrorMessage, observeAuth, signInWithGoogle, signOutFromFirebase } from './services/firebaseAuthService';
 
 // Model Pages Components
 import { InstitutionalPageView } from './components/pages/InstitutionalPageView';
@@ -372,20 +372,26 @@ export default function App() {
 
   const handleGoogleLogin = async () => {
     try {
-      await signInWithGoogle();
+      const user = await signInWithGoogle();
+      setCurrentUser(user);
     } catch (error) {
-      showToast(error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED'
-        ? 'Autenticação Google ainda não configurada neste ambiente.'
-        : 'Não foi possível concluir o acesso com Google.');
+      const message = getFirebaseAuthErrorMessage(error);
+      if (message) showToast(message);
     }
   };
 
 
 
   const handleGoogleLogout = async () => {
-    await signOutFromFirebase();
-    setCurrentUser(null);
-    handleNavigateHome();
+    try {
+      await signOutFromFirebase();
+    } catch (error) {
+      const message = getFirebaseAuthErrorMessage(error);
+      if (message) showToast(message);
+    } finally {
+      setCurrentUser(null);
+      handleNavigateHome();
+    }
   };
 
 

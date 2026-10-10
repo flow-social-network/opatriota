@@ -2,9 +2,9 @@ name: Backend and frontend checks
 
 on:
   push:
-    branches: [main, feature/efi-assinaturas]
+    branches: [main, feature/efi-assinaturas, feature/arquitetura-react-backend]
   pull_request:
-    branches: [main]
+    branches: [main, feature/efi-assinaturas]
 
 jobs:
   validate:
@@ -18,16 +18,20 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-      - name: Install dependencies and reconcile lockfile
-        run: pnpm install --no-frozen-lockfile
+      - name: Install dependencies from lockfile
+        run: pnpm install --frozen-lockfile
       - name: Validate Prisma schema
         run: DATABASE_URL='postgresql://ci:ci@localhost:5432/opatriota?schema=public' pnpm exec prisma validate --schema prisma/schema.prisma
       - name: Generate Prisma Client
         run: DATABASE_URL='postgresql://ci:ci@localhost:5432/opatriota?schema=public' pnpm exec prisma generate --schema prisma/schema.prisma
       - name: Type-check backend
         run: pnpm backend:check
+      - name: Test backend authentication failure handling
+        run: pnpm --filter @opatriota/api test
       - name: Type-check operational core
         run: pnpm core:check
+      - name: Test operational core URL policy
+        run: pnpm core:test
       - name: Build frontend (current Vite app)
         run: pnpm build
       - name: Type-check Next.js migration

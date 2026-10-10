@@ -1,6 +1,7 @@
 import "dotenv/config";
 import { createHash } from "node:crypto";
 import { Prisma, PrismaClient, AgentRunStatus, AgentType, ArticleStatus, EditorialRiskLevel, IngestionStatus, OperationalTaskStatus, SourceKind, SourceStatus, UserRole } from "@prisma/client";
+import { fetchPublicFeed } from "./public-feed.js";
 
 const prisma = new PrismaClient({ log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"] });
 const MAX_FEED_BYTES = 3_000_000;
@@ -114,10 +115,8 @@ async function pollSource(sourceId:string):Promise<void> {
   try {
     const url=safeUrl(source.url);
     if(!url) throw new Error("URL da fonte rejeitada: é necessário HTTPS e um endereço público.");
-    const response=await fetch(url,{headers:{"User-Agent":"OPatriota-Core/1.0 (+https://opatriota.com.br)",Accept:"application/rss+xml, application/atom+xml, application/xml, text/xml"},signal:AbortSignal.timeout(12_000)});
-    if(!response.ok) throw new Error(`Fonte respondeu com HTTP ${response.status}.`);
-    const xml=await response.text();
-    if(xml.length>MAX_FEED_BYTES) throw new Error("Feed excede o limite de tamanho permitido.");
+    const response=await fetchPublicFeed(url,{maxBytes:MAX_FEED_BYTES,timeoutMs:12_000});
+    const xml=response.body;
     for(const item of parseFeed(xml)) {
       const contentHash=createHash("sha256").update(`${source.id}\n${item.link}\n${item.title}`).digest("hex");
       let ingestion=await prisma.ingestionItem.findUnique({where:{sourceId_contentHash:{sourceId:source.id,contentHash}}});

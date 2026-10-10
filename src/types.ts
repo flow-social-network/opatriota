@@ -182,7 +182,7 @@ export interface RssSource {
   officialUrl: string;
   newsUrl?: string;
   rssUrl: string;
-  sourceType: 'órgão público' | 'governo' | 'congresso' | 'tribunal' | 'agência oficial' | 'veículo' | 'partido';
+  sourceType: 'órgão público' | 'governo' | 'congresso' | 'tribunal' | 'agência oficial' | 'agência pública' | 'veículo' | 'partido';
   category: CategorySlug;
   integrationType?: SourceIntegrationType;
   validationStatus?: SourceValidationStatus;

@@ -4,6 +4,7 @@ import { Router } from "express";
 import { UserRole } from "@prisma/client";
 import { env } from "../config/env.js";
 import { prisma } from "../db/prisma.js";
+import { verifyGoogleIdToken } from "../lib/firebase-auth.js";
 import { asyncHandler, HttpError, readString } from "../lib/http.js";
 import { requireAuth, type AuthUser } from "../middleware/auth.js";
 
@@ -69,6 +70,45 @@ router.post("/login", asyncHandler(async (req, res) => {
   });
   setSessionCookie(res, token);
   res.json({ data: { id: user.id, email: user.email, displayName: user.displayName, role: user.role } });
+}));
+
+router.post("/firebase", asyncHandler(async (req, res) => {
+  const idToken = readString(req.body?.idToken, "idToken", 8192);
+  const identity = await verifyGoogleIdToken(idToken);
+  const rawToken = randomBytes(32).toString("base64url");
+  const tokenHash = createHash("sha256").update(rawToken).digest("hex");
+  const now = new Date();
+
+  const user = await prisma.$transaction(async (tx) => {
+    const account = await tx.user.upsert({
+      where: { email: identity.email },
+      create: {
+        email: identity.email,
+        displayName: identity.displayName,
+        role: UserRole.READER,
+        emailVerifiedAt: now,
+      },
+      update: { emailVerifiedAt: now },
+    });
+    if (account.disabledAt) throw new HttpError(403, "ACCOUNT_DISABLED", "This account is disabled");
+
+    await tx.refreshSession.create({
+      data: {
+        userId: account.id,
+        tokenHash,
+        expiresAt: new Date(Date.now() + env.sessionDays * 86400_000),
+        userAgent: req.get("user-agent")?.slice(0, 500),
+        ipHash: req.ip ? createHash("sha256").update(req.ip).digest("hex") : null,
+      },
+    });
+    await tx.auditEvent.create({
+      data: { actorId: account.id, action: "GOOGLE_SIGN_IN", entityType: "User", entityId: account.id, metadata: { provider: "google" } },
+    });
+    return account;
+  });
+
+  setSessionCookie(res, rawToken);
+  res.json({ data: { id: user.id, email: user.email, displayName: user.displayName, role: user.role, createdAt: user.createdAt } });
 }));
 
 router.get("/me", requireAuth, (req, res) => {

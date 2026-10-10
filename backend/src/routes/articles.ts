@@ -14,10 +14,20 @@ router.get("/", asyncHandler(async (req, res) => {
   const page = Math.max(1, Math.min(10000, Number.parseInt(String(req.query.page ?? "1"), 10) || 1));
   const pageSize = Math.max(1, Math.min(50, Number.parseInt(String(req.query.pageSize ?? "20"), 10) || 20));
   const categorySlug = typeof req.query.category === "string" ? req.query.category : undefined;
+  if (req.query.q !== undefined && typeof req.query.q !== "string") {
+    throw new HttpError(400, "INVALID_SEARCH_QUERY", "Search query must be a single string");
+  }
+  const searchTerm = typeof req.query.q === "string" ? req.query.q.trim().slice(0, 160) : "";
   const where = {
     status: ArticleStatus.PUBLISHED,
     publishedAt: { lte: new Date() },
     ...(categorySlug ? { category: { slug: categorySlug } } : {}),
+    ...(searchTerm ? {
+      OR: [
+        { title: { contains: searchTerm, mode: "insensitive" as const } },
+        { excerpt: { contains: searchTerm, mode: "insensitive" as const } },
+      ],
+    } : {}),
   };
   const [items, total] = await prisma.$transaction([
     prisma.article.findMany({
