@@ -14,7 +14,7 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test test/*.test.ts"No tests configured yet\" && exit 0"
+    "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
