@@ -10,7 +10,6 @@ import { RegionalCoverageRS } from '../../components/RegionalCoverageRS';
 import { HomeEditorialScaffold } from '../../components/home/HomeEditorialScaffold';
 import { RecipesSection } from '../../components/recipes/RecipesSection';
 import { useData } from '../../app/contexts/DataContext';
-import { isApiConfigured } from '../../services/apiClient';
 import type { Article, FactCheckItem } from '../../types';
 
 const FACEBOOK_POSTS = [
@@ -56,7 +55,6 @@ export default function HomePage() {
   }
 
   const hasPublishedArticles = articles.length > 0;
-  const apiConfigured = isApiConfigured();
 
   return (
     <main className="mx-auto max-w-[1360px] px-4 py-6 sm:py-8">
