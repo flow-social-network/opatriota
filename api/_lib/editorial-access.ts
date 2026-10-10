@@ -77,6 +77,7 @@ export function isOpenArticle(article: Record<string, any>): boolean {
 }
 
 export function isPublicPage(page: Record<string, any>): boolean {
+  if (page.status === 'rascunho' || page.status === 'revisao' || page.status === 'despublicada') return false;
   return page.status === 'publicado' || page.status === 'publicada' || page.published === true;
 }
 
