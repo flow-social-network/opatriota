@@ -72,7 +72,7 @@ export async function paidAccessLevel(identity: Identity | null): Promise<PaidAc
   // Legacy records without a stored expiry are bounded by the recorded activation
   // date and billing cycle. Missing activation data fails closed instead of granting
   // an unbounded subscription.
-  if (!Number.isFinite(expiry) || expiry === null || expiry < Date.now()) return 'none';
+  if (expiry === null || !Number.isFinite(expiry) || expiry < Date.now()) return 'none';
 
   const plan = String(subscription.planId || '').toLowerCase();
   return plan.includes('premium') ? 'premium' : 'assinante';
