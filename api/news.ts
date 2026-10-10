@@ -7,7 +7,7 @@ type FeedItem = {
   source: "Agência Brasil";
 };
 
-const FEED_URL = "https://agenciabrasil.ebc.com.br/feed/";
+const FEED_URL = "https://agenciabrasil.ebc.com.br/rss.xml";
 const escapeXml = (value: string) => value
   .replace(/&amp;/g, "&").replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'")
   .replace(/&lt;/g, "<").replace(/&gt;/g, ">").trim();

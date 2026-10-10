@@ -257,6 +257,33 @@ paths:
         "200": { description: Matéria publicada e evento auditado; exige aprovação humana anterior registrada }
         "403": { $ref: "#/components/responses/Forbidden" }
         "409": { description: Matéria não aprovada ou estado inválido }
+  /api/articles/{id}/schedule:
+    post:
+      summary: Agendar ou desagendar publicação de matéria aprovada
+      description: Apenas EDITOR/CHIEF_EDITOR/ADMIN; exige aprovação humana registrada. Publicação ocorre via worker (scheduledAt vencido → PUBLISHED, auditado).
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [scheduledAt]
+              properties:
+                scheduledAt:
+                  oneOf:
+                    - type: string
+                      format: date-time
+                    - type: "null"
+      responses:
+        "200": { description: scheduledAt definido (SCHEDULED) ou removido (APPROVED); evento auditado }
+        "400": { description: Data inválida, passada ou além de 366 dias }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "409": { description: Matéria não aprovada ou estado inválido }
   /api/social/oauth/meta/start:
     get:
       summary: Iniciar autorização Meta
@@ -306,6 +333,84 @@ paths:
       responses:
         "200": { description: Estado sanitizado da publicação }
         "404": { $ref: "#/components/responses/NotFound" }
+  /api/admin/overview:
+    get:
+      summary: Visão geral operacional (saúde, migrações, contagens reais)
+      description: Apenas ADMIN/CHIEF_EDITOR. Somente métricas reais de serviços conectados.
+      responses:
+        "200": { description: Indicadores reais agregados }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/admin/users:
+    get:
+      summary: Listar utilizadores e sessões ativas
+      description: "Apenas ADMIN/CHIEF_EDITOR. Filtros: query, role, disabled, paginação."
+      responses:
+        "200": { description: Página de utilizadores (sem segredos) }
+        "403": { $ref: "#/components/responses/Forbidden" }
+  /api/admin/users/{id}/role:
+    patch:
+      summary: Alterar papel de um utilizador (ADMIN apenas)
+      description: Validação de enum; proibido alterar o próprio papel; auditoria obrigatória.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties:
+                role: { type: string, enum: [READER, JOURNALIST, REVIEWER, EDITOR, CHIEF_EDITOR, ADMIN] }
+      responses:
+        "200": { description: Papel atualizado; evento USER_ROLE_CHANGED auditado }
+        "400": { description: Papel inválido }
+        "403": { description: Ator não é ADMIN ou tentou alterar o próprio papel }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/admin/users/{id}/disabled:
+    patch:
+      summary: Desativar ou reativar conta (ADMIN apenas)
+      description: Desativação revoga todas as sessões; auditoria obrigatória.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [disabled]
+              properties:
+                disabled: { type: boolean }
+      responses:
+        "200": { description: Estado atualizado; evento USER_DISABLED/USER_ENABLED auditado }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/admin/users/{id}/revoke-sessions:
+    post:
+      summary: Revogar todas as sessões de um utilizador (ADMIN apenas)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema: { type: string }
+      responses:
+        "200": { description: Sessões revogadas; evento USER_SESSIONS_REVOKED auditado }
+        "403": { $ref: "#/components/responses/Forbidden" }
+        "404": { $ref: "#/components/responses/NotFound" }
+  /api/admin/audit:
+    get:
+      summary: Consultar eventos de auditoria
+      description: "Apenas ADMIN/CHIEF_EDITOR. Filtros: action, entityType, paginação."
+      responses:
+        "200": { description: Página de eventos de auditoria }
+        "403": { $ref: "#/components/responses/Forbidden" }
   /api/admin/social/pause:
     post:
       summary: Pausar ou retomar publicações sociais
