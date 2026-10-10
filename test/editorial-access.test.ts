@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { isOpenArticle, isPublicArticle, isPublicPage } from '../api/_lib/editorial-access.ts';
+import { isOpenArticle, isPublicArticle, isPublicPage } from '../api/_lib/editorial-access';
 
 test('only editorially published articles are public', () => {
   assert.equal(isPublicArticle({ editorialStatus: 'PUBLICADA' }), true);
