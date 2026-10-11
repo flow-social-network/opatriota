@@ -325,7 +325,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* ═══════════════════════════════════════════════════════════════════
             1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
            ═══════════════════════════════════════════════════════════════════ */}
-        <div className="lg:hidden">
+        <div className="md:hidden">
           {/* Main White Bar: Hamburger + Centered Logo + Search, Bell, Profile */}
           <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] shadow-xs">
             {/* Hamburger Button */}
@@ -449,10 +449,10 @@ export const Header: React.FC<HeaderProps> = ({
         {/* ═══════════════════════════════════════════════════════════════════
             2. DESKTOP & TABLET HEADER (Fidelidade Absoluta ao Painel 1)
            ═══════════════════════════════════════════════════════════════════ */}
-        <div className="hidden lg:block">
+        <div className="hidden md:block">
           
           {/* TIER 1: BARRA CINZA CLARA (#EAEFF5) COM DATA, TAQUARA (RS) [INMET] E REDES SOCIAIS */}
-          <div className="bg-[#EAEFF5] border-b border-[#D8DEE6] px-4 py-1.5 text-xs text-[#334155]">
+          <div className="bg-white border-b border-[#D8DEE6] px-4 py-0.5 text-xs text-[#334155]">
             <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
               
               {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
@@ -500,7 +500,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
-          <div className="bg-[#081628] text-white px-4 py-1.5 text-[11px] font-medium border-b border-[#0d223a]">
+          <div className="bg-[#081628] text-white px-4 py-0.5 text-[10px] font-medium border-b border-[#0d223a]">
             <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
               <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
                 {/* Ponto verde pulsante + MERCADOS AO VIVO */}
@@ -549,7 +549,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E BUSCA INTEGRADA */}
-          <div className="bg-white py-4 px-4 border-b border-[#E2E8F0]">
+          <div className="bg-white py-2 px-4 border-b border-[#E2E8F0]">
             <div className="max-w-[1380px] mx-auto flex flex-col items-center justify-center">
               
               {/* Logotipo Central O PATRIOTA */}
@@ -558,7 +558,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex flex-col items-center justify-center focus:outline-none cursor-pointer group mb-3"
               >
                 {/* Brush Flag Arc */}
-                <div className="w-64 h-10 flex items-center justify-center -mb-1">
+                <div className="w-56 h-7 flex items-center justify-center -mb-1">
                   <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
                     <path d="M 20,48 C 80,10 240,10 300,48 C 260,20 60,20 20,48 Z" fill="#16803C" />
                     <path d="M 40,54 C 100,28 220,28 280,54 C 230,36 90,36 40,54 Z" fill="#FFCC29" />
@@ -572,17 +572,17 @@ export const Header: React.FC<HeaderProps> = ({
                   </svg>
                 </div>
 
-                <h1 className="font-serif text-5xl font-black text-[#0B2345] tracking-tight leading-none">
+                <h1 className="font-serif text-4xl font-black text-[#0B2345] tracking-tight leading-none">
                   O PATRIOT<span className="tracking-normal">A</span>
                 </h1>
 
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#64748B] mt-1.5">
+                <p className="text-[8px] font-bold tracking-[0.2em] uppercase text-[#64748B] mt-1">
                   INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE
                 </p>
               </button>
 
               {/* Linha Centralizada: Busca + Sino Notificação + Usuário */}
-              <div className="flex items-center justify-center gap-3.5 w-full max-w-xl">
+              <div className="flex items-center justify-center gap-2.5 w-full max-w-xl">
                 
                 {/* Search Input Box */}
                 <form 
@@ -760,7 +760,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       key={item.slug}
                       onClick={() => onSelectCategory(item.slug)}
-                      className={`px-3 py-3 text-xs font-black tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
+                      className={`px-3 py-2 text-[10px] font-black tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
                         isActive
                           ? 'text-[#FFCC29]'
                           : 'text-white/90 hover:text-white hover:bg-white/5'
