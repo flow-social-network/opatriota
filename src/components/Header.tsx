@@ -465,8 +465,8 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="hidden md:block">
           
           {/* TIER 1: BARRA BRANCA COM DATA, TAQUARA (RS) [INMET], BUSCA, REDES SOCIAIS E ANUNCIE */}
-          <div className="bg-white border-b border-[#E2E8F0] px-4 py-1.5 text-xs text-[#334155]">
-            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-3">
+          <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
+            <div className="w-full mx-auto flex items-center justify-between gap-5">
               
               {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
               <div className="flex items-center gap-2.5 shrink-0">
@@ -545,8 +545,8 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
-          <div className="bg-[#081628] text-white px-4 py-0.5 text-[10px] font-medium border-b border-[#0d223a]">
-            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
+          <div className="bg-[#061A35] text-white px-5 py-3 text-[13px] font-medium border-b border-[#0d223a]">
+            <div className="w-full mx-auto flex items-center justify-between gap-5">
               <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
                 {/* Ponto verde pulsante + MERCADOS AO VIVO */}
                 <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#22C55E] shrink-0">
@@ -594,16 +594,21 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E CONTROLES DE NOTIFICAÇÃO/USUÁRIO */}
-          <div className="bg-white py-2 px-4 border-b border-[#E2E8F0]">
-            <div className="max-w-[1380px] mx-auto flex flex-col items-center justify-center">
+          <div className="bg-white py-7 px-9 border-b border-[#E2E8F0]">
+            <div className="w-full mx-auto flex items-center justify-center relative min-h-[170px]">
               
+              {/* Assinatura editorial esquerda da referência */}
+              <div className="absolute left-9 top-1/2 -translate-y-1/2 border-l-4 border-[#FFCC29] pl-7 max-w-[360px] hidden xl:block">
+                <p className="font-serif italic text-[20px] leading-relaxed text-[#526B8D]">“Um jornal livre ajuda a construir<br />um país mais forte.”</p>
+              </div>
+
               {/* Logotipo Central O PATRIOTA */}
               <button
                 onClick={() => onSelectCategory('todos')}
-                className="flex flex-col items-center justify-center focus:outline-none cursor-pointer group mb-3"
+                className="flex flex-col items-center justify-center focus:outline-none cursor-pointer group"
               >
                 {/* Brush Flag Arc */}
-                <div className="w-56 h-7 flex items-center justify-center -mb-1">
+                <div className="w-[390px] h-16 flex items-center justify-center -mb-2">
                   <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
                     <path d="M 20,48 C 80,10 240,10 300,48 C 260,20 60,20 20,48 Z" fill="#16803C" />
                     <path d="M 40,54 C 100,28 220,28 280,54 C 230,36 90,36 40,54 Z" fill="#FFCC29" />
@@ -617,7 +622,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </svg>
                 </div>
 
-                <h1 className="font-serif text-4xl font-black text-[#0B2345] tracking-tight leading-none">
+                <h1 className="font-serif text-6xl font-black text-[#0B2345] tracking-tight leading-none">
                   O PATRIOT<span className="tracking-normal">A</span>
                 </h1>
 
@@ -626,8 +631,13 @@ export const Header: React.FC<HeaderProps> = ({
                 </p>
               </button>
 
+              {/* Manifesto institucional direito da referência */}
+              <div className="absolute right-9 top-1/2 -translate-y-1/2 border-r-4 border-[#16A34A] pr-7 text-right hidden xl:block">
+                <p className="text-[16px] font-black tracking-[0.18em] leading-relaxed text-[#0B2345]">FATOS<br />IDEIAS<br />PESSOAS<br />SOLUÇÕES<br /><span className="text-[#16A34A]">PELO BRASIL</span></p>
+              </div>
+
               {/* Linha Centralizada: Sino Notificação + Usuário */}
-              <div className="flex items-center justify-center gap-2.5">
+              <div className="absolute right-9 top-5 flex items-center justify-center gap-2.5">
                 
                 {/* Sino de Notificações com badge 5 */}
                 <button
@@ -772,8 +782,8 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* TIER 4: BARRA DE NAVEGAÇÃO AZUL-MARINHO (#0B2345) */}
-          <nav className="bg-[#0B2345] text-white shadow-md">
-            <div className="max-w-[1380px] mx-auto px-4 flex items-center justify-between">
+          <nav className="bg-[#061A35] text-white shadow-md">
+            <div className="w-full mx-auto px-9 flex items-center justify-between min-h-[80px]">
               
               {/* Navigation Items (Sem botão desalinhado na esquerda) */}
               <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none flex items-center space-x-1">
@@ -783,7 +793,7 @@ export const Header: React.FC<HeaderProps> = ({
                     <button
                       key={item.slug}
                       onClick={() => onSelectCategory(item.slug)}
-                      className={`px-3 py-2 text-[10px] font-black tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
+                      className={`px-5 py-4 text-[16px] font-black tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
                         isActive
                           ? 'text-[#FFCC29]'
                           : 'text-white/90 hover:text-white hover:bg-white/5'
