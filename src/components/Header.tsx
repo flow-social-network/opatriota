@@ -336,7 +336,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* ═══════════════════════════════════════════════════════════════════
             1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
            ═══════════════════════════════════════════════════════════════════ */}
-        <div className="md:hidden">
+        <div className="lg:hidden">
           {/* Main White Bar: Hamburger + Centered Logo + Search, Bell, Profile */}
           <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] shadow-xs">
             {/* Hamburger Button */}
@@ -462,7 +462,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* ═══════════════════════════════════════════════════════════════════
             2. DESKTOP & TABLET HEADER (Fidelidade Absoluta à Imagem de Auditoria)
            ═══════════════════════════════════════════════════════════════════ */}
-        <div className="hidden md:block">
+        <div className="hidden lg:block">
           
           {/* TIER 1: BARRA BRANCA COM DATA, TAQUARA (RS) [INMET], BUSCA, REDES SOCIAIS E ANUNCIE */}
           <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
@@ -502,7 +502,7 @@ export const Header: React.FC<HeaderProps> = ({
                     rel="noopener noreferrer"
                     aria-label={soc.name}
                     title={soc.name}
-                    className={`inline-flex items-center justify-center w-9 h-9 min-w-9 min-h-9 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:w-5 [&>svg]:h-5 [&>img]:w-5 [&>img]:h-5`}
+                    className={`inline-flex items-center justify-center w-8 h-8 min-w-8 min-h-8 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:w-[18px] [&>svg]:h-[18px] [&>img]:w-[18px] [&>img]:h-[18px]`}
                   >
                     {soc.icon}
                   </a>
@@ -512,9 +512,9 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Centro: Search Input */}
               <form 
                 onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }}
-                className="flex items-center flex-1 min-w-[260px] max-w-[390px] bg-white border border-[#CBD5E1] rounded overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
+                className="flex items-center flex-1 min-w-[220px] max-w-[390px] bg-white border border-[#CBD5E1] rounded overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
               >
-                <Search className="w-3.5 h-3.5 text-[#94A3B8] ml-2 shrink-0" />
+                <Search className="w-[18px] h-[18px] text-[#94A3B8] ml-2 shrink-0" />
                 <input
                   type="text"
                   placeholder="Buscar notícias, análises, vídeos..."
@@ -530,7 +530,7 @@ export const Header: React.FC<HeaderProps> = ({
                   aria-label="Buscar"
                   className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"
                 >
-                  <Search className="w-3.5 h-3.5 text-white" />
+                  <Search className="w-[18px] h-[18px] text-white" />
                 </button>
               </form>
 
@@ -542,7 +542,7 @@ export const Header: React.FC<HeaderProps> = ({
                   title="Notificações"
                   aria-label="Abrir notificações"
                 >
-                  <Bell className="w-6 h-6" />
+                  <Bell className="w-5 h-5" />
                   <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF2222] text-white text-[9px] font-black flex items-center justify-center">3</span>
                 </button>
                 {currentUser ? (
@@ -805,14 +805,14 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="w-full mx-auto px-9 flex items-center justify-between min-h-[80px]">
               
               {/* Navigation Items (Sem botão desalinhado na esquerda) */}
-              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none flex items-center space-x-1">
+              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none flex items-center space-x-0.5 pr-2">
                 {navItems.map((item) => {
                   const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
                   return (
                     <button
                       key={item.slug}
                       onClick={() => onSelectCategory(item.slug)}
-                      className={`px-5 py-4 text-[16px] font-black tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
+                      className={`px-2.5 py-3 text-[13px] leading-[1.2] font-semibold tracking-wide uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
                         isActive
                           ? 'text-[#FFCC29]'
                           : 'text-white/90 hover:text-white hover:bg-white/5'
@@ -828,10 +828,10 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* Right Button: APOIE O JORNAL */}
-              <div className="py-2 shrink-0">
+              <div className="py-2 pl-2 shrink-0">
                 <button
                   onClick={onOpenSupport}
-                  className="bg-[#15803D] hover:bg-[#166534] text-white text-xs font-black uppercase tracking-wider px-4 py-2 rounded-md transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="bg-[#15803D] hover:bg-[#166534] text-white text-[13px] leading-[1.2] font-semibold uppercase tracking-wide px-3 py-2 rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
                 >
                   <Heart className="w-4 h-4 fill-white text-white" />
                   <span>APOIE O JORNAL</span>
@@ -847,7 +847,7 @@ export const Header: React.FC<HeaderProps> = ({
             Fidelidade total à captura de tela de referência
            ═══════════════════════════════════════════════════════════════════ */}
         {mobileMenuOpen && (
-          <div id="mobile-site-menu" className="fixed inset-0 z-50 md:hidden flex" role="dialog" aria-modal="true" aria-label="Menu principal">
+          <div id="mobile-site-menu" className="fixed inset-0 z-50 lg:hidden flex" role="dialog" aria-modal="true" aria-label="Menu principal">
             {/* Backdrop escuro */}
             <div 
               className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
