@@ -74,6 +74,40 @@ export const WEATHER_METADATA_INFO = {
   ]
 };
 
+export const TAQUARA_HEADQUARTERS_WEATHER: CapitalWeather = {
+  id: 'taquara',
+  name: 'Taquara',
+  uf: 'RS',
+  fullName: 'Taquara - RS',
+  region: 'Sul',
+  lat: -29.65,
+  lon: -50.78,
+  timezone: 'America/Sao_Paulo',
+  temp: 24,
+  feelsLike: 25,
+  min: 16,
+  max: 27,
+  humidity: 62,
+  windSpeed: 12,
+  windDirection: 'SE',
+  pressure: 1018,
+  uvIndex: 7,
+  condition: 'Céu limpo e ensolarado',
+  code: 'clear',
+  inmetStation: 'Estação INMET Campo Bom / Encosta da Serra (A888)',
+  updatedAt: 'Hoje às 07:00 (Horário de Brasília)',
+  inmetStationCode: 'A888',
+  dataSource: 'Cache Local / Histórico Armazenado',
+  syncState: 'cached',
+  lastSuccessfulSync: '2026-10-11T07:00:00.000Z',
+  forecast: [
+    { day: 'Hoje', date: '11/10', min: 16, max: 27, condition: 'Céu Claro', code: 'clear' },
+    { day: 'Segunda', date: '12/10', min: 17, max: 28, condition: 'Poucas Nuvens', code: 'partly-cloudy' },
+    { day: 'Terça', date: '13/10', min: 18, max: 26, condition: 'Parcialmente Nublado', code: 'partly-cloudy' },
+    { day: 'Quarta', date: '14/10', min: 16, max: 24, condition: 'Pancadas de Chuva', code: 'rain' }
+  ]
+};
+
 export const BRAZIL_CAPITALS_WEATHER: CapitalWeather[] = [
   // CENTRO-OESTE
   {

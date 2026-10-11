@@ -722,6 +722,447 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
   </ul>
 </section>
 `
+  },
+  {
+    id: 'page-central-ajuda',
+    slug: 'central-de-ajuda',
+    title: 'Central de Ajuda',
+    subtitle: 'Tudo o que você precisa saber sobre o portal, planos de assinatura, acesso digital e suporte técnico.',
+    badge: 'ATENDIMENTO AO LEITOR',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col4'],
+    author: 'Equipe de Suporte O Patriota',
+    seo: {
+      metaTitle: 'Central de Ajuda e Suporte — O Patriota',
+      metaDescription: 'Dúvidas sobre sua conta, assinatura digital, formas de pagamento e navegação no portal O Patriota.',
+      canonicalUrl: 'https://opatriota.com.br/central-de-ajuda/'
+    },
+    toc: [
+      { id: 'assinatura', title: '1. Gestão da Assinatura Digital' },
+      { id: 'acesso', title: '2. Problemas de Acesso e Senha' },
+      { id: 'pagamentos', title: '3. Pagamentos e Formas de Cobrança' },
+      { id: 'canais', title: '4. Como Falar com Nosso Suporte' }
+    ],
+    relatedLinks: [
+      { label: 'Perguntas Frequentes', url: '/perguntas-frequentes/' },
+      { label: 'Planos e Assinaturas', url: '/planos/' },
+      { label: 'Contato', url: '/contato/' }
+    ],
+    content: `
+<section id="assinatura">
+  <h2>1. Gestão da Assinatura Digital</h2>
+  <p>Ao assinar o <strong>O Patriota</strong>, você apoia o jornalismo independente e ganha acesso irrestrito às reportagens exclusivas, checagens detalhadas e análises de colunistas.</p>
+  <p>Você pode alterar seu plano, atualizar seus dados de cobrança e emitir recibos diretamente na sua Área do Assinante.</p>
+</section>
+
+<section id="acesso">
+  <h2>2. Problemas de Acesso e Senha</h2>
+  <p>Caso tenha esquecido sua senha, acesse a página de recuperação de senha e informe seu e-mail cadastrado. Um link seguro será enviado em instantes para redefinição.</p>
+  <p>Se ainda não possuir cadastro, crie sua conta gratuitamente em menos de um minuto.</p>
+</section>
+
+<section id="pagamentos">
+  <h2>3. Pagamentos e Formas de Cobrança</h2>
+  <p>Aceitamos pagamentos via <strong>Pix com compensação instantânea</strong>, além de cartões de crédito das principais bandeiras nacionais e internacionais.</p>
+  <p>A renovação da assinatura ocorre de forma automática e transparente, podendo ser cancelada a qualquer momento sem taxas ocultas.</p>
+</section>
+
+<section id="canais">
+  <h2>4. Como Falar com Nosso Suporte</h2>
+  <p>Nossa equipe de atendimento opera de segunda a sexta-feira, das 08h às 19h (horário de Brasília). Envie um e-mail para <strong>contato@opatriota.com.br</strong> ou fale pelo formulário oficial na nossa página de Contato.</p>
+</section>
+`
+  },
+  {
+    id: 'page-faq',
+    slug: 'perguntas-frequentes',
+    title: 'Perguntas Frequentes (FAQ)',
+    subtitle: 'Respostas rápidas para as dúvidas mais comuns de leitores, assinantes e parceiros.',
+    badge: 'DÚVIDAS FREQUENTES',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col4'],
+    author: 'Conselho Editorial O Patriota',
+    seo: {
+      metaTitle: 'Perguntas Frequentes (FAQ) — O Patriota',
+      metaDescription: 'Tire suas dúvidas sobre o jornal O Patriota, planos de assinatura, apuração jornalística e cancelamento.',
+      canonicalUrl: 'https://opatriota.com.br/perguntas-frequentes/'
+    },
+    toc: [
+      { id: 'sobre-jornal', title: '1. O que é O Patriota?' },
+      { id: 'independencia', title: '2. Como o jornal é financiado?' },
+      { id: 'planos-faq', title: '3. Quais são os planos disponíveis?' },
+      { id: 'cancelamento', title: '4. Como cancelar minha assinatura?' },
+      { id: 'pautas', title: '5. Como enviar uma sugestão de pauta?' }
+    ],
+    relatedLinks: [
+      { label: 'Central de Ajuda', url: '/central-de-ajuda/' },
+      { label: 'Sobre O Patriota', url: '/sobre-o-patriota/' },
+      { label: 'Planos e Assinaturas', url: '/planos/' }
+    ],
+    content: `
+<section id="sobre-jornal">
+  <h2>1. O que é O Patriota?</h2>
+  <p><strong>O Patriota</strong> é um portal jornalístico independente comprometido com os fatos, a soberania nacional, a liberdade de expressão e a defesa dos valores cívicos e econômicos do Brasil.</p>
+</section>
+
+<section id="independencia">
+  <h2>2. Como o jornal é financiado?</h2>
+  <p>Nossa principal fonte de sustentabilidade é a contribuição de <strong>nossos leitores e assinantes</strong>, além de publicidade programática e parceiros institucionais alinhados aos nossos princípios de transparência. Não dependemos de verbas governamentais condicionadas.</p>
+</section>
+
+<section id="planos-faq">
+  <h2>3. Quais são os planos disponíveis?</h2>
+  <p>Oferecemos planos mensais e anuais com desconto, além de opções de apoio voluntário recorrente ou avulso via Pix.</p>
+</section>
+
+<section id="cancelamento">
+  <h2>4. Como cancelar minha assinatura?</h2>
+  <p>O cancelamento pode ser feito com apenas um clique na sua Área do Assinante, sem multas, sem carência e sem burocracia. O acesso continuará ativo até o término do ciclo já contratado.</p>
+</section>
+
+<section id="pautas">
+  <h2>5. Como enviar uma sugestão de pauta?</h2>
+  <p>Encaminhe documentos, relatórios ou informações com relevância pública para nossa equipe de redação no endereço <strong>redacao@opatriota.com.br</strong> ou na seção Fale com a Redação.</p>
+</section>
+`
+  },
+  {
+    id: 'page-anuncie',
+    slug: 'anuncie-conosco',
+    title: 'Anuncie Conosco',
+    subtitle: 'Conecte sua marca a um público qualificado, consciente e engajado em todo o território nacional.',
+    badge: 'MÍDIA KIT & PUBLICIDADE',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col4'],
+    author: 'Diretoria Comercial O Patriota',
+    seo: {
+      metaTitle: 'Anuncie Conosco — O Patriota Mídia Kit',
+      metaDescription: 'Oportunidades de publicidade, patrocínio de editorias e branded content no portal O Patriota.',
+      canonicalUrl: 'https://opatriota.com.br/anuncie-conosco/'
+    },
+    toc: [
+      { id: 'publico', title: '1. Perfil da Audiência' },
+      { id: 'formatos', title: '2. Formatos Publicitários' },
+      { id: 'etica', title: '3. Diretrizes Éticas e Branded Content' },
+      { id: 'contato-comercial', title: '4. Atendimento Comercial' }
+    ],
+    relatedLinks: [
+      { label: 'Fale com o Comercial', url: '/fale-com-o-comercial/' },
+      { label: 'Expediente', url: '/expediente/' }
+    ],
+    content: `
+<section id="publico">
+  <h2>1. Perfil da Audiência</h2>
+  <p>Os leitores do <strong>O Patriota</strong> são formadores de opinião, empresários, produtores rurais, profissionais liberais e cidadãos atentos ao cenário político, econômico e institucional do Brasil.</p>
+</section>
+
+<section id="formatos">
+  <h2>2. Formatos Publicitários</h2>
+  <ul>
+    <li><strong>Banners Responsivos:</strong> Leaderboard (728x90 / 970x90), Superbanner topo, MPU (300x250) e Halfpage (300x600);</li>
+    <li><strong>Patrocínio de Editorias:</strong> Destaque contínuo em seções de alta afinidade como Política, Economia, Agronegócio e Segurança;</li>
+    <li><strong>Newsletter Exclusiva:</strong> Inserções com alta taxa de abertura na edição matinal enviada a assinantes cadastrados;</li>
+    <li><strong>Podcasts e Vídeos:</strong> Menções e vinhetas institucionais em nossos programas audiovisuais.</li>
+  </ul>
+</section>
+
+<section id="etica">
+  <h2>3. Diretrizes Éticas e Branded Content</h2>
+  <p>Todo conteúdo comercialmente patrocinado é categoricamente identificado com selo de informe publicitário, preservando a absoluta independência e isenção da equipe jornalística do jornal.</p>
+</section>
+
+<section id="contato-comercial">
+  <h2>4. Atendimento Comercial</h2>
+  <p>Para solicitar nossa tabela de preços e Mídia Kit detalhado, escreva para <strong>comercial@opatriota.com.br</strong>.</p>
+</section>
+`
+  },
+  {
+    id: 'page-redacao',
+    slug: 'fale-com-a-redacao',
+    title: 'Fale com a Redação',
+    subtitle: 'Canal direto para envio de sugestões de pauta, correções factuais e contato com os jornalistas.',
+    badge: 'JORNALISMO PARTICIPATIVO',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col4'],
+    author: 'Chefia de Redação',
+    seo: {
+      metaTitle: 'Fale com a Redação — O Patriota',
+      metaDescription: 'Envie denúncias, pautas e correções para a redação do O Patriota com garantia de sigilo de fonte.',
+      canonicalUrl: 'https://opatriota.com.br/fale-com-a-redacao/'
+    },
+    toc: [
+      { id: 'pautas', title: '1. Sugestões de Pauta e Informações' },
+      { id: 'sigilo', title: '2. Sigilo Constitucional de Fonte' },
+      { id: 'correcoes', title: '3. Solicitações de Correção Factual' }
+    ],
+    relatedLinks: [
+      { label: 'Política de Correções', url: '/politica-de-correcoes/' },
+      { label: 'Expediente', url: '/expediente/' }
+    ],
+    content: `
+<section id="pautas">
+  <h2>1. Sugestões de Pauta e Informações</h2>
+  <p>A redação do <strong>O Patriota</strong> está sempre aberta para receber contribuições da sociedade sobre fatos que impactam o Brasil:</p>
+  <p><strong>E-mail direto da Redação:</strong> <code>redacao@opatriota.com.br</code></p>
+</section>
+
+<section id="sigilo">
+  <h2>2. Sigilo Constitucional de Fonte</h2>
+  <p>Nos termos do artigo 5º, inciso XIV, da Constituição Federal, o sigilo da fonte é um direito fundamental assegurado ao exercício do jornalismo. Suas informações serão apuradas com total discrição e segurança.</p>
+</section>
+
+<section id="correcoes">
+  <h2>3. Solicitações de Correção Factual</h2>
+  <p>Comprometidos com a verdade factual, acolhemos pedidos de retificação com prontidão pelo e-mail <code>correcoes@opatriota.com.br</code>.</p>
+</section>
+`
+  },
+  {
+    id: 'page-comercial',
+    slug: 'fale-com-o-comercial',
+    title: 'Fale com o Comercial',
+    subtitle: 'Atendimento corporativo para marcas, anunciantes, parcerias e planos empresariais.',
+    badge: 'PARCERIAS E NEGÓCIOS',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col4'],
+    author: 'Departamento Comercial O Patriota',
+    seo: {
+      metaTitle: 'Fale com o Comercial — O Patriota',
+      metaDescription: 'Contate a equipe comercial do portal O Patriota para projetos especiais e veiculação de anúncios.',
+      canonicalUrl: 'https://opatriota.com.br/fale-com-o-comercial/'
+    },
+    toc: [
+      { id: 'canais-comercial', title: '1. Canais de Atendimento' },
+      { id: 'projetos', title: '2. Projetos Especiais' }
+    ],
+    relatedLinks: [
+      { label: 'Anuncie Conosco', url: '/anuncie-conosco/' },
+      { label: 'Planos e Assinaturas', url: '/planos/' }
+    ],
+    content: `
+<section id="canais-comercial">
+  <h2>1. Canais de Atendimento</h2>
+  <p>Nossos executivos de contas estão à disposição para construir planos de mídia customizados:</p>
+  <ul>
+    <li><strong>E-mail comercial:</strong> <code>comercial@opatriota.com.br</code></li>
+    <li><strong>Horário de atendimento:</strong> Segunda a Sexta, das 09h às 18h</li>
+  </ul>
+</section>
+
+<section id="projetos">
+  <h2>2. Projetos Especiais</h2>
+  <p>Desenvolvemos projetos de cobertura especial de feiras agropecuárias, fóruns de infraestrutura e eventos de tecnologia com presença da marca do patrocinador em múltiplas plataformas.</p>
+</section>
+`
+  },
+  {
+    id: 'page-trabalhe',
+    slug: 'trabalhe-conosco',
+    title: 'Trabalhe Conosco',
+    subtitle: 'Faça parte de uma equipe vibrante e apaixonada pelo jornalismo factual e pela liberdade.',
+    badge: 'OPORTUNIDADES DE CARREIRA',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col3'],
+    author: 'Recursos Humanos O Patriota',
+    seo: {
+      metaTitle: 'Trabalhe Conosco — Carreiras em O Patriota',
+      metaDescription: 'Vagas para jornalistas, repórteres, revisores, analistas de dados e desenvolvedores no portal O Patriota.',
+      canonicalUrl: 'https://opatriota.com.br/trabalhe-conosco/'
+    },
+    toc: [
+      { id: 'cultura', title: '1. Nossa Cultura de Trabalho' },
+      { id: 'candidatura', title: '2. Envio de Currículo' }
+    ],
+    relatedLinks: [
+      { label: 'Sobre O Patriota', url: '/sobre-o-patriota/' },
+      { label: 'Princípios Editoriais', url: '/principios-editoriais/' }
+    ],
+    content: `
+<section id="cultura">
+  <h2>1. Nossa Cultura de Trabalho</h2>
+  <p>Trabalhar no <strong>O Patriota</strong> significa atuar em um ambiente ágil, colaborativo e fundamentado no mérito, no rigor técnico e no amor ao Brasil.</p>
+</section>
+
+<section id="candidatura">
+  <h2>2. Envio de Currículo</h2>
+  <p>Envie seu currículo atualizado, links de matérias publicadas ou portfólio para <strong>talentos@opatriota.com.br</strong> indicando a área de interesse no assunto da mensagem.</p>
+</section>
+`
+  },
+  {
+    id: 'page-mapa-site',
+    slug: 'mapa-do-site',
+    title: 'Mapa do Site',
+    subtitle: 'Navegue de forma simples e direta por todas as seções, editorias e páginas institucionais.',
+    badge: 'ESTRUTURA COMPLETA',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col3'],
+    author: 'Equipe de Tecnologia O Patriota',
+    seo: {
+      metaTitle: 'Mapa do Site — Índice de Conteúdo O Patriota',
+      metaDescription: 'Índice de navegação de todas as editorias, categorias e páginas institucionais do portal O Patriota.',
+      canonicalUrl: 'https://opatriota.com.br/mapa-do-site/'
+    },
+    toc: [
+      { id: 'editorias-mapa', title: '1. Editorias Principais' },
+      { id: 'institucional-mapa', title: '2. Páginas Institucionais' }
+    ],
+    relatedLinks: [
+      { label: 'Início', url: '/' },
+      { label: 'Arquivo Histórico', url: '/arquivo/' }
+    ],
+    content: `
+<section id="editorias-mapa">
+  <h2>1. Editorias Principais</h2>
+  <ul>
+    <li><a href="/categoria/politica">Política Nacional</a></li>
+    <li><a href="/categoria/brasil">Brasil</a></li>
+    <li><a href="/categoria/economia">Economia e Finanças</a></li>
+    <li><a href="/categoria/seguranca">Segurança Pública</a></li>
+    <li><a href="/categoria/saude">Saúde</a></li>
+    <li><a href="/categoria/opiniao">Opinião</a></li>
+    <li><a href="/verificacao">Checagem de Fatos</a></li>
+    <li><a href="/categoria/tecnologia">Tecnologia</a></li>
+    <li><a href="/categoria/mundo">Mundo</a></li>
+    <li><a href="/categoria/cultura">Cultura</a></li>
+    <li><a href="/categoria/esportes">Esportes</a></li>
+  </ul>
+</section>
+
+<section id="institucional-mapa">
+  <h2>2. Páginas Institucionais</h2>
+  <ul>
+    <li><a href="/sobre-o-patriota">Sobre O Patriota</a></li>
+    <li><a href="/principios-editoriais">Princípios Editoriais</a></li>
+    <li><a href="/expediente">Expediente</a></li>
+    <li><a href="/fontes-e-metodologia">Fontes e Metodologia</a></li>
+    <li><a href="/politica-de-correcoes">Política de Correções</a></li>
+    <li><a href="/politica-de-privacidade">Política de Privacidade</a></li>
+    <li><a href="/termos-de-uso">Termos de Uso</a></li>
+    <li><a href="/cookies">Diretrizes de Cookies</a></li>
+    <li><a href="/gestao-de-dados">Gestão de Dados (LGPD)</a></li>
+    <li><a href="/seguranca-da-informacao">Segurança da Informação</a></li>
+    <li><a href="/contato">Contato</a></li>
+  </ul>
+</section>
+`
+  },
+  {
+    id: 'page-cookies',
+    slug: 'cookies',
+    title: 'Política de Cookies',
+    subtitle: 'Transparência sobre como utilizamos cookies para garantir funcionalidade, segurança e desempenho.',
+    badge: 'PRIVACIDADE DIGITAL',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col3'],
+    author: 'Encarregado de Proteção de Dados (DPO)',
+    seo: {
+      metaTitle: 'Política de Cookies — O Patriota',
+      metaDescription: 'Saiba quais cookies utilizamos, finalidades técnicas de cada categoria e como gerenciar suas preferências.',
+      canonicalUrl: 'https://opatriota.com.br/cookies/'
+    },
+    toc: [
+      { id: 'o-que-sao', title: '1. O que são Cookies?' },
+      { id: 'tipos', title: '2. Categorias de Cookies Utilizados' },
+      { id: 'gestao', title: '3. Como Gerenciar Cookies' }
+    ],
+    relatedLinks: [
+      { label: 'Política de Privacidade', url: '/politica-de-privacidade/' },
+      { label: 'Gestão de Dados (LGPD)', url: '/gestao-de-dados/' },
+      { label: 'Termos de Uso', url: '/termos-de-uso/' }
+    ],
+    content: `
+<section id="o-que-sao">
+  <h2>1. O que são Cookies?</h2>
+  <p>Cookies são pequenos arquivos de texto armazenados no seu navegador que permitem memorizar suas preferências, manter sua sessão segura ativa e melhorar a velocidade de carregamento das páginas.</p>
+</section>
+
+<section id="tipos">
+  <h2>2. Categorias de Cookies Utilizados</h2>
+  <ul>
+    <li><strong>Cookies Estritamente Necessários:</strong> Indispensáveis para autenticação, controle de sessão do assinante e segurança da rede;</li>
+    <li><strong>Cookies de Desempenho e Estatística:</strong> Coletam métricas anônimas de visualizações para otimização do portal;</li>
+    <li><strong>Cookies de Funcionalidade:</strong> Lembram preferências de tamanho de texto ou temas selecionados.</li>
+  </ul>
+</section>
+
+<section id="gestao">
+  <h2>3. Como Gerenciar Cookies</h2>
+  <p>Você pode configurar as opções de privacidade do seu navegador a qualquer momento para bloquear cookies de terceiros ou limpar seu histórico de navegação.</p>
+</section>
+`
+  },
+  {
+    id: 'page-newsletter',
+    slug: 'newsletter',
+    title: 'Newsletter Oficial',
+    subtitle: 'Receba gratuitamente as principais análises, furos de reportagem e notícias do dia no seu e-mail.',
+    badge: 'INFORMAÇÃO DIRETA',
+    model: 'institucional',
+    updatedAt: '10 de outubro de 2026',
+    publishedAt: '01 de janeiro de 2026',
+    status: 'publicada',
+    featuredImage: '/images/hero_congresso.jpg',
+    menuLocations: ['footer_col4'],
+    author: 'Equipe Editorial O Patriota',
+    seo: {
+      metaTitle: 'Newsletter O Patriota — Análises e Fatos Diários',
+      metaDescription: 'Assine gratuitamente a newsletter do jornal O Patriota e fique por dentro dos principais acontecimentos do Brasil.',
+      canonicalUrl: 'https://opatriota.com.br/newsletter/'
+    },
+    toc: [
+      { id: 'conteudo-news', title: '1. O que você receberá' },
+      { id: 'privacidade-news', title: '2. Respeito à sua Privacidade' }
+    ],
+    relatedLinks: [
+      { label: 'Política de Privacidade', url: '/politica-de-privacidade/' },
+      { label: 'Planos e Assinaturas', url: '/planos/' }
+    ],
+    content: `
+<section id="conteudo-news">
+  <h2>1. O que você receberá</h2>
+  <p>A newsletter <strong>O Patriota</strong> traz um resumo inteligente e aprofundado dos bastidores políticos, decisões econômicas, cotações do agronegócio e checagens factuais, direto ao ponto e sem ruído.</p>
+</section>
+
+<section id="privacidade-news">
+  <h2>2. Respeito à sua Privacidade</h2>
+  <p>Seus dados nunca serão compartilhados nem vendidos a terceiros. Você pode cancelar sua inscrição a qualquer momento com apenas um clique no rodapé de cada edição.</p>
+  <p>Inscreva-se diretamente pelo formulário de newsletter disponível no rodapé deste portal.</p>
+</section>
+`
   }
 ];
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Article } from '../types';
-import { MapPin, ArrowRight, TrendingUp } from 'lucide-react';
+import { Bookmark, ArrowRight } from 'lucide-react';
 
 interface RegionalCoverageRSProps {
   articles: Article[];
@@ -13,23 +13,99 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
   onSelectArticle,
   onSelectCategory
 }) => {
-  // Filter RS specific articles or fallbacks with RS tags
-  const rsArticles = articles.filter(
-    (a) => 
-      a.kicker?.includes('RIO GRANDE DO SUL') ||
-      a.kicker?.includes('VALE DO SINOS') ||
-      a.kicker?.includes('SERRA GAÚCHA') ||
-      a.kicker?.includes('AGRONEGÓCIO GAÚCHO') ||
-      a.tags?.some(t => ['Rio Grande do Sul', 'Porto Alegre', 'Novo Hamburgo', 'Vale do Sinos', 'Serra Gaúcha'].includes(t))
-  );
+  // Matérias temáticas de referência da imagem anexada
+  const referenceLeadArticle: Article = {
+    id: 'lead-regional-1',
+    slug: 'camara-avanca-com-projeto-de-corte-de-gastos',
+    title: 'Câmara avança com projeto de corte de gastos',
+    subtitle: 'Proposta segue para análise no Senado e divide opiniões entre governo e oposição.',
+    kicker: 'POLÍTICA',
+    category: 'politica',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    content: 'A Câmara dos Deputados aprovou em votação expressiva o texto-base da proposta que estabelece novos limites e critérios para os gastos públicos.',
+    author: 'Thiago Vasconcellos',
+    authorRole: 'Correspondente Político em Brasília',
+    sourceName: 'Agência Câmara e O Patriota',
+    publishedAt: 'Há 3 horas',
+    readTimeMinutes: 4,
+    imageUrl: '/images/hero_congresso.jpg',
+    imageCaption: 'Plenário da Câmara dos Deputados durante deliberação.',
+    tags: ['Câmara dos Deputados', 'Política', 'Economia']
+  };
 
-  // If fewer than 4, take from main list
-  const displayArticles = rsArticles.length >= 3 ? rsArticles.slice(0, 4) : articles.slice(2, 6);
+  const referenceSecondaryArticles: Article[] = [
+    {
+      id: 'sec-regional-1',
+      slug: 'brasil-lidera-em-energia-renovavel-na-america-latina',
+      title: 'Brasil lidera em energia renovável na América Latina',
+      subtitle: 'Fontes eólica e solar batem recordes históricos de geração e atraem investimentos globais.',
+      kicker: 'ECONOMIA',
+      category: 'economia',
+      accessLevel: 'aberto',
+      editorialStatus: 'PUBLICADA',
+      content: 'O Brasil consolidou sua liderança continental na matriz de energia limpa com novos parques solares e eólicos.',
+      author: 'Equipe de Economia',
+      authorRole: 'Analista Econômico',
+      sourceName: 'Ministério de Minas e Energia',
+      imageCaption: 'Parque de turbinas eólicas e energia renovável no Brasil.',
+      publishedAt: 'Há 4 horas',
+      readTimeMinutes: 3,
+      imageUrl: '/images/news_infraestrutura.jpg',
+      tags: ['Energia', 'Economia', 'Sustentabilidade']
+    },
+    {
+      id: 'sec-regional-2',
+      slug: 'stf-retoma-julgamento-sobre-marco-das-redes-sociais',
+      title: 'STF retoma julgamento sobre marco das redes sociais',
+      subtitle: 'Ministros analisam a responsabilidade de plataformas por conteúdos publicados por terceiros.',
+      kicker: 'SEGURANÇA',
+      category: 'seguranca',
+      accessLevel: 'aberto',
+      editorialStatus: 'PUBLICADA',
+      content: 'O Supremo Tribunal Federal retomou nesta quinta-feira a deliberação sobre o regime de responsabilidade civil das plataformas digitais.',
+      author: 'Redação Jurídica',
+      authorRole: 'Repórter Judiciário',
+      sourceName: 'Supremo Tribunal Federal',
+      imageCaption: 'Sessão plenária de julgamentos do Supremo Tribunal Federal.',
+      publishedAt: 'Há 5 horas',
+      readTimeMinutes: 5,
+      imageUrl: '/images/news_seguranca.jpg',
+      tags: ['STF', 'Segurança', 'Tecnologia']
+    },
+    {
+      id: 'sec-regional-3',
+      slug: 'tensao-cresce-no-oriente-medio-apos-novos-ataques',
+      title: 'Tensão cresce no Oriente Médio após novos ataques',
+      subtitle: 'Comunidade internacional apela por cessar-fogo e reforça corredores de assistência humanitária.',
+      kicker: 'MUNDO',
+      category: 'mundo',
+      accessLevel: 'aberto',
+      editorialStatus: 'PUBLICADA',
+      content: 'A escalada de tensões na região mobilizou diplomatas das Nações Unidas e governos aliados em busca de trégua.',
+      author: 'Correspondente Internacional',
+      authorRole: 'Analista de Relações Internacionais',
+      sourceName: 'Agências Internacionais',
+      imageCaption: 'Cobertura diplomática e geopolítica internacional.',
+      publishedAt: 'Há 6 horas',
+      readTimeMinutes: 4,
+      imageUrl: '/images/news_opiniao.jpg',
+      tags: ['Mundo', 'Internacional', 'Geopolítica']
+    }
+  ];
+
+  // Identifica artigos reais do banco ou utiliza os dados fiéis à imagem de referência
+  const mainLead = articles.find(a => a.category === 'politica') || referenceLeadArticle;
+  const secondary1 = articles.find(a => a.category === 'economia') || referenceSecondaryArticles[0];
+  const secondary2 = articles.find(a => a.category === 'seguranca') || referenceSecondaryArticles[1];
+  const secondary3 = articles.find(a => a.category === 'mundo') || referenceSecondaryArticles[2];
+
+  const secondaryList = [secondary1, secondary2, secondary3];
 
   return (
     <section className="mb-12 select-none" aria-label="Cobertura Regional do Rio Grande do Sul">
-      {/* Section Header */}
-      <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-3 mb-6 border-b-2 border-[#16803C] gap-3">
+      {/* Section Header fiel à Imagem 3 */}
+      <div className="flex items-center justify-between pb-3 mb-6 border-b-2 border-[#16803C]">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-[#16803C]" />
@@ -43,103 +119,93 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
           </h2>
         </div>
 
-        {/* Quick regional badges */}
-        <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-bold text-[#0B2345]">
-          <span className="px-2 py-0.5 rounded bg-slate-100 border border-[#D9DEE7]">Porto Alegre</span>
-          <span className="px-2 py-0.5 rounded bg-slate-100 border border-[#D9DEE7]">Novo Hamburgo</span>
-          <span className="px-2 py-0.5 rounded bg-slate-100 border border-[#D9DEE7]">Vale do Sinos</span>
-          <span className="px-2 py-0.5 rounded bg-slate-100 border border-[#D9DEE7]">Serra Gaúcha</span>
-        </div>
+        {/* Link Ver todas → */}
+        <button
+          onClick={() => onSelectCategory?.('brasil')}
+          className="text-[#0284C7] hover:text-[#0369A1] font-bold text-xs sm:text-sm flex items-center gap-1 transition-colors cursor-pointer group"
+        >
+          <span>Ver todas</span>
+          <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+        </button>
       </div>
 
-      {/* Grid: 1 Featured Large Card (Left) + 3 Stacked / Medium Cards (Right) */}
+      {/* Grid: 1 Featured Large Card com Overlay (Esquerda) + 3 Stacked Cards (Direita) */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* Main Regional Lead (7 cols) */}
-        {displayArticles[0] && (
-          <article 
-            onClick={() => onSelectArticle(displayArticles[0])}
-            className="lg:col-span-7 bg-white border border-[#D9DEE7] rounded-lg overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all hover:border-[#16803C]"
-          >
-            <div className="relative h-64 sm:h-72 w-full overflow-hidden bg-slate-900">
-              <span className="absolute top-3 left-3 z-10 bg-[#16803C] text-white text-[10px] font-bold px-2.5 py-1 uppercase tracking-wider rounded shadow-xs flex items-center gap-1">
-                <MapPin className="w-3 h-3" />
-                <span>{displayArticles[0].kicker || 'RIO GRANDE DO SUL'}</span>
-              </span>
-              <img
-                src={displayArticles[0].imageUrl}
-                alt={displayArticles[0].title}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-95"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-              <div className="absolute bottom-3 left-3 right-3 text-white">
-                <span className="text-[11px] text-white/80 block mb-1">
-                  {displayArticles[0].imageCaption}
-                </span>
-              </div>
-            </div>
+        {/* Main Regional Lead (7 cols) - Card com imagem grande e texto sobreposto */}
+        <article 
+          onClick={() => onSelectArticle(mainLead)}
+          className="lg:col-span-7 relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all min-h-[380px] sm:min-h-[420px] flex flex-col justify-end bg-slate-900 border border-[#D9DEE7]"
+        >
+          <img
+            src={mainLead.imageUrl || '/images/hero_congresso.jpg'}
+            alt={mainLead.title}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
-            <div className="p-5 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 className="font-serif text-xl sm:text-2xl font-bold text-[#0B2345] leading-tight mb-2 group-hover:text-[#16803C] transition-colors">
-                  {displayArticles[0].title}
-                </h3>
-                <p className="text-xs sm:text-sm text-[#5D6673] leading-relaxed font-normal">
-                  {displayArticles[0].subtitle}
-                </p>
-              </div>
+          <div className="relative z-10 p-6 sm:p-8 text-white">
+            <span className="bg-[#0284C7] text-white text-[10px] sm:text-[11px] font-black px-2.5 py-1 uppercase tracking-wider rounded-md shadow-sm inline-block mb-3">
+              {mainLead.kicker || 'POLÍTICA'}
+            </span>
 
-              <div className="pt-4 mt-4 border-t border-[#F1F3F5] flex items-center justify-between text-xs text-[#5D6673]">
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-[#0B2345]">{displayArticles[0].author}</span>
-                  <span>•</span>
-                  <span>{displayArticles[0].readTimeMinutes} min de leitura</span>
-                </div>
-                <span className="text-[#16803C] font-bold flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                  <span>Ler reportagem</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </span>
-              </div>
-            </div>
-          </article>
-        )}
+            <h3 className="font-serif text-2xl sm:text-3xl font-black text-white leading-tight mb-2.5 drop-shadow-sm group-hover:text-blue-200 transition-colors">
+              {mainLead.title}
+            </h3>
 
-        {/* 3 Secondary Regional Cards (5 cols) */}
+            <p className="text-white/90 text-xs sm:text-sm leading-relaxed max-w-xl line-clamp-2 sm:line-clamp-3">
+              {mainLead.subtitle}
+            </p>
+          </div>
+        </article>
+
+        {/* 3 Secondary Cards (5 cols) - Cards horizontais empilhados com ícone de Bookmark */}
         <div className="lg:col-span-5 flex flex-col justify-between gap-4">
-          {displayArticles.slice(1, 4).map((art) => (
-            <article
-              key={art.id}
-              onClick={() => onSelectArticle(art)}
-              className="bg-white border border-[#D9DEE7] rounded-lg p-3.5 flex gap-3.5 items-start group cursor-pointer hover:shadow-sm hover:border-[#16803C] transition flex-1"
-            >
-              <div className="w-28 sm:w-32 h-20 sm:h-24 rounded overflow-hidden shrink-0 bg-slate-100 border border-[#E2E8F0]">
-                <img
-                  src={art.imageUrl}
-                  alt={art.title}
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                />
-              </div>
+          {secondaryList.map((art) => {
+            const getKickerColor = (kicker?: string) => {
+              if (kicker?.includes('ECONOMIA')) return 'text-[#16803C]';
+              if (kicker?.includes('SEGURANÇA')) return 'text-[#EA580C]';
+              if (kicker?.includes('MUNDO')) return 'text-[#0284C7]';
+              return 'text-[#16803C]';
+            };
 
-              <div className="flex-1 flex flex-col justify-between h-full">
-                <div>
-                  <span className="text-[10px] font-bold text-[#16803C] uppercase tracking-wider block mb-1">
-                    {art.kicker}
+            return (
+              <article
+                key={art.id}
+                onClick={() => onSelectArticle(art)}
+                className="bg-white border border-[#D9DEE7] rounded-xl p-3.5 flex gap-4 items-center group cursor-pointer hover:shadow-md hover:border-[#0284C7] transition-all flex-1"
+              >
+                {/* Thumbnail */}
+                <div className="w-28 sm:w-32 h-20 sm:h-22 rounded-lg overflow-hidden shrink-0 bg-slate-100 border border-[#E2E8F0]">
+                  <img
+                    src={art.imageUrl || '/images/news_infraestrutura.jpg'}
+                    alt={art.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                </div>
+
+                {/* Conteúdo textual */}
+                <div className="flex-1 flex flex-col justify-between min-h-[76px]">
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className={`text-[10px] font-black tracking-wider uppercase ${getKickerColor(art.kicker)}`}>
+                        {art.kicker || 'NOTÍCIA'}
+                      </span>
+                      <Bookmark className="w-3.5 h-3.5 text-[#94A3B8] group-hover:text-[#0B2345] transition-colors shrink-0" />
+                    </div>
+
+                    <h4 className="font-sans text-xs sm:text-[13px] font-bold text-[#0B2345] leading-snug group-hover:text-[#0284C7] transition-colors line-clamp-2">
+                      {art.title}
+                    </h4>
+                  </div>
+
+                  <span className="text-[10px] text-[#8C9BAE] mt-1.5 block">
+                    {art.publishedAt?.includes('às') ? 'Há 4 horas' : (art.publishedAt || 'Há 4 horas')}
                   </span>
-                  <h4 className="font-serif text-xs sm:text-sm font-bold text-[#0B2345] leading-snug group-hover:text-[#16803C] transition-colors line-clamp-2 mb-1">
-                    {art.title}
-                  </h4>
-                  <p className="text-[11px] text-[#5D6673] leading-snug line-clamp-2 hidden sm:block">
-                    {art.subtitle}
-                  </p>
                 </div>
-
-                <div className="pt-2 text-[10px] text-[#8C9BAE] flex items-center justify-between">
-                  <span>{art.publishedAt?.split(' às ')[0] || 'Hoje'}</span>
-                  <span className="text-[#16803C] font-semibold">→</span>
-                </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
 
       </div>

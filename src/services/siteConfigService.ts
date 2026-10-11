@@ -245,22 +245,48 @@ const SUPABASE_SETTINGS_ID = 'main';
  * Loads current settings from Firestore with local storage cache fallback.
  */
 export async function loadPortalSettings(): Promise<PortalSettings> {
+  // First check localStorage for cached settings to allow immediate render and offline resilience
+  let cached: PortalSettings | null = null;
+  try {
+    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        cached = {
+          identity: { ...DEFAULT_IDENTITY_CONFIG, ...(parsed.identity || {}) },
+          socialNetworks: Array.isArray(parsed.socialNetworks) ? parsed.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
+          adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(parsed.adsense || {}) },
+          adSlots: Array.isArray(parsed.adSlots) ? parsed.adSlots : DEFAULT_AD_SLOTS,
+          webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(parsed.webPush || {}) },
+          marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(parsed.marketTicker || {}) },
+          updatedAt: parsed.updatedAt || new Date().toISOString()
+        };
+      }
+    }
+  } catch {
+    /* ignore localStorage parse issues */
+  }
+
   try {
     const data = await api.get<Partial<PortalSettings>>('/site-settings', { auth: false });
-    const merged: PortalSettings = {
-      identity: { ...DEFAULT_IDENTITY_CONFIG, ...(data.identity || {}) },
-      socialNetworks: Array.isArray(data.socialNetworks) ? data.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
-      adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(data.adsense || {}) },
-      adSlots: Array.isArray(data.adSlots) ? data.adSlots : DEFAULT_AD_SLOTS,
-      webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(data.webPush || {}) },
-      marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(data.marketTicker || {}) },
-      updatedAt: data.updatedAt || new Date().toISOString()
-    };
-    try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged)); } catch { /* cache is optional */ }
-    return merged;
+    if (data && typeof data === 'object') {
+      const merged: PortalSettings = {
+        identity: { ...DEFAULT_IDENTITY_CONFIG, ...(data.identity || {}) },
+        socialNetworks: Array.isArray(data.socialNetworks) ? data.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
+        adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(data.adsense || {}) },
+        adSlots: Array.isArray(data.adSlots) ? data.adSlots : DEFAULT_AD_SLOTS,
+        webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(data.webPush || {}) },
+        marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(data.marketTicker || {}) },
+        updatedAt: data.updatedAt || new Date().toISOString()
+      };
+      try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged)); } catch { /* cache is optional */ }
+      return merged;
+    }
+    return cached || DEFAULT_PORTAL_SETTINGS;
   } catch (error) {
-    console.error('Não foi possível carregar as configurações persistidas:', error);
-    return DEFAULT_PORTAL_SETTINGS;
+    // When API is unreachable or returns 502/network failure, seamlessly fallback to cached or default settings
+    console.warn('Configurações persistidas não puderam ser obtidas da API; usando configurações locais/padrão:', error instanceof Error ? error.message : error);
+    return cached || DEFAULT_PORTAL_SETTINGS;
   }
 }
 

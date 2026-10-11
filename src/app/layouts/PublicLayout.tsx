@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
-import { BrandPillarsFooter } from '../../components/BrandPillarsFooter';
 import { SupportModal } from '../../components/SupportModal';
 import { SubscriberModalsContainer, SubscriberModalType } from '../../components/subscriber/SubscriberModalsContainer';
 import { useAuth } from '../contexts/AuthContext';
@@ -36,7 +35,14 @@ export function PublicLayout() {
       case 'minha-conta': 
         setSubscriberModal('area-assinante');
         return;
+      case 'login': return navigate('/login');
+      case 'cadastro': return navigate('/cadastro');
+      case 'esqueci-a-senha': return navigate('/esqueci-a-senha');
+      case 'redefinir-senha': return navigate('/redefinir-senha');
+      case 'admin': return navigate('/admin');
+      case 'admin/login': return navigate('/admin/login');
       case 'redacao': return navigate('/redacao');
+      case 'redacao/login': return navigate('/redacao/login');
       case 'planos': case 'apoie-o-jornal': return navigate('/planos');
       case 'contato': return navigate('/contato');
       case 'gestao-de-dados': return navigate('/gestao-de-dados');
@@ -47,7 +53,14 @@ export function PublicLayout() {
     }
     if (slug.startsWith('categoria/')) return navigate(`/categoria/${slug.replace('categoria/', '')}`);
     if (categories.some(c => c.slug === slug)) return navigate(`/categoria/${slug}`);
-    if (pages.some(p => p.slug === slug)) return navigate(`/${slug}`);
+    if (pages.some(p => p.slug === slug) || [
+      'sobre-o-patriota', 'principios-editoriais', 'expediente', 'fontes-e-metodologia',
+      'politica-de-correcoes', 'politica-de-privacidade', 'termos-de-uso', 'seguranca-da-informacao',
+      'mapa-do-site', 'contato', 'trabalhe-conosco', 'central-de-ajuda', 'perguntas-frequentes',
+      'anuncie-conosco', 'fale-com-a-redacao', 'fale-com-o-comercial', 'cookies', 'newsletter'
+    ].includes(slug)) {
+      return navigate(`/${slug}`);
+    }
     navigate('/404');
   };
 
@@ -87,11 +100,11 @@ export function PublicLayout() {
         <Outlet />
       </main>
 
-      <BrandPillarsFooter />
       <Footer
         onSelectCategory={handleSelectCategory}
         onOpenSupport={() => setSupportOpen(true)}
         onNavigatePage={handleNavigatePage}
+        onOpenSubscriberModal={(modalType) => setSubscriberModal(modalType)}
         menuConfig={menuConfig}
       />
       <SupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />

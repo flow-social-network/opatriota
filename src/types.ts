@@ -11,7 +11,9 @@ export type CategorySlug =
   | 'mundo'
   | 'opiniao'
   | 'checagem'
-  | 'receita';
+  | 'receita'
+  | 'videos'
+  | 'podcast';
 
 export type FactVerdict = 
   | 'VERDADEIRO'
@@ -323,7 +325,7 @@ export interface InstitutionalPage {
   publishedAt: string;
   status: PageStatus;
   featuredImage?: string;
-  menuLocations: ('header' | 'topbar' | 'footer_col2' | 'footer_col3' | 'nenhum')[];
+  menuLocations: ('header' | 'topbar' | 'footer_col2' | 'footer_col3' | 'footer_col4' | 'nenhum')[];
   seo: ArticleSEO;
   author?: string;
   relatedLinks?: RelatedLink[];

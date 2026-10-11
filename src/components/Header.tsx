@@ -13,15 +13,14 @@ import {
   Rss,
   Share2,
   Sun, 
-  CloudSun,
-  Cloud,
-  CloudRain,
-  CloudLightning,
+  CloudSun, 
+  Cloud, 
+  CloudRain, 
+  CloudLightning, 
   SlidersHorizontal, 
   ShieldCheck, 
   User, 
   PenTool, 
-  Sparkles,
   ExternalLink,
   ChevronRight,
   Bell,
@@ -31,17 +30,39 @@ import {
   Star,
   CreditCard,
   LayoutGrid,
-  Settings
+  Settings,
+  Menu,
+  X,
+  MapPin,
+  TrendingUp,
+  Heart,
+  Home,
+  Landmark,
+  BarChart3,
+  Shield,
+  HeartPulse,
+  MessageSquare,
+  CheckCircle2,
+  Cpu,
+  Globe,
+  Palette,
+  Trophy,
+  PlayCircle,
+  Mic,
+  UtensilsCrossed,
+  Newspaper,
+  Clock,
+  Bookmark,
+  UserCircle
 } from 'lucide-react';
 import { 
   CapitalWeather, 
   BRAZIL_CAPITALS_WEATHER, 
+  TAQUARA_HEADQUARTERS_WEATHER,
   OFFICIAL_INMET_URL,
-  fetchLiveCapitalWeather,
   getSyncStateMeta
 } from '../data/weatherData';
 import { WeatherCapitalsModal } from './weather/WeatherCapitalsModal';
-import { WeatherBar } from './weather/WeatherBar';
 import { BreakingNewsTicker } from './BreakingNewsTicker';
 import { subscribeToWebPush, getPushPermissionStatus } from '../services/webPushService';
 import type { SubscriberModalType } from './subscriber/SubscriberModalsContainer';
@@ -82,10 +103,11 @@ export const Header: React.FC<HeaderProps> = ({
   portalSettings
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
-  const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(BRAZIL_CAPITALS_WEATHER[0]);
+  const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(TAQUARA_HEADQUARTERS_WEATHER);
   const [pushStatus, setPushStatus] = useState<string>('default');
   const [pushLoading, setPushLoading] = useState(false);
 
@@ -118,29 +140,25 @@ export const Header: React.FC<HeaderProps> = ({
   const handleTogglePush = async () => {
     setPushLoading(true);
     try {
-      const res = await subscribeToWebPush(portalSettings?.webPush?.vapidPublicKey);
-      setPushStatus(res.permission);
-    } catch (e) {
-      // Ignored
+      const res = await subscribeToWebPush();
+      setPushStatus(res.success ? 'granted' : 'denied');
+    } catch {
+      setPushStatus('denied');
     } finally {
       setPushLoading(false);
     }
   };
 
-  // Automatically sync live weather for initial capital on mount
-  useEffect(() => {
-    let isMounted = true;
-    fetchLiveCapitalWeather(BRAZIL_CAPITALS_WEATHER[0]).then((result) => {
-      if (isMounted && result.isSuccess && result.updatedCapital) {
-        setSelectedCapital(result.updatedCapital);
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+  const handleOpenWeather = (capitalId?: string) => {
+    if (capitalId) {
+      const found = BRAZIL_CAPITALS_WEATHER.find(c => c.id === capitalId);
+      if (found) setSelectedCapital(found);
+    }
+    setIsWeatherModalOpen(true);
+  };
 
-  const navItems: { label: string; slug: CategorySlug | 'videos' | 'podcast'; hasSubmenu?: boolean }[] = [
+  // Nav categories matching Image 3 and Image 1
+  const navItems: { label: string; slug: CategorySlug }[] = [
     { label: 'INÍCIO', slug: 'todos' },
     { label: 'POLÍTICA', slug: 'politica' },
     { label: 'BRASIL', slug: 'brasil' },
@@ -153,455 +171,878 @@ export const Header: React.FC<HeaderProps> = ({
     { label: 'MUNDO', slug: 'mundo' },
     { label: 'CULTURA', slug: 'cultura' },
     { label: 'ESPORTES', slug: 'esportes' },
+  ];
+
+  // Additional mobile categories
+  const mobileExtraNavItems: { label: string; slug: CategorySlug }[] = [
+    { label: 'RECEITAS', slug: 'receita' },
     { label: 'VÍDEOS', slug: 'videos' },
     { label: 'PODCAST', slug: 'podcast' },
   ];
 
-  const handleOpenWeather = (capitalId?: string) => {
-    if (capitalId) {
-      const found = BRAZIL_CAPITALS_WEATHER.find(c => c.id === capitalId);
-      if (found) setSelectedCapital(found);
-    }
-    setIsWeatherModalOpen(true);
-  };
+  // Helper for dynamic formatted date
+  const now = new Date();
+  const fullDateText = now.toLocaleDateString('pt-BR', { 
+    weekday: 'long', 
+    day: 'numeric', 
+    month: 'long', 
+    year: 'numeric' 
+  });
+  // Capitalize first letter (e.g. Quinta-feira, 9 de outubro de 2026)
+  const formattedFullDate = fullDateText.charAt(0).toUpperCase() + fullDateText.slice(1);
+  const mobileShortDate = `Taquara (RS), ${now.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
 
-  const renderWeatherIcon = (code: CapitalWeather['code'], className = "w-3.5 h-3.5") => {
-    switch (code) {
-      case 'clear':
-        return <Sun className={`${className} text-[#FFCC29] fill-[#FFCC29]`} />;
-      case 'partly-cloudy':
-        return <CloudSun className={`${className} text-[#FFCC29]`} />;
-      case 'cloudy':
-        return <Cloud className={`${className} text-slate-400`} />;
-      case 'rain':
-        return <CloudRain className={`${className} text-[#0B5FFF]`} />;
-      case 'thunderstorm':
-        return <CloudLightning className={`${className} text-amber-500`} />;
-      default:
-        return <Sun className={`${className} text-[#FFCC29]`} />;
+  // Circular colored social icons matching Image 3
+  const socialIconsConfig: {
+    platform: SocialPlatform;
+    name: string;
+    url: string;
+    bgColor: string;
+    icon: React.ReactNode;
+  }[] = [
+    {
+      platform: 'facebook',
+      name: 'Facebook',
+      url: 'https://www.facebook.com/opatriota.news.brasil/',
+      bgColor: 'bg-[#1877F2]',
+      icon: <Facebook className="w-3.5 h-3.5 text-white fill-current" />
+    },
+    {
+      platform: 'instagram',
+      name: 'Instagram',
+      url: 'https://www.instagram.com/journal_opatriota/',
+      bgColor: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]',
+      icon: <Instagram className="w-3.5 h-3.5 text-white" />
+    },
+    {
+      platform: 'youtube',
+      name: 'YouTube',
+      url: 'https://www.youtube.com/@jornal_opatriota',
+      bgColor: 'bg-[#FF0000]',
+      icon: <Youtube className="w-3.5 h-3.5 text-white fill-current" />
+    },
+    {
+      platform: 'x',
+      name: 'X',
+      url: 'https://x.com/opatriotabr',
+      bgColor: 'bg-[#000000]',
+      icon: <Twitter className="w-3.5 h-3.5 text-white fill-current" />
+    },
+    {
+      platform: 'linkedin',
+      name: 'LinkedIn',
+      url: 'https://linkedin.com/company/opatriotabrasil',
+      bgColor: 'bg-[#0A66C2]',
+      icon: <Linkedin className="w-3.5 h-3.5 text-white fill-current" />
+    },
+    {
+      platform: 'telegram',
+      name: 'Telegram',
+      url: 'https://t.me/opatriotabrasil',
+      bgColor: 'bg-[#229ED9]',
+      icon: <Send className="w-3.5 h-3.5 text-white fill-current" />
+    },
+    {
+      platform: 'whatsapp',
+      name: 'WhatsApp',
+      url: 'https://whatsapp.com/channel/0029VbDzzEo4o7qIuMMRBp2n',
+      bgColor: 'bg-[#25D366]',
+      icon: <MessageCircle className="w-3.5 h-3.5 text-white fill-current" />
+    },
+    {
+      platform: 'rss',
+      name: 'RSS',
+      url: '/rss.xml',
+      bgColor: 'bg-[#EE802F]',
+      icon: <Rss className="w-3.5 h-3.5 text-white" />
+    },
+    {
+      platform: 'tiktok',
+      name: 'TikTok Marcos Dresbach',
+      url: 'https://www.tiktok.com/@marcosdresbach',
+      bgColor: 'bg-[#000000]',
+      icon: (
+        <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.3 6.3 0 0 0 1.88-4.49V8.75a8.28 8.28 0 0 0 3.89 1.15V6.69z"/>
+        </svg>
+      )
+    },
+    {
+      platform: 'kwai',
+      name: 'Kwai',
+      url: 'https://k.kwai.com/u/@jornal-opatriota/WPiCxD5Te',
+      bgColor: 'bg-[#FF5000]',
+      icon: (
+        <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
+          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l7 4.5-7 4.5z"/>
+        </svg>
+      )
     }
-  };
+  ];
 
-  const renderSocialIcon = (platform: SocialPlatform, className = "w-3.5 h-3.5") => {
-    switch (platform) {
-      case 'facebook':
-        return <Facebook className={className} />;
-      case 'instagram':
-        return <Instagram className={className} />;
-      case 'youtube':
-        return <Youtube className={className} />;
-      case 'x':
-        return <Twitter className={className} />;
-      case 'linkedin':
-        return <Linkedin className={className} />;
-      case 'telegram':
-        return <Send className={className} />;
-      case 'whatsapp':
-        return <MessageCircle className={className} />;
-      case 'kwai':
-        return (
-          <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l7 4.5-7 4.5z"/>
-          </svg>
-        );
-      case 'tiktok':
-        return <Radio className={className} />;
-      case 'rss':
-        return <Rss className={className} />;
-      default:
-        return <Share2 className={className} />;
-    }
-  };
+  // Papéis autorizados para Redação e Painel Administrativo
+  const EDITORIAL_ROLES = ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'];
+  const ADMIN_ROLES = ['administrador'];
+  const canAccessNewsroom = Boolean(currentUser && EDITORIAL_ROLES.includes(currentUser.role));
+  const canAccessAdmin = Boolean(currentUser && ADMIN_ROLES.includes(currentUser.role));
 
-  const activeSocials = (portalSettings?.socialNetworks || []).filter(s => s.active);
+  const displayName = currentUser?.name || '';
+  const displayAvatar = currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80';
+
+  // Lista de itens do menu mobile com fidelidade total à captura de tela de referência
+  const mobileDrawerMenuItems: {
+    slug: CategorySlug;
+    label: string;
+    icon: React.ReactNode;
+  }[] = [
+    { slug: 'todos', label: 'Início', icon: <Home className="w-4 h-4 shrink-0" /> },
+    { slug: 'politica', label: 'Política', icon: <Landmark className="w-4 h-4 shrink-0" /> },
+    { slug: 'brasil', label: 'Brasil', icon: <MapPin className="w-4 h-4 shrink-0" /> },
+    { slug: 'economia', label: 'Economia', icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
+    { slug: 'seguranca', label: 'Segurança', icon: <Shield className="w-4 h-4 shrink-0" /> },
+    { slug: 'saude', label: 'Saúde', icon: <HeartPulse className="w-4 h-4 shrink-0" /> },
+    { slug: 'opiniao', label: 'Opinião', icon: <MessageSquare className="w-4 h-4 shrink-0" /> },
+    { slug: 'checagem', label: 'Checagem', icon: <CheckCircle2 className="w-4 h-4 shrink-0" /> },
+    { slug: 'tecnologia', label: 'Tecnologia', icon: <Cpu className="w-4 h-4 shrink-0" /> },
+    { slug: 'mundo', label: 'Mundo', icon: <Globe className="w-4 h-4 shrink-0" /> },
+    { slug: 'cultura', label: 'Cultura', icon: <Palette className="w-4 h-4 shrink-0" /> },
+    { slug: 'esportes', label: 'Esportes', icon: <Trophy className="w-4 h-4 shrink-0" /> },
+    { slug: 'videos', label: 'Vídeos', icon: <PlayCircle className="w-4 h-4 shrink-0" /> },
+    { slug: 'podcast', label: 'Podcast', icon: <Mic className="w-4 h-4 shrink-0" /> },
+    { slug: 'receita', label: 'Receitas', icon: <UtensilsCrossed className="w-4 h-4 shrink-0" /> },
+  ];
+
+  // 7 Ícones Sociais Redondos selecionados para a barra inferior do menu mobile
+  const mobileSocialKeys: SocialPlatform[] = ['facebook', 'instagram', 'x', 'youtube', 'tiktok', 'whatsapp', 'telegram'];
+  const drawerSocialIcons = mobileSocialKeys
+    .map(key => socialIconsConfig.find(s => s.platform === key))
+    .filter(Boolean) as typeof socialIconsConfig;
 
   return (
     <>
-      <header className="w-full bg-white select-none">
-        {/* A barra de utilidades permanece fixa; marca e navegação rolam com o conteúdo. */}
-      <div className="site-utility-bar bg-[#F1F3F5] border-b border-[#D9DEE7] text-xs px-4 text-[#5D6673]">
-        <div className="max-w-[1360px] mx-auto flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-1">
-          {/* Left: Date & Dynamic Weather from INMET */}
-          <div className="flex items-center gap-4 text-[11px] sm:text-xs">
-            <span className="font-semibold text-[#17202A]">Brasília, 8 de outubro de 2026</span>
-            <span className="text-[#D9DEE7] hidden sm:inline">|</span>
-
-            {/* DYNAMIC WEATHER PILL (Open-Meteo live / INMET stations reference) */}
+      <header className="w-full select-none font-sans">
+        
+        {/* ═══════════════════════════════════════════════════════════════════
+            1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
+           ═══════════════════════════════════════════════════════════════════ */}
+        <div className="lg:hidden">
+          {/* Main White Bar: Hamburger + Centered Logo + Search, Bell, Profile */}
+          <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] shadow-xs">
+            {/* Hamburger Button */}
             <button
-              onClick={() => handleOpenWeather(selectedCapital.id)}
-              className="group flex items-center gap-1.5 font-medium text-[#17202A] hover:text-[#0B5FFF] bg-white hover:bg-[#F0F5FF] border border-[#D9DEE7] hover:border-[#0B5FFF] px-2 py-0.5 rounded transition cursor-pointer shadow-2xs"
-              title={`Previsão de ${selectedCapital.fullName} • ${selectedCapital.syncState === 'live' ? 'Tempo real via Open-Meteo' : 'Cache local preservado'} • Estação INMET: ${selectedCapital.inmetStationCode}`}
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Abrir Menu do Site"
+              className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
             >
-              <span 
-                className="w-1.5 h-1.5 rounded-full shrink-0" 
-                style={{ backgroundColor: getSyncStateMeta(selectedCapital.syncState).indicatorColor }}
-                title={`Estado: ${getSyncStateMeta(selectedCapital.syncState).label}`}
-              />
-              <span className="font-bold">{selectedCapital.name} ({selectedCapital.uf})</span>
-              {renderWeatherIcon(selectedCapital.code)}
-              <span className="font-black text-[#0B2345]">{selectedCapital.temp}°C</span>
-              <span className="text-[#5D6673] hidden sm:inline text-[11px] font-normal truncate max-w-[110px]">
-                {selectedCapital.condition}
-              </span>
-              <span className="bg-[#16803C] group-hover:bg-[#22A447] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase tracking-wider ml-0.5">
-                INMET
-              </span>
+              <Menu className="w-6 h-6" />
             </button>
 
-            {onNavigatePage && (
-              <>
-                <span className="text-[#D9DEE7] hidden md:inline">|</span>
-                <div className="hidden md:flex items-center gap-3 text-[11px]">
-                  <button onClick={() => onNavigatePage('sobre-o-patriota')} className="hover:text-[#0B2345] cursor-pointer">Sobre</button>
-                  <button onClick={() => onNavigatePage('principios-editoriais')} className="hover:text-[#0B2345] cursor-pointer">Princípios</button>
-                  <button onClick={() => onNavigatePage('expediente')} className="hover:text-[#0B2345] cursor-pointer">Expediente</button>
-                  <button onClick={() => onNavigatePage('planos')} className="hover:text-[#0B2345] cursor-pointer text-[#16803C] font-bold">Planos</button>
-                  <button onClick={() => onNavigatePage('contato')} className="hover:text-[#0B2345] cursor-pointer">Contato</button>
-                </div>
-              </>
-            )}
-          </div>
-
-          {/* Right: Social Networks, Search, Subscriber Area & Newsroom */}
-          <div className="flex items-center gap-3">
-            {/* Social Icons (Dynamic from Portal Settings) */}
-            <div className="hidden md:flex items-center gap-2.5 text-[#0B2345] mr-1">
-              {activeSocials.map((soc) => (
-                <a
-                  key={soc.id}
-                  href={soc.url}
-                  target={soc.url.startsWith('http') ? '_blank' : undefined}
-                  rel={soc.url.startsWith('http') ? 'noopener noreferrer' : undefined}
-                  aria-label={soc.ariaLabel || soc.name}
-                  title={`${soc.name}: ${soc.url}`}
-                  className="hover:text-[#0B5FFF] transition-colors"
-                >
-                  {renderSocialIcon(soc.platform)}
-                </a>
-              ))}
-            </div>
-
-            {/* Search Input Box */}
-            <form 
-              onSubmit={(e) => { e.preventDefault(); onSearchSubmit(); }}
-              className="flex items-center border border-[#D9DEE7] bg-white rounded overflow-hidden h-7"
-            >
-              <input
-                type="text"
-                placeholder="Buscar notícias..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                className="px-2.5 py-1 text-xs text-[#17202A] placeholder-[#5D6673] w-24 sm:w-36 focus:outline-none"
-              />
-              <button
-                type="submit"
-                aria-label="Buscar"
-                className="bg-[#0B2345] hover:bg-[#0B5FFF] text-white px-2.5 h-full flex items-center justify-center transition-colors"
-              >
-                <Search className="w-3 h-3" />
-              </button>
-            </form>
-
-            {/* BUTTON: NOTIFICAÇÕES (Com badge vermelha 5) */}
+            {/* Centered Logo (Vector with brush arc) */}
             <button
-              onClick={() => onOpenSubscriberModal?.('notificacoes')}
-              className="relative p-1.5 text-[#0B2345] hover:text-[#0B5FFF] hover:bg-slate-100 rounded-full transition cursor-pointer"
-              title="Notificações (5 não lidas)"
-              aria-label="Abrir notificações"
-            >
-              <Bell className="w-4 h-4 text-[#0B2345]" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#DC2626] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
-                5
-              </span>
-            </button>
-
-            {/* BUTTON: ALERTA WEB PUSH */}
-            <button
-              onClick={handleTogglePush}
-              disabled={pushLoading}
-              className={`hidden xl:flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-bold rounded border transition-colors shadow-2xs cursor-pointer ${
-                pushStatus === 'granted'
-                  ? 'bg-[#EBF7EE] text-[#16803C] border-[#16803C]/40 hover:bg-[#d8f2dc]'
-                  : 'bg-white text-[#0B2345] border-[#D9DEE7] hover:border-[#0B5FFF] hover:text-[#0B5FFF]'
-              }`}
-              title={pushStatus === 'granted' ? 'Alertas push ativos neste navegador' : 'Ativar alertas urgentes no navegador'}
-            >
-              <Bell className={`w-3 h-3 ${pushStatus === 'granted' ? 'text-[#16803C] fill-[#16803C]' : 'text-[#0B2345]'}`} />
-              <span>{pushStatus === 'granted' ? 'ALERTAS ATIVOS' : 'RECEBER ALERTAS'}</span>
-            </button>
-
-            {/* Estado de conta / Menu do Usuário (Visual fiel à Imagem 1) */}
-            <div className="relative" ref={userMenuRef}>
-              {currentUser ? (
-                <button
-                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                  className="flex items-center gap-2 bg-white border border-[#CBD5E1] hover:border-[#0B5FFF] px-2.5 py-1 rounded-lg transition-all shadow-2xs cursor-pointer group"
-                  title="Menu do Usuário"
-                  aria-expanded={userDropdownOpen}
-                >
-                  <img 
-                    src={currentUser.avatarUrl || '/images/marcos-vinicius.jpg'} 
-                    alt={currentUser.name} 
-                    className="w-6 h-6 rounded-full object-cover border border-[#0B5FFF]" 
-                  />
-                  <div className="flex flex-col text-left">
-                    <span className="font-bold text-[11px] text-[#0B2345] leading-tight truncate max-w-[110px]">
-                      {currentUser.name}
-                    </span>
-                    <span className="text-[9px] font-bold text-[#0B5FFF] leading-none flex items-center gap-0.5">
-                      <span>👑</span>
-                      <span>Assinante Premium</span>
-                    </span>
-                  </div>
-                  <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-[#0B5FFF] transition-transform ml-0.5 ${userDropdownOpen ? 'rotate-180' : ''}`} />
-                </button>
-              ) : (
-                <button
-                  onClick={onGoogleLogin}
-                  className="flex items-center gap-1.5 bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-[11px] font-bold px-3 py-1.5 rounded transition shadow-2xs cursor-pointer"
-                  title="Entrar na conta"
-                >
-                  <User className="w-3.5 h-3.5" />
-                  <span>ENTRAR</span>
-                </button>
-              )}
-
-              {/* Floating Dropdown Card (Matches Image 1 precisely!) */}
-              {userDropdownOpen && currentUser && (
-                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl border border-[#D9DEE7] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150">
-                  {/* User profile summary */}
-                  <div className="px-4 py-3 border-b border-[#F1F5F9] flex items-center gap-3">
-                    <img 
-                      src={currentUser.avatarUrl || '/images/marcos-vinicius.jpg'} 
-                      alt="" 
-                      className="w-10 h-10 rounded-full object-cover border-2 border-[#0B5FFF]" 
-                    />
-                    <div className="min-w-0">
-                      <h5 className="font-bold text-xs text-[#0B2345] truncate">{currentUser.name}</h5>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0B5FFF] bg-[#EFF6FF] px-2 py-0.5 rounded-full mt-0.5">
-                        <span>👑</span>
-                        <span>Assinante Premium</span>
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Menu Options (Each opens the corresponding popup modal!) */}
-                  <div className="py-1 text-xs">
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('perfil'); }} 
-                      className="w-full px-4 py-2 flex items-center gap-2.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <User className="w-4 h-4 text-[#0B5FFF]" />
-                      <span>Meu Perfil</span>
-                    </button>
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('assinatura'); }} 
-                      className="w-full px-4 py-2 flex items-center gap-2.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <CreditCard className="w-4 h-4 text-[#0B5FFF]" />
-                      <span>Minha Assinatura</span>
-                    </button>
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('favoritos'); }} 
-                      className="w-full px-4 py-2 flex items-center gap-2.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <Star className="w-4 h-4 text-[#FFCC29]" />
-                      <span>Meus Favoritos</span>
-                    </button>
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('notificacoes'); }} 
-                      className="w-full px-4 py-2 flex items-center justify-between text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <Bell className="w-4 h-4 text-[#0B5FFF]" />
-                        <span>Notificações</span>
-                      </div>
-                      <span className="bg-[#DC2626] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">5</span>
-                    </button>
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('configuracoes'); }} 
-                      className="w-full px-4 py-2 flex items-center gap-2.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <Settings className="w-4 h-4 text-[#64748B]" />
-                      <span>Configurações</span>
-                    </button>
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('area-assinante'); }} 
-                      className="w-full px-4 py-2 flex items-center gap-2.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <LayoutGrid className="w-4 h-4 text-[#0B5FFF]" />
-                      <span>Área do Assinante</span>
-                    </button>
-                  </div>
-
-                  {/* Editorial & Admin & Sair */}
-                  <div className="pt-1 mt-1 border-t border-[#F1F5F9] text-xs">
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenNewsroom(); }} 
-                      className="w-full px-4 py-2 flex items-center gap-2.5 text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <PenTool className="w-4 h-4 text-[#0B2345]" />
-                      <span>Painel da Redação</span>
-                    </button>
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onOpenAdmin(); }} 
-                      className="w-full px-4 py-2 flex items-center justify-between text-[#334155] hover:bg-slate-50 hover:text-[#0B5FFF] transition text-left cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <SlidersHorizontal className="w-4 h-4 text-[#0B2345]" />
-                        <span>Painel Administrativo</span>
-                      </div>
-                      <span className="text-[#FFCC29]">👑</span>
-                    </button>
-                    <button 
-                      onClick={() => { setUserDropdownOpen(false); onGoogleLogout(); }} 
-                      className="w-full px-4 py-2 flex items-center gap-2.5 text-[#DC2626] hover:bg-red-50 transition text-left cursor-pointer font-bold"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Sair</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* O ticker fica logo abaixo da barra fixa e recolhe visualmente ao rolar. */}
-      <BreakingNewsTicker enabled={portalSettings?.marketTicker?.enabled ?? true} speedSeconds={portalSettings?.marketTicker?.speedSeconds ?? 42} />
-
-      {/* 2. GRAND BRANDING BANNER */}
-      <div className="py-2 sm:py-2.5 px-4 bg-white border-b border-[#D9DEE7]">
-        <div className="max-w-[1360px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-          {/* Left Column: Quote */}
-          <div className="hidden lg:flex lg:col-span-3 flex-col justify-center">
-            <blockquote className="font-serif italic text-sm text-[#5D6673] border-l-2 border-[#FFCC29] pl-3 leading-relaxed">
-              “Um jornal livre ajuda a construir um país mais forte.”
-            </blockquote>
-          </div>
-
-          {/* Center Column: The Grand Logo */}
-          <div className="lg:col-span-6 flex justify-center">
-            <button 
               onClick={() => onSelectCategory('todos')}
-              className="text-left focus:outline-none cursor-pointer"
+              className="flex flex-col items-center justify-center text-center cursor-pointer focus:outline-none"
             >
-              <Logo identityConfig={portalSettings?.identity} />
+              <div className="w-40 h-7 flex items-center justify-center -mb-1">
+                <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
+                  <path d="M 30,48 C 90,14 230,14 290,48 C 250,22 70,22 30,48 Z" fill="#16803C" />
+                  <path d="M 50,52 C 100,30 220,30 270,52 C 220,38 100,38 50,52 Z" fill="#FFCC29" />
+                  <g transform="translate(160, 38)">
+                    <circle cx="0" cy="0" r="14" fill="#0B2345" stroke="#FFFFFF" strokeWidth="1" />
+                    <path d="M -13,1 Q 0,-5 13,1" stroke="#FFFFFF" strokeWidth="2.4" fill="none" />
+                  </g>
+                </svg>
+              </div>
+              <span className="font-serif text-2xl font-black text-[#0B2345] tracking-tight leading-none">
+                O PATRIOT<span className="tracking-normal">A</span>
+              </span>
+              <span className="text-[7px] font-bold tracking-[0.14em] uppercase text-[#5D6673] mt-0.5">
+                INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE
+              </span>
             </button>
-          </div>
 
-          {/* Right Column: Editorial Pillars */}
-          <div className="hidden lg:flex lg:col-span-3 flex-col items-end text-right justify-center">
-            <div className="text-[11px] font-bold tracking-[0.25em] text-[#0B2345] uppercase leading-relaxed font-sans border-r-2 border-[#16803C] pr-3">
-              <div>FATOS</div>
-              <div>IDEIAS</div>
-              <div>PESSOAS</div>
-              <div>SOLUÇÕES</div>
-              <div className="text-[#16803C]">PELO BRASIL</div>
+            {/* Right Icons: Search + Bell with badge 5 + User Profile */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setMobileMenuOpen(true)}
+                aria-label="Buscar Notícias"
+                className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
+              >
+                <Search className="w-5 h-5" />
+              </button>
+
+              <button
+                onClick={() => onOpenSubscriberModal?.('notificacoes')}
+                aria-label="Notificações"
+                className="relative p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
+              >
+                <Bell className="w-5 h-5" />
+                <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#E11D48] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
+                  5
+                </span>
+              </button>
+
+              <button
+                onClick={() => onOpenSubscriberModal?.('perfil')}
+                aria-label="Perfil do Usuário"
+                className="p-1 text-[#0B2345] hover:bg-slate-100 rounded-full transition cursor-pointer"
+              >
+                <img 
+                  src={displayAvatar} 
+                  alt={displayName} 
+                  className="w-6 h-6 rounded-full object-cover border border-[#15803D]" 
+                />
+              </button>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* 3. MAIN NAVIGATION BAR (Dark Navy #0B2345 with Gold/Green accents) */}
-      <nav className="bg-[#0B2345] text-white shadow-sm border-b border-[#07172E]">
-        <div className="max-w-[1360px] mx-auto px-4 flex items-center justify-between">
-          {/* Mobile hamburger button */}
-          <button
-            type="button"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            aria-expanded={mobileMenuOpen}
-            aria-controls="mobile-navigation"
-            className="lg:hidden py-3 px-2 text-white focus:outline-none flex items-center gap-2 text-xs font-bold uppercase"
-          >
-            <span>{mobileMenuOpen ? 'FECHAR MENU' : 'ABRIR MENU'}</span>
-          </button>
-
-          {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center space-x-0.5">
+          {/* Horizontal Scrollable Category Bar (Fundo Azul-Marinho #0B2345) */}
+          <div className="bg-[#0B2345] border-b border-[#0d223a] px-2 py-1.5 overflow-x-auto scrollbar-none flex items-center gap-1 shadow-2xs">
             {navItems.map((item) => {
               const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
               return (
                 <button
                   key={item.slug}
                   onClick={() => onSelectCategory(item.slug)}
-                  className={`flex items-center gap-1 px-3 py-3 text-[11px] xl:text-xs font-bold tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer ${
+                  className={`px-3 py-1 rounded text-[11px] font-black tracking-wider uppercase whitespace-nowrap transition cursor-pointer ${
                     isActive
-                      ? 'bg-[#07172E] text-[#FFCC29] border-b-2 border-[#FFCC29]'
-                      : 'text-white/90 hover:text-white hover:bg-[#0E2C56]'
+                      ? 'bg-white/20 text-[#FFCC29] shadow-xs'
+                      : 'text-white/85 hover:text-white hover:bg-white/10'
                   }`}
                 >
-                  <span>{item.label}</span>
-                  {item.hasSubmenu && (
-                    <ChevronDown className="w-2.5 h-2.5 text-white/50" />
-                  )}
+                  {item.label}
                 </button>
               );
             })}
           </div>
 
-          {/* Right Action: APOIE O JORNAL / ASSINATURA */}
-          <div className="py-2 flex items-center gap-2">
+          {/* Utility Bar (Cinza Claro): Data + Taquara (RS) 24°C + [INMET] */}
+          <div className="bg-[#F8FAFC] px-3 py-1.5 border-b border-[#E2E8F0] flex items-center justify-between text-[11px] text-[#475569]">
+            <span className="font-medium">{formattedFullDate}</span>
             <button
-              onClick={onOpenSupport}
-              className="bg-[#16803C] hover:bg-[#22A447] text-white text-[11px] xl:text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95"
+              onClick={() => handleOpenWeather('taquara')}
+              className="flex items-center gap-1.5 font-bold text-[#0F172A] hover:text-[#0284C7] transition cursor-pointer"
             >
-              <ShieldCheck className="w-3.5 h-3.5" />
-              <span>APOIE O JORNAL</span>
+              <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
+              <span>Taquara (RS)</span>
+              <span>24°C</span>
+              <span className="bg-[#10B981] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase">
+                INMET
+              </span>
             </button>
+          </div>
+
+          {/* Markets Bar no Mobile */}
+          <div className="bg-white px-3 py-1.5 border-b border-[#E2E8F0] flex items-center text-[11px] font-medium text-[#0F172A]">
+            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#16803C] shrink-0 mr-3">
+              <span className="w-2 h-2 rounded-full bg-[#16803C] animate-pulse" />
+              <span>MERCADOS AO VIVO</span>
+            </div>
+            <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none text-slate-700">
+              <span>Dólar</span>
+              <span className="font-bold">R$ 5,45</span>
+              <span className="text-[#16803C] font-bold">▲ +0,32%</span>
+            </div>
           </div>
         </div>
 
-        {/* Mobile Dropdown Menu */}
-        {mobileMenuOpen && (
-          <div id="mobile-navigation" className="lg:hidden bg-[#07172E] border-t border-white/10 px-4 py-3 space-y-2" aria-label="Navegação móvel">
-            {navItems.map((item) => (
-              <button
-                key={item.slug}
-                onClick={() => {
-                  onSelectCategory(item.slug);
-                  setMobileMenuOpen(false);
-                }}
-                className="w-full text-left py-2 px-3 text-xs font-bold text-white hover:bg-white/10 rounded uppercase"
-              >
-                {item.label}
-              </button>
-            ))}
-            <div className="pt-2 border-t border-white/20 flex flex-col gap-2">
-              <button
-                onClick={() => { onOpenSubscriberArea(); setMobileMenuOpen(false); }}
-                className="text-left py-2 px-3 text-xs font-bold text-[#FFCC29] hover:bg-white/10 rounded uppercase"
-              >
-                Área do Assinante
-              </button>
-              {currentUser && ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(currentUser.role) && (
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            2. DESKTOP & TABLET HEADER (Fidelidade Absoluta ao Painel 1)
+           ═══════════════════════════════════════════════════════════════════ */}
+        <div className="hidden lg:block">
+          
+          {/* TIER 1: BARRA CINZA CLARA (#EAEFF5) COM DATA, TAQUARA (RS) [INMET] E REDES SOCIAIS */}
+          <div className="bg-[#EAEFF5] border-b border-[#D8DEE6] px-4 py-1.5 text-xs text-[#334155]">
+            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
+              
+              {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
+              <div className="flex items-center gap-3">
+                <span className="font-semibold text-[#1E293B] text-[11px] xl:text-xs">
+                  {formattedFullDate}
+                </span>
+
+                <span className="text-[#CBD5E1]">|</span>
+
+                {/* Previsão do Tempo Oficial de Taquara (RS) */}
                 <button
-                  onClick={() => { onOpenNewsroom(); setMobileMenuOpen(false); }}
-                  className="text-left py-2 px-3 text-xs font-bold text-white hover:bg-white/10 rounded uppercase"
+                  onClick={() => handleOpenWeather('taquara')}
+                  className="flex items-center gap-1.5 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] xl:text-xs"
+                  title="Clique para ver a previsão meteorológica (INMET)"
                 >
-                  Área da Redação
+                  <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
+                  <span className="font-bold">Taquara (RS)</span>
+                  <span className="font-bold">24°C</span>
+                  <span className="text-[#64748B] text-[11px]">Céu limpo e ensolarado</span>
+                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase ml-1">
+                    INMET
+                  </span>
                 </button>
-              )}
+              </div>
+
+              {/* Lado Direito: Os 7 Ícones Coloridos Redondos das Redes Sociais */}
+              <div className="flex items-center gap-1.5">
+                {socialIconsConfig.slice(0, 7).map((soc) => (
+                  <a
+                    key={soc.platform}
+                    href={soc.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={soc.name}
+                    title={`${soc.name} oficial do O Patriota`}
+                    style={{ borderRadius: '9999px' }}
+                    className={`w-5.5 h-5.5 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 transition-transform overflow-hidden`}
+                  >
+                    {soc.icon}
+                  </a>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
+          <div className="bg-[#081628] text-white px-4 py-1.5 text-[11px] font-medium border-b border-[#0d223a]">
+            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
+                {/* Ponto verde pulsante + MERCADOS AO VIVO */}
+                <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#22C55E] shrink-0">
+                  <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+                  <span>MERCADOS AO VIVO</span>
+                </div>
+
+                <span className="text-white/20">|</span>
+
+                {/* Indicadores Econômicos */}
+                <div className="flex items-center gap-4 text-white/90">
+                  <div className="flex items-center gap-1">
+                    <span className="text-white/60">Dólar</span>
+                    <span className="font-bold text-white">R$ 5,45</span>
+                    <span className="text-[#22C55E] font-bold">▲ +0,32%</span>
+                  </div>
+
+                  <span className="text-white/20">|</span>
+
+                  <div className="flex items-center gap-1">
+                    <span className="text-white/60">Euro</span>
+                    <span className="font-bold text-white">R$ 5,89</span>
+                    <span className="text-[#EF4444] font-bold">▼ -0,14%</span>
+                  </div>
+
+                  <span className="text-white/20">|</span>
+
+                  <div className="flex items-center gap-1">
+                    <span className="text-white/60">Ibovespa</span>
+                    <span className="font-bold text-white">145.320</span>
+                    <span className="text-[#22C55E] font-bold">▲ +0,68%</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mais Cotações */}
+              <button 
+                onClick={() => onSelectCategory('economia')}
+                className="text-white/70 hover:text-white flex items-center gap-1 text-[11px] shrink-0 transition cursor-pointer"
+              >
+                <span>Mais cotações</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+
+          {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E BUSCA INTEGRADA */}
+          <div className="bg-white py-4 px-4 border-b border-[#E2E8F0]">
+            <div className="max-w-[1380px] mx-auto flex flex-col items-center justify-center">
+              
+              {/* Logotipo Central O PATRIOTA */}
+              <button
+                onClick={() => onSelectCategory('todos')}
+                className="flex flex-col items-center justify-center focus:outline-none cursor-pointer group mb-3"
+              >
+                {/* Brush Flag Arc */}
+                <div className="w-64 h-10 flex items-center justify-center -mb-1">
+                  <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
+                    <path d="M 20,48 C 80,10 240,10 300,48 C 260,20 60,20 20,48 Z" fill="#16803C" />
+                    <path d="M 40,54 C 100,28 220,28 280,54 C 230,36 90,36 40,54 Z" fill="#FFCC29" />
+                    <g transform="translate(160, 36)">
+                      <circle cx="0" cy="0" r="16" fill="#0B2345" stroke="#FFFFFF" strokeWidth="1" />
+                      <path d="M -15,1 Q 0,-6 15,1" stroke="#FFFFFF" strokeWidth="2.8" fill="none" />
+                      <circle cx="-5" cy="5" r="0.8" fill="#FFFFFF" />
+                      <circle cx="0" cy="8" r="0.9" fill="#FFFFFF" />
+                      <circle cx="6" cy="4" r="0.7" fill="#FFFFFF" />
+                    </g>
+                  </svg>
+                </div>
+
+                <h1 className="font-serif text-5xl font-black text-[#0B2345] tracking-tight leading-none">
+                  O PATRIOT<span className="tracking-normal">A</span>
+                </h1>
+
+                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#64748B] mt-1.5">
+                  INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE
+                </p>
+              </button>
+
+              {/* Linha Centralizada: Busca + Sino Notificação + Usuário */}
+              <div className="flex items-center justify-center gap-3.5 w-full max-w-xl">
+                
+                {/* Search Input Box */}
+                <form 
+                  onSubmit={(e) => { e.preventDefault(); onSearchSubmit(); }}
+                  className="flex items-center flex-1 bg-white border border-[#CBD5E1] rounded-lg overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
+                >
+                  <Search className="w-4 h-4 text-[#94A3B8] ml-3 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Buscar notícias, análises, vídeos..."
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="w-full px-2.5 py-1.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none"
+                  />
+                  <button
+                    type="submit"
+                    aria-label="Buscar"
+                    className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-3.5 h-full flex items-center justify-center transition-colors cursor-pointer"
+                  >
+                    <Search className="w-4 h-4 text-white" />
+                  </button>
+                </form>
+
+                {/* Sino de Notificações com badge 5 */}
+                <button
+                  onClick={() => onOpenSubscriberModal?.('notificacoes')}
+                  className="relative p-2 text-[#0F172A] hover:text-[#0284C7] hover:bg-slate-100 rounded-full transition cursor-pointer shrink-0"
+                  title="5 novas notificações não lidas"
+                  aria-label="Abrir Notificações"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-[#E11D48] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
+                    5
+                  </span>
+                </button>
+
+                {/* Avatar do Usuário com Dropdown ou Botão de Entrar */}
+                {currentUser ? (
+                  <div className="relative shrink-0" ref={userMenuRef}>
+                    <button
+                      onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                      className="flex items-center gap-1.5 hover:opacity-90 transition cursor-pointer p-0.5 rounded-full hover:ring-2 hover:ring-[#0B2345]"
+                      aria-expanded={userDropdownOpen}
+                      aria-label="Menu do Usuário"
+                    >
+                      <img 
+                        src={currentUser.avatarUrl || displayAvatar} 
+                        alt={currentUser.name} 
+                        className="w-8 h-8 rounded-full object-cover border-2 border-white shadow-xs" 
+                      />
+                    </button>
+
+                    {/* Dropdown Card */}
+                    {userDropdownOpen && (
+                      <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-xl shadow-2xl border border-[#CBD5E1] py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-left">
+                        <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-3">
+                          <img 
+                            src={currentUser.avatarUrl || displayAvatar} 
+                            alt="" 
+                            className="w-10 h-10 rounded-full object-cover border-2 border-[#15803D]" 
+                          />
+                          <div className="min-w-0">
+                            <h5 className="font-bold text-xs text-[#0F172A] truncate">{currentUser.name}</h5>
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#15803D] bg-emerald-50 px-2 py-0.5 rounded-full mt-0.5">
+                              <span>👑</span>
+                              <span>
+                                {currentUser.subscription?.plan === 'premium' 
+                                  ? 'Assinante Premium' 
+                                  : currentUser.subscription?.plan === 'digital' 
+                                    ? 'Assinatura Digital Ativa' 
+                                    : 'Leitor Cadastrado'}
+                              </span>
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="py-1 text-xs text-[#334155]">
+                          <button 
+                            onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('perfil'); }} 
+                            className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 hover:text-[#0284C7] transition text-left cursor-pointer"
+                          >
+                            <User className="w-4 h-4 text-[#0284C7]" />
+                            <span>Meu Perfil</span>
+                          </button>
+                          <button 
+                            onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('assinatura'); }} 
+                            className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 hover:text-[#0284C7] transition text-left cursor-pointer"
+                          >
+                            <CreditCard className="w-4 h-4 text-[#0284C7]" />
+                            <span>Minha Assinatura</span>
+                          </button>
+                          <button 
+                            onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('favoritos'); }} 
+                            className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 hover:text-[#0284C7] transition text-left cursor-pointer"
+                          >
+                            <Star className="w-4 h-4 text-[#EAB308]" />
+                            <span>Meus Favoritos</span>
+                          </button>
+                          <button 
+                            onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('notificacoes'); }} 
+                            className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 hover:text-[#0284C7] transition text-left cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Bell className="w-4 h-4 text-[#0284C7]" />
+                              <span>Notificações</span>
+                            </div>
+                            <span className="bg-[#E11D48] text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">5</span>
+                          </button>
+                          <button 
+                            onClick={() => { setUserDropdownOpen(false); onOpenSubscriberModal?.('configuracoes'); }} 
+                            className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 hover:text-[#64748B] transition text-left cursor-pointer"
+                          >
+                            <Settings className="w-4 h-4 text-[#64748B]" />
+                            <span>Configurações</span>
+                          </button>
+                        </div>
+
+                        <div className="pt-1 mt-1 border-t border-slate-100 text-xs">
+                          {canAccessNewsroom && (
+                            <button 
+                              onClick={() => { setUserDropdownOpen(false); onOpenNewsroom(); }} 
+                              className="w-full px-4 py-2 flex items-center gap-2.5 hover:bg-slate-50 hover:text-[#0B2345] transition text-left cursor-pointer font-bold"
+                            >
+                              <PenTool className="w-4 h-4 text-[#0B2345]" />
+                              <span>Acesso à Redação</span>
+                            </button>
+                          )}
+                          {canAccessAdmin && (
+                            <button 
+                              onClick={() => { setUserDropdownOpen(false); onOpenAdmin(); }} 
+                              className="w-full px-4 py-2 flex items-center justify-between hover:bg-slate-50 hover:text-[#0B2345] transition text-left cursor-pointer font-bold"
+                            >
+                              <div className="flex items-center gap-2.5">
+                                <SlidersHorizontal className="w-4 h-4 text-[#0B2345]" />
+                                <span>Painel Administrativo</span>
+                              </div>
+                              <span className="text-[#EAB308]">👑</span>
+                            </button>
+                          )}
+                          <button 
+                            onClick={() => { setUserDropdownOpen(false); onGoogleLogout(); }} 
+                            className="w-full px-4 py-2 flex items-center gap-2.5 text-[#DC2626] hover:bg-red-50 transition text-left cursor-pointer font-bold"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            <span>Sair</span>
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <button
+                    onClick={onGoogleLogin}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-[#0B2345] hover:text-[#0B5FFF] border border-slate-300 hover:border-[#0B2345] rounded-lg transition shrink-0 cursor-pointer shadow-2xs"
+                  >
+                    <User className="w-4 h-4" />
+                    <span>Entrar</span>
+                  </button>
+                )}
+
+              </div>
+
+            </div>
+          </div>
+
+          {/* TIER 4: BARRA DE NAVEGAÇÃO AZUL-MARINHO (#0B2345) */}
+          <nav className="bg-[#0B2345] text-white shadow-md">
+            <div className="max-w-[1380px] mx-auto px-4 flex items-center justify-between">
+              
+              {/* Navigation Items (Sem botão desalinhado na esquerda) */}
+              <div className="flex items-center space-x-1">
+                {navItems.map((item) => {
+                  const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
+                  return (
+                    <button
+                      key={item.slug}
+                      onClick={() => onSelectCategory(item.slug)}
+                      className={`px-3 py-3 text-xs font-black tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
+                        isActive
+                          ? 'text-[#FFCC29]'
+                          : 'text-white/90 hover:text-white hover:bg-white/5'
+                      }`}
+                    >
+                      <span>{item.label}</span>
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FFCC29]" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Right Button: APOIE O JORNAL */}
+              <div className="py-2">
+                <button
+                  onClick={onOpenSupport}
+                  className="bg-[#15803D] hover:bg-[#166534] text-white text-xs font-black uppercase tracking-wider px-4 py-2 rounded-md transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
+                >
+                  <Heart className="w-4 h-4 fill-white text-white" />
+                  <span>APOIE O JORNAL</span>
+                </button>
+              </div>
+            </div>
+          </nav>
+        </div>
+
+
+        {/* ═══════════════════════════════════════════════════════════════════
+            3. MOBILE DRAWER MENU (GAVETA LATERAL DO MOBILE)
+            Fidelidade total à captura de tela de referência
+           ═══════════════════════════════════════════════════════════════════ */}
+        {mobileMenuOpen && (
+          <div className="fixed inset-0 z-50 lg:hidden flex">
+            {/* Backdrop escuro */}
+            <div 
+              className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            {/* Gaveta branca */}
+            <div className="relative w-[85%] max-w-[340px] bg-white h-full shadow-2xl flex flex-col z-10 overflow-hidden">
+              
+              {/* TOPO DA GAVETA: AZUL-MARINHO INSTITUCIONAL COM LOGO E BUSCA */}
+              <div className="bg-[#07192F] text-white pt-3 pb-4 px-4 relative shrink-0 border-b border-[#0D2444]">
+                {/* Botão Fechar no canto superior direito */}
+                <button 
+                  onClick={() => setMobileMenuOpen(false)}
+                  aria-label="Fechar menu"
+                  className="absolute top-3 right-3 p-1.5 text-white/80 hover:text-white rounded-full hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                {/* Logotipo Centralizado com Arco e Tipografia Oficial */}
+                <div className="flex flex-col items-center justify-center text-center pt-1 pb-3">
+                  <div className="w-36 h-7 flex items-center justify-center -mb-0.5">
+                    <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
+                      <path d="M 20,48 C 80,14 240,14 300,48 C 260,22 60,22 20,48 Z" fill="#16803C" />
+                      <path d="M 40,52 C 100,30 220,30 280,52 C 230,38 90,38 40,52 Z" fill="#FFCC29" />
+                      <g transform="translate(160, 38)">
+                        <circle cx="0" cy="0" r="14" fill="#0B2345" stroke="#FFFFFF" strokeWidth="1" />
+                        <path d="M -13,1 Q 0,-5 13,1" stroke="#FFFFFF" strokeWidth="2.4" fill="none" />
+                      </g>
+                    </svg>
+                  </div>
+                  <h3 className="font-serif text-2xl font-black text-white tracking-tight leading-none">
+                    O PATRIOT<span className="tracking-normal">A</span>
+                  </h3>
+                  <p className="text-[9px] text-white/90 font-bold tracking-[0.18em] uppercase mt-1 leading-tight">
+                    INFORMAÇÃO COM LIBERDADE
+                  </p>
+                  <p className="text-[8px] text-[#FFCC29] font-bold tracking-[0.22em] uppercase leading-tight mt-0.5">
+                    POR UM BRASIL MAIS FORTE
+                  </p>
+                </div>
+
+                {/* Campo de Busca Integrado no Topo */}
+                <form 
+                  onSubmit={(e) => { 
+                    e.preventDefault(); 
+                    onSearchSubmit(); 
+                    setMobileMenuOpen(false); 
+                  }}
+                  className="relative flex items-center"
+                >
+                  <div className="absolute left-3 text-white/60 pointer-events-none">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Buscar notícias, análises, vídeos..."
+                    value={searchQuery}
+                    onChange={(e) => onSearchChange(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 text-xs text-white placeholder-white/50 bg-[#142A4A] border border-white/20 rounded-xl focus:outline-none focus:ring-1 focus:ring-white/40 shadow-inner"
+                  />
+                </form>
+              </div>
+
+              {/* CORPO DA GAVETA: LISTA COMPLETA DE EDITORIAS E SERVIÇOS */}
+              <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+                {/* 1. Editorias Principais com Chevrons */}
+                <div className="px-2 py-1.5 space-y-0.5">
+                  {mobileDrawerMenuItems.map((item) => {
+                    const isActive = currentCategory === item.slug;
+                    return (
+                      <button
+                        key={item.slug}
+                        onClick={() => {
+                          onSelectCategory(item.slug);
+                          setMobileMenuOpen(false);
+                        }}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                          isActive
+                            ? 'bg-[#EEF4FF] text-[#2563EB]'
+                            : 'text-[#0F172A] hover:bg-slate-50'
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className={isActive ? 'text-[#2563EB]' : 'text-[#0F172A]'}>
+                            {item.icon}
+                          </span>
+                          <span>{item.label}</span>
+                        </div>
+                        <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`} />
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* 2. Seções Rápidas: Últimas Notícias, Mais Lidas, Meus Favoritos */}
+                <div className="px-2 py-1.5 space-y-0.5">
+                  <button
+                    onClick={() => {
+                      onSelectCategory('todos');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold text-[#0F172A] hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Newspaper className="w-4 h-4 shrink-0 text-[#0F172A]" />
+                      <span>Últimas Notícias</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#94A3B8]" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      onSelectCategory('todos');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold text-[#0F172A] hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 shrink-0 text-[#0F172A]" />
+                      <span>Mais Lidas</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#94A3B8]" />
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      onOpenSubscriberModal?.('favoritos');
+                      setMobileMenuOpen(false);
+                    }}
+                    className="w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold text-[#0F172A] hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Bookmark className="w-4 h-4 shrink-0 text-[#0F172A]" />
+                      <span>Meus Favoritos</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-[#94A3B8]" />
+                  </button>
+                </div>
+
+                {/* 3. Botões de Ação Destacados */}
+                <div className="p-3 space-y-2.5">
+                  {/* Botão Verde: APOIE O JORNAL */}
+                  <button
+                    onClick={() => { onOpenSupport(); setMobileMenuOpen(false); }}
+                    className="w-full bg-[#0F763E] hover:bg-[#0c5f32] active:scale-[0.99] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-between text-xs tracking-wider shadow-sm transition-all cursor-pointer"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <Heart className="w-4 h-4 fill-white text-white" />
+                      <span>APOIE O JORNAL</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-white" />
+                  </button>
+
+                  {/* Botão Branco/Azul: Entrar / Criar conta (ou Minha Conta) */}
+                  {currentUser ? (
+                    <button
+                      onClick={() => { onOpenSubscriberModal?.('perfil'); setMobileMenuOpen(false); }}
+                      className="w-full bg-white hover:bg-blue-50/50 border-2 border-[#1E6FD9] text-[#1E6FD9] font-semibold py-2.5 px-3.5 rounded-xl flex items-center justify-between text-xs shadow-xs transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5 overflow-hidden">
+                        <img 
+                          src={displayAvatar} 
+                          alt={displayName} 
+                          className="w-5 h-5 rounded-full object-cover shrink-0 border border-[#1E6FD9]" 
+                        />
+                        <span className="truncate">{displayName}</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-[#1E6FD9] shrink-0" />
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => { onGoogleLogin(); setMobileMenuOpen(false); }}
+                      className="w-full bg-white hover:bg-blue-50/50 border-2 border-[#1E6FD9] text-[#1E6FD9] font-semibold py-2.5 px-3.5 rounded-xl flex items-center justify-between text-xs shadow-xs transition-all cursor-pointer"
+                    >
+                      <div className="flex items-center gap-2.5">
+                        <UserCircle className="w-5 h-5 text-[#1E6FD9]" />
+                        <span>Entrar / Criar conta</span>
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-[#1E6FD9]" />
+                    </button>
+                  )}
+
+                  {/* Acesso exclusivo para equipe autorizada ou link de saída */}
+                  {(canAccessNewsroom || canAccessAdmin || currentUser) && (
+                    <div className="pt-1 flex items-center justify-center gap-3 text-[11px] text-slate-500">
+                      {canAccessNewsroom && (
+                        <button
+                          onClick={() => { onOpenNewsroom(); setMobileMenuOpen(false); }}
+                          className="hover:text-[#0B2345] underline cursor-pointer"
+                        >
+                          Redação
+                        </button>
+                      )}
+                      {canAccessNewsroom && canAccessAdmin && <span>•</span>}
+                      {canAccessAdmin && (
+                        <button
+                          onClick={() => { onOpenAdmin(); setMobileMenuOpen(false); }}
+                          className="hover:text-[#0B2345] underline cursor-pointer"
+                        >
+                          Painel Geral
+                        </button>
+                      )}
+                      {currentUser && (canAccessNewsroom || canAccessAdmin) && <span>•</span>}
+                      {currentUser && (
+                        <button
+                          onClick={() => { onGoogleLogout(); setMobileMenuOpen(false); }}
+                          className="text-rose-600 hover:text-rose-700 underline cursor-pointer"
+                        >
+                          Sair da conta
+                        </button>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Barra Inferior de Redes Sociais Redondas Oficiais */}
+                <div className="p-3 border-t border-slate-100 flex items-center justify-center gap-2 bg-slate-50/50">
+                  {drawerSocialIcons.map((soc) => (
+                    <a
+                      key={soc.platform}
+                      href={soc.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={soc.name}
+                      title={soc.name}
+                      style={{ borderRadius: '9999px' }}
+                      className={`w-8 h-8 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 active:scale-95 transition-transform overflow-hidden`}
+                    >
+                      {soc.icon}
+                    </a>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         )}
-      </nav>
 
-      {/* 4. DYNAMIC WEATHER BAR (CAPITAIS DO BRASIL — INMET) */}
-      <WeatherBar 
-        onOpenModal={handleOpenWeather}
-        selectedCapital={selectedCapital}
-      />
-
-      {/* 5. WEATHER CAPITALS MODAL (FONTE OFICIAL INMET) */}
-      <WeatherCapitalsModal
-        isOpen={isWeatherModalOpen}
-        onClose={() => setIsWeatherModalOpen(false)}
-        selectedCapitalId={selectedCapital.id}
-        onSelectCapital={(cap) => setSelectedCapital(cap)}
-      />
-    </header>
-  </>
+        {/* Modal Meteorológico das 27 Capitais (INMET) */}
+        <WeatherCapitalsModal
+          isOpen={isWeatherModalOpen}
+          onClose={() => setIsWeatherModalOpen(false)}
+          selectedCapitalId={selectedCapital.id}
+          onSelectCapital={(cap) => setSelectedCapital(cap)}
+        />
+      </header>
+    </>
   );
 };

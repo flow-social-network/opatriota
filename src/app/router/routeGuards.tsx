@@ -3,11 +3,16 @@ import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 /**
- * Protege rotas que exigem autenticação.
- * Redireciona para /minha-conta?next=<rota-atual> se não autenticado.
- * A autorização real é sempre validada no backend.
+ * Protege rotas que exigem autenticação geral (ex: assinante).
+ * Redireciona para /login?next=<rota-atual> se não autenticado.
  */
-export function RequireAuth({ children }: { children: React.ReactNode }) {
+export function RequireAuth({ 
+  loginRedirect = '/login', 
+  children 
+}: { 
+  loginRedirect?: string; 
+  children: React.ReactNode 
+}) {
   const { currentUser, authLoading } = useAuth();
   const location = useLocation();
 
@@ -23,7 +28,7 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
   if (!currentUser) {
     const next = encodeURIComponent(location.pathname + location.search);
-    return <Navigate to={`/minha-conta?next=${next}`} replace />;
+    return <Navigate to={`${loginRedirect}?next=${next}`} replace />;
   }
 
   return <>{children}</>;
@@ -31,13 +36,16 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
 
 /**
  * Protege rotas que exigem um dos papéis listados.
- * Redireciona para /acesso-negado se o papel não for permitido.
+ * Redireciona para login específico caso não esteja logado,
+ * ou /acesso-negado caso logado mas sem papel suficiente.
  */
 export function RequireRole({
   roles,
+  loginRedirect = '/login',
   children,
 }: {
   roles: string[];
+  loginRedirect?: string;
   children: React.ReactNode;
 }) {
   const { currentUser, authLoading } = useAuth();
@@ -55,7 +63,7 @@ export function RequireRole({
 
   if (!currentUser) {
     const next = encodeURIComponent(location.pathname + location.search);
-    return <Navigate to={`/minha-conta?next=${next}`} replace />;
+    return <Navigate to={`${loginRedirect}?next=${next}`} replace />;
   }
 
   if (!roles.includes(currentUser.role)) {

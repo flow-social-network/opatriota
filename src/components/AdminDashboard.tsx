@@ -10,6 +10,8 @@ import { AdminOverviewTab } from './admin/AdminOverviewTab';
 import { AdminQueueTab } from './admin/AdminQueueTab';
 import { AdminDedupTab } from './admin/AdminDedupTab';
 import { AdminExportTab } from './admin/AdminExportTab';
+import { UsersPage } from '../pages/admin/UsersPage';
+import { PermissionsPage } from '../pages/admin/PermissionsPage';
 import { DEFAULT_WEBPUSH_CONFIG } from '../services/siteConfigService';
 import JSZip from 'jszip';
 import { 
@@ -24,7 +26,9 @@ import {
   Palette,
   Share2,
   Megaphone,
-  Bell
+  Bell,
+  Users,
+  Shield
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -36,6 +40,7 @@ interface AdminDashboardProps {
   onSyncResult: (sources: RssSource[], queue: EditorialQueueItem[]) => void;
   portalSettings: PortalSettings;
   onSavePortalSettings: (newSettings: PortalSettings) => void;
+  initialTab?: string;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -46,9 +51,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onUpdateQueue,
   onSyncResult,
   portalSettings,
-  onSavePortalSettings
+  onSavePortalSettings,
+  initialTab = 'painel'
 }) => {
-  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download'>('painel');
+  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes'>(
+    (initialTab as any) || 'painel'
+  );
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
@@ -374,6 +382,26 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('usuarios')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'usuarios' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+            }`}
+          >
+            <Users className="w-4 h-4 text-[#0B5FFF]" />
+            <span>Equipe & Usuários</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('permissoes')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'permissoes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+            }`}
+          >
+            <Shield className="w-4 h-4 text-[#FFCC29]" />
+            <span>Permissões (RBAC)</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('download')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
               activeTab === 'download' ? 'bg-white text-[#16803C] border-t-2 border-[#16803C] shadow-xs' : 'text-[#16803C] hover:bg-white/50'
@@ -491,6 +519,20 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             zipError={zipError}
             onDownloadZip={handleDownloadZip}
           />
+        )}
+
+        {/* TAB 10: GESTÃO DE EQUIPE & USUÁRIOS */}
+        {activeTab === 'usuarios' && (
+          <div className="bg-white rounded-xl border border-[#D9DEE7] shadow-xs p-6">
+            <UsersPage />
+          </div>
+        )}
+
+        {/* TAB 11: PERMISSÕES & POLÍTICAS RBAC */}
+        {activeTab === 'permissoes' && (
+          <div className="bg-white rounded-xl border border-[#D9DEE7] shadow-xs p-6">
+            <PermissionsPage />
+          </div>
         )}
 
       </div>

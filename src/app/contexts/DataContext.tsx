@@ -123,7 +123,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const result = await api.get<T>(path, { auth });
         if (active) setter(result);
       } catch (error) {
-        console.error('Falha ao carregar ' + path, error);
+        console.warn('Falha ao carregar ' + path + '; mantendo dados padrão locais:', error instanceof Error ? error.message : error);
       }
     };
     setDataLoading(true);
