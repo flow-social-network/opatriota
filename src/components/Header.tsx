@@ -460,44 +460,44 @@ export const Header: React.FC<HeaderProps> = ({
 
 
         {/* ═══════════════════════════════════════════════════════════════════
-            2. DESKTOP & TABLET HEADER (Fidelidade Absoluta ao Painel 1)
+            2. DESKTOP & TABLET HEADER (Fidelidade Absoluta à Imagem de Auditoria)
            ═══════════════════════════════════════════════════════════════════ */}
         <div className="hidden md:block">
           
-          {/* TIER 1: BARRA CINZA CLARA (#EAEFF5) COM DATA, TAQUARA (RS) [INMET] E REDES SOCIAIS */}
-          <div className="bg-white border-b border-[#D8DEE6] px-4 py-0.5 text-xs text-[#334155]">
+          {/* TIER 1: BARRA BRANCA COM DATA, TAQUARA (RS) [INMET], REDES SOCIAIS E ANUNCIE */}
+          <div className="bg-white border-b border-[#E2E8F0] px-4 py-1 text-xs text-[#334155]">
             <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
               
               {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
-              <div className="flex items-center gap-3">
-                <span className="font-semibold text-[#1E293B] text-[11px] xl:text-xs">
+              <div className="flex items-center gap-2.5">
+                <span className="font-medium text-[#1E293B] text-[11px]">
                   {formattedFullDate}
                 </span>
 
-                <span className="text-[#CBD5E1]">|</span>
+                <span className="text-[#CBD5E1] text-xs">|</span>
 
                 {/* Previsão do Tempo Oficial de Taquara (RS) */}
                 <button
                   onClick={() => handleOpenWeather('taquara')}
-                  className="flex items-center gap-1.5 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] xl:text-xs"
+                  className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px]"
                   title="Clique para ver a previsão meteorológica (INMET)"
                 >
                   <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
                   <span className="font-bold">Taquara (RS)</span>
                   <span className="font-bold">24°C</span>
-                  <span className="text-[#64748B] text-[11px]">Céu limpo e ensolarado</span>
-                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase ml-1">
+                  <span className="text-[#64748B] text-[10px]">Céu limpo e ensolarado</span>
+                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">
                     INMET
                   </span>
                 </button>
               </div>
 
-              {/* Lado Direito: Redes sociais e acesso comercial */}
+              {/* Lado Direito: Botão Anuncie + Redes Sociais Circulares */}
               <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => onNavigatePage?.('anuncie-conosco')}
-                  className="border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-2.5 py-1 text-[10px] font-black transition-colors cursor-pointer"
+                  className="border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-2 py-0.5 text-[9px] font-black transition-colors cursor-pointer whitespace-nowrap"
                 >
                   Anuncie
                 </button>
@@ -510,7 +510,7 @@ export const Header: React.FC<HeaderProps> = ({
                     aria-label={soc.name}
                     title={`${soc.name} oficial do O Patriota`}
                     style={{ borderRadius: '9999px' }}
-                    className={`w-5.5 h-5.5 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 transition-transform overflow-hidden`}
+                    className={`w-5 h-5 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 transition-transform overflow-hidden`}
                   >
                     {soc.icon}
                   </a>
