@@ -493,9 +493,9 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* Redes sociais seguem a ordem da referência: Facebook, Instagram, YouTube, X, LinkedIn e Telegram */}
-              <div className="flex items-center gap-2 shrink-0">
+              <div className="flex items-center gap-1.5 shrink-0">
                 {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => (
-                  <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`w-7 h-7 rounded-full ${soc.bgColor} flex items-center justify-center overflow-hidden shrink-0 hover:scale-105 transition-transform`}>
+                  <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`w-5 h-5 rounded-full ${soc.bgColor} flex items-center justify-center overflow-hidden shrink-0 hover:scale-105 transition-transform`}>
                     {soc.icon}
                   </a>
                 ))}
