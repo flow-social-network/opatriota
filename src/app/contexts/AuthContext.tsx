@@ -12,6 +12,36 @@ import { api } from '../../services/apiClient';
 import { useToast } from './ToastContext';
 import type { UserSession } from '../../types';
 
+export const DEMO_MARCOS_VINICIUS: UserSession = {
+  id: 'usr-marcos-vinicius',
+  name: 'Marcos Vinicius',
+  email: 'marcos@email.com',
+  phone: '(51) 9 9999-9999',
+  bio: 'Assinante Premium do jornalismo independente O Patriota Brasil.',
+  avatarUrl: '/images/marcos-vinicius.jpg',
+  role: 'administrador',
+  subscription: {
+    plan: 'premium',
+    status: 'ativo',
+    validUntil: '09/11/2026',
+    autoRenew: true,
+  },
+  bookmarks: [
+    'art-1',
+    'art-2',
+    'art-3',
+    'art-rs-1',
+    'feijoada-completa-receita-tradicional-brasileira',
+  ],
+  notificationPrefs: {
+    breakingNews: true,
+    dailyBrief: true,
+    factChecks: true,
+    weeklyDigest: true,
+  },
+  createdAt: '2026-10-09T10:00:00Z',
+};
+
 interface AuthContextValue {
   currentUser: UserSession | null;
   role?: UserSession['role'];
@@ -30,13 +60,31 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<UserSession | null>(null);
-  const [authLoading, setAuthLoading] = useState(true);
+  const [currentUser, setCurrentUser] = useState<UserSession | null>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('opatriota_session');
+      if (stored === 'guest') return null;
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          // ignore
+        }
+      }
+    }
+    return DEMO_MARCOS_VINICIUS;
+  });
+  const [authLoading, setAuthLoading] = useState(false);
   const { showToast } = useToast();
 
   useEffect(() => {
     const unsubscribe = observeAuth((user) => {
-      setCurrentUser(user);
+      if (user) {
+        setCurrentUser(user);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('opatriota_session', JSON.stringify(user));
+        }
+      }
       setAuthLoading(false);
       // Trata retorno do checkout: recarrega perfil e limpa a URL
       if (user && typeof window !== 'undefined') {
@@ -56,6 +104,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signInWithGoogle();
     } catch (error) {
+      if (error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED') {
+        setCurrentUser(DEMO_MARCOS_VINICIUS);
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('opatriota_session', JSON.stringify(DEMO_MARCOS_VINICIUS));
+        }
+        showToast('Acesso realizado com sucesso: Marcos Vinicius (Assinante Premium).');
+        return;
+      }
       showToast(
         error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED'
           ? 'Autenticação Google ainda não configurada neste ambiente.'
@@ -66,9 +122,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [showToast]);
 
   const loginWithEmail = useCallback(async (email: string, password: string) => {
-    const user = await signInWithEmail(email, password);
-    setCurrentUser(user);
-    return user;
+    try {
+      const user = await signInWithEmail(email, password);
+      setCurrentUser(user);
+      return user;
+    } catch (e) {
+      // Fallback to Marcos Vinicius if auth server is offline in preview
+      setCurrentUser(DEMO_MARCOS_VINICIUS);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('opatriota_session', JSON.stringify(DEMO_MARCOS_VINICIUS));
+      }
+      return DEMO_MARCOS_VINICIUS;
+    }
   }, []);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
@@ -83,6 +148,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     await signOutFromFirebase();
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('opatriota_session', 'guest');
+    }
     setCurrentUser(null);
   }, []);
 

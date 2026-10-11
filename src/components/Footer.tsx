@@ -1,7 +1,17 @@
 import React, { useState } from 'react';
 import { CategorySlug, SiteMenuConfig } from '../types';
-import { Bell, CheckCircle2 } from 'lucide-react';
-import { subscribeToWebPush, getPushPermissionStatus } from '../services/webPushService';
+import { 
+  Facebook, 
+  Instagram, 
+  Youtube, 
+  Twitter, 
+  Linkedin, 
+  Send, 
+  MessageCircle, 
+  CheckCircle2, 
+  Mail,
+  ShieldCheck
+} from 'lucide-react';
 
 interface FooterProps {
   onSelectCategory: (category: CategorySlug) => void;
@@ -16,120 +26,132 @@ export const Footer: React.FC<FooterProps> = ({
   onNavigatePage,
   menuConfig
 }) => {
-  const [pushStatus, setPushStatus] = useState<string>(() => getPushPermissionStatus());
-  const [isPushLoading, setIsPushLoading] = useState(false);
-  const [pushNotice, setPushNotice] = useState<string | null>(null);
+  const [newsletterEmail, setNewsletterEmail] = useState('');
+  const [newsletterAgreed, setNewsletterAgreed] = useState(true);
+  const [newsletterSuccess, setNewsletterSuccess] = useState(false);
 
-  const handleSubscribePush = async () => {
-    setIsPushLoading(true);
-    setPushNotice(null);
-    try {
-      const res = await subscribeToWebPush();
-      setPushStatus(res.permission);
-      setPushNotice(res.message);
-      setTimeout(() => setPushNotice(null), 5000);
-    } catch (err: any) {
-      setPushNotice(err.message || 'Falha ao registrar.');
-    } finally {
-      setIsPushLoading(false);
-    }
+  const handleSubscribeNewsletter = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newsletterEmail || !newsletterAgreed) return;
+    setNewsletterSuccess(true);
+    setNewsletterEmail('');
+    setTimeout(() => setNewsletterSuccess(false), 5000);
   };
+
   return (
     <footer className="bg-[#07172E] text-white pt-12 pb-8 border-t border-[#0B2345] select-none">
       <div className="max-w-[1360px] mx-auto px-4">
-        
-        {/* Top Banner: Brand, Slogan & Action Buttons */}
-        <div className="flex flex-col md:flex-row items-center justify-between pb-8 mb-8 border-b border-white/10 gap-6">
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-serif text-2xl md:text-3xl font-black text-white tracking-wide">
+        {/* Top 6 Columns Grid Matching Reference Design */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 pb-10 border-b border-white/10 text-xs">
+          
+          {/* COLUMN 1: BRAND LOGO + SLOGAN + SOCIAL NETWORKS */}
+          <div className="space-y-4">
+            <div>
+              <span className="font-serif text-xl sm:text-2xl font-black text-white tracking-wide block">
                 O PATRIOTA
               </span>
+              <p className="text-[10px] text-[#FFCC29] font-bold tracking-wider uppercase mt-1 leading-tight">
+                INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE
+              </p>
             </div>
-            <p className="text-xs text-[#FFCC29] font-bold tracking-widest uppercase mt-1">
-              INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE
-            </p>
+
+            {/* Social Icons (With official Kwai & Instagram links) */}
+            <div className="flex flex-wrap items-center gap-2.5 text-white/80 pt-2">
+              <a 
+                href="https://www.facebook.com/opatriota.news.brasil/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                title="Facebook oficial"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <Facebook className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://www.instagram.com/journal_opatriota/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                title="Instagram oficial (@journal_opatriota)"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <Instagram className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://youtube.com/@opatriotabrasil" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="YouTube"
+                title="YouTube oficial"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <Youtube className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://x.com/opatriotabr" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="X (Twitter)"
+                title="X oficial"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <Twitter className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://linkedin.com/company/opatriotabrasil" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="LinkedIn"
+                title="LinkedIn oficial"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <Linkedin className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://t.me/opatriotabrasil" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Telegram"
+                title="Telegram oficial"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <Send className="w-4 h-4" />
+              </a>
+              <a 
+                href="https://whatsapp.com/channel/opatriotabrasil" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="WhatsApp"
+                title="WhatsApp oficial"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <MessageCircle className="w-4 h-4" />
+              </a>
+              {/* Official Kwai Link & Badge */}
+              <a 
+                href="https://k.kwai.com/u/@jornal-opatriota/WPiCxD5Te" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                aria-label="Kwai"
+                title="Kwai oficial (@jornal-opatriota)"
+                className="hover:text-[#FFCC29] transition"
+              >
+                <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l7 4.5-7 4.5z"/>
+                </svg>
+              </a>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => onNavigatePage('planos')}
-              className="bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold px-5 py-2.5 rounded transition cursor-pointer shadow-sm"
-            >
-              APOIAR O JORNAL
-            </button>
-            <button
-              onClick={() => onNavigatePage('contato')}
-              className="border border-white/30 hover:border-white text-white text-xs font-bold px-5 py-2.5 rounded transition cursor-pointer"
-            >
-              FALE COM A REDAÇÃO
-            </button>
-          </div>
-        </div>
-
-        {/* 4 Columns Grid including Web Push & Transparency */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 pb-10 border-b border-white/10 text-xs">
-          
-          {/* EDITORIAS */}
+          {/* COLUMN 2: INSTITUCIONAL */}
           <div>
-            <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-4 text-[#FFCC29] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#16803C]"></span>
-              EDITORIAL
+            <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-3.5 text-[#FFCC29]">
+              Institucional
             </h4>
-            <ul className="space-y-2.5 text-white/80">
-              <li>
-                <button onClick={() => onSelectCategory('politica')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Política Nacional
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectCategory('brasil')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Brasil e Estados
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectCategory('economia')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Economia e Mercado
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectCategory('seguranca')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Segurança Pública
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectCategory('saude')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Saúde
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectCategory('opiniao')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Artigos e Opinião
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onSelectCategory('checagem')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Agência de Checagem
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* INSTITUCIONAL */}
-          <div>
-            <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-4 text-[#FFCC29] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#FFCC29]"></span>
-              INSTITUCIONAL
-            </h4>
-            <ul className="space-y-2.5 text-white/80">
+            <ul className="space-y-2 text-white/75 text-[11px]">
               <li>
                 <button onClick={() => onNavigatePage('sobre-o-patriota')} className="hover:text-white hover:underline transition cursor-pointer">
                   Sobre O Patriota
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigatePage('expediente')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Expediente e Redação
                 </button>
               </li>
               <li>
@@ -138,30 +160,10 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigatePage('fontes-e-metodologia')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Fontes e Metodologia
+                <button onClick={() => onNavigatePage('expediente')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Expediente
                 </button>
               </li>
-              <li>
-                <button onClick={() => onNavigatePage('politica-de-correcoes')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Política de Correções
-                </button>
-              </li>
-              <li>
-                <button onClick={() => onNavigatePage('contato')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Fale com a Redação
-                </button>
-              </li>
-            </ul>
-          </div>
-
-          {/* TRANSPARÊNCIA E LGPD */}
-          <div>
-            <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-4 text-[#FFCC29] flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-[#0B5FFF]"></span>
-              TRANSPARÊNCIA E LGPD
-            </h4>
-            <ul className="space-y-2.5 text-white/80">
               <li>
                 <button onClick={() => onNavigatePage('politica-de-privacidade')} className="hover:text-white hover:underline transition cursor-pointer">
                   Política de Privacidade
@@ -173,8 +175,95 @@ export const Footer: React.FC<FooterProps> = ({
                 </button>
               </li>
               <li>
-                <button onClick={() => onNavigatePage('gestao-de-dados')} className="hover:text-white hover:underline transition cursor-pointer">
-                  Gestão de Dados (LGPD)
+                <button onClick={() => onNavigatePage('politica-de-correcoes')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Política de Correções
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 3: EDITORIAS */}
+          <div>
+            <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-3.5 text-[#FFCC29]">
+              Editorias
+            </h4>
+            <ul className="space-y-2 text-white/75 text-[11px]">
+              <li><button onClick={() => onSelectCategory('politica')} className="hover:text-white hover:underline transition cursor-pointer">Política</button></li>
+              <li><button onClick={() => onSelectCategory('brasil')} className="hover:text-white hover:underline transition cursor-pointer">Brasil</button></li>
+              <li><button onClick={() => onSelectCategory('economia')} className="hover:text-white hover:underline transition cursor-pointer">Economia</button></li>
+              <li><button onClick={() => onSelectCategory('seguranca')} className="hover:text-white hover:underline transition cursor-pointer">Segurança</button></li>
+              <li><button onClick={() => onSelectCategory('saude')} className="hover:text-white hover:underline transition cursor-pointer">Saúde</button></li>
+              <li><button onClick={() => onSelectCategory('mundo')} className="hover:text-white hover:underline transition cursor-pointer">Mundo</button></li>
+              <li><button onClick={() => onSelectCategory('cultura')} className="hover:text-white hover:underline transition cursor-pointer">Cultura</button></li>
+              <li><button onClick={() => onSelectCategory('esportes')} className="hover:text-white hover:underline transition cursor-pointer">Esportes</button></li>
+              <li><button onClick={() => onSelectCategory('tecnologia')} className="hover:text-white hover:underline transition cursor-pointer">Tecnologia</button></li>
+              <li><button onClick={() => onSelectCategory('checagem')} className="hover:text-white hover:underline transition cursor-pointer">Checagem</button></li>
+            </ul>
+          </div>
+
+          {/* COLUMN 4: SERVIÇOS */}
+          <div>
+            <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-3.5 text-[#FFCC29]">
+              Serviços
+            </h4>
+            <ul className="space-y-2 text-white/75 text-[11px]">
+              <li>
+                <button onClick={() => onNavigatePage('planos')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Planos e Assinaturas
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('planos')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Receber Alertas
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('newsletter')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Newsletter
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('contato')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Anuncie Conosco
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('contato')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Fale Conosco
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('contato')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Trabalhe Conosco
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          {/* COLUMN 5: AJUDA */}
+          <div>
+            <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-3.5 text-[#FFCC29]">
+              Ajuda
+            </h4>
+            <ul className="space-y-2 text-white/75 text-[11px]">
+              <li>
+                <button onClick={() => onNavigatePage('contato')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Central de Ajuda
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('contato')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Perguntas Frequentes
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('mapa-do-site')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Mapa do Site
+                </button>
+              </li>
+              <li>
+                <button onClick={() => onNavigatePage('contato')} className="hover:text-white hover:underline transition cursor-pointer">
+                  Acessibilidade
                 </button>
               </li>
               <li>
@@ -182,63 +271,74 @@ export const Footer: React.FC<FooterProps> = ({
                   Segurança da Informação
                 </button>
               </li>
-              <li className="pt-2 border-t border-white/10">
-                <button onClick={() => onNavigatePage('minha-conta')} className="text-[#FFCC29] hover:underline transition cursor-pointer font-bold block">
-                  Área do Assinante
-                </button>
-              </li>
             </ul>
           </div>
 
-          {/* 4. ALERTAS WEB PUSH (FCM) */}
-          <div className="bg-white/5 border border-white/10 p-4 rounded-lg flex flex-col justify-between">
-            <div>
-              <h4 className="font-bold text-white text-[11px] uppercase tracking-wider mb-2 text-[#FFCC29] flex items-center gap-1.5">
-                <Bell className="w-3.5 h-3.5 text-[#FFCC29]" />
-                ALERTAS URGENTES PUSH
-              </h4>
-              <p className="text-[11px] text-white/70 leading-relaxed mb-3">
-                Receba breaking news, plantões e apurações exclusivas em tempo real no seu dispositivo.
-              </p>
-            </div>
+          {/* COLUMN 6: NEWSLETTER SUBSCRIPTION */}
+          <div>
+            <h4 className="font-bold text-white text-xs uppercase tracking-wider mb-2 text-[#FFCC29]">
+              Receba nossas notícias
+            </h4>
+            <p className="text-[11px] text-white/70 mb-3 leading-relaxed">
+              Assine nossa newsletter e receba as principais notícias no seu e-mail.
+            </p>
 
-            <div className="space-y-2">
-              {pushNotice && (
-                <div className="p-2 bg-[#16803C]/30 border border-[#22A447] text-white text-[10px] rounded flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-[#22A447] shrink-0" />
-                  <span>{pushNotice}</span>
-                </div>
-              )}
-
-              <button
-                onClick={handleSubscribePush}
-                disabled={isPushLoading}
-                className={`w-full py-2 px-3 text-xs font-bold rounded flex items-center justify-center gap-1.5 transition cursor-pointer ${
-                  pushStatus === 'granted'
-                    ? 'bg-[#16803C] hover:bg-[#22A447] text-white'
-                    : 'bg-[#FFCC29] hover:bg-[#ffb700] text-[#07172E]'
-                }`}
-              >
-                <Bell className={`w-3.5 h-3.5 ${pushStatus === 'granted' ? 'fill-white' : ''}`} />
-                <span>
-                  {pushStatus === 'granted' ? 'Notificações Ativadas ✓' : 'Ativar Alertas Push'}
-                </span>
-              </button>
-              <div className="text-[9px] text-white/40 text-center">
-                Firebase Cloud Messaging • Cancele a qualquer momento
+            {newsletterSuccess && (
+              <div className="mb-3 p-2 bg-[#16803C]/30 border border-[#22A447] text-white text-[10px] rounded flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#22A447] shrink-0" />
+                <span>Inscrição confirmada com sucesso!</span>
               </div>
-            </div>
+            )}
+
+            <form onSubmit={handleSubscribeNewsletter} className="space-y-2">
+              <div className="flex">
+                <input 
+                  type="email" 
+                  placeholder="Seu email" 
+                  value={newsletterEmail}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
+                  className="bg-white/10 border border-white/20 px-3 py-1.5 text-xs text-white placeholder-white/50 rounded-l focus:outline-none focus:border-[#0B5FFF] flex-1 min-w-0"
+                  required
+                />
+                <button 
+                  type="submit"
+                  className="bg-[#0B5FFF] hover:bg-[#0948c2] text-white font-bold text-xs px-3 py-1.5 rounded-r transition cursor-pointer shrink-0"
+                >
+                  Assinar
+                </button>
+              </div>
+
+              <label className="flex items-start gap-1.5 text-[10px] text-white/60 cursor-pointer pt-1">
+                <input 
+                  type="checkbox" 
+                  checked={newsletterAgreed}
+                  onChange={(e) => setNewsletterAgreed(e.target.checked)}
+                  className="mt-0.5 accent-[#0B5FFF] shrink-0"
+                />
+                <span>
+                  Li e concordo com a{' '}
+                  <button 
+                    type="button" 
+                    onClick={() => onNavigatePage('politica-de-privacidade')}
+                    className="underline text-white/80 hover:text-white"
+                  >
+                    Política de Privacidade
+                  </button>
+                </span>
+              </label>
+            </form>
           </div>
 
         </div>
 
-        {/* Bottom Tier: Copyright & Compliance */}
-        <div className="pt-8 flex flex-col md:flex-row items-center justify-between text-xs text-white/50 gap-4 text-center md:text-left">
+        {/* Bottom Tier: Copyright & Patriot Brand Tag */}
+        <div className="pt-6 flex flex-col md:flex-row items-center justify-between text-[11px] text-white/50 gap-3 text-center md:text-left">
           <p>
-            © 2026 O PATRIOTA BRASIL. Todos os direitos reservados.
+            © 2026 O Patriota. Todos os direitos reservados.
           </p>
-          <div className="text-[11px] text-white/40">
-            Jornalismo independente com compromisso com a informação verificável.
+          <div className="flex items-center gap-1.5 text-white/60">
+            <span>Um jornal livre ajuda a construir um país mais forte.</span>
+            <span>🇧🇷</span>
           </div>
         </div>
 
@@ -246,3 +346,5 @@ export const Footer: React.FC<FooterProps> = ({
     </footer>
   );
 };
+
+export default Footer;

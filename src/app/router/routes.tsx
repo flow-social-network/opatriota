@@ -66,6 +66,14 @@ export const router = createBrowserRouter([
       { path: '/minha-conta', element: <ClientPage /> },
       { path: '/minha-conta/:subpage', element: <ClientPage /> },
 
+      // ─── Receitas (atalho) ───
+      { path: '/receitas', element: <Navigate to="/categoria/receita" replace /> },
+
+      // ─── Páginas institucionais / CMS ───
+      { path: '/pagina/:slug', element: <InstitutionalPage /> },
+      { path: '/p/:slug', element: <InstitutionalPage /> },
+      { path: '/:slug', element: <InstitutionalPage /> },
+
       // ─── Acesso negado / 404 ───
       { path: '/acesso-negado', element: <LazyPanel><AccessDeniedPage /></LazyPanel> },
       { path: '/404', element: <NotFound /> },
@@ -83,6 +91,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: ':section', element: <LazyPanel><AdminPage /></LazyPanel> },
       { path: '*', element: <Navigate to="/admin" replace /> },
     ],
   },
@@ -97,6 +106,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: ':section', element: <LazyPanel><NewsroomPage /></LazyPanel> },
       { path: '*', element: <Navigate to="/redacao" replace /> },
     ],
   },

@@ -1,10 +1,11 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { Header } from '../../components/Header';
 import { Footer } from '../../components/Footer';
 import { BrandPillarsFooter } from '../../components/BrandPillarsFooter';
 import { SupportModal } from '../../components/SupportModal';
+import { SubscriberModalsContainer, SubscriberModalType } from '../../components/subscriber/SubscriberModalsContainer';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
@@ -12,17 +13,18 @@ import type { CategorySlug } from '../../types';
 
 /**
  * Layout principal do portal público.
- * Header + conteúdo + rodapé, com navegação via react-router.
+ * Header + conteúdo + rodapé, com navegação via react-router e popups fecháveis do assinante.
  */
 export function PublicLayout() {
   const { currentUser, loginWithGoogle, logout } = useAuth();
-  const { categories, pages, menuConfig, portalSettings } = useData();
+  const { articles, categories, pages, menuConfig, portalSettings } = useData();
   const { showToast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const [supportOpen, setSupportOpen] = React.useState(false);
+  const [supportOpen, setSupportOpen] = useState(false);
+  const [subscriberModal, setSubscriberModal] = useState<SubscriberModalType>(null);
 
-  const handleSelectCategory = (cat: CategorySlug) => {
+  const handleSelectCategory = (cat: CategorySlug | string) => {
     if (cat === 'checagem') navigate('/verificacao');
     else if (cat === 'todos') navigate('/');
     else navigate(`/categoria/${cat}`);
@@ -31,7 +33,9 @@ export function PublicLayout() {
   const handleNavigatePage = (rawSlug: string) => {
     const slug = rawSlug.replace(/^\/|\/$/g, '');
     switch (slug) {
-      case 'minha-conta': return navigate('/minha-conta');
+      case 'minha-conta': 
+        setSubscriberModal('area-assinante');
+        return;
       case 'redacao': return navigate('/redacao');
       case 'planos': case 'apoie-o-jornal': return navigate('/planos');
       case 'contato': return navigate('/contato');
@@ -63,7 +67,11 @@ export function PublicLayout() {
         onSelectCategory={handleSelectCategory}
         onOpenSupport={() => setSupportOpen(true)}
         onOpenAdmin={() => navigate('/admin')}
-        onOpenSubscriberArea={(sub) => navigate(sub === 'entrar' ? '/minha-conta?tab=entrar' : '/minha-conta')}
+        onOpenSubscriberArea={(sub) => {
+          if (sub === 'entrar') handleGoogleLogin();
+          else setSubscriberModal('area-assinante');
+        }}
+        onOpenSubscriberModal={(modalType) => setSubscriberModal(modalType)}
         onOpenNewsroom={() => navigate('/redacao')}
         onGoogleLogin={handleGoogleLogin}
         onGoogleLogout={handleGoogleLogout}
@@ -87,6 +95,15 @@ export function PublicLayout() {
         menuConfig={menuConfig}
       />
       <SupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
+      <SubscriberModalsContainer
+        modalType={subscriberModal}
+        onClose={() => setSubscriberModal(null)}
+        onSwitchModal={(type) => setSubscriberModal(type)}
+        currentUser={currentUser}
+        articles={articles}
+        onSelectArticle={(art) => navigate(`/noticia/${art.slug}`)}
+      />
     </div>
   );
 }
+

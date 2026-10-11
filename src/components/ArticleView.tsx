@@ -219,12 +219,51 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
             </div>
 
             {/* Article Prose */}
-            <div className="prose prose-slate max-w-none text-[#17202A] text-base leading-relaxed space-y-6">
-              {visibleParagraphs.map((para, idx) => (
-                <p key={idx} className="leading-relaxed">
-                  {para}
-                </p>
-              ))}
+            <div className="prose prose-slate max-w-none text-[#17202A] text-base leading-relaxed space-y-5">
+              {visibleParagraphs.map((para, idx) => {
+                const trimmed = para.trim();
+                if (trimmed.startsWith('### ')) {
+                  return (
+                    <h3 key={idx} className="font-serif text-xl font-bold text-[#0B2345] pt-4 pb-1 border-b border-[#E2E8F0]">
+                      {trimmed.replace(/^###\s+/, '')}
+                    </h3>
+                  );
+                }
+                if (trimmed.startsWith('## ')) {
+                  return (
+                    <h2 key={idx} className="font-serif text-2xl font-bold text-[#0B2345] pt-5 pb-1 border-b-2 border-[#0B2345]">
+                      {trimmed.replace(/^##\s+/, '')}
+                    </h2>
+                  );
+                }
+                if (trimmed.startsWith('- ') || trimmed.includes('\n- ')) {
+                  const items = trimmed.split('\n').filter(line => line.trim().startsWith('- '));
+                  return (
+                    <ul key={idx} className="list-disc pl-5 space-y-1.5 my-3 text-[#2D3748]">
+                      {items.map((line, itemIdx) => {
+                        const raw = line.trim().replace(/^-\s*/, '');
+                        return <li key={itemIdx} className="leading-relaxed">{renderInlineFormatted(raw)}</li>;
+                      })}
+                    </ul>
+                  );
+                }
+                if (/^\d+\.\s/.test(trimmed) || trimmed.includes('\n1.')) {
+                  const lines = trimmed.split('\n').filter(line => /^\d+\.\s/.test(line.trim()));
+                  return (
+                    <ol key={idx} className="list-decimal pl-5 space-y-2.5 my-3 text-[#2D3748]">
+                      {lines.map((line, itemIdx) => {
+                        const raw = line.trim().replace(/^\d+\.\s*/, '');
+                        return <li key={itemIdx} className="leading-relaxed">{renderInlineFormatted(raw)}</li>;
+                      })}
+                    </ol>
+                  );
+                }
+                return (
+                  <p key={idx} className="leading-relaxed">
+                    {renderInlineFormatted(para)}
+                  </p>
+                );
+              })}
             </div>
 
             {/* IF ACCESS IS BLOCKED: RENDER PAYWALL BARRIER */}
@@ -380,3 +419,17 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
     </div>
   );
 };
+
+function renderInlineFormatted(text: string): React.ReactNode {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, i) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return (
+        <strong key={i} className="font-bold text-[#0B2345]">
+          {part.slice(2, -2)}
+        </strong>
+      );
+    }
+    return part;
+  });
+}

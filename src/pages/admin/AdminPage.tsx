@@ -8,6 +8,7 @@ import { JournalistsPage } from './JournalistsPage';
 import { CategoriesPage } from './CategoriesPage';
 import { SourcesPage } from './SourcesPage';
 import { ArticlesPage } from './ArticlesPage';
+import { AdminDashboard } from '../../components/AdminDashboard';
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -111,10 +112,16 @@ export default function AdminPage() {
           <h3 className="text-xl font-bold text-[#17202A] mb-4">Painel Administrativo</h3>
 
           {location.pathname === '/admin' && (
-            <div>
-              <p className="text-[#64748B] mb-4">Bem-vindo ao painel administrativo, {currentUser.name}.</p>
-              <p className="text-sm">Use o menu acima para navegar entre as areas.</p>
-            </div>
+            <AdminDashboard
+              sources={sources}
+              queueItems={queueItems}
+              onBack={() => navigate('/')}
+              onUpdateSource={(s) => setSources(s)}
+              onUpdateQueue={(q) => setQueueItems(q)}
+              onSyncResult={(s, q) => { setSources(s); setQueueItems(q); }}
+              portalSettings={portalSettings}
+              onSavePortalSettings={savePortalSettings}
+            />
           )}
 
           {location.pathname === '/admin/users' && (

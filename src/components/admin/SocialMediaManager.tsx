@@ -77,6 +77,9 @@ export const SocialMediaManager: React.FC<SocialMediaManagerProps> = ({
       x: 'X (Twitter)',
       tiktok: 'TikTok',
       whatsapp: 'WhatsApp',
+      kwai: 'Kwai',
+      linkedin: 'LinkedIn',
+      telegram: 'Telegram',
       rss: 'Feed RSS'
     };
 

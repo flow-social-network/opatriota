@@ -427,6 +427,9 @@ export type SocialPlatform =
   | 'x' 
   | 'tiktok' 
   | 'whatsapp' 
+  | 'kwai'
+  | 'linkedin'
+  | 'telegram'
   | 'rss';
 
 export interface SocialNetworkItem {
@@ -600,6 +603,9 @@ export type SocialPlatformType =
   | 'x' 
   | 'tiktok' 
   | 'whatsapp' 
+  | 'kwai'
+  | 'linkedin'
+  | 'telegram'
   | 'rss';
 
 export interface SocialNetworkItem {

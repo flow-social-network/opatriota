@@ -158,7 +158,7 @@ export const INITIAL_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     id: 'soc-fb',
     name: 'Facebook',
     platform: 'facebook',
-    url: 'https://facebook.com/opatriotabrasil',
+    url: 'https://www.facebook.com/opatriota.news.brasil/',
     active: true,
     order: 1,
     ariaLabel: 'Página oficial do O Patriota no Facebook'
@@ -167,10 +167,10 @@ export const INITIAL_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     id: 'soc-ig',
     name: 'Instagram',
     platform: 'instagram',
-    url: 'https://instagram.com/opatriotabrasil',
+    url: 'https://www.instagram.com/journal_opatriota/',
     active: true,
     order: 2,
-    ariaLabel: 'Perfil oficial do O Patriota no Instagram'
+    ariaLabel: 'Perfil oficial do O Patriota no Instagram (@journal_opatriota)'
   },
   {
     id: 'soc-yt',
@@ -191,13 +191,22 @@ export const INITIAL_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     ariaLabel: 'Perfil oficial do O Patriota no X'
   },
   {
-    id: 'soc-tt',
-    name: 'TikTok',
-    platform: 'tiktok',
-    url: 'https://tiktok.com/@opatriotabrasil',
+    id: 'soc-in',
+    name: 'LinkedIn',
+    platform: 'linkedin',
+    url: 'https://linkedin.com/company/opatriotabrasil',
     active: true,
     order: 5,
-    ariaLabel: 'Perfil oficial do O Patriota no TikTok'
+    ariaLabel: 'Página oficial do O Patriota no LinkedIn'
+  },
+  {
+    id: 'soc-tg',
+    name: 'Telegram',
+    platform: 'telegram',
+    url: 'https://t.me/opatriotabrasil',
+    active: true,
+    order: 6,
+    ariaLabel: 'Canal oficial do O Patriota no Telegram'
   },
   {
     id: 'soc-wa',
@@ -205,8 +214,17 @@ export const INITIAL_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     platform: 'whatsapp',
     url: 'https://whatsapp.com/channel/opatriotabrasil',
     active: true,
-    order: 6,
+    order: 7,
     ariaLabel: 'Canal oficial do O Patriota no WhatsApp'
+  },
+  {
+    id: 'soc-kw',
+    name: 'Kwai',
+    platform: 'kwai',
+    url: 'https://k.kwai.com/u/@jornal-opatriota/WPiCxD5Te',
+    active: true,
+    order: 8,
+    ariaLabel: 'Perfil oficial do O Patriota no Kwai (@jornal-opatriota)'
   },
   {
     id: 'soc-rss',
@@ -214,7 +232,7 @@ export const INITIAL_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     platform: 'rss',
     url: '/rss.xml',
     active: true,
-    order: 7,
+    order: 9,
     ariaLabel: 'Feed RSS oficial de notícias do O Patriota'
   }
 ];
