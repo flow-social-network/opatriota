@@ -81,7 +81,7 @@ interface HeaderProps {
   currentUser: UserSession | null;
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  onSearchSubmit: () => void;
+  onSearchSubmit: (query?: string) => void;
   portalSettings?: PortalSettings;
 }
 
@@ -104,6 +104,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [headerSearchQuery, setHeaderSearchQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    setHeaderSearchQuery(searchQuery);
+  }, [searchQuery]);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
@@ -133,8 +138,14 @@ export const Header: React.FC<HeaderProps> = ({
       if (event.key === 'Escape') setMobileMenuOpen(false);
     };
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [mobileMenuOpen]);
 
   const handleTogglePush = async () => {
@@ -330,8 +341,10 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] shadow-xs">
             {/* Hamburger Button */}
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Abrir Menu do Site"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label={mobileMenuOpen ? 'Fechar menu do site' : 'Abrir menu do site'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-site-menu"
               className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
             >
               <Menu className="w-6 h-6" />
@@ -479,8 +492,15 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
 
-              {/* Lado Direito: Os 7 Ícones Coloridos Redondos das Redes Sociais */}
-              <div className="flex items-center gap-1.5">
+              {/* Lado Direito: Redes sociais e acesso comercial */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onNavigatePage?.('anuncie-conosco')}
+                  className="border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-2.5 py-1 text-[10px] font-black transition-colors cursor-pointer"
+                >
+                  Anuncie
+                </button>
                 {socialIconsConfig.slice(0, 7).map((soc) => (
                   <a
                     key={soc.platform}
@@ -586,15 +606,18 @@ export const Header: React.FC<HeaderProps> = ({
                 
                 {/* Search Input Box */}
                 <form 
-                  onSubmit={(e) => { e.preventDefault(); onSearchSubmit(); }}
+                  onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }}
                   className="flex items-center flex-1 bg-white border border-[#CBD5E1] rounded-lg overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
                 >
                   <Search className="w-4 h-4 text-[#94A3B8] ml-3 shrink-0" />
                   <input
                     type="text"
                     placeholder="Buscar notícias, análises, vídeos..."
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
+                    value={headerSearchQuery}
+                    onChange={(e) => {
+                      setHeaderSearchQuery(e.target.value);
+                      onSearchChange(e.target.value);
+                    }}
                     className="w-full px-2.5 py-1.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none"
                   />
                   <button
@@ -753,7 +776,7 @@ export const Header: React.FC<HeaderProps> = ({
             <div className="max-w-[1380px] mx-auto px-4 flex items-center justify-between">
               
               {/* Navigation Items (Sem botão desalinhado na esquerda) */}
-              <div className="flex items-center space-x-1">
+              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none flex items-center space-x-1">
                 {navItems.map((item) => {
                   const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
                   return (
@@ -776,7 +799,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* Right Button: APOIE O JORNAL */}
-              <div className="py-2">
+              <div className="py-2 shrink-0">
                 <button
                   onClick={onOpenSupport}
                   className="bg-[#15803D] hover:bg-[#166534] text-white text-xs font-black uppercase tracking-wider px-4 py-2 rounded-md transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
@@ -795,7 +818,7 @@ export const Header: React.FC<HeaderProps> = ({
             Fidelidade total à captura de tela de referência
            ═══════════════════════════════════════════════════════════════════ */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div id="mobile-site-menu" className="fixed inset-0 z-50 md:hidden flex" role="dialog" aria-modal="true" aria-label="Menu principal">
             {/* Backdrop escuro */}
             <div 
               className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
@@ -843,8 +866,8 @@ export const Header: React.FC<HeaderProps> = ({
                 <form 
                   onSubmit={(e) => { 
                     e.preventDefault(); 
-                    onSearchSubmit(); 
-                    setMobileMenuOpen(false); 
+                    onSearchSubmit(headerSearchQuery.trim());
+                    setMobileMenuOpen(false);
                   }}
                   className="relative flex items-center"
                 >
