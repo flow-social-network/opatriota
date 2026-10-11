@@ -91,8 +91,8 @@ export function PublicLayout() {
         onNavigatePage={handleNavigatePage}
         currentUser={currentUser}
         searchQuery={new URLSearchParams(location.search).get('q') || ''}
-        onSearchChange={() => { /* controlado pelo SearchPage */ }}
-        onSearchSubmit={() => navigate('/busca')}
+        onSearchChange={() => { /* estado local mantido pelo Header até o envio */ }}
+        onSearchSubmit={(query = '') => navigate(query ? `/busca?q=${encodeURIComponent(query)}` : '/busca')}
         portalSettings={portalSettings}
       />
 

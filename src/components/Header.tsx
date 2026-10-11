@@ -81,7 +81,7 @@ interface HeaderProps {
   currentUser: UserSession | null;
   searchQuery: string;
   onSearchChange: (q: string) => void;
-  onSearchSubmit: () => void;
+  onSearchSubmit: (query?: string) => void;
   portalSettings?: PortalSettings;
 }
 
@@ -104,6 +104,11 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [headerSearchQuery, setHeaderSearchQuery] = useState(searchQuery);
+
+  useEffect(() => {
+    setHeaderSearchQuery(searchQuery);
+  }, [searchQuery]);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
@@ -133,8 +138,14 @@ export const Header: React.FC<HeaderProps> = ({
       if (event.key === 'Escape') setMobileMenuOpen(false);
     };
 
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
     document.addEventListener('keydown', handleEscape);
-    return () => document.removeEventListener('keydown', handleEscape);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', handleEscape);
+    };
   }, [mobileMenuOpen]);
 
   const handleTogglePush = async () => {
@@ -330,8 +341,10 @@ export const Header: React.FC<HeaderProps> = ({
           <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] shadow-xs">
             {/* Hamburger Button */}
             <button
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Abrir Menu do Site"
+              onClick={() => setMobileMenuOpen((open) => !open)}
+              aria-label={mobileMenuOpen ? 'Fechar menu do site' : 'Abrir menu do site'}
+              aria-expanded={mobileMenuOpen}
+              aria-controls="mobile-site-menu"
               className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
             >
               <Menu className="w-6 h-6" />
@@ -447,61 +460,112 @@ export const Header: React.FC<HeaderProps> = ({
 
 
         {/* ═══════════════════════════════════════════════════════════════════
-            2. DESKTOP & TABLET HEADER (Fidelidade Absoluta ao Painel 1)
+            2. DESKTOP & TABLET HEADER (Fidelidade Absoluta à Imagem de Auditoria)
            ═══════════════════════════════════════════════════════════════════ */}
         <div className="hidden lg:block">
           
-          {/* TIER 1: BARRA CINZA CLARA (#EAEFF5) COM DATA, TAQUARA (RS) [INMET] E REDES SOCIAIS */}
-          <div className="bg-[#EAEFF5] border-b border-[#D8DEE6] px-4 py-1.5 text-xs text-[#334155]">
-            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
+          {/* TIER 1: BARRA BRANCA COM DATA, TAQUARA (RS) [INMET], BUSCA, REDES SOCIAIS E ANUNCIE */}
+          <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
+            <div className="w-full mx-auto flex items-center justify-between gap-5">
               
               {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
-              <div className="flex items-center gap-3">
-                <span className="font-semibold text-[#1E293B] text-[11px] xl:text-xs">
+              <div className="flex items-center gap-2.5 shrink-0">
+                <span className="font-medium text-[#1E293B] text-[11px]">
                   {formattedFullDate}
                 </span>
 
-                <span className="text-[#CBD5E1]">|</span>
+                <span className="text-[#CBD5E1] text-xs">|</span>
 
                 {/* Previsão do Tempo Oficial de Taquara (RS) */}
                 <button
                   onClick={() => handleOpenWeather('taquara')}
-                  className="flex items-center gap-1.5 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] xl:text-xs"
+                  className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] whitespace-nowrap"
                   title="Clique para ver a previsão meteorológica (INMET)"
                 >
                   <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
                   <span className="font-bold">Taquara (RS)</span>
                   <span className="font-bold">24°C</span>
-                  <span className="text-[#64748B] text-[11px]">Céu limpo e ensolarado</span>
-                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase ml-1">
+                  <span className="text-[#64748B] text-[10px]">Céu limpo</span>
+                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">
                     INMET
                   </span>
                 </button>
               </div>
 
-              {/* Lado Direito: Os 7 Ícones Coloridos Redondos das Redes Sociais */}
-              <div className="flex items-center gap-1.5">
-                {socialIconsConfig.slice(0, 7).map((soc) => (
+              {/* Redes sociais seguem a ordem da referência: Facebook, Instagram, YouTube, X, LinkedIn e Telegram */}
+              <div className="flex items-center gap-2 shrink-0" aria-label="Redes sociais oficiais">
+                {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => (
                   <a
                     key={soc.platform}
                     href={soc.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={soc.name}
-                    title={`${soc.name} oficial do O Patriota`}
-                    style={{ borderRadius: '9999px' }}
-                    className={`w-5.5 h-5.5 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 transition-transform overflow-hidden`}
+                    title={soc.name}
+                    className={`inline-flex items-center justify-center w-8 h-8 min-w-8 min-h-8 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:w-[18px] [&>svg]:h-[18px] [&>img]:w-[18px] [&>img]:h-[18px]`}
                   >
                     {soc.icon}
                   </a>
                 ))}
               </div>
+
+              {/* Centro: Search Input */}
+              <form 
+                onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }}
+                className="flex items-center flex-1 min-w-[220px] max-w-[390px] bg-white border border-[#CBD5E1] rounded overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
+              >
+                <Search className="w-[18px] h-[18px] text-[#94A3B8] ml-2 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Buscar notícias, análises, vídeos..."
+                  value={headerSearchQuery}
+                  onChange={(e) => {
+                    setHeaderSearchQuery(e.target.value);
+                    onSearchChange(e.target.value);
+                  }}
+                  className="w-full px-2 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  aria-label="Buscar"
+                  className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <Search className="w-[18px] h-[18px] text-white" />
+                </button>
+              </form>
+
+              {/* Lado direito: notificações, perfil e selo Digital */}
+              <div className="flex items-center gap-3 shrink-0">
+                <button
+                  onClick={() => onOpenSubscriberModal?.('notificacoes')}
+                  className="relative p-1 text-[#0B2345] hover:text-[#0284C7] transition cursor-pointer"
+                  title="Notificações"
+                  aria-label="Abrir notificações"
+                >
+                  <Bell className="w-5 h-5" />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF2222] text-white text-[9px] font-black flex items-center justify-center">3</span>
+                </button>
+                {currentUser ? (
+                  <button onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-2 text-[#0B2345] font-bold text-[12px] cursor-pointer" aria-label="Menu do usuário" aria-expanded={userDropdownOpen}>
+                    <img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="w-9 h-9 rounded-full object-cover border-2 border-[#0B2345]" />
+                    <span className="max-w-[110px] truncate">{currentUser.name}</span>
+                    <span className="text-[#0B2345]">⌄</span>
+                  </button>
+                ) : (
+                  <button onClick={onGoogleLogin} className="flex items-center gap-1 text-[#0B2345] font-bold text-xs cursor-pointer" aria-label="Entrar">
+                    <User className="w-5 h-5" />
+                    <span>Entrar</span>
+                  </button>
+                )}
+                <span className="bg-[#16A34A] text-white font-black text-[11px] px-2.5 py-1 rounded">DIGITAL</span>
+                <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-2 py-1 text-[10px] font-black transition-colors cursor-pointer">Anuncie</button>
+              </div>
             </div>
           </div>
 
           {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
-          <div className="bg-[#081628] text-white px-4 py-1.5 text-[11px] font-medium border-b border-[#0d223a]">
-            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
+          <div className="bg-[#061A35] text-white px-5 py-3 text-[13px] font-medium border-b border-[#0d223a]">
+            <div className="w-full mx-auto flex items-center justify-between gap-5">
               <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
                 {/* Ponto verde pulsante + MERCADOS AO VIVO */}
                 <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#22C55E] shrink-0">
@@ -548,17 +612,22 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E BUSCA INTEGRADA */}
-          <div className="bg-white py-4 px-4 border-b border-[#E2E8F0]">
-            <div className="max-w-[1380px] mx-auto flex flex-col items-center justify-center">
+          {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E CONTROLES DE NOTIFICAÇÃO/USUÁRIO */}
+          <div className="bg-white py-7 px-9 border-b border-[#E2E8F0]">
+            <div className="w-full mx-auto flex items-center justify-center relative min-h-[170px]">
               
+              {/* Assinatura editorial esquerda da referência */}
+              <div className="absolute left-9 top-1/2 -translate-y-1/2 border-l-4 border-[#FFCC29] pl-7 max-w-[360px] hidden xl:block">
+                <p className="font-serif italic text-[20px] leading-relaxed text-[#526B8D]">“Um jornal livre ajuda a construir<br />um país mais forte.”</p>
+              </div>
+
               {/* Logotipo Central O PATRIOTA */}
               <button
                 onClick={() => onSelectCategory('todos')}
-                className="flex flex-col items-center justify-center focus:outline-none cursor-pointer group mb-3"
+                className="flex flex-col items-center justify-center focus:outline-none cursor-pointer group"
               >
                 {/* Brush Flag Arc */}
-                <div className="w-64 h-10 flex items-center justify-center -mb-1">
+                <div className="w-[390px] h-16 flex items-center justify-center -mb-2">
                   <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
                     <path d="M 20,48 C 80,10 240,10 300,48 C 260,20 60,20 20,48 Z" fill="#16803C" />
                     <path d="M 40,54 C 100,28 220,28 280,54 C 230,36 90,36 40,54 Z" fill="#FFCC29" />
@@ -572,40 +641,23 @@ export const Header: React.FC<HeaderProps> = ({
                   </svg>
                 </div>
 
-                <h1 className="font-serif text-5xl font-black text-[#0B2345] tracking-tight leading-none">
+                <h1 className="font-serif text-6xl font-black text-[#0B2345] tracking-tight leading-none">
                   O PATRIOT<span className="tracking-normal">A</span>
                 </h1>
 
-                <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#64748B] mt-1.5">
+                <p className="text-[8px] font-bold tracking-[0.2em] uppercase text-[#64748B] mt-1">
                   INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE
                 </p>
               </button>
 
-              {/* Linha Centralizada: Busca + Sino Notificação + Usuário */}
-              <div className="flex items-center justify-center gap-3.5 w-full max-w-xl">
-                
-                {/* Search Input Box */}
-                <form 
-                  onSubmit={(e) => { e.preventDefault(); onSearchSubmit(); }}
-                  className="flex items-center flex-1 bg-white border border-[#CBD5E1] rounded-lg overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
-                >
-                  <Search className="w-4 h-4 text-[#94A3B8] ml-3 shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Buscar notícias, análises, vídeos..."
-                    value={searchQuery}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    className="w-full px-2.5 py-1.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Buscar"
-                    className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-3.5 h-full flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    <Search className="w-4 h-4 text-white" />
-                  </button>
-                </form>
+              {/* Manifesto institucional direito da referência */}
+              <div className="absolute right-9 top-1/2 -translate-y-1/2 border-r-4 border-[#16A34A] pr-7 text-right hidden xl:block">
+                <p className="text-[16px] font-black tracking-[0.18em] leading-relaxed text-[#0B2345]">FATOS<br />IDEIAS<br />PESSOAS<br />SOLUÇÕES<br /><span className="text-[#16A34A]">PELO BRASIL</span></p>
+              </div>
 
+              {/* Linha Centralizada: Sino Notificação + Usuário */}
+              <div className="hidden">
+                
                 {/* Sino de Notificações com badge 5 */}
                 <button
                   onClick={() => onOpenSubscriberModal?.('notificacoes')}
@@ -749,18 +801,18 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* TIER 4: BARRA DE NAVEGAÇÃO AZUL-MARINHO (#0B2345) */}
-          <nav className="bg-[#0B2345] text-white shadow-md">
-            <div className="max-w-[1380px] mx-auto px-4 flex items-center justify-between">
+          <nav className="bg-[#061A35] text-white shadow-md">
+            <div className="w-full mx-auto px-9 flex items-center justify-between min-h-[80px]">
               
               {/* Navigation Items (Sem botão desalinhado na esquerda) */}
-              <div className="flex items-center space-x-1">
+              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none flex items-center space-x-0.5 pr-2">
                 {navItems.map((item) => {
                   const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
                   return (
                     <button
                       key={item.slug}
                       onClick={() => onSelectCategory(item.slug)}
-                      className={`px-3 py-3 text-xs font-black tracking-wider uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
+                      className={`px-2.5 py-3 text-[13px] leading-[1.2] font-semibold tracking-wide uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
                         isActive
                           ? 'text-[#FFCC29]'
                           : 'text-white/90 hover:text-white hover:bg-white/5'
@@ -776,10 +828,10 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* Right Button: APOIE O JORNAL */}
-              <div className="py-2">
+              <div className="py-2 pl-2 shrink-0">
                 <button
                   onClick={onOpenSupport}
-                  className="bg-[#15803D] hover:bg-[#166534] text-white text-xs font-black uppercase tracking-wider px-4 py-2 rounded-md transition-all shadow-xs flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="bg-[#15803D] hover:bg-[#166534] text-white text-[13px] leading-[1.2] font-semibold uppercase tracking-wide px-3 py-2 rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
                 >
                   <Heart className="w-4 h-4 fill-white text-white" />
                   <span>APOIE O JORNAL</span>
@@ -795,7 +847,7 @@ export const Header: React.FC<HeaderProps> = ({
             Fidelidade total à captura de tela de referência
            ═══════════════════════════════════════════════════════════════════ */}
         {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden flex">
+          <div id="mobile-site-menu" className="fixed inset-0 z-50 lg:hidden flex" role="dialog" aria-modal="true" aria-label="Menu principal">
             {/* Backdrop escuro */}
             <div 
               className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
@@ -843,8 +895,8 @@ export const Header: React.FC<HeaderProps> = ({
                 <form 
                   onSubmit={(e) => { 
                     e.preventDefault(); 
-                    onSearchSubmit(); 
-                    setMobileMenuOpen(false); 
+                    onSearchSubmit(headerSearchQuery.trim());
+                    setMobileMenuOpen(false);
                   }}
                   className="relative flex items-center"
                 >
