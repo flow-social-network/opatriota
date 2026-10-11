@@ -464,12 +464,12 @@ export const Header: React.FC<HeaderProps> = ({
            ═══════════════════════════════════════════════════════════════════ */}
         <div className="hidden md:block">
           
-          {/* TIER 1: BARRA BRANCA COM DATA, TAQUARA (RS) [INMET], REDES SOCIAIS E ANUNCIE */}
-          <div className="bg-white border-b border-[#E2E8F0] px-4 py-1 text-xs text-[#334155]">
-            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-4">
+          {/* TIER 1: BARRA BRANCA COM DATA, TAQUARA (RS) [INMET], BUSCA, REDES SOCIAIS E ANUNCIE */}
+          <div className="bg-white border-b border-[#E2E8F0] px-4 py-1.5 text-xs text-[#334155]">
+            <div className="max-w-[1380px] mx-auto flex items-center justify-between gap-3">
               
               {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 shrink-0">
                 <span className="font-medium text-[#1E293B] text-[11px]">
                   {formattedFullDate}
                 </span>
@@ -479,21 +479,46 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* Previsão do Tempo Oficial de Taquara (RS) */}
                 <button
                   onClick={() => handleOpenWeather('taquara')}
-                  className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px]"
+                  className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] whitespace-nowrap"
                   title="Clique para ver a previsão meteorológica (INMET)"
                 >
                   <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
                   <span className="font-bold">Taquara (RS)</span>
                   <span className="font-bold">24°C</span>
-                  <span className="text-[#64748B] text-[10px]">Céu limpo e ensolarado</span>
+                  <span className="text-[#64748B] text-[10px]">Céu limpo</span>
                   <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">
                     INMET
                   </span>
                 </button>
               </div>
 
+              {/* Centro: Search Input */}
+              <form 
+                onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }}
+                className="flex items-center flex-1 max-w-sm bg-white border border-[#CBD5E1] rounded overflow-hidden h-7 shadow-xs focus-within:border-[#0B2345] transition-colors"
+              >
+                <Search className="w-3.5 h-3.5 text-[#94A3B8] ml-2 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Buscar notícias, análises, vídeos..."
+                  value={headerSearchQuery}
+                  onChange={(e) => {
+                    setHeaderSearchQuery(e.target.value);
+                    onSearchChange(e.target.value);
+                  }}
+                  className="w-full px-2 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none"
+                />
+                <button
+                  type="submit"
+                  aria-label="Buscar"
+                  className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"
+                >
+                  <Search className="w-3.5 h-3.5 text-white" />
+                </button>
+              </form>
+
               {/* Lado Direito: Botão Anuncie + Redes Sociais Circulares */}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 shrink-0">
                 <button
                   type="button"
                   onClick={() => onNavigatePage?.('anuncie-conosco')}
@@ -568,7 +593,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E BUSCA INTEGRADA */}
+          {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E CONTROLES DE NOTIFICAÇÃO/USUÁRIO */}
           <div className="bg-white py-2 px-4 border-b border-[#E2E8F0]">
             <div className="max-w-[1380px] mx-auto flex flex-col items-center justify-center">
               
@@ -601,34 +626,9 @@ export const Header: React.FC<HeaderProps> = ({
                 </p>
               </button>
 
-              {/* Linha Centralizada: Busca + Sino Notificação + Usuário */}
-              <div className="flex items-center justify-center gap-2.5 w-full max-w-xl">
+              {/* Linha Centralizada: Sino Notificação + Usuário */}
+              <div className="flex items-center justify-center gap-2.5">
                 
-                {/* Search Input Box */}
-                <form 
-                  onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }}
-                  className="flex items-center flex-1 bg-white border border-[#CBD5E1] rounded-lg overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
-                >
-                  <Search className="w-4 h-4 text-[#94A3B8] ml-3 shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Buscar notícias, análises, vídeos..."
-                    value={headerSearchQuery}
-                    onChange={(e) => {
-                      setHeaderSearchQuery(e.target.value);
-                      onSearchChange(e.target.value);
-                    }}
-                    className="w-full px-2.5 py-1.5 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none"
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Buscar"
-                    className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-3.5 h-full flex items-center justify-center transition-colors cursor-pointer"
-                  >
-                    <Search className="w-4 h-4 text-white" />
-                  </button>
-                </form>
-
                 {/* Sino de Notificações com badge 5 */}
                 <button
                   onClick={() => onOpenSubscriberModal?.('notificacoes')}
