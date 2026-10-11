@@ -492,10 +492,19 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </div>
 
+              {/* Redes sociais seguem a ordem da referência: Facebook, Instagram, YouTube, X, LinkedIn e Telegram */}
+              <div className="flex items-center gap-2 shrink-0">
+                {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => (
+                  <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`w-7 h-7 rounded-full ${soc.bgColor} flex items-center justify-center overflow-hidden shrink-0 hover:scale-105 transition-transform`}>
+                    {soc.icon}
+                  </a>
+                ))}
+              </div>
+
               {/* Centro: Search Input */}
               <form 
                 onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }}
-                className="flex items-center flex-1 max-w-sm bg-white border border-[#CBD5E1] rounded overflow-hidden h-7 shadow-xs focus-within:border-[#0B2345] transition-colors"
+                className="flex items-center flex-1 min-w-[260px] max-w-[390px] bg-white border border-[#CBD5E1] rounded overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
               >
                 <Search className="w-3.5 h-3.5 text-[#94A3B8] ml-2 shrink-0" />
                 <input
@@ -517,29 +526,31 @@ export const Header: React.FC<HeaderProps> = ({
                 </button>
               </form>
 
-              {/* Lado Direito: Botão Anuncie + Redes Sociais Circulares */}
-              <div className="flex items-center gap-1.5 shrink-0">
+              {/* Lado direito: notificações, perfil e selo Digital */}
+              <div className="flex items-center gap-3 shrink-0">
                 <button
-                  type="button"
-                  onClick={() => onNavigatePage?.('anuncie-conosco')}
-                  className="border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-2 py-0.5 text-[9px] font-black transition-colors cursor-pointer whitespace-nowrap"
+                  onClick={() => onOpenSubscriberModal?.('notificacoes')}
+                  className="relative p-1 text-[#0B2345] hover:text-[#0284C7] transition cursor-pointer"
+                  title="Notificações"
+                  aria-label="Abrir notificações"
                 >
-                  Anuncie
+                  <Bell className="w-6 h-6" />
+                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF2222] text-white text-[9px] font-black flex items-center justify-center">3</span>
                 </button>
-                {socialIconsConfig.slice(0, 7).map((soc) => (
-                  <a
-                    key={soc.platform}
-                    href={soc.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={soc.name}
-                    title={`${soc.name} oficial do O Patriota`}
-                    style={{ borderRadius: '9999px' }}
-                    className={`w-5 h-5 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 transition-transform overflow-hidden`}
-                  >
-                    {soc.icon}
-                  </a>
-                ))}
+                {currentUser ? (
+                  <button onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-2 text-[#0B2345] font-bold text-[12px] cursor-pointer" aria-label="Menu do usuário" aria-expanded={userDropdownOpen}>
+                    <img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="w-9 h-9 rounded-full object-cover border-2 border-[#0B2345]" />
+                    <span className="max-w-[110px] truncate">{currentUser.name}</span>
+                    <span className="text-[#0B2345]">⌄</span>
+                  </button>
+                ) : (
+                  <button onClick={onGoogleLogin} className="flex items-center gap-1 text-[#0B2345] font-bold text-xs cursor-pointer" aria-label="Entrar">
+                    <User className="w-5 h-5" />
+                    <span>Entrar</span>
+                  </button>
+                )}
+                <span className="bg-[#16A34A] text-white font-black text-[11px] px-2.5 py-1 rounded">DIGITAL</span>
+                <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-2 py-1 text-[10px] font-black transition-colors cursor-pointer">Anuncie</button>
               </div>
             </div>
           </div>
@@ -637,7 +648,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* Linha Centralizada: Sino Notificação + Usuário */}
-              <div className="absolute right-9 top-5 flex items-center justify-center gap-2.5">
+              <div className="hidden">
                 
                 {/* Sino de Notificações com badge 5 */}
                 <button
