@@ -21,6 +21,7 @@ export type FactVerdict =
   | 'NÃO COMPROVADO';
 
 export type EditorialStatus = 
+  | 'RASCUNHO'
   | 'RECEBIDA'
   | 'EM TRIAGEM'
   | 'EM APURAÇÃO'
@@ -532,4 +533,96 @@ export interface PortalSettings {
   webPush?: WebPushConfig;
   marketTicker?: MarketTickerConfig;
   updatedAt?: string;
+}
+
+/**
+ * INFRAESTRUTURA DE PUBLICIDADE — CENTRAL DE ANÚNCIOS
+ */
+export type AdPosition = 
+  | 'HOME_TOP_BANNER'
+  | 'HOME_BELOW_BREAKING'
+  | 'HOME_SIDEBAR_TOP'
+  | 'HOME_SIDEBAR_MIDDLE'
+  | 'HOME_IN_ARTICLE'
+  | 'HOME_BELOW_NEWS_GRID'
+  | 'HOME_PRE_FOOTER'
+  | 'ARTICLE_AFTER_CONTENT'
+  | 'ARTICLE_SIDEBAR'
+  | 'ARTICLE_RELATED_CONTENT';
+
+export type AdPlatform = 'adsense' | 'custom' | 'demo';
+
+export interface AdSpaceConfig {
+  id: string;
+  position: AdPosition;
+  name: string;
+  locationLabel: string;
+  dimensions: string;
+  recommendedSize: string;
+  supportedDevices: 'all' | 'desktop' | 'mobile';
+  active: boolean;
+  platform: AdPlatform;
+  adSlotId?: string;
+  customBannerUrl?: string;
+  customLinkUrl?: string;
+  customAltText?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface GoogleAdSenseConfig {
+  enabled: boolean;
+  publisherId: string;
+  testMode: boolean;
+  autoAdsEnabled: boolean;
+  lastUpdated?: string;
+}
+
+export interface AdMobConfig {
+  enabled: boolean;
+  androidAppId: string;
+  iosAppId: string;
+  bannerUnitId: string;
+  interstitialUnitId: string;
+  nativeUnitId: string;
+  notes: string;
+  platformTarget: 'mobile_only';
+}
+
+/**
+ * REDES SOCIAIS E BRANDING ADMINISTRÁVEL
+ */
+export type SocialPlatformType = 
+  | 'facebook' 
+  | 'instagram' 
+  | 'youtube' 
+  | 'x' 
+  | 'tiktok' 
+  | 'whatsapp' 
+  | 'rss';
+
+export interface SocialNetworkItem {
+  id: string;
+  name: string;
+  platform: SocialPlatformType;
+  url: string;
+  active: boolean;
+  order: number;
+  ariaLabel: string;
+}
+
+export interface SiteBrandingConfig {
+  headerLogoUrl: string;
+  footerLogoUrl: string;
+  headerLogoAlt: string;
+  footerLogoAlt: string;
+  slogan: string;
+  institutionalBio: string;
+  copyrightText: string;
+  maintainerName: string;
+  maintainerCnpj: string;
+  contactEmail: string;
+  contactCity: string;
+  socialNetworks: SocialNetworkItem[];
 }

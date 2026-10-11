@@ -14,6 +14,8 @@ import type { UserSession } from '../../types';
 
 interface AuthContextValue {
   currentUser: UserSession | null;
+  role?: UserSession['role'];
+  subscription?: UserSession['subscription'];
   authLoading: boolean;
   setCurrentUser: (user: UserSession | null) => void;
   loginWithGoogle: () => Promise<void>;
@@ -107,6 +109,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         currentUser,
+        role: currentUser?.role,
+        subscription: currentUser?.subscription,
         authLoading,
         setCurrentUser,
         loginWithGoogle,

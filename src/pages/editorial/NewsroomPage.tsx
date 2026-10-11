@@ -8,7 +8,7 @@ import { DashboardPage } from './DashboardPage';
 export default function NewsroomPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, authLoading } = useAuth();
+  const { currentUser, authLoading, role } = useAuth();
   const {
     articles, sources, pages, categories, authors, subscriptionPlans,
     updateArticles, updateSources, savePage, deletePage,

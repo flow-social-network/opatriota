@@ -2,6 +2,12 @@ import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
+import { UsersPage } from './UsersPage';
+import { PermissionsPage } from './PermissionsPage';
+import { JournalistsPage } from './JournalistsPage';
+import { CategoriesPage } from './CategoriesPage';
+import { SourcesPage } from './SourcesPage';
+import { ArticlesPage } from './ArticlesPage';
 
 export default function AdminPage() {
   const navigate = useNavigate();

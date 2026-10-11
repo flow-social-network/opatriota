@@ -941,7 +941,8 @@ export const INITIAL_MENU_CONFIG: SiteMenuConfig = {
     { id: 'm-8', label: 'Tecnologia', url: '/categoria/tecnologia', type: 'categoria' },
     { id: 'm-9', label: 'Mundo', url: '/categoria/mundo', type: 'categoria' },
     { id: 'm-10', label: 'Cultura', url: '/categoria/cultura', type: 'categoria' },
-    { id: 'm-11', label: 'Esportes', url: '/categoria/esportes', type: 'categoria' }
+    { id: 'm-11', label: 'Esportes', url: '/categoria/esportes', type: 'categoria' },
+    { id: 'm-12', label: 'Receitas', url: '/categoria/receita', type: 'categoria' }
   ],
   topBar: [
     { id: 'tb-1', label: 'Sobre O Patriota', url: '/sobre-o-patriota', type: 'pagina' },
@@ -957,7 +958,8 @@ export const INITIAL_MENU_CONFIG: SiteMenuConfig = {
     { id: 'fc1-4', label: 'Segurança Pública', url: '/categoria/seguranca', type: 'categoria' },
     { id: 'fc1-5', label: 'Saúde', url: '/categoria/saude', type: 'categoria' },
     { id: 'fc1-6', label: 'Artigos e Opinião', url: '/categoria/opiniao', type: 'categoria' },
-    { id: 'fc1-7', label: 'Agência de Checagem', url: '/checagem', type: 'custom' }
+    { id: 'fc1-7', label: 'Agência de Checagem', url: '/checagem', type: 'custom' },
+    { id: 'fc1-8', label: 'Receitas e Culinária', url: '/categoria/receita', type: 'categoria' }
   ],
   footerCol2: [
     { id: 'fc2-1', label: 'Sobre O Patriota', url: '/sobre-o-patriota', type: 'pagina' },

@@ -864,6 +864,130 @@ A Federação da Agricultura do RS (Farsul) destacou o espírito de união e a a
     sourcesConsulted: ['Instituto Rio Grandense do Arroz', 'Relatório Conab Safra RS'],
     tags: ['Agronegócio', 'Arroz', 'Soja', 'Rio Grande do Sul', 'Farsul'],
     priority: 'normal'
+  },
+  {
+    id: 'art-rec-1',
+    slug: 'feijoada-completa-receita-tradicional-brasileira',
+    title: 'Feijoada completa: receita tradicional brasileira e os segredos do preparo autêntico',
+    subtitle: 'O prato símbolo da gastronomia nacional com feijão negro, cortes defumados selecionados, couve refogada no alho e acompanhamentos clássicos.',
+    kicker: 'RECEITA TRADICIONAL',
+    category: 'receita',
+    tags: ['Culinária Brasileira', 'Feijoada', 'Gastronomia', 'Tradição', 'Final de Semana'],
+    content: `A feijoada completa é mais do que um prato: é uma celebração da identidade, da hospitalidade e da cultura gastronômica brasileira. Preparada lentamente em panelas de barro ou ferro, a receita reúne o feijão negro encorpado a uma seleção harmoniosa de cortes suínos e bovinos defumados.
+
+### Ingredientes Principais
+- 1 kg de feijão preto de primeira qualidade
+- 500g de carne-seca dessalgada em cubos
+- 400g de lombo suíno salgado ou defumado
+- 300g de costelinha de porco defumada
+- 2 paios e 2 linguiças calabresas defumadas em rodelas
+- 200g de bacon em cubos
+- 4 folhas de louro fresco
+- 6 dentes de alho amassados e 2 cebolas médias picadas
+- Pimenta-do-reino e cheiro-verde a gosto
+- Laranjas bahia, couve manteiga fresca cortada fininha e farinha de mandioca torrada para acompanhar
+
+### Modo de Preparo
+1. **Dessalga e hidratação**: Na véspera, coloque a carne-seca e o lombo de molho em água na geladeira, trocando a água de 4 a 5 vezes. Deixe o feijão de molho por 8 horas.
+2. **Cozimento das carnes**: Em uma panela grande com água fervente, escalde as carnes salgadas para retirar o excesso de gordura. Cozinhe a carne-seca e o lombo até começarem a amaciar.
+3. **União com o feijão**: Adicione o feijão escorrido, as folhas de louro e água suficiente para cobrir cerca de 4 dedos acima dos grãos. Cozinhe em fogo médio.
+4. **Adição dos defumados**: Junte a costelinha, as calabresas e os paios cerca de 30 minutos após o feijão começar a ferver, mantendo o cozimento suave.
+5. **O tempero especial**: Em uma frigideira à parte, doure o bacon, adicione a cebola e o alho até ficarem dourados. Retire duas conchas do feijão cozido, amasse na frigideira para formar uma pasta e devolva à panela principal para conferir cremosidade.
+6. **Finalização**: Deixe ferver por mais 15 a 20 minutos até o caldo ficar aveludado e perfumado. Sirva fumegante com arroz branco soltinho, couve refogada no azeite com alho, vinagrete caseiro e fatias de laranja.`,
+    author: 'Equipe Editorial O Patriota',
+    authorId: 'usr-100',
+    authorRole: 'Editoria de Gastronomia & Cultura',
+    publishedAt: '08 de outubro de 2026 às 11:00',
+    readTimeMinutes: 6,
+    imageUrl: '/images/receita-feijoada.jpg',
+    imageCaption: 'Feijoada tradicional servida em panela de barro com carnes nobres defumadas e guarnições típicas.',
+    imageCredits: 'Redação O Patriota / Acervo Culinário',
+    sourceName: 'Culinária e Tradição O Patriota',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'normal'
+  },
+  {
+    id: 'art-rec-2',
+    slug: 'moqueca-de-peixe-receita-nordestina',
+    title: 'Moqueca de peixe: a receita nordestina com leite de coco artesanal e azeite de dendê',
+    subtitle: 'Postas nobres de peixe fresco marinadas em ervas, cozidas lentamente com pimentões coloridos, coentro fresco e toque de dendê.',
+    kicker: 'RECEITA LITORÂNEA',
+    category: 'receita',
+    tags: ['Moqueca', 'Culinária Nordestina', 'Peixe', 'Dendê', 'Tradição Brasileira'],
+    content: `A moqueca de peixe é um dos maiores patrimônios da culinária brasileira litorânea. O segredo da preparação reside no equilíbrio exato entre o frescor do peixe de água salgada, a untuosidade perfumada do azeite de dendê e a suavidade do leite de coco.
+
+### Ingredientes
+- 1,2 kg de postas de peixe firme (robalo, badejo ou cação)
+- Suco de 2 limões tahiti e sal marinho a gosto
+- 4 dentes de alho amassados
+- 3 tomates maduros cortados em rodelas
+- 1 pimentão vermelho, 1 amarelo e 1 verde em rodelas
+- 2 cebolas médias cortadas em rodelas
+- 200 ml de leite de coco integral
+- 3 a 4 colheres de sopa de azeite de dendê autêntico
+- 1 maço de coentro fresco e cebolinha picados
+- 1 pimenta-dedo-de-moça sem sementes bem picadinha
+
+### Modo de Preparo
+1. **Marinada**: Tempere as postas de peixe com o suco de limão, alho, pimenta e sal marinho. Deixe descansar na geladeira por 30 minutos.
+2. **Montagem em camadas**: Em uma panela de barro ou de fundo grosso, monte uma cama com metade das rodelas de cebola, tomates e pimentões.
+3. **Distribuição do peixe**: Acomode as postas temperadas por cima da camada de vegetais. Cubra com o restante dos tomates, pimentões, cebolas e metade do coentro picado.
+4. **Cozimento suave**: Regue com 2 colheres de azeite de oliva e tampe a panela. Cozinhe em fogo brando por cerca de 15 minutos; os vegetais e o peixe soltarão seu próprio caldo rico em sabor.
+5. **Finalização com dendê e leite de coco**: Adicione o leite de coco e o azeite de dendê sobre as postas. Balance a panela delicadamente pelas alças (evite mexer com colher para não desmanchar as postas). Cozinhe destampado por mais 5 a 7 minutos.
+6. **Apresentação**: Salpique o restante do coentro fresco e sirva imediatamente acompanhado de pirão de peixe e arroz branco.`,
+    author: 'Equipe Editorial O Patriota',
+    authorId: 'usr-101',
+    authorRole: 'Editoria de Gastronomia & Cultura',
+    publishedAt: '08 de outubro de 2026 às 10:30',
+    readTimeMinutes: 5,
+    imageUrl: '/images/receita-moqueca.jpg',
+    imageCaption: 'Moqueca nordestina servida em panela de barro fumegante com frutos do mar e temperos verdes.',
+    imageCredits: 'Redação O Patriota / Acervo Culinário',
+    sourceName: 'Culinária e Tradição O Patriota',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'normal'
+  },
+  {
+    id: 'art-rec-3',
+    slug: 'pao-de-queijo-mineiro-segredos-da-massa-perfeita',
+    title: 'Pão de queijo mineiro: segredos da massa perfeita e o queijo curado ideal',
+    subtitle: 'A receita secular das fazendas de Minas Gerais: casca crocante dourada, miolo elástico aerado e sabor inconfundível.',
+    kicker: 'RECEITA MINEIRA',
+    category: 'receita',
+    tags: ['Pão de Queijo', 'Minas Gerais', 'Café da Manhã', 'Polvilho', 'Tradição'],
+    content: `O pão de queijo é o símbolo maior da hospitalidade mineira. O verdadeiro segredo da receita reside na proporção correta entre o polvilho doce e o polvilho azedo e na escolha de um queijo meia-cura ou Canastra de qualidade artesanal.
+
+### Ingredientes
+- 500g de polvilho (250g de polvilho azedo e 250g de polvilho doce)
+- 300g de queijo minas padrão ou meia-cura Canastra ralado grosso
+- 100g de queijo parmesão artesanal ralado fino
+- 1 xícara de chá de leite integral (240ml)
+- 1/2 xícara de chá de óleo vegetal ou banha de porco (120ml)
+- 1/2 xícara de chá de água (120ml)
+- 1 colher de chá rasa de sal refinado
+- 3 ovos caipiras médios
+
+### Modo de Preparo
+1. **O escaldado (ponto crucial)**: Em uma panela, junte a água, o leite, o óleo e o sal. Leve ao fogo até abrir fervura.
+2. **Escaldando o polvilho**: Em uma tigela ampla, coloque os dois polvilhos misturados. Despeje o líquido fervente aos poucos, mexendo com uma colher de pau até incorporar todo o pó. Deixe a mistura amornar até que possa ser manipulada com as mãos.
+3. **Adição dos ovos**: Adicione os ovos um a um, sovando bem a massa com as mãos após cada adição até que a massa fique homogênea e elástica.
+4. **Incorporação dos queijos**: Agregue o queijo Canastra meia-cura e o parmesão. Amasse até que os pedaços de queijo fiquem bem distribuídos por toda a massa.
+5. **Modelagem**: Unte as mãos levemente com óleo e modele bolinhas de aproximadamente 40g a 50g. Disponha em assadeiras mantendo espaço de 2 dedos entre elas.
+6. **Forno**: Asse em forno preaquecido a 200°C por cerca de 25 a 30 minutos, até que estejam inflados, firmes e com manchas douradas características. Sirva imediatamente com café fresco coado na hora.`,
+    author: 'Equipe Editorial O Patriota',
+    authorId: 'usr-102',
+    authorRole: 'Editoria de Gastronomia & Cultura',
+    publishedAt: '08 de outubro de 2026 às 09:15',
+    readTimeMinutes: 5,
+    imageUrl: '/images/receita-pao-de-queijo.jpg',
+    imageCaption: 'Pães de queijo mineiros dourados e crocantes assados na hora, servidos com café coado.',
+    imageCredits: 'Redação O Patriota / Acervo Culinário',
+    sourceName: 'Culinária e Tradição O Patriota',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'normal'
   }
 ];
 
@@ -1520,86 +1644,5 @@ export const INITIAL_EDITORIAL_QUEUE: EditorialQueueItem[] = [
     factualClassification: 'especulacao_hipotese',
     independentConfirmationRequired: true,
     factualVerificationNotes: '⚠️ RESTRIÇÃO EDITORIAL (Grupo Globo): Vedado como sustentação editorial. A alegação é especulativa ("pode anunciar", "apontam interlocutores"). Exige confirmação em documentos oficiais do Ministério da Fazenda ou declarações on the record de autoridades antes de publicação.'
-  },
-  {
-    id: 106,
-    title: 'Feijoada completa: receita tradicional brasileira',
-    subtitle: 'O prato completo com feijão negro, defumados e acompanhamentos',
-    kicker: 'RECEITA',
-    category: 'receita',
-    tags: ['comida', 'brasileira', 'final de semana'],
-    content: 'Conteúdo da receita feijoada...',
-    author: 'Equipe O Patriota',
-    authorId: 'usr-100',
-    authorRole: 'jornalista',
-    publishedAt: '2024-01-15T10:00:00Z',
-    updatedAt?: string,
-    scheduledFor?: string,
-    readTimeMinutes: 20,
-    imageUrl: '/images/receita-feijoada.jpg',
-    imageCaption: 'Feijoada pronta para servir',
-    imageCredits: 'Divulgação',
-    sourceName: 'O Patriota',
-    sourceUrl?: string,
-    sourcesConsulted?: string[],
-    accessLevel: 'aberto',
-    editorialStatus: 'PUBLICADA',
-    reviewNotes?: string,
-    auditLog?: AuditAction[],
-    factVerdict?: FactVerdict
-  },
-  {
-    id: 107,
-    title: 'Moqueca de peixe: receita nordestina',
-    subtitle: 'Peixe fresco com leite de coco e dendê',
-    kicker: 'RECEITA',
-    category: 'receita',
-    tags: ['peixe', 'nordestina', 'coco'],
-    content: 'Conteúdo da receita moqueca...',
-    author: 'Equipe O Patriota',
-    authorId: 'usr-101',
-    authorRole: 'jornalista',
-    publishedAt: '2024-01-20T14:30:00Z',
-    updatedAt?: string,
-    scheduledFor?: string,
-    readTimeMinutes: 18,
-    imageUrl: '/images/receita-moqueca.jpg',
-    imageCaption: 'Moqueca de peixe em potes',
-    imageCredits: 'Divulgação',
-    sourceName: 'O Patriota',
-    sourceUrl?: string,
-    sourcesConsulted?: string[],
-    accessLevel: 'aberto',
-    editorialStatus: 'PUBLICADA',
-    reviewNotes?: string,
-    auditLog?: AuditAction[],
-    factVerdict?: FactVerdict
-  },
-  {
-    id: 108,
-    title: 'Pão de queijo mineiro: segredos da massa perfeita',
-    subtitle: 'A receita tradicional mineira para um pão de queijo crescidinho',
-    kicker: 'RECEITA',
-    category: 'receita',
-    tags: ['queijo', 'mineiro', 'café da manhã'],
-    content: 'Conteúdo do pão de queijo...',
-    author: 'Equipe O Patriota',
-    authorId: 'usr-102',
-    authorRole: 'jornalista',
-    publishedAt: '2024-02-01T09:00:00Z',
-    updatedAt?: string,
-    scheduledFor?: string,
-    readTimeMinutes: 15,
-    imageUrl: '/images/receita-pao-de-queijo.jpg',
-    imageCaption: 'Pão de queijo fresquinho do forno',
-    imageCredits: 'Divulgação',
-    sourceName: 'O Patriota',
-    sourceUrl?: string,
-    sourcesConsulted?: string[],
-    accessLevel: 'aberto',
-    editorialStatus: 'PUBLICADA',
-    reviewNotes?: string,
-    auditLog?: AuditAction[],
-    factVerdict?: FactVerdict
   }
 ];

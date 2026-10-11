@@ -2,13 +2,17 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroSection } from '../../components/HeroSection';
 import { EditorialGrid } from '../../components/EditorialGrid';
+import { RegionalCoverageRS } from '../../components/RegionalCoverageRS';
+import { NationalNewsSection } from '../../components/NationalNewsSection';
+import { RecipesSection } from '../../components/RecipesSection';
+import { OpinionColumnistsSection } from '../../components/OpinionColumnistsSection';
 import { FactCheckRibbon } from '../../components/FactCheckRibbon';
 import { FacebookPostsSection } from '../../components/FacebookPostsSection';
 import { useData } from '../../app/contexts/DataContext';
-import type { Article, FactCheckItem } from '../../types';
+import type { Article } from '../../types';
 
 export default function HomePage() {
-  const { articles, factChecks, dataLoading } = useData();
+  const { articles, factChecks, authors, portalSettings, dataLoading } = useData();
   const navigate = useNavigate();
 
   const handleSelectArticle = (article: Article) => navigate(`/noticia/${article.slug}`);
@@ -68,6 +72,27 @@ export default function HomePage() {
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <HeroSection articles={articles} onSelectArticle={handleSelectArticle} />
       <EditorialGrid articles={articles} onSelectArticle={handleSelectArticle} />
+      <RegionalCoverageRS
+        articles={articles}
+        onSelectArticle={handleSelectArticle}
+        onSelectCategory={(cat) => navigate(`/categoria/${cat}`)}
+      />
+      <NationalNewsSection
+        articles={articles}
+        onSelectArticle={handleSelectArticle}
+        adSlots={portalSettings?.adSlots || []}
+        adsense={portalSettings?.adsense || { enabled: false, publisherId: '', autoAds: false, clientStatus: 'nao_configurado', testMode: true }}
+      />
+      <RecipesSection
+        articles={articles}
+        onSelectArticle={handleSelectArticle}
+        onViewAll={() => navigate('/categoria/receita')}
+      />
+      <OpinionColumnistsSection
+        articles={articles}
+        authors={authors}
+        onSelectArticle={handleSelectArticle}
+      />
       <FactCheckRibbon
         factChecks={factChecks}
         onOpenFactCheck={() => navigate('/verificacao')}

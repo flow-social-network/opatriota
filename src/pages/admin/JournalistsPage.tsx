@@ -4,7 +4,7 @@ import { useAuth } from '../../app/contexts/AuthContext';
 import { useToast } from '../../app/contexts/ToastContext';
 
 export function JournalistsPage() {
-  const { authors } = useData();
+  const { authors, dataLoading } = useData();
   const { currentUser, role } = useAuth();
   const { showToast } = useToast();
 

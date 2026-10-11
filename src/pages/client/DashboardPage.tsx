@@ -4,8 +4,8 @@ import { useAuth } from '../../app/contexts/AuthContext';
 import { useToast } from '../../app/contexts/ToastContext';
 
 export function DashboardPage() {
-  const { articles, subscriptionPlans, currentUser } = useData();
-  const { role, subscription } = useAuth();
+  const { articles, subscriptionPlans } = useData();
+  const { currentUser, role, subscription } = useAuth();
 
   if (!currentUser) {
     return (

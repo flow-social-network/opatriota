@@ -6,6 +6,21 @@ import {
   savePortalSettings,
   DEFAULT_PORTAL_SETTINGS,
 } from '../../services/siteConfigService';
+import {
+  INITIAL_ARTICLES,
+  INITIAL_FACT_CHECKS,
+  INITIAL_RSS_SOURCES,
+  INITIAL_EDITORIAL_QUEUE,
+  SUBSCRIPTION_PLANS,
+} from '../../data/mockData';
+import {
+  INITIAL_PAGES,
+  INITIAL_CATEGORIES,
+  INITIAL_AUTHORS,
+  INITIAL_MENU_CONFIG,
+  INITIAL_CONTACT_SUBMISSIONS,
+  INITIAL_LGPD_REQUESTS,
+} from '../../data/pagesData';
 import { useToast } from './ToastContext';
 import { useAuth } from './AuthContext';
 import type {
@@ -73,19 +88,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const { currentUser } = useAuth();
   const { showToast } = useToast();
 
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [factChecks, setFactChecks] = useState<FactCheckItem[]>([]);
-  const [sources, setSources] = useState<RssSource[]>([]);
-  const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>([]);
-  const [pages, setPages] = useState<InstitutionalPage[]>([]);
-  const [categories, setCategories] = useState<CategoryDetail[]>([]);
-  const [authors, setAuthors] = useState<AuthorDetail[]>([]);
-  const [menuConfig, setMenuConfig] = useState<SiteMenuConfig>(DEFAULT_MENU);
-  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
-  const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>([]);
-  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
+  const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
+  const [factChecks, setFactChecks] = useState<FactCheckItem[]>(INITIAL_FACT_CHECKS);
+  const [sources, setSources] = useState<RssSource[]>(INITIAL_RSS_SOURCES);
+  const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>(INITIAL_EDITORIAL_QUEUE);
+  const [pages, setPages] = useState<InstitutionalPage[]>(INITIAL_PAGES);
+  const [categories, setCategories] = useState<CategoryDetail[]>(INITIAL_CATEGORIES);
+  const [authors, setAuthors] = useState<AuthorDetail[]>(INITIAL_AUTHORS);
+  const [menuConfig, setMenuConfig] = useState<SiteMenuConfig>(INITIAL_MENU_CONFIG);
+  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>(INITIAL_CONTACT_SUBMISSIONS);
+  const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>(INITIAL_LGPD_REQUESTS);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>(SUBSCRIPTION_PLANS);
   const [portalSettings, setPortalSettingsState] = useState<PortalSettings>(DEFAULT_PORTAL_SETTINGS);
-  const [dataLoading, setDataLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState(false);
 
   // Load portal settings on mount
   useEffect(() => {
@@ -99,7 +114,6 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Load data from API whenever auth state changes
   useEffect(() => {
     if (!isApiConfigured()) {
-      showToast('API não configurada: defina VITE_API_BASE_URL para carregar conteúdo real.');
       setDataLoading(false);
       return;
     }

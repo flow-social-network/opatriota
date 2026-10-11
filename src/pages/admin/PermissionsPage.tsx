@@ -8,7 +8,7 @@ export function PermissionsPage() {
   const { currentUser, role } = useAuth();
   const { showToast } = useToast();
 
-  if (!['administrador', 'editor_chefe'].includes(role)) {
+  if (!role || !['administrador', 'editor_chefe'].includes(role)) {
     return (
       <div className="p-8">
         <h2 className="text-2xl font-bold text-[#17202A] mb-6">Permissões</h2>
