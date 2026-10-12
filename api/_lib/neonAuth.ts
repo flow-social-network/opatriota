@@ -2,11 +2,29 @@ import { Pool } from 'pg';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
 function resolveConnectionString() {
-  return process.env.opatriota_DATABASE_URL
+  const configuredUrl = process.env.opatriota_DATABASE_URL
     || process.env.opatriota_POSTGRES_URL
     || process.env.DATABASE_URL
     || process.env.POSTGRES_URL
-    || process.env.POSTGRES_PRISMA_URL;
+    || process.env.POSTGRES_PRISMA_URL
+    || process.env.POSTGRES_URL_NON_POOLING
+    || process.env.DATABASE_URL_UNPOOLED;
+  if (configuredUrl) return configuredUrl;
+
+  const host = process.env.PGHOST || process.env.POSTGRES_HOST;
+  const user = process.env.PGUSER || process.env.POSTGRES_USER;
+  const password = process.env.PGPASSWORD || process.env.POSTGRES_PASSWORD;
+  const database = process.env.PGDATABASE || process.env.POSTGRES_DATABASE;
+  if (!host || !user || !password || !database) return undefined;
+
+  const url = new URL('postgresql://localhost');
+  url.hostname = host;
+  url.username = user;
+  url.password = password;
+  url.pathname = `/${database}`;
+  url.port = process.env.PGPORT || '5432';
+  url.searchParams.set('sslmode', 'require');
+  return url.toString();
 }
 
 function getConnectionLabel() {
