@@ -70,6 +70,7 @@ export default function NewsroomPage() {
         articles={articles}
         currentUser={currentUser}
         onUpdateArticles={updateArticles}
+        onPreviewArticle={(article) => navigate(`/noticia/${encodeURIComponent(String(article.slug || article.id))}?preview=1`)}
         pages={pages}
         onSavePage={savePage}
         onDeletePage={deletePage}
