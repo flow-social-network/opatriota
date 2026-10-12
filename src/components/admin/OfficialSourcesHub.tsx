@@ -566,7 +566,7 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
                   <div className="mt-3 pt-2 border-t border-[#F1F3F5] text-[10px] text-[#718096] space-y-0.5">
                     <div className="flex justify-between">
                       <span>Última verificação:</span>
-                      <span className="font-semibold text-[#0B2345]">{src.lastVerified || src.lastPolled || 'Hoje'}</span>
+                      <span className="font-semibold text-[#0B2345]">{src.lastVerified || src.lastPolled || 'Nunca verificada'}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Frequência:</span>
@@ -831,7 +831,7 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
                     onChange={(e) => setFormValidationStatus(e.target.value as SourceValidationStatus)}
                     className="w-full bg-[#F8FAFC] border border-[#CBD5E1] rounded-lg p-2 text-xs"
                   >
-                    <option value="VALIDADO">VALIDADO</option>
+                    <option value="VALIDADO" disabled>VALIDADO (somente após sincronização)</option>
                     <option value="EM VERIFICAÇÃO">EM VERIFICAÇÃO</option>
                     <option value="SEM RSS (MONITORAMENTO MANUAL)">SEM RSS (MONITORAMENTO MANUAL)</option>
                     <option value="PENDENTE">PENDENTE</option>
