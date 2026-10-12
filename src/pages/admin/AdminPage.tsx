@@ -65,9 +65,9 @@ export default function AdminPage() {
       sources={sources}
       queueItems={queueItems}
       onBack={() => navigate('/')}
-      onUpdateSource={(s) => { void updateSources(s); }}
-      onUpdateQueue={(q) => { void updateQueue(q); }}
-      onSyncResult={(s, q) => { void updateSources(s); void updateQueue(q); }}
+          onUpdateSource={(s) => updateSources(s)}
+          onUpdateQueue={(q) => updateQueue(q)}
+          onSyncResult={(s, q) => { void updateSources(s); void updateQueue(q); }}
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}
