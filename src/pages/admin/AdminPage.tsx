@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { AdminDashboard } from '../../components/AdminDashboard';
@@ -9,7 +9,8 @@ export default function AdminPage() {
   const { section } = useParams();
   const { currentUser, authLoading } = useAuth();
   const {
-    queueItems, 
+    sources,
+    queueItems,
     portalSettings,
     updateQueue,
     savePortalSettings,
@@ -66,6 +67,8 @@ export default function AdminPage() {
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}
+      sources={sources}
+      onNavigateToSources={() => navigate('/admin/sources')}
       onTabChange={(tab) => navigate(tab === 'painel' ? '/admin' : `/admin/${tab}`)}
     />
   );
