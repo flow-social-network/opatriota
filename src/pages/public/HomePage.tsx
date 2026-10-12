@@ -18,10 +18,18 @@ export default function HomePage() {
 
   const handleSelectArticle = (article: Article) => navigate(`/noticia/${article.slug}`);
 
-  const videoArticle = articles.find((article) => Boolean(article.videoEmbedUrl));
-
-  // Facebook posts to display on home page
-
+  const isPublicArticle = (article: Article) => {
+    const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+    const status = String((article as any).status || '').trim().toLowerCase();
+    return editorialStatus === 'PUBLICADA' && ['', 'publicada', 'publicado', 'published'].includes(status);
+  };
+  const publicArticles = articles.filter(isPublicArticle);
+  const publicAuthors = authors.filter((author) => author.active !== false);
+  const publicFactChecks = factChecks.filter((item: any) => {
+    const status = String(item.status || '').trim().toLowerCase();
+    return item.published !== false && !['rascunho', 'draft', 'revisao', 'review', 'despublicada', 'unpublished'].includes(status);
+  });
+  const videoArticle = publicArticles.find((article) => Boolean(article.videoEmbedUrl));
 
   if (dataLoading) {
     return (
@@ -46,16 +54,16 @@ export default function HomePage() {
           </span>
         </div>
       )}
-      <HeroSection articles={articles} onSelectArticle={handleSelectArticle} />
+      <HeroSection articles={publicArticles} onSelectArticle={handleSelectArticle} />
       <FeaturedVideoSpotlight article={videoArticle} onSelectArticle={handleSelectArticle} />
-      <EditorialGrid articles={articles} onSelectArticle={handleSelectArticle} />
+      <EditorialGrid articles={publicArticles} onSelectArticle={handleSelectArticle} />
       <RegionalCoverageRS
-        articles={articles}
+        articles={publicArticles}
         onSelectArticle={handleSelectArticle}
         onSelectCategory={(cat) => navigate(cat === 'todos' ? '/' : `/categoria/${cat}`)}
       />
       <NationalNewsSection
-        articles={articles}
+        articles={publicArticles}
         onSelectArticle={handleSelectArticle}
         adSlots={portalSettings?.adSlots || []}
         adsense={portalSettings?.adsense || { enabled: false, publisherId: '', autoAds: false, clientStatus: 'nao_configurado', testMode: true }}
@@ -67,11 +75,11 @@ export default function HomePage() {
       />
       <OpinionColumnistsSection
         articles={articles}
-        authors={authors}
+        authors={publicAuthors}
         onSelectArticle={handleSelectArticle}
       />
       <FactCheckRibbon
-        factChecks={factChecks}
+        factChecks={publicFactChecks}
         onOpenFactCheck={() => navigate('/verificacao')}
         onOpenHub={() => navigate('/verificacao')}
       />
