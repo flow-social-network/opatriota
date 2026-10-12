@@ -42,6 +42,7 @@ type NewsroomTab = 'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'pagi
 
 interface NewsroomDashboardProps {
   initialTab?: NewsroomTab;
+  initialStatusFilter?: string;
   onTabChange?: (tab: NewsroomTab) => void;
   articles: Article[];
   sources: RssSource[];
@@ -61,6 +62,7 @@ interface NewsroomDashboardProps {
 
 export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   initialTab = 'painel',
+  initialStatusFilter = 'TODAS',
   onTabChange,
   articles,
   sources,
@@ -88,7 +90,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   }, [initialTab]);
 
   // Article filters
-  const [statusFilter, setStatusFilter] = useState<string>('TODAS');
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter);
+  useEffect(() => {
+    if (initialStatusFilter !== 'TODAS') setStatusFilter(initialStatusFilter);
+  }, [initialStatusFilter]);
   const [categoryFilter, setCategoryFilter] = useState<string>('TODAS');
   const [searchQuery, setSearchQuery] = useState('');
 
