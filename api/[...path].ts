@@ -1,5 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
+import { isIP } from 'node:net';
+import { lookup } from 'node:dns/promises';
 import {
   json, newId, readBody, validEmail, verifyFirebaseIdToken
 } from './_lib/billing';
@@ -104,6 +106,42 @@ function cleanObject(value: unknown): Record<string, any> {
 function slugify(value: string): string {
   return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
     .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 180);
+}
+
+function isPrivateAddress(address: string): boolean {
+  const normalized = address.toLowerCase().split('%')[0];
+  const version = isIP(normalized);
+  if (version === 4) {
+    const parts = normalized.split('.').map(Number);
+    const [a, b] = parts;
+    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127) || (a === 198 && (b === 18 || b === 19)) || a >= 224;
+  }
+  if (version === 6) {
+    return normalized === '::' || normalized === '::1' || normalized.startsWith('fc') ||
+      normalized.startsWith('fd') || /^fe[89ab]/.test(normalized) ||
+      normalized.startsWith('ff') || normalized.startsWith('::ffff:');
+  }
+  return true;
+}
+
+async function readLimitedText(response: Response, maxBytes: number): Promise<string> {
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new Error('RSS_RESPONSE_TOO_LARGE');
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk))).toString('utf8');
 }
 async function getIdentity(req: Req): Promise<{ uid: string; email: string; role: string } | null> {
   const raw = req.headers.authorization;
@@ -431,7 +469,7 @@ export default async function handler(req: Req, res: Res) {
       return json(res, failedCount ? 207 : 201, campaign);
     }
     if (path === 'editorial/sources/sync' && method === 'POST') {
-      if (!requireRole(identity, STAFF, res)) return;
+      if (!requireRole(identity, EDITORS, res)) return;
       const sources = await documentList('editorialSources');
       const existingQueue = await documentList('editorialQueue');
       const seen = new Set(existingQueue
@@ -442,21 +480,42 @@ export default async function handler(req: Req, res: Res) {
       for (const source of sources.filter(item => item.isActive !== false && item.rssUrl)) {
         const rssUrl = String(source.rssUrl);
         let parsedUrl: URL;
+        const checkedAt = new Date().toISOString();
         try { parsedUrl = new URL(rssUrl); } catch {
-          updatedSources.push({ ...source, lastError: 'URL de feed inválida', lastPolled: new Date().toISOString() });
+          const updated = { ...source, validationStatus: 'PENDENTE', lastVerified: checkedAt, lastError: 'URL de feed inválida', lastPolled: checkedAt };
+          await documentWrite('editorialSources', String(source.id), updated);
+          updatedSources.push(updated);
           continue;
         }
         const host = parsedUrl.hostname.toLowerCase();
-        if (parsedUrl.protocol !== 'https:' || host === 'localhost' || host.endsWith('.local') ||
-            /^(127\.|10\.|192\.168\.|169\.254\.|0\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host) ||
-            host === '::1' || host.startsWith('fc') || host.startsWith('fe80:')) {
-          updatedSources.push({ ...source, lastError: 'Feed bloqueado por política de segurança; use uma URL HTTPS pública.', lastPolled: new Date().toISOString() });
+        let resolvedAddresses: Array<{ address: string; family: number }> = [];
+        try {
+          const literalHost = host.replace(/^\[|\]$/g, '');
+          if (isIP(literalHost)) resolvedAddresses = [{ address: literalHost, family: isIP(literalHost) }];
+          else resolvedAddresses = await lookup(literalHost, { all: true, verbatim: true });
+        } catch {
+          resolvedAddresses = [];
+        }
+        const privateOrInvalidHost = !resolvedAddresses.length ||
+          resolvedAddresses.some((entry) => isPrivateAddress(entry.address)) ||
+          host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') ||
+          host.endsWith('.internal') || host === 'metadata.google.internal';
+        if (parsedUrl.protocol !== 'https:' || privateOrInvalidHost) {
+          const updated = {
+            ...source,
+            validationStatus: 'PENDENTE',
+            lastVerified: checkedAt,
+            lastError: 'Feed bloqueado por política de segurança; use uma URL HTTPS pública.',
+            lastPolled: checkedAt,
+          };
+          await documentWrite('editorialSources', String(source.id), updated);
+          updatedSources.push(updated);
           continue;
         }
         try {
-          const response = await fetch(parsedUrl, { headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' }, signal: AbortSignal.timeout(10000) });
+          const response = await fetch(parsedUrl, { redirect: 'error', headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' }, signal: AbortSignal.timeout(10000) });
           if (!response.ok) throw new Error('HTTP ' + response.status);
-          const xml = (await response.text()).slice(0, 2_000_000);
+          const xml = await readLimitedText(response, 2_000_000);
           const entries = [...xml.matchAll(/<(item|entry)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/gi)].slice(0, 50);
           let imported = 0;
           const decodeXml = (value: string) => value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/\s+/g, ' ').trim();
@@ -472,7 +531,7 @@ export default async function handler(req: Req, res: Res) {
             try { const normalized = new URL(link, parsedUrl); if (normalized.protocol !== 'https:') continue; link = canonicalizeUrl(normalized.toString()); } catch { continue; }
             if (seen.has(link)) continue;
             seen.add(link);
-            const id = Date.now() + newItems.length;
+            const id = newId();
             const record = {
               id, title: title.slice(0, 500),
               summary: decodeXml(descMatch?.[2] || '').slice(0, 2000),
@@ -492,11 +551,13 @@ export default async function handler(req: Req, res: Res) {
             newItems.push(record);
             imported++;
           }
-          const updated = { ...source, lastPolled: new Date().toISOString(), lastSuccess: new Date().toISOString(), lastError: null, itemsReceived: Number(source.itemsReceived || 0) + imported };
+          const checkedAt = new Date().toISOString();
+          const updated = { ...source, validationStatus: 'VALIDADO', lastVerified: checkedAt, lastPolled: checkedAt, lastSuccess: checkedAt, lastError: null, itemsReceived: Number(source.itemsReceived || 0) + imported };
           await documentWrite('editorialSources', String(source.id), updated);
           updatedSources.push(updated);
         } catch (error) {
-          const updated = { ...source, lastPolled: new Date().toISOString(), lastError: String((error as Error)?.message || 'Falha ao consultar feed').slice(0, 300) };
+          const checkedAt = new Date().toISOString();
+          const updated = { ...source, validationStatus: 'PENDENTE', lastVerified: checkedAt, lastPolled: checkedAt, lastError: String((error as Error)?.message || 'Falha ao consultar feed').slice(0, 300) };
           await documentWrite('editorialSources', String(source.id), updated);
           updatedSources.push(updated);
         }
