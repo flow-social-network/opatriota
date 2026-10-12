@@ -128,7 +128,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setArticles(Array.isArray(items) ? items : []);
         setDataError(null);
       }, true),
-      load<FactCheckItem[]>('/fact-checks', setFactChecks),
+      load<FactCheckItem[]>('/fact-checks', setFactChecks, true),
       load<RssSource[]>('/editorial/sources', setSources, true),
       load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),
       load<InstitutionalPage[]>('/pages', setPages, true),
