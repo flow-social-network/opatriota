@@ -91,8 +91,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         importedCount: number;
         checkedSources: number;
       }>('/editorial/sources/sync', {});
-      onUpdateSource(result.sources);
-      if (result.queueItems.length) onUpdateQueue([...result.queueItems, ...queueItems]);
+      await onUpdateSource(result.sources);
+      if (result.queueItems.length) await onUpdateQueue([...result.queueItems, ...queueItems]);
       setSyncMessage(`Sincronização concluída: ${result.checkedSources} fontes consultadas; ${result.importedCount} pautas novas.`);
       setTimeout(() => setSyncMessage(null), 5000);
     } catch (error) {

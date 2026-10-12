@@ -176,6 +176,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setter(next);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'A API não confirmou as alterações; os dados locais foram mantidos.');
+      throw error;
     }
   }, [showToast]);
 
@@ -200,6 +201,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast(`Página "${persisted.title}" salva no servidor.`);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Falha ao salvar página.');
+      throw error;
     }
   }, [pages, showToast]);
 
@@ -225,6 +227,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast(`Editoria "${persisted.name}" salva no servidor.`);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Falha ao salvar editoria.');
+      throw error;
     }
   }, [categories, showToast]);
 
