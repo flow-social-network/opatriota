@@ -569,6 +569,26 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <>
       <header className="w-full select-none font-sans">
+        {/* Faixa institucional superior — primeira faixa cinza do cabeçalho */}
+        <div className="bg-[#EEF1F4] border-b border-[#D7DDE5] text-[#526B8D] text-[11px]">
+          <div className="mx-auto flex min-h-9 max-w-[1400px] items-center justify-between gap-4 px-4 lg:px-9">
+            <div className="flex min-w-0 items-center gap-3 whitespace-nowrap">
+              <span className="hidden sm:inline font-semibold">{formattedFullDate}</span>
+              <span className="text-[#AAB3BF]">|</span>
+              <button type="button" onClick={() => handleOpenWeather()} className="truncate hover:text-[#0B2345] transition-colors cursor-pointer" aria-label={`Abrir previsão do tempo de ${selectedCapital.name}`}>
+                {selectedCapital.name} ({selectedCapital.uf}) · {selectedCapital.temp}°C · {selectedCapital.condition}
+              </button>
+            </div>
+            <div className="hidden items-center gap-1.5 md:flex" aria-label="Redes sociais">
+              {socialIconsConfig.slice(0, 6).map((social) => (
+                <a key={social.platform} href={social.url} target={social.url.startsWith('/') ? undefined : '_blank'} rel={social.url.startsWith('/') ? undefined : 'noreferrer'} aria-label={social.name} className={`flex size-5 items-center justify-center rounded-full ${social.bgColor}`}>
+                  {social.icon}
+                </a>
+              ))}
+              <a href={OFFICIAL_INMET_URL} target="_blank" rel="noreferrer" className="ml-2 font-semibold hover:text-[#0B2345] transition-colors">INMET</a>
+            </div>
+          </div>
+        </div>
         
         {/* ═══════════════════════════════════════════════════════════════════
             1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
@@ -701,6 +721,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
+        <div className="hidden lg:block">
           {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E CONTROLES DE NOTIFICAÇÃO/USUÁRIO */}
           <div className="bg-white py-7 px-9 border-b border-[#E2E8F0]">
             <div className="w-full mx-auto flex items-center justify-center relative min-h-[170px]">
@@ -979,7 +1000,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
           </nav>
-
+        </div>
 
         {/* ═══════════════════════════════════════════════════════════════════
             3. MOBILE DRAWER MENU (GAVETA LATERAL DO MOBILE)
