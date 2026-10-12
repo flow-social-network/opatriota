@@ -33,8 +33,8 @@ export default function NewsroomPage() {
   const initialStatusFilter = statusFilterMapping[section] || 'TODAS';
   const initialTab = tabMapping[section] || 'painel';
   const {
-    articles, sources, pages, categories, authors, subscriptionPlans,
-    updateArticles, updateSources, savePage, deletePage,
+    articles, pages, categories,
+    updateArticles, savePage, deletePage,
     saveCategory, saveMenuConfig,
   } = useData();
 
@@ -68,8 +68,6 @@ export default function NewsroomPage() {
         initialStatusFilter={initialStatusFilter}
         onTabChange={(tab) => navigate(tab === 'painel' ? '/redacao' : `/redacao/${tab}`)}
         articles={articles}
-        sources={sources}
-        onUpdateSources={updateSources}
         currentUser={currentUser}
         onUpdateArticles={updateArticles}
         pages={pages}
