@@ -44,7 +44,7 @@ export default async function handler(req: IncomingMessage & { method?:string; h
       const donation=await documentGet('donations',donationId);
       if(!donation) return json(res,404,{error:'DONATION_NOT_FOUND'});
       const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(donation.amount) && payment.currency_id==='BRL';
-      const donationStatus=approved?'paid':nextStatus;
+      const donationStatus=approved ? 'paid' : payment.status === 'approved' ? 'payment_mismatch' : nextStatus;
       await documentWrite('donations',donationId,{status:donationStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),paidAt:approved?new Date().toISOString():null,updatedAt:new Date().toISOString()});
       return json(res,200,{received:true,type:'donation',status:donationStatus});
     }
@@ -52,7 +52,7 @@ export default async function handler(req: IncomingMessage & { method?:string; h
     const order=await documentGet('checkoutOrders',orderId);
     if(!order) return json(res,404,{error:'ORDER_NOT_FOUND'});
     const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(order.amount) && payment.currency_id==='BRL';
-    const orderStatus=approved?'paid':nextStatus;
+    const orderStatus = approved ? 'paid' : payment.status === 'approved' ? 'payment_mismatch' : nextStatus;
     await documentWrite('checkoutOrders',orderId,{status:orderStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),updatedAt:new Date().toISOString()});
     if (order.uid && approved) {
       const subscriptionId = String(order.uid);
@@ -96,7 +96,7 @@ export default async function handler(req: IncomingMessage & { method?:string; h
       // An old payment's delayed refund must not revoke a newer renewal.
       const subscriptionId = String(order.uid);
       const existing = await documentGet('subscriptions', subscriptionId);
-      if (existing && String(existing.providerPaymentId || '') === String(payment.id)) {
+      if (existing && (String(existing.providerPaymentId || '') === String(payment.id) || String(existing.orderId || '') === orderId)) {
         await documentWrite('subscriptions', subscriptionId, {
           status: 'inactive',
           providerStatus: String(payment.status),
