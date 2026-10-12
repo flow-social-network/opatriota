@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { useToast } from '../../app/contexts/ToastContext';
@@ -21,13 +21,25 @@ export default function NewsroomPage() {
     paginas: 'paginas',
     categorias: 'categorias',
     menus: 'menus',
+    revisao: 'materias',
+    agenda: 'materias',
+    aprovacao: 'materias',
   };
+  const statusFilterMapping: Record<string, string> = {
+    revisao: 'EM REVISÃO',
+    agenda: 'AGENDADA',
+    aprovacao: 'APROVADA',
+  };
+  const initialStatusFilter = statusFilterMapping[section] || 'TODAS';
   const initialTab = tabMapping[section] || 'painel';
   const {
     articles, sources, pages, categories, authors, subscriptionPlans,
     updateArticles, updateSources, savePage, deletePage,
     saveCategory, saveMenuConfig,
   } = useData();
+
+  // Unknown editorial paths must not silently open the dashboard.
+  if (section && !tabMapping[section]) return <Navigate to="/404" replace />;
 
   // Handle auth loading
   if (authLoading) {
@@ -53,6 +65,7 @@ export default function NewsroomPage() {
     <div className="min-h-screen bg-[#F7F8FA] flex flex-col font-sans antialiased text-[#17202A]">
       <NewsroomDashboard
         initialTab={initialTab}
+        initialStatusFilter={initialStatusFilter}
         onTabChange={(tab) => navigate(tab === 'painel' ? '/redacao' : `/redacao/${tab}`)}
         articles={articles}
         sources={sources}
