@@ -54,17 +54,20 @@ function parseBody(req: any): Promise<unknown> {
     }
     const chunks: Buffer[] = [];
     let totalBytes = 0;
+    let tooLarge = false;
     req.on('data', (chunk: Buffer | string) => {
+      if (tooLarge) return;
       const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
       totalBytes += buffer.length;
       if (totalBytes > 1_000_000) {
-        rejectPromise(new Error('REQUEST_BODY_TOO_LARGE'));
-        req.destroy();
+        tooLarge = true;
+        chunks.length = 0;
         return;
       }
       chunks.push(buffer);
     });
     req.on('end', () => {
+      if (tooLarge) return rejectPromise(new Error('REQUEST_BODY_TOO_LARGE'));
       const raw = Buffer.concat(chunks).toString('utf-8');
       if (!raw) return resolvePromise(undefined);
       try {
