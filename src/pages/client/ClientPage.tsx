@@ -22,6 +22,7 @@ export default function ClientPage() {
         articles={articles}
         onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
         initialSubpage={subpage}
+        onSubpageChange={(tab) => navigate(`/minha-conta?tab=${encodeURIComponent(tab)}`)}
       />
     </div>
   );
