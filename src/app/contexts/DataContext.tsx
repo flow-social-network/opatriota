@@ -22,7 +22,7 @@ import {
   INITIAL_LGPD_REQUESTS,
 } from '../../data/pagesData';
 import { useToast } from './ToastContext';
-import { useAuth } from './AuthContext';
+import { useAuthOptional } from './AuthContext';
 import type {
   Article,
   CategorySlug,
@@ -86,7 +86,8 @@ const DEFAULT_MENU: SiteMenuConfig = {
 };
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const { currentUser } = useAuth();
+  const auth = useAuthOptional();
+  const currentUser = auth?.currentUser ?? null;
   const { showToast } = useToast();
 
   const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
