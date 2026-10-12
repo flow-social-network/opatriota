@@ -657,32 +657,37 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
 
           {/* CONTRATO: Faixa 1 cinza fixa; não fundir com mercado ou cabeçalho principal. */}
-          <div className="hidden lg:block site-utility-bar fixed inset-x-0 top-0 z-[60]" data-header-band="utility">
-            <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-4 xl:px-5 py-2 text-xs text-[#334155]">
-              <div className="w-full mx-auto flex min-w-0 items-center justify-between gap-3 xl:gap-5">
+          <div className="hidden lg:block site-utility-bar fixed inset-x-0 top-0 z-[60] h-6 overflow-hidden" data-header-band="utility">
+            <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-2 xl:px-4 h-6 text-[9px] text-[#334155]">
+              <div className="w-full mx-auto flex h-6 min-w-0 items-center justify-between gap-2 xl:gap-3">
                 <div className="flex min-w-0 shrink items-center gap-2 xl:gap-2.5">
-                  <span className="font-medium text-[#1E293B] text-[11px]">{formattedFullDate}</span>
+                  <span className="font-medium text-[#1E293B] text-[9px] whitespace-nowrap">{formattedFullDate}</span>
                   <span className="text-[#CBD5E1] text-xs">|</span>
                   <button type="button" onClick={() => handleOpenWeather('taquara')} className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] whitespace-nowrap" title="Clique para ver a previsão meteorológica (INMET)">
                     <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
                     <span className="font-bold">Taquara (RS)</span><span className="font-bold">24°C</span><span className="text-[#64748B] text-[10px]">Céu limpo</span><span className="bg-[#10B981] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">INMET</span>
                   </button>
                 </div>
-                <form onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }} className="flex w-[220px] xl:w-[260px] flex-none min-w-0 bg-white border border-[#CBD5E1] rounded overflow-hidden h-8 shadow-xs focus-within:border-[#0B2345] transition-colors">
-                  <Search className="w-3.5 h-3.5 text-[#94A3B8] ml-2 shrink-0" />
-                  <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="min-w-0 w-full px-2 py-1 text-[11px] text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
-                  <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-3.5 h-3.5 text-white" /></button>
-                </form>
-                <div className="flex shrink-0 items-center gap-1" aria-label="Redes sociais oficiais">
+                <div className="flex min-w-0 shrink items-center gap-1" aria-label="Redes sociais oficiais">
                   {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex size-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-3`}>{soc.icon}</a>)}
+                </div>
+                <form onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }} className="flex w-[180px] xl:w-[205px] flex-none min-w-0 bg-white border border-[#CBD5E1] rounded overflow-hidden h-5 shadow-xs focus-within:border-[#0B2345] transition-colors">
+                  <Search className="w-3 h-3 text-[#94A3B8] ml-1.5 shrink-0" />
+                  <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="min-w-0 w-full px-1.5 py-0.5 text-[10px] text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
+                  <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-1.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-3 h-3 text-white" /></button>
+                </form>
+                <div className="flex shrink-0 items-center gap-1.5 text-[10px] text-[#0B2345]">
+                  {currentUser ? <button type="button" onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-1 font-bold whitespace-nowrap"><img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="size-5 rounded-full object-cover" /><span className="max-w-[88px] truncate">{currentUser.name}</span><span>⌄</span></button> : <button type="button" onClick={() => { window.location.assign('/login'); }} className="font-bold whitespace-nowrap">Entrar</button>}
+                  <span className="bg-[#16A34A] text-white font-black text-[8px] px-1 py-0.5 rounded">DIGITAL</span>
+                  <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="border border-[#0B5FFF] text-[#0B5FFF] rounded px-1.5 py-0.5 text-[9px] font-black whitespace-nowrap">Anuncie</button>
                 </div>
               </div>
             </div>
           </div>
 
           {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
-          <div data-header-band="market" className="lg:mt-[58px] bg-[#061A35] text-white px-5 py-3 text-[13px] font-medium border-b border-[#0d223a]">
-            <div className="w-full mx-auto flex items-center justify-between gap-5">
+          <div data-header-band="market" className="lg:mt-[24px] h-6 max-h-6 overflow-hidden bg-[#061A35] text-white px-3 py-0 text-[9px] font-medium border-b border-[#0d223a]">
+            <div className="w-full mx-auto flex h-6 min-h-6 items-center justify-between gap-3">
               <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
                 {/* Ponto verde pulsante + MERCADOS AO VIVO */}
                 <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#22C55E] shrink-0">
@@ -732,8 +737,8 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="hidden lg:block">
           {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E CONTROLES DE NOTIFICAÇÃO/USUÁRIO */}
-          <div className="bg-white py-7 px-9 border-b border-[#E2E8F0]">
-            <div className="w-full mx-auto flex items-center justify-center relative min-h-[170px]">
+          <div className="bg-white py-2 px-4 border-b border-[#E2E8F0]">
+            <div className="w-full mx-auto flex items-center justify-center relative min-h-[52px]">
               
               {/* Assinatura editorial esquerda da referência */}
               <div className="absolute left-9 top-1/2 -translate-y-1/2 border-l-4 border-[#FFCC29] pl-7 max-w-[360px] hidden xl:block">
@@ -746,7 +751,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="flex flex-col items-center justify-center focus:outline-none cursor-pointer group"
               >
                 {/* Brush Flag Arc */}
-                <div className="w-[390px] h-16 flex items-center justify-center -mb-2">
+                <div className="w-[220px] h-7 flex items-center justify-center -mb-1">
                   <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
                     <path d="M 20,48 C 80,10 240,10 300,48 C 260,20 60,20 20,48 Z" fill="#16803C" />
                     <path d="M 40,54 C 100,28 220,28 280,54 C 230,36 90,36 40,54 Z" fill="#FFCC29" />
@@ -760,7 +765,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </svg>
                 </div>
 
-                <h1 className="font-serif text-6xl font-black text-[#0B2345] tracking-tight leading-none">
+                <h1 className="font-serif text-3xl font-black text-[#0B2345] tracking-tight leading-none">
                   O PATRIOT<span className="tracking-normal">A</span>
                 </h1>
 

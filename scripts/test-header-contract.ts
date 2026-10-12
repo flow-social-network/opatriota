@@ -9,7 +9,7 @@ const checks: Array<[string, boolean]> = [
   ['Faixa financeira separada', header.includes('data-header-band="market"')],
   ['Faixa utilitária fixa', css.includes('.site-utility-bar') && css.includes('position: fixed')],
   ['Faixa principal não sticky', !header.slice(header.indexOf('TIER 3'), header.indexOf('MOBILE DRAWER')).match(/sticky|fixed/)],
-  ['Offset da faixa fixa', header.includes('lg:mt-[58px]')],
+  ['Offset da faixa fixa', header.includes('lg:mt-[24px]')],
 ];
 
 for (const [name, passed] of checks) {
