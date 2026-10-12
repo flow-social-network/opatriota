@@ -252,8 +252,8 @@ export default async function handler(req: Req, res: Res) {
         updatedAt,
       });
     }
-    if (adminUserMatch && method !== 'GET' && method !== 'PATCH') {
-      res.setHeader('Allow', 'GET, PATCH');
+    if (adminUserMatch && method !== 'PATCH') {
+      res.setHeader('Allow', 'PATCH');
       return json(res, 405, { error: 'METHOD_NOT_ALLOWED' });
     }
 
