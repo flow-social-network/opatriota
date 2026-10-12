@@ -39,7 +39,15 @@ function saveLocalStore(store: Record<string, Record<string, any>>): void {
 export function getDatabaseProvider(): DatabaseProvider {
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) return 'firestore';
   if (process.env.DATABASE_URL) return 'mysql';
-  return 'local_disk';
+
+  // The seeded file store is for local development only. Serverless production
+  // instances have ephemeral filesystems and must fail closed when no durable
+  // database is configured, rather than silently serving seed/demo content.
+  if (process.env.NODE_ENV !== 'production') return 'local_disk';
+
+  throw new Error(
+    'DATABASE_PROVIDER_NOT_CONFIGURED: configure FIREBASE_SERVICE_ACCOUNT_JSON or DATABASE_URL',
+  );
 }
 
 async function getMysqlPool(): Promise<Pool> {
