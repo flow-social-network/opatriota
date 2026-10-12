@@ -14,7 +14,7 @@ interface AdminQueueTabProps {
   items: EditorialQueueItem[];
   queueFilter: string;
   onQueueFilterChange: (value: string) => void;
-  onStatusChange: (id: number, newStatus: EditorialStatus) => void;
+  onStatusChange: (id: string | number, newStatus: EditorialStatus) => void;
 }
 
 export const AdminQueueTab: React.FC<AdminQueueTabProps> = ({
