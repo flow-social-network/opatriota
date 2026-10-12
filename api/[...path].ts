@@ -381,8 +381,8 @@ export default async function handler(req: Req, res: Res) {
         date: String(order.createdAt || ''),
         amount: Number(order.amount || 0),
         planName: String(order.planName || order.planId || 'Assinatura'),
-        status: ['approved', 'paid'].includes(String(order.status)) ? 'concluido' : ['refunded', 'cancelled'].includes(String(order.status)) ? 'reembolsado' : 'processando',
-        invoiceNumber: String(order.orderId || order.id)
+        status: ['approved', 'paid'].includes(String(order.status)) ? 'concluido' : String(order.status) === 'refunded' ? 'reembolsado' : String(order.status) === 'cancelled' ? 'cancelado' : ['rejected', 'payment_mismatch'].includes(String(order.status)) ? 'recusado' : 'processando',
+        orderReference: String(order.orderId || order.id)
       }));
       return json(res, 200, payments);
     }
