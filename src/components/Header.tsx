@@ -668,10 +668,10 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="font-bold">Taquara (RS)</span><span className="font-bold">24°C</span><span className="text-[#64748B] text-[10px]">Céu limpo</span><span className="bg-[#10B981] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">INMET</span>
                   </button>
                 </div>
-                <form onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }} className="flex items-center flex-1 min-w-[220px] max-w-[390px] bg-white border border-[#CBD5E1] rounded overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors">
-                  <Search className="w-[18px] h-[18px] text-[#94A3B8] ml-2 shrink-0" />
-                  <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="w-full px-2 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
-                  <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-[18px] h-[18px] text-white" /></button>
+                <form onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }} className="flex w-[220px] xl:w-[260px] flex-none min-w-0 bg-white border border-[#CBD5E1] rounded overflow-hidden h-8 shadow-xs focus-within:border-[#0B2345] transition-colors">
+                  <Search className="w-3.5 h-3.5 text-[#94A3B8] ml-2 shrink-0" />
+                  <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="min-w-0 w-full px-2 py-1 text-[11px] text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
+                  <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-3.5 h-3.5 text-white" /></button>
                 </form>
                 <div className="flex shrink-0 items-center gap-1" aria-label="Redes sociais oficiais">
                   {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex size-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-3`}>{soc.icon}</a>)}
