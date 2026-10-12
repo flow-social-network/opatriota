@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import webhookHandler from '../api/webhooks/mercadopago';
+import webhookHandler, { matchesApprovedBRLPayment } from '../api/webhooks/mercadopago';
 
 function responseRecorder() {
   const headers = new Map<string, string>();
@@ -50,4 +50,11 @@ test('Mercado Pago webhook fails closed when no signing secret is configured', a
     if (previousSecret === undefined) delete process.env.MERCADOPAGO_WEBHOOK_SECRET;
     else process.env.MERCADOPAGO_WEBHOOK_SECRET = previousSecret;
   }
+});
+
+test('approved payments must match the expected BRL amount before marking an order paid', () => {
+  assert.equal(matchesApprovedBRLPayment({ status: 'approved', transaction_amount: 19.9, currency_id: 'BRL' }, 19.9), true);
+  assert.equal(matchesApprovedBRLPayment({ status: 'approved', transaction_amount: 9.9, currency_id: 'BRL' }, 19.9), false);
+  assert.equal(matchesApprovedBRLPayment({ status: 'approved', transaction_amount: 19.9, currency_id: 'USD' }, 19.9), false);
+  assert.equal(matchesApprovedBRLPayment({ status: 'pending', transaction_amount: 19.9, currency_id: 'BRL' }, 19.9), false);
 });
