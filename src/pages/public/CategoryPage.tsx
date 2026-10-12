@@ -10,12 +10,17 @@ export default function CategoryPage({ defaultCategory }: { defaultCategory?: st
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { articles, categories, dataLoading, dataErrors } = useData();
+  const publicArticles = articles.filter((article) => {
+    const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+    const status = String((article as any).status || '').trim().toLowerCase();
+    return editorialStatus === 'PUBLICADA' && ['', 'publicada', 'publicado', 'published'].includes(status);
+  });
 
   const activeSlug = slug || defaultCategory || 'todos';
   let category = categories.find(c => c.slug === activeSlug);
 
   if (!category && activeSlug && activeSlug !== 'todos') {
-    const matchingArticle = articles.find((article) => {
+    const matchingArticle = publicArticles.find((article) => {
       const categorySlug = String(article.category || '').normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -78,7 +83,7 @@ export default function CategoryPage({ defaultCategory }: { defaultCategory?: st
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <CategoryPageView
         category={category}
-        articles={articles}
+        articles={publicArticles}
         allCategories={categories}
         onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
         onSelectCategory={(cat) => navigate(cat === 'todos' ? '/' : `/categoria/${cat}`)}
