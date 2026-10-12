@@ -56,15 +56,23 @@ export const OpinionColumnistsSection: React.FC<OpinionColumnistsSectionProps> =
             <article
               key={art.id}
               onClick={() => onSelectArticle(art)}
-              className="bg-white border border-[#D9DEE7] rounded-xl p-5 flex flex-col justify-between group cursor-pointer hover:shadow-md hover:border-[#FFCC29] transition relative overflow-hidden"
+              role="button"
+              tabIndex={0}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  onSelectArticle(art);
+                }
+              }}
+              className="bg-white border border-[#D9DEE7] rounded-xl p-4 flex flex-col justify-between group cursor-pointer hover:shadow-md hover:border-[#FFCC29] transition relative overflow-hidden focus-within:ring-2 focus-within:ring-[#0B5FFF] focus-within:ring-offset-2"
             >
               {/* Subtle gold top ribbon */}
               <div className="absolute top-0 inset-x-0 h-1 bg-[#FFCC29] group-hover:h-1.5 transition-all" />
 
               <div>
                 {/* Author Avatar & Header */}
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#FFCC29] shrink-0 bg-slate-100 shadow-xs">
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-[#FFCC29] shrink-0 bg-slate-100 shadow-xs">
                     <img
                       src={matchingAuthor?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=240&q=80'}
                       alt={art.author}
@@ -82,18 +90,18 @@ export const OpinionColumnistsSection: React.FC<OpinionColumnistsSectionProps> =
                 </div>
 
                 {/* Article Title */}
-                <h3 className="font-serif text-sm sm:text-base font-bold text-[#0B2345] leading-snug group-hover:text-[#0B5FFF] transition-colors mb-2.5 line-clamp-3">
+                <h3 className="font-serif text-[15px] sm:text-base font-bold text-[#0B2345] leading-[1.35] group-hover:text-[#0B5FFF] transition-colors mb-2 line-clamp-3">
                   "{art.title}"
                 </h3>
 
                 {/* Subtitle / Excerpt */}
-                <p className="text-xs text-[#5D6673] leading-relaxed line-clamp-3 font-normal">
+                <p className="text-[12px] sm:text-[13px] text-[#5D6673] leading-[1.4] line-clamp-2 font-normal">
                   {art.subtitle}
                 </p>
               </div>
 
               {/* Bottom footer link */}
-              <div className="pt-4 mt-4 border-t border-[#F1F3F5] flex items-center justify-between text-xs">
+              <div className="pt-3 mt-3 border-t border-[#F1F3F5] flex items-center justify-between text-xs">
                 <span className="text-[10px] font-semibold text-[#8C9BAE]">
                   {art.readTimeMinutes} min de leitura
                 </span>
