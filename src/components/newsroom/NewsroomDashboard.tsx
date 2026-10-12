@@ -30,7 +30,8 @@ import {
   SlidersHorizontal,
   Globe,
   Compass,
-  Menu
+  Menu,
+  Search
 } from 'lucide-react';
 import { NewsroomOverviewTab } from './NewsroomOverviewTab';
 import { NewsroomArticlesTab } from './NewsroomArticlesTab';
@@ -513,13 +514,20 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     { id: 'menus', label: 'Menus', icon: Menu },
   ];
 
+  const workflowNavigation = [
+    { label: 'Agenda Editorial', count: countAgendadas },
+    { label: 'Fila de Revisão', count: countEmRevisao },
+    { label: 'Aprovação Final', count: countAprovadas },
+    { label: 'Relatórios', count: countPublicadas },
+  ];
+
   return (
     <div className="min-h-screen bg-[#eef5fb] text-[#17202A] select-none">
       <div className="flex min-h-screen">
         <aside className="hidden w-56 shrink-0 flex-col bg-white border-r border-[#c7d9ea] lg:flex">
-          <div className="h-[74px] bg-[#0875bd] px-4 flex items-center gap-2 text-white">
-            <div className="size-9 rounded-md bg-white flex items-center justify-center text-[#0875bd] font-black">OP</div>
-            <div><div className="text-[13px] font-black leading-tight">O PATRIOTA</div><div className="text-[9px] text-white/80">Sistema de Redação</div></div>
+          <div className="h-[74px] bg-[#e8f3fc] border-b border-[#c7d9ea] px-4 flex items-center gap-2 text-[#153d61]">
+            <div className="size-9 rounded-md bg-[#0875bd] flex items-center justify-center text-white font-black shadow-sm">OP</div>
+            <div><div className="text-[13px] font-black leading-tight">O PATRIOTA BRASIL</div><div className="text-[9px] text-[#55718a]">Sistema da Redação</div></div>
           </div>
           <nav className="flex-1 p-3" aria-label="Navegação da redação">
             <p className="px-3 py-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Redação</p>
@@ -532,7 +540,8 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
             </div>
             <p className="px-3 pt-6 pb-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Fluxo editorial</p>
             <div className="flex flex-col gap-1 text-[12px] font-semibold text-[#52677a]">
-              {['Agenda Editorial', 'Fila de Revisão', 'Aprovação Final', 'Relatórios', 'Configurações', 'Integrações (APIs)'].map((label) => <button key={label} onClick={() => setActiveTab('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><CheckCircle className="size-4 text-[#7b9bb5]" />{label}</button>)}
+              {workflowNavigation.map(({ label, count }) => <button key={label} onClick={() => setActiveTab('painel')} className="flex items-center justify-between gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><span className="flex items-center gap-3"><CheckCircle className="size-4 text-[#7b9bb5]" />{label}</span><span className="rounded-full bg-[#e8f3fc] px-2 py-0.5 text-[10px] text-[#0875bd]">{count}</span></button>)}
+              <button onClick={() => setActiveTab('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><SlidersHorizontal className="size-4 text-[#7b9bb5]" />Configurações</button>
             </div>
           </nav>
           <div className="border-t border-[#e1ebf3] p-3 text-[11px] text-[#52677a]">{currentUser.name}<div className="text-[10px] text-[#8ba0b2]">{currentUser.role.replace('_', ' ')}</div></div>
@@ -540,7 +549,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         <main className="min-w-0 flex-1">
           <header className="h-[74px] border-b border-[#c7d9ea] bg-white px-4 md:px-7 flex items-center justify-between gap-4">
             <div><p className="text-[11px] font-bold text-[#8195a8]">O PATRIOTA / REDAÇÃO</p><h1 className="text-lg font-black text-[#153d61]">{activeTab === 'painel' ? 'Painel Principal' : navigation.find((item) => item.id === activeTab)?.label || 'Redação'}</h1></div>
-            <div className="flex items-center gap-3"><div className="hidden md:flex h-9 w-64 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center px-3 text-xs text-[#8aa0b2]">Buscar matérias, pautas, autores...</div><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova</button><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
+            <div className="flex items-center gap-3"><label className="hidden md:flex h-9 w-72 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center gap-2 px-3 text-xs text-[#8aa0b2]"><Search className="size-4 shrink-0 text-[#0875bd]" aria-hidden="true" /><input aria-label="Buscar na redação" placeholder="Buscar matérias, pautas, autores..." className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8aa0b2]" /></label><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova matéria</button><div className="hidden sm:block text-right"><div className="text-xs font-bold text-[#153d61]">{currentUser.name}</div><div className="text-[10px] text-[#7b91a4]">{currentUser.role.replace('_', ' ')}</div></div><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
           </header>
           {feedbackMsg && <div className={`px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'}`}><AlertTriangle className="size-4" /><span>{feedbackMsg.text}</span></div>}
           <div className="mx-auto max-w-[1440px] px-4 py-5 md:px-7">

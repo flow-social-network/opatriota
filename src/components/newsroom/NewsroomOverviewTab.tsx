@@ -70,6 +70,28 @@ export const NewsroomOverviewTab: React.FC<NewsroomOverviewTabProps> = ({
         </div>
       </div>
 
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+        <section className="xl:col-span-2 rounded-xl border border-[#c7d9ea] bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between border-b border-[#e5edf4] pb-3">
+            <div><h3 className="text-sm font-black text-[#153d61]">Fluxo de trabalho</h3><p className="mt-1 text-[11px] text-[#7890a4]">Atividades reais da redação por estado editorial.</p></div>
+            <span className="rounded-full bg-[#e8f3fc] px-2.5 py-1 text-[10px] font-bold text-[#0875bd]">Atualizado agora</span>
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+            {[
+              ['Em produção', countRascunho, 'bg-[#e8f3fc] text-[#0875bd]'],
+              ['Em revisão', countEmRevisao, 'bg-[#fff4df] text-[#b56b00]'],
+              ['Aguardando aprovação', countAprovadas, 'bg-[#f2eaff] text-[#7541c8]'],
+              ['Publicadas', countPublicadas, 'bg-[#e4f8ef] text-[#16803c]'],
+            ].map(([label, value, tone]) => <div key={label} className="rounded-lg border border-[#e5edf4] p-3"><div className={`mb-2 inline-flex rounded-md px-2 py-1 text-lg font-black ${tone}`}>{value}</div><div className="text-[11px] font-bold text-[#52677a]">{label}</div></div>)}
+          </div>
+        </section>
+        <section className="rounded-xl border border-[#c7d9ea] bg-white p-5 shadow-sm">
+          <div className="flex items-center justify-between"><h3 className="text-sm font-black text-[#153d61]">Checklist editorial</h3><span className="text-[10px] font-bold text-[#7890a4]">Dados por matéria</span></div>
+          <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#e5edf4]"><div className="h-full w-0 rounded-full bg-[#21b573]" /></div>
+          <ul className="mt-4 space-y-2 text-[11px] text-[#52677a]">{['Título e linha fina','Fontes consultadas','Imagem e créditos','Tags e editoria','Revisão ortográfica','Análise editorial','Aprovação final'].map((item, index) => <li key={item} className="flex items-center gap-2"><span className={`flex size-4 items-center justify-center rounded text-[10px] font-black ${index === 6 ? 'border border-[#b9c9d8] text-[#8ba0b2]' : 'bg-[#21b573] text-white'}`}>{index === 6 ? '' : '✓'}</span>{item}{index === 6 && <strong className="text-[#b56b00]">(obrigatória)</strong>}</li>)}</ul>
+        </section>
+      </div>
+
       {/* Editorial Policy Reminder */}
       <div className="p-4 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] rounded text-xs flex items-center justify-between">
         <div className="flex items-center gap-2">
