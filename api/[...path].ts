@@ -28,6 +28,12 @@ export function isPublicPage(page: Record<string, any>): boolean {
   return ['publicado', 'publicada', 'published'].includes(status) || page.published === true;
 }
 
+export function isPublicFactCheck(item: Record<string, any>): boolean {
+  const status = String(item.editorialStatus || item.status || '').trim().toLowerCase();
+  if (['rascunho', 'draft', 'revisao', 'em revisão', 'review', 'despublicada', 'unpublished'].includes(status)) return false;
+  return item.published !== false && item.active !== false;
+}
+
 export function subscriptionExpiry(startValue: unknown, cycle: unknown): number | null {
   const date = new Date(String(startValue || ''));
   if (!Number.isFinite(date.getTime())) return null;
@@ -138,6 +144,7 @@ function canonicalizeUrl(value: string): string {
 function publicRecords(collection: string, records: any[]): any[] {
   if (collection === 'articles') return records.filter(isPublicArticle);
   if (collection === 'pages') return records.filter(isPublicPage);
+  if (collection === 'factChecks') return records.filter(isPublicFactCheck);
   if (collection === 'categories' || collection === 'authors' || collection === 'columnists') return records.filter(item => item.active !== false);
   return records;
 }
@@ -732,7 +739,9 @@ export default async function handler(req: Req, res: Res) {
       if (!isEditorial) {
         const canSeeEditorialRecords =
           (resource.collection === 'articles' && staff) ||
-          (resource.collection === 'pages' && editor);
+          (resource.collection === 'pages' && editor) ||
+          (resource.collection === 'factChecks' && staff) ||
+          (['categories', 'authors', 'columnists'].includes(resource.collection) && editor);
         if (!canSeeEditorialRecords) records = publicRecords(resource.collection, records);
       }
 
@@ -765,6 +774,10 @@ export default async function handler(req: Req, res: Res) {
       if (resource.collection === 'pages' && !isPublicPage(record) &&
           !Boolean(identity && EDITORS.has(identity.role))) {
         return json(res, 404, { error: 'NOT_FOUND', message: 'Página não encontrada.' });
+      }
+      if (resource.collection === 'factChecks' && !isPublicFactCheck(record) &&
+          !Boolean(identity && STAFF.has(identity.role))) {
+        return json(res, 404, { error: 'NOT_FOUND', message: 'Checagem não encontrada.' });
       }
       if (['categories', 'authors', 'columnists'].includes(resource.collection) &&
           record.active === false && !Boolean(identity && STAFF.has(identity.role))) {
