@@ -3,6 +3,16 @@ import { createHmac } from 'node:crypto';
 import { constantTimeHexEqual, json, mpRequest } from '../_lib/billing';
 import { documentGet, documentWrite } from '../_lib/storage';
 
+export function matchesApprovedBRLPayment(payment: Record<string, any>, expectedAmount: unknown): boolean {
+  const actualCents = Math.round(Number(payment.transaction_amount) * 100);
+  const expectedCents = Math.round(Number(expectedAmount) * 100);
+  return payment.status === 'approved' &&
+    Number.isFinite(actualCents) &&
+    Number.isFinite(expectedCents) &&
+    actualCents === expectedCents &&
+    payment.currency_id === 'BRL';
+}
+
 export function addBillingCycle(startValue: string | Date, cycle: unknown): string {
   const start = new Date(startValue);
   if (!Number.isFinite(start.getTime())) throw new Error('INVALID_SUBSCRIPTION_START_DATE');
@@ -49,7 +59,7 @@ export default async function handler(req: IncomingMessage & { method?:string; h
       const donationId=externalReference.slice('donation:'.length);
       const donation=await documentGet('donations',donationId);
       if(!donation) return json(res,404,{error:'DONATION_NOT_FOUND'});
-      const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(donation.amount) && payment.currency_id==='BRL';
+      const approved = matchesApprovedBRLPayment(payment, donation.amount);
       const donationStatus=approved ? 'paid' : payment.status === 'approved' ? 'payment_mismatch' : nextStatus;
       await documentWrite('donations',donationId,{status:donationStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),paidAt:approved?new Date().toISOString():null,updatedAt:new Date().toISOString()});
       return json(res,200,{received:true,type:'donation',status:donationStatus});
@@ -57,7 +67,7 @@ export default async function handler(req: IncomingMessage & { method?:string; h
     const orderId=externalReference;
     const order=await documentGet('checkoutOrders',orderId);
     if(!order) return json(res,404,{error:'ORDER_NOT_FOUND'});
-    const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(order.amount) && payment.currency_id==='BRL';
+    const approved = matchesApprovedBRLPayment(payment, order.amount);
     const orderStatus = approved ? 'paid' : payment.status === 'approved' ? 'payment_mismatch' : nextStatus;
     await documentWrite('checkoutOrders',orderId,{status:orderStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),updatedAt:new Date().toISOString()});
     if (order.uid && approved) {
