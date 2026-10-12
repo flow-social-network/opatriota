@@ -1,12 +1,13 @@
 import React from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { AdminDashboard } from '../../components/AdminDashboard';
 
 export default function AdminPage() {
   const navigate = useNavigate();
-  const { section } = useParams();
+  const location = useLocation();
+  const section = location.pathname.split('/').filter(Boolean)[1];
   const { currentUser, authLoading } = useAuth();
   const {
     sources,
