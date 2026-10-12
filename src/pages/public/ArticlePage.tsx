@@ -13,7 +13,7 @@ export default function ArticlePage() {
   const { currentUser, toggleBookmark } = useAuth();
 
   const article = articles.find((item) => item.slug === slug || item.id === slug);
-  const isPremiumLocked = Boolean((article as (typeof article & { premiumLocked?: boolean }))?.premiumLocked);
+  const isPremiumLocked = Boolean((article as any)?.premiumLocked);
 
   useSeoMetadata({
     title: article?.seo?.metaTitle || article?.title,
