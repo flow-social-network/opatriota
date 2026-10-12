@@ -84,12 +84,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section className="mb-10" aria-label="Destaques principais">
       <div className="grid grid-cols-1 items-stretch gap-6 lg:grid-cols-12">
         <div className="flex min-w-0 flex-col lg:col-span-6">
-          <button
-            type="button"
-            onClick={() => onSelectArticle(currentLead)}
-            className="group relative flex min-h-[360px] flex-1 flex-col justify-end overflow-hidden rounded-lg border border-[#D9DEE7] bg-[#0B2345] text-left shadow-sm sm:min-h-[420px] xl:min-h-[460px]"
-            aria-label={`Ler matéria: ${currentLead.title}`}
-          >
+          <div className="group relative flex min-h-[360px] flex-1 flex-col justify-end overflow-hidden rounded-lg border border-[#D9DEE7] bg-[#0B2345] text-left shadow-sm sm:min-h-[420px] xl:min-h-[460px]">
             <ArticleImage
               src={currentLead.imageUrl}
               alt={currentLead.title}
@@ -101,7 +96,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 {currentLead.kicker || currentLead.category}
               </span>
               <h1 className="mb-2 font-serif text-2xl font-bold leading-snug text-white transition-colors group-hover:text-[#FFCC29] sm:text-3xl">
-                {currentLead.title}
+                <button type="button" onClick={() => onSelectArticle(currentLead)} className="text-left hover:text-[#FFCC29] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+                  {currentLead.title}
+                </button>
               </h1>
               {currentLead.subtitle && (
                 <p className="mb-4 line-clamp-2 text-xs leading-relaxed text-white/85 sm:text-sm">{currentLead.subtitle}</p>
@@ -115,26 +112,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   <span className="flex items-center gap-2">
                     <span>{activeSlide + 1}/{carouselArticles.length}</span>
                     <span className="flex gap-1">
-                      <span
-                        role="presentation"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/40"
-                        onClick={(event) => { event.stopPropagation(); changeSlide(-1); }}
-                      >
+                      <button type="button" aria-label="Destaque anterior" onClick={() => changeSlide(-1)} className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/40 hover:bg-black/60">
                         <ChevronLeft className="h-4 w-4" />
-                      </span>
-                      <span
-                        role="presentation"
-                        className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/40"
-                        onClick={(event) => { event.stopPropagation(); changeSlide(1); }}
-                      >
+                      </button>
+                      <button type="button" aria-label="Próximo destaque" onClick={() => changeSlide(1)} className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-black/40 hover:bg-black/60">
                         <ChevronRight className="h-4 w-4" />
-                      </span>
+                      </button>
                     </span>
                   </span>
                 )}
               </div>
             </div>
-          </button>
+          </div>
         </div>
 
         <div className="flex min-w-0 flex-col lg:col-span-3">
