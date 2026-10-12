@@ -151,6 +151,7 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'fontes', element: <LazyPanel><AdminSourcesPage /></LazyPanel> },
       { path: ':section', element: <LazyPanel><NewsroomPage /></LazyPanel> },
       { path: '*', element: <Navigate to="/redacao" replace /> },
     ],
