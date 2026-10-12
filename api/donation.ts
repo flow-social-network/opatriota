@@ -1,8 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { json, mpRequest, newId, readBody, validEmail } from './_lib/billing';
 import { documentWrite } from './_lib/storage';
+import { handleCors } from './_lib/cors';
 
 export default async function handler(req: IncomingMessage & { method?:string; headers:any; body?:any },res:ServerResponse & {statusCode:number;setHeader(name:string,value:string):void;end(body?:string):void}) {
+ if (handleCors(req, res)) return;
  if(req.method!=='POST'){res.setHeader('Allow','POST');return json(res,405,{error:'METHOD_NOT_ALLOWED'});}
  try {
   const body=await readBody(req);
@@ -13,7 +15,7 @@ export default async function handler(req: IncomingMessage & { method?:string; h
   const message=String(body.message||'').trim();
   if(donorEmail&&!validEmail(donorEmail)) return json(res,400,{error:'INVALID_EMAIL',message:'Informe um e-mail válido.'});
   if(message.length>500) return json(res,400,{error:'MESSAGE_TOO_LONG',message:'A mensagem pode ter no máximo 500 caracteres.'});
-  const configuredSiteUrl=process.env.PUBLIC_SITE_URL||(process.env.VERCEL_URL?'https://'+process.env.VERCEL_URL:'');
+  const configuredSiteUrl=process.env.PUBLIC_SITE_URL||(process.env.VERCEL_URL?'https://'+process.env.VERCEL_URL:'https://www.opatriota.sbs');
   if(!configuredSiteUrl||!configuredSiteUrl.startsWith('https://')) return json(res,503,{error:'PUBLIC_SITE_URL_NOT_CONFIGURED',message:'Configure a URL HTTPS pública do jornal.'});
   const siteUrl=configuredSiteUrl.replace(/\/$/,'');
   const donationId=newId();

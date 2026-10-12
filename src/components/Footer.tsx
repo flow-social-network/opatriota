@@ -119,7 +119,7 @@ export const Footer: React.FC<FooterProps> = ({
     {
       platform: 'linkedin',
       name: 'LinkedIn',
-      url: 'https://linkedin.com/company/opatriotabrasil',
+      url: 'https://www.linkedin.com/company/journal-o-patriota',
       bgColor: 'bg-[#0A66C2]',
       icon: <Linkedin className="w-4 h-4 text-white fill-current" />
     },
@@ -554,11 +554,11 @@ export const Footer: React.FC<FooterProps> = ({
           {/* E-mail de Contato Institucional */}
           <div className="flex items-center gap-4 flex-wrap justify-center text-white/80">
             <a 
-              href="mailto:contato@opatriota.com.br" 
+              href="mailto:contato@opatriota.sbs" 
               className="hover:text-white flex items-center gap-1.5 transition-colors"
             >
               <Mail className="w-3.5 h-3.5 text-[#FFCC29]" />
-              <span>contato@opatriota.com.br</span>
+              <span>contato@opatriota.sbs</span>
             </a>
           </div>
 

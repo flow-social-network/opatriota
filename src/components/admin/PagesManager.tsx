@@ -63,7 +63,7 @@ export const PagesManager: React.FC<PagesManagerProps> = ({
       seo: {
         metaTitle: 'Nova Página — O Patriota',
         metaDescription: 'Descrição para motores de busca e compartilhamento social.',
-        canonicalUrl: 'https://opatriota.com.br/nova-pagina/'
+        canonicalUrl: 'https://www.opatriota.sbs/nova-pagina/'
       }
     };
     setEditingPage(newPage);

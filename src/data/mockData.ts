@@ -140,7 +140,7 @@ export const DEMO_USERS: Record<string, UserSession> = {
   jornalista: {
     id: 'usr-4',
     name: 'Thiago Vasconcellos',
-    email: 'thiago.jornalista@opatriota.com.br',
+    email: 'thiago.jornalista@opatriota.sbs',
     role: 'jornalista',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=160&q=80',
     bio: 'Repórter de Política em Brasília. Cobre Congresso Nacional e Ministério da Fazenda.',
@@ -162,7 +162,7 @@ export const DEMO_USERS: Record<string, UserSession> = {
   revisor: {
     id: 'usr-5',
     name: 'Helena Miranda',
-    email: 'helena.revisora@opatriota.com.br',
+    email: 'helena.revisora@opatriota.sbs',
     role: 'revisor',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=160&q=80',
     bio: 'Revisora de textos e estilo editorial. Especialista em apuração factual e normas ABNT/Manual O Patriota.',
@@ -184,7 +184,7 @@ export const DEMO_USERS: Record<string, UserSession> = {
   editor_chefe: {
     id: 'usr-6',
     name: 'Dr. Alberto Gonçalves',
-    email: 'alberto.editor@opatriota.com.br',
+    email: 'alberto.editor@opatriota.sbs',
     role: 'editor_chefe',
     avatarUrl: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=160&q=80',
     bio: 'Editor-Chefe e Membro do Conselho Editorial de O Patriota. Mais de 25 anos de jornalismo de cobertura nacional.',

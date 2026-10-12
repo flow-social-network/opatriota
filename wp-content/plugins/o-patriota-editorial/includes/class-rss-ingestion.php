@@ -31,7 +31,7 @@ class O_Patriota_Rss_Ingestion {
 		$response = wp_safe_remote_get( $source->rss_url, array(
 			'timeout'     => 15,
 			'redirection' => 2,
-			'user-agent'  => 'OPatriotaBot/1.0 (+https://opatriota.com.br/expediente)',
+			'user-agent'  => 'OPatriotaBot/1.0 (+https://www.opatriota.sbs/expediente)',
 		) );
 
 		if ( is_wp_error( $response ) ) {

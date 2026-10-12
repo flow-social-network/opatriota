@@ -149,7 +149,7 @@ export default function ClientLoginPage() {
               Sua Senha
             </label>
             <Link
-              to="/esqueci-a-senha"
+              to="/auth/esqueci-a-senha"
               className="text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-medium"
             >
               Esqueci a senha
@@ -210,7 +210,7 @@ export default function ClientLoginPage() {
       {/* Sign up prompt */}
       <div className="mt-6 text-center text-xs text-[#4A5568]">
         <span>Ainda não possui uma assinatura? </span>
-        <Link to="/cadastro" className="text-[#0B5FFF] font-bold hover:underline">
+        <Link to="/auth/cadastro" className="text-[#0B5FFF] font-bold hover:underline">
           Cadastre-se gratuitamente
         </Link>
         <span className="mx-1.5">•</span>

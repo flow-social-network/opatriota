@@ -208,11 +208,11 @@ export default function ClientRegisterPage() {
             />
             <span className="text-xs text-[#4A5568] leading-tight">
               Li e concordo com os{' '}
-              <Link to="/termos" target="_blank" className="text-[#0B5FFF] underline hover:text-[#0848C7]">
+              <Link to="/termos-de-uso" target="_blank" className="text-[#0B5FFF] underline hover:text-[#0848C7]">
                 Termos de Uso
               </Link>{' '}
               e a{' '}
-              <Link to="/privacidade" target="_blank" className="text-[#0B5FFF] underline hover:text-[#0848C7]">
+              <Link to="/politica-de-privacidade" target="_blank" className="text-[#0B5FFF] underline hover:text-[#0848C7]">
                 Política de Privacidade
               </Link>{' '}
               do jornal O Patriota.
@@ -238,7 +238,7 @@ export default function ClientRegisterPage() {
 
       <div className="mt-6 text-center text-xs text-[#4A5568]">
         <span>Já tem uma conta cadastrada? </span>
-        <Link to="/login" className="text-[#0B5FFF] font-bold hover:underline">
+        <Link to="/auth/login" className="text-[#0B5FFF] font-bold hover:underline">
           Faça login aqui
         </Link>
       </div>

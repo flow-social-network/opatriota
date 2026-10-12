@@ -51,7 +51,7 @@ export default function NewsroomResetPasswordPage() {
             Sua nova senha de redação foi atualizada no sistema de segurança. Você já pode acessar a redação com a nova credencial.
           </p>
           <button
-            onClick={() => navigate('/redacao/login')}
+            onClick={() => navigate('/auth/login/redacao')}
             className="w-full py-3 px-4 bg-[#0B2345] hover:bg-[#132D50] text-white text-sm font-bold rounded-lg shadow-md transition cursor-pointer"
           >
             Acessar Login da Redação
@@ -147,7 +147,7 @@ export default function NewsroomResetPasswordPage() {
 
             <div className="text-center pt-2">
               <Link
-                to="/redacao/login"
+                to="/auth/login/redacao"
                 className="inline-flex items-center gap-1.5 text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-bold"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

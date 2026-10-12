@@ -242,7 +242,7 @@ export const Header: React.FC<HeaderProps> = ({
     {
       platform: 'linkedin',
       name: 'LinkedIn',
-      url: 'https://linkedin.com/company/opatriotabrasil',
+      url: 'https://www.linkedin.com/company/journal-o-patriota',
       bgColor: 'bg-[#0A66C2]',
       icon: <Linkedin className="w-3.5 h-3.5 text-white fill-current" />
     },

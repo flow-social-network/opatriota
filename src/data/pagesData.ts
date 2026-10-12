@@ -24,7 +24,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Sobre O Patriota — Informação com Liberdade por um Brasil mais Forte',
       metaDescription: 'Conheça a história, os princípios e a missão do portal O Patriota. Jornalismo independente, defesa das liberdades e rigor na apuração factual.',
-      canonicalUrl: 'https://opatriota.com.br/sobre-o-patriota/',
+      canonicalUrl: 'https://www.opatriota.sbs/sobre-o-patriota/',
       focusKeywords: ['Sobre O Patriota', 'Jornalismo Independente', 'Brasil', 'Liberdade de Imprensa']
     },
     toc: [
@@ -91,7 +91,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 <section id="contatos">
   <h2>7. Contatos Institucionais</h2>
   <p>Para dúvidas institucionais, correspondência com o conselho ou envio de documentações:</p>
-  <p><strong>E-mail institucional:</strong> institucional@opatriota.com.br<br />
+  <p><strong>E-mail institucional:</strong> institucional@opatriota.sbs<br />
   <strong>Sede Editorial:</strong> Edifício Centro Empresarial Brasília, Setor Comercial Sul (SCS), Brasília - DF, CEP 70300-900</p>
 </section>
 `
@@ -112,7 +112,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Expediente e Redação — O Patriota',
       metaDescription: 'Conheça o corpo editorial, diretores de redação, editores-chefes e correspondentes responsáveis pelo conteúdo de O Patriota.',
-      canonicalUrl: 'https://opatriota.com.br/expediente/'
+      canonicalUrl: 'https://www.opatriota.sbs/expediente/'
     },
     toc: [
       { id: 'diretoria', title: '1. Diretoria Executiva e Editorial' },
@@ -161,14 +161,14 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 <section id="juridico">
   <h2>5. Assessoria Jurídica e Compliance</h2>
   <p><strong>Consultoria Jurídica e Defesa de Imprensa:</strong> Assessoria Externa Credenciada na OAB/DF</p>
-  <p><strong>Encarregado de Proteção de Dados (DPO / LGPD):</strong> privacidade@opatriota.com.br</p>
+  <p><strong>Encarregado de Proteção de Dados (DPO / LGPD):</strong> privacidade@opatriota.sbs</p>
 </section>
 
 <section id="canais">
   <h2>6. Canais Oficiais de Contato</h2>
-  <p><strong>Pautas e Sugestões:</strong> pauta@opatriota.com.br<br />
-  <strong>Correções de Matérias:</strong> correcoes@opatriota.com.br<br />
-  <strong>Redação Geral:</strong> redacao@opatriota.com.br<br />
+  <p><strong>Pautas e Sugestões:</strong> pauta@opatriota.sbs<br />
+  <strong>Correções de Matérias:</strong> correcoes@opatriota.sbs<br />
+  <strong>Redação Geral:</strong> redacao@opatriota.sbs<br />
   <strong>Telefone / WhatsApp da Redação:</strong> (61) 3244-8800 (Atendimento em dias úteis das 08h às 19h)</p>
 </section>
 `
@@ -189,7 +189,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Princípios Editoriais e Código Ético — O Patriota',
       metaDescription: 'Leia os princípios que regem cada notícia, reportagem e artigo publicado em O Patriota. Independência, precisão e distinção clara entre fato e opinião.',
-      canonicalUrl: 'https://opatriota.com.br/principios-editoriais/'
+      canonicalUrl: 'https://www.opatriota.sbs/principios-editoriais/'
     },
     toc: [
       { id: 'independencia', title: '1. Independência Editorial' },
@@ -264,7 +264,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Fontes e Metodologia de Apuração — O Patriota',
       metaDescription: 'Descubra como O Patriota seleciona fontes oficiais, verifica dados públicos e utiliza inteligência editorial sob supervisão humana rigorosa.',
-      canonicalUrl: 'https://opatriota.com.br/fontes-e-metodologia/'
+      canonicalUrl: 'https://www.opatriota.sbs/fontes-e-metodologia/'
     },
     toc: [
       { id: 'fontes-oficiais', title: '1. Critérios de Seleção de Fontes' },
@@ -334,7 +334,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Política de Correções e Erratas — O Patriota',
       metaDescription: 'Saiba como solicitar correções de matérias em O Patriota. Processo transparente de acolhimento, análise editorial e publicação de erratas.',
-      canonicalUrl: 'https://opatriota.com.br/politica-de-correcoes/'
+      canonicalUrl: 'https://www.opatriota.sbs/politica-de-correcoes/'
     },
     toc: [
       { id: 'comunicar-erro', title: '1. Como Comunicar um Erro' },
@@ -351,7 +351,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     content: `
 <section id="comunicar-erro">
   <h2>1. Como Comunicar um Erro</h2>
-  <p>Leitores, partes citadas, autoridades ou qualquer cidadão que identifique imprecisão factual, erro de grafia de nome próprio, dado numérico incorreto ou citação fora de contexto podem enviar apontamentos imediatos através de nosso formulário ou pelo e-mail <strong>correcoes@opatriota.com.br</strong>.</p>
+  <p>Leitores, partes citadas, autoridades ou qualquer cidadão que identifique imprecisão factual, erro de grafia de nome próprio, dado numérico incorreto ou citação fora de contexto podem enviar apontamentos imediatos através de nosso formulário ou pelo e-mail <strong>correcoes@opatriota.sbs</strong>.</p>
   <p>Para agilizar a análise, solicitamos o link da matéria, o trecho específico contestado e, quando aplicável, o documento comprobatório correspondente.</p>
 </section>
 
@@ -376,7 +376,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 
 <section id="canais-diretos">
   <h2>5. Canal Exclusivo de Correções</h2>
-  <p><strong>E-mail direto:</strong> correcoes@opatriota.com.br<br />
+  <p><strong>E-mail direto:</strong> correcoes@opatriota.sbs<br />
   <strong>Formulário de Contato:</strong> Selecione o assunto <em>"Correção de Matéria / Errata"</em> na página <a href="/contato/">Fale com a Redação</a>.</p>
 </section>
 `
@@ -397,7 +397,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Fale com a Redação — Contato Oficial O Patriota',
       metaDescription: 'Entre em contato com a equipe de jornalistas e editores de O Patriota. Envie sugestões de pauta, denúncias e correções com sigilo e rapidez.',
-      canonicalUrl: 'https://opatriota.com.br/contato/'
+      canonicalUrl: 'https://www.opatriota.sbs/contato/'
     },
     toc: [
       { id: 'formulario', title: '1. Formulário de Contato Direto' },
@@ -421,19 +421,19 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-4">
     <div class="p-3 bg-gray-50 border border-gray-200 rounded">
       <strong>Sugestão de Pauta e Reportagens:</strong><br />
-      <span class="text-blue-700">pauta@opatriota.com.br</span>
+      <span class="text-blue-700">pauta@opatriota.sbs</span>
     </div>
     <div class="p-3 bg-gray-50 border border-gray-200 rounded">
       <strong>Correções e Erratas:</strong><br />
-      <span class="text-blue-700">correcoes@opatriota.com.br</span>
+      <span class="text-blue-700">correcoes@opatriota.sbs</span>
     </div>
     <div class="p-3 bg-gray-50 border border-gray-200 rounded">
       <strong>Suporte ao Assinante:</strong><br />
-      <span class="text-blue-700">assinante@opatriota.com.br</span>
+      <span class="text-blue-700">assinante@opatriota.sbs</span>
     </div>
     <div class="p-3 bg-gray-50 border border-gray-200 rounded">
       <strong>Departamento Comercial & Anúncios:</strong><br />
-      <span class="text-blue-700">comercial@opatriota.com.br</span>
+      <span class="text-blue-700">comercial@opatriota.sbs</span>
     </div>
   </div>
 </section>
@@ -466,7 +466,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Política de Privacidade e Proteção de Dados — O Patriota',
       metaDescription: 'Entenda como O Patriota coleta, armazena e protege seus dados cadastrais em conformidade integral com a Lei 13.709/2018 (LGPD).',
-      canonicalUrl: 'https://opatriota.com.br/politica-de-privacidade/'
+      canonicalUrl: 'https://www.opatriota.sbs/politica-de-privacidade/'
     },
     toc: [
       { id: 'dados-coletados', title: '1. Quais Dados Coletamos' },
@@ -521,7 +521,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 <section id="contato-dpo">
   <h2>7. Contato do Encarregado (DPO)</h2>
   <p>Para exercer seus direitos ou tirar dúvidas sobre esta política, escreva para nosso Encarregado de Dados:<br />
-  <strong>E-mail:</strong> privacidade@opatriota.com.br<br />
+  <strong>E-mail:</strong> privacidade@opatriota.sbs<br />
   <strong>Prazo de resposta:</strong> Até 15 dias úteis, conforme estipulado pela Autoridade Nacional de Proteção de Dados (ANPD).</p>
 </section>
 `
@@ -542,7 +542,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Termos de Uso do Portal — O Patriota',
       metaDescription: 'Leia os termos e condições que regem a navegação, reprodução de conteúdos, comentários e assinaturas em O Patriota.',
-      canonicalUrl: 'https://opatriota.com.br/termos-de-uso/'
+      canonicalUrl: 'https://www.opatriota.sbs/termos-de-uso/'
     },
     toc: [
       { id: 'aceitacao', title: '1. Aceitação dos Termos' },
@@ -561,7 +561,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     content: `
 <section id="aceitacao">
   <h2>1. Aceitação dos Termos</h2>
-  <p>Ao acessar, navegar ou cadastrar-se no portal <em>O PATRIOTA</em> (opatriota.com.br), o usuário declara estar ciente e concordar integralmente com as disposições estabelecidas neste documento e na Política de Privacidade vinculada.</p>
+  <p>Ao acessar, navegar ou cadastrar-se no portal <em>O PATRIOTA</em> (www.opatriota.sbs), o usuário declara estar ciente e concordar integralmente com as disposições estabelecidas neste documento e na Política de Privacidade vinculada.</p>
 </section>
 
 <section id="propriedade">
@@ -616,7 +616,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Gestão de Dados Pessoais — Canal LGPD O Patriota',
       metaDescription: 'Solicite acesso, retificação ou exclusão de seus dados pessoais em O Patriota. Atendimento oficial conforme a Lei Geral de Proteção de Dados.',
-      canonicalUrl: 'https://opatriota.com.br/gestao-de-dados/'
+      canonicalUrl: 'https://www.opatriota.sbs/gestao-de-dados/'
     },
     toc: [
       { id: 'compromisso', title: '1. Compromisso com a Privacidade' },
@@ -656,7 +656,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 <section id="prazos">
   <h2>4. Prazos e Procedimentos de Resposta</h2>
   <p>Após a confirmação de titularidade do requisitante, nossa equipe fornecerá a declaração clara e completa no prazo legal de até 15 (quinze) dias contados a partir da data de solicitação.</p>
-  <p><strong>Contato do DPO:</strong> privacidade@opatriota.com.br</p>
+  <p><strong>Contato do DPO:</strong> privacidade@opatriota.sbs</p>
 </section>
 `
   },
@@ -676,7 +676,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Segurança da Informação e Proteção Cibernética — O Patriota',
       metaDescription: 'Conheça as diretrizes de segurança digital, criptografia TLS 1.3 e prevenção contra ameaças adotadas pelo portal O Patriota.',
-      canonicalUrl: 'https://opatriota.com.br/seguranca-da-informacao/'
+      canonicalUrl: 'https://www.opatriota.sbs/seguranca-da-informacao/'
     },
     toc: [
       { id: 'criptografia', title: '1. Criptografia em Trânsito e em Repouso' },
@@ -709,7 +709,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 
 <section id="vulnerabilidades">
   <h2>4. Comunicação Responsável de Vulnerabilidades</h2>
-  <p>Pesquisadores de segurança que identifiquem potenciais falhas ou brechas técnicas são convidados a notificar nossa equipe de forma confidencial e responsável através do endereço <strong>seguranca@opatriota.com.br</strong> antes de qualquer divulgação pública, respeitando o princípio de divulgação responsável.</p>
+  <p>Pesquisadores de segurança que identifiquem potenciais falhas ou brechas técnicas são convidados a notificar nossa equipe de forma confidencial e responsável através do endereço <strong>seguranca@opatriota.sbs</strong> antes de qualquer divulgação pública, respeitando o princípio de divulgação responsável.</p>
 </section>
 
 <section id="recomendacoes">
@@ -717,7 +717,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
   <ul>
     <li>Nunca compartilhe suas credenciais de acesso à Área do Assinante com terceiros;</li>
     <li>Utilize senhas fortes combinando letras maiúsculas, minúsculas, números e caracteres especiais;</li>
-    <li>Verifique sempre se a URL no seu navegador começa exatamente com <code>https://opatriota.com.br</code> antes de digitar qualquer dado;</li>
+    <li>Verifique sempre se a URL no seu navegador começa exatamente com <code>https://www.opatriota.sbs</code> antes de digitar qualquer dado;</li>
     <li>A equipe de O Patriota <strong>nunca solicita senhas por telefone, WhatsApp ou mensagens diretas</strong>.</li>
   </ul>
 </section>
@@ -739,7 +739,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Central de Ajuda e Suporte — O Patriota',
       metaDescription: 'Dúvidas sobre sua conta, assinatura digital, formas de pagamento e navegação no portal O Patriota.',
-      canonicalUrl: 'https://opatriota.com.br/central-de-ajuda/'
+      canonicalUrl: 'https://www.opatriota.sbs/central-de-ajuda/'
     },
     toc: [
       { id: 'assinatura', title: '1. Gestão da Assinatura Digital' },
@@ -773,7 +773,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 
 <section id="canais">
   <h2>4. Como Falar com Nosso Suporte</h2>
-  <p>Nossa equipe de atendimento opera de segunda a sexta-feira, das 08h às 19h (horário de Brasília). Envie um e-mail para <strong>contato@opatriota.com.br</strong> ou fale pelo formulário oficial na nossa página de Contato.</p>
+  <p>Nossa equipe de atendimento opera de segunda a sexta-feira, das 08h às 19h (horário de Brasília). Envie um e-mail para <strong>contato@opatriota.sbs</strong> ou fale pelo formulário oficial na nossa página de Contato.</p>
 </section>
 `
   },
@@ -793,7 +793,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Perguntas Frequentes (FAQ) — O Patriota',
       metaDescription: 'Tire suas dúvidas sobre o jornal O Patriota, planos de assinatura, apuração jornalística e cancelamento.',
-      canonicalUrl: 'https://opatriota.com.br/perguntas-frequentes/'
+      canonicalUrl: 'https://www.opatriota.sbs/perguntas-frequentes/'
     },
     toc: [
       { id: 'sobre-jornal', title: '1. O que é O Patriota?' },
@@ -830,7 +830,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 
 <section id="pautas">
   <h2>5. Como enviar uma sugestão de pauta?</h2>
-  <p>Encaminhe documentos, relatórios ou informações com relevância pública para nossa equipe de redação no endereço <strong>redacao@opatriota.com.br</strong> ou na seção Fale com a Redação.</p>
+  <p>Encaminhe documentos, relatórios ou informações com relevância pública para nossa equipe de redação no endereço <strong>redacao@opatriota.sbs</strong> ou na seção Fale com a Redação.</p>
 </section>
 `
   },
@@ -850,7 +850,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Anuncie Conosco — O Patriota Mídia Kit',
       metaDescription: 'Oportunidades de publicidade, patrocínio de editorias e branded content no portal O Patriota.',
-      canonicalUrl: 'https://opatriota.com.br/anuncie-conosco/'
+      canonicalUrl: 'https://www.opatriota.sbs/anuncie-conosco/'
     },
     toc: [
       { id: 'publico', title: '1. Perfil da Audiência' },
@@ -885,7 +885,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 
 <section id="contato-comercial">
   <h2>4. Atendimento Comercial</h2>
-  <p>Para solicitar nossa tabela de preços e Mídia Kit detalhado, escreva para <strong>comercial@opatriota.com.br</strong>.</p>
+  <p>Para solicitar nossa tabela de preços e Mídia Kit detalhado, escreva para <strong>comercial@opatriota.sbs</strong>.</p>
 </section>
 `
   },
@@ -905,7 +905,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Fale com a Redação — O Patriota',
       metaDescription: 'Envie denúncias, pautas e correções para a redação do O Patriota com garantia de sigilo de fonte.',
-      canonicalUrl: 'https://opatriota.com.br/fale-com-a-redacao/'
+      canonicalUrl: 'https://www.opatriota.sbs/fale-com-a-redacao/'
     },
     toc: [
       { id: 'pautas', title: '1. Sugestões de Pauta e Informações' },
@@ -920,7 +920,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 <section id="pautas">
   <h2>1. Sugestões de Pauta e Informações</h2>
   <p>A redação do <strong>O Patriota</strong> está sempre aberta para receber contribuições da sociedade sobre fatos que impactam o Brasil:</p>
-  <p><strong>E-mail direto da Redação:</strong> <code>redacao@opatriota.com.br</code></p>
+  <p><strong>E-mail direto da Redação:</strong> <code>redacao@opatriota.sbs</code></p>
 </section>
 
 <section id="sigilo">
@@ -930,7 +930,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 
 <section id="correcoes">
   <h2>3. Solicitações de Correção Factual</h2>
-  <p>Comprometidos com a verdade factual, acolhemos pedidos de retificação com prontidão pelo e-mail <code>correcoes@opatriota.com.br</code>.</p>
+  <p>Comprometidos com a verdade factual, acolhemos pedidos de retificação com prontidão pelo e-mail <code>correcoes@opatriota.sbs</code>.</p>
 </section>
 `
   },
@@ -950,7 +950,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Fale com o Comercial — O Patriota',
       metaDescription: 'Contate a equipe comercial do portal O Patriota para projetos especiais e veiculação de anúncios.',
-      canonicalUrl: 'https://opatriota.com.br/fale-com-o-comercial/'
+      canonicalUrl: 'https://www.opatriota.sbs/fale-com-o-comercial/'
     },
     toc: [
       { id: 'canais-comercial', title: '1. Canais de Atendimento' },
@@ -965,7 +965,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
   <h2>1. Canais de Atendimento</h2>
   <p>Nossos executivos de contas estão à disposição para construir planos de mídia customizados:</p>
   <ul>
-    <li><strong>E-mail comercial:</strong> <code>comercial@opatriota.com.br</code></li>
+    <li><strong>E-mail comercial:</strong> <code>comercial@opatriota.sbs</code></li>
     <li><strong>Horário de atendimento:</strong> Segunda a Sexta, das 09h às 18h</li>
   </ul>
 </section>
@@ -992,7 +992,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Trabalhe Conosco — Carreiras em O Patriota',
       metaDescription: 'Vagas para jornalistas, repórteres, revisores, analistas de dados e desenvolvedores no portal O Patriota.',
-      canonicalUrl: 'https://opatriota.com.br/trabalhe-conosco/'
+      canonicalUrl: 'https://www.opatriota.sbs/trabalhe-conosco/'
     },
     toc: [
       { id: 'cultura', title: '1. Nossa Cultura de Trabalho' },
@@ -1010,7 +1010,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
 
 <section id="candidatura">
   <h2>2. Envio de Currículo</h2>
-  <p>Envie seu currículo atualizado, links de matérias publicadas ou portfólio para <strong>talentos@opatriota.com.br</strong> indicando a área de interesse no assunto da mensagem.</p>
+  <p>Envie seu currículo atualizado, links de matérias publicadas ou portfólio para <strong>talentos@opatriota.sbs</strong> indicando a área de interesse no assunto da mensagem.</p>
 </section>
 `
   },
@@ -1030,7 +1030,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Mapa do Site — Índice de Conteúdo O Patriota',
       metaDescription: 'Índice de navegação de todas as editorias, categorias e páginas institucionais do portal O Patriota.',
-      canonicalUrl: 'https://opatriota.com.br/mapa-do-site/'
+      canonicalUrl: 'https://www.opatriota.sbs/mapa-do-site/'
     },
     toc: [
       { id: 'editorias-mapa', title: '1. Editorias Principais' },
@@ -1092,7 +1092,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Política de Cookies — O Patriota',
       metaDescription: 'Saiba quais cookies utilizamos, finalidades técnicas de cada categoria e como gerenciar suas preferências.',
-      canonicalUrl: 'https://opatriota.com.br/cookies/'
+      canonicalUrl: 'https://www.opatriota.sbs/cookies/'
     },
     toc: [
       { id: 'o-que-sao', title: '1. O que são Cookies?' },
@@ -1141,7 +1141,7 @@ export const INITIAL_PAGES: InstitutionalPage[] = [
     seo: {
       metaTitle: 'Newsletter O Patriota — Análises e Fatos Diários',
       metaDescription: 'Assine gratuitamente a newsletter do jornal O Patriota e fique por dentro dos principais acontecimentos do Brasil.',
-      canonicalUrl: 'https://opatriota.com.br/newsletter/'
+      canonicalUrl: 'https://www.opatriota.sbs/newsletter/'
     },
     toc: [
       { id: 'conteudo-news', title: '1. O que você receberá' },
@@ -1322,10 +1322,10 @@ export const INITIAL_AUTHORS: AuthorDetail[] = [
     bio: 'Jornalista com mais de 15 anos de cobertura ininterrupta no Congresso Nacional e nos palácios de Brasília. Especialista em tramitação orçamentária e processos legislativos.',
     avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=240&q=80',
     credentials: 'DRT/DF 19.340 • Membro da Associação de Correspondentes de Brasília',
-    email: 'thiago.vasconcellos@opatriota.com.br',
+    email: 'thiago.vasconcellos@opatriota.sbs',
     social: {
-      twitter: 'https://twitter.com/opatriota',
-      linkedin: 'https://linkedin.com/company/opatriota'
+      twitter: 'https://x.com/opatriotabr',
+      linkedin: 'https://www.linkedin.com/company/journal-o-patriota'
     }
   },
   {
@@ -1336,7 +1336,7 @@ export const INITIAL_AUTHORS: AuthorDetail[] = [
     bio: 'Jornalista diplomada pela USP, com pós-graduação em Gestão de Políticas Públicas. Lidera a equipe de revisão de estilo, checagem documental e cobertura de cidadania.',
     avatarUrl: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=240&q=80',
     credentials: 'DRT/SP 45.210 • Auditora de Integridade Textual',
-    email: 'helena.miranda@opatriota.com.br'
+    email: 'helena.miranda@opatriota.sbs'
   },
   {
     id: 'usr-6',
@@ -1346,7 +1346,7 @@ export const INITIAL_AUTHORS: AuthorDetail[] = [
     bio: 'Doutor em Economia do Desenvolvimento e ensaísta com livros publicados sobre livre mercado, história republicana e soberania nacional. Escreve artigos semanais sobre macroeconomia e reformas.',
     avatarUrl: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=240&q=80',
     credentials: 'DRT/DF 14.892 • Conselho Editorial O Patriota',
-    email: 'alberto.goncalves@opatriota.com.br'
+    email: 'alberto.goncalves@opatriota.sbs'
   },
   {
     id: 'usr-7',
@@ -1356,7 +1356,7 @@ export const INITIAL_AUTHORS: AuthorDetail[] = [
     bio: 'Especialista em inteligência de fronteiras e segurança pública integrada. Cobertura diária de grandes operações policiais federais e modernização do aparato de defesa civil.',
     avatarUrl: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=240&q=80',
     credentials: 'DRT/PR 22.810 • Repórter Investigativo',
-    email: 'roberto.siqueira@opatriota.com.br'
+    email: 'roberto.siqueira@opatriota.sbs'
   },
   {
     id: 'usr-8',
@@ -1366,7 +1366,7 @@ export const INITIAL_AUTHORS: AuthorDetail[] = [
     bio: 'Analista de comércio exterior com foco na inserção do agronegócio e da indústria nacional nos mercados asiático e norte-americano. Cobertura de cúpulas de comércio e geopolítica.',
     avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=240&q=80',
     credentials: 'DRT/SP 38.109 • Correspondente de Mercado',
-    email: 'beatriz.albuquerque@opatriota.com.br'
+    email: 'beatriz.albuquerque@opatriota.sbs'
   }
 ];
 

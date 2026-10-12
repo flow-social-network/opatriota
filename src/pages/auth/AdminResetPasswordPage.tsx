@@ -51,7 +51,7 @@ export default function AdminResetPasswordPage() {
             Sua chave administrativa foi renovada com êxito. Utilize as novas credenciais para acessar o painel de controle do portal.
           </p>
           <button
-            onClick={() => navigate('/admin/login')}
+            onClick={() => navigate('/auth/login/admin')}
             className="w-full py-3 px-4 bg-[#0B2345] hover:bg-[#132D50] text-[#FFCC29] text-sm font-bold rounded-lg shadow-md transition cursor-pointer"
           >
             Acessar Painel Administrativo
@@ -147,7 +147,7 @@ export default function AdminResetPasswordPage() {
 
             <div className="text-center pt-2">
               <Link
-                to="/admin/login"
+                to="/auth/login/admin"
                 className="inline-flex items-center gap-1.5 text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-bold"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

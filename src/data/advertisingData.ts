@@ -23,7 +23,7 @@ export const INITIAL_AD_SPACES: AdSpaceConfig[] = [
     platform: 'demo',
     adSlotId: '1092837465',
     customBannerUrl: '',
-    customLinkUrl: 'https://opatriota.com.br/anuncie',
+    customLinkUrl: 'https://www.opatriota.sbs/anuncie-conosco/',
     customAltText: 'Publicidade Institucional — Apoie o Jornalismo Independente',
     notes: 'Posição nobre com alta visibilidade sem sobrepor a manchete principal.',
     createdAt: '2026-10-01T10:00:00Z',
@@ -41,7 +41,7 @@ export const INITIAL_AD_SPACES: AdSpaceConfig[] = [
     platform: 'demo',
     adSlotId: '2039485716',
     customBannerUrl: '',
-    customLinkUrl: 'https://opatriota.com.br/anuncie',
+    customLinkUrl: 'https://www.opatriota.sbs/anuncie-conosco/',
     customAltText: 'Espaço Publicitário Reservado',
     notes: 'Integrado contextualmente na barra lateral da primeira dobra.',
     createdAt: '2026-10-01T10:00:00Z',
@@ -194,7 +194,7 @@ export const INITIAL_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     id: 'soc-in',
     name: 'LinkedIn',
     platform: 'linkedin',
-    url: 'https://linkedin.com/company/opatriotabrasil',
+    url: 'https://www.linkedin.com/company/journal-o-patriota',
     active: true,
     order: 5,
     ariaLabel: 'Página oficial do O Patriota no LinkedIn'
@@ -250,7 +250,7 @@ export const INITIAL_BRANDING_CONFIG: SiteBrandingConfig = {
   copyrightText: '© {year} O PATRIOTA BRASIL. Todos os direitos reservados.',
   maintainerName: 'DEEVO Soluções Financeiras LTDA',
   maintainerCnpj: '63.187.175/0001-70',
-  contactEmail: 'redacao@opatriota.com.br',
+  contactEmail: 'redacao@opatriota.sbs',
   contactCity: 'Taquara/RS',
   socialNetworks: INITIAL_SOCIAL_NETWORKS
 };

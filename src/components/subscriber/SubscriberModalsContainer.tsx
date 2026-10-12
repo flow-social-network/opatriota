@@ -827,7 +827,7 @@ export const SubscriberModalsContainer: React.FC<SubscriberModalsContainerProps>
                       if (card.target && card.target !== 'area-assinante') {
                         onSwitchModal(card.target);
                       } else if (card.id === 'suporte') {
-                        alert('Central de Suporte: suporte@opatriota.com.br');
+                        alert('Central de Suporte: suporte@opatriota.sbs');
                       }
                     }}
                     className="p-4 bg-white border border-[#CBD5E1] rounded-xl hover:border-[#0B5FFF] hover:shadow-md transition text-center flex flex-col items-center justify-center gap-2 group cursor-pointer aspect-square"

@@ -207,7 +207,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       if (type === 'theme' || type === 'both') {
         const themeFolder = zip.folder('o-patriota');
-        themeFolder?.file('style.css', `/* Theme Name: O Patriota\nTheme URI: https://opatriota.com.br\nAuthor: Redação O Patriota\nVersion: 1.0.0\nText Domain: o-patriota */\n:root { --color-primary: #0B2345; --color-accent: #FFCC29; }`);
+        themeFolder?.file('style.css', `/* Theme Name: O Patriota\nTheme URI: https://www.opatriota.sbs\nAuthor: Redação O Patriota\nVersion: 1.0.0\nText Domain: o-patriota */\n:root { --color-primary: #0B2345; --color-accent: #FFCC29; }`);
         themeFolder?.file('functions.php', `<?php\ndefine('O_PATRIOTA_VERSION', '1.0.0');\nrequire_once __DIR__ . '/inc/setup.php';\nrequire_once __DIR__ . '/inc/assets.php';`);
         themeFolder?.file('theme.json', JSON.stringify({ version: 3, settings: { color: { palette: [{ slug: 'primary', color: '#0B2345', name: 'Azul Marinho' }] } } }, null, 2));
         

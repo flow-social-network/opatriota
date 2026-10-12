@@ -14,6 +14,7 @@ import { useAuth } from '../../app/contexts/AuthContext';
 import { api } from '../../services/apiClient';
 import { useToast } from '../../app/contexts/ToastContext';
 import { useParams } from 'react-router-dom';
+import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 
 // ─── Archive ───
 export function ArchivePage() {
@@ -157,6 +158,15 @@ export function InstitutionalPage() {
   const { pages } = useData();
 
   const page = pages.find(p => p.slug === slug);
+
+  useSeoMetadata({
+    title: page?.seo?.metaTitle || page?.title,
+    description: page?.seo?.metaDescription || page?.subtitle,
+    canonicalUrl: page?.seo?.canonicalUrl,
+    pathname: page ? `/${page.slug}` : undefined,
+    imageUrl: page?.featuredImage,
+    type: 'article',
+  });
 
   if (!page) return <NotFound />;
 

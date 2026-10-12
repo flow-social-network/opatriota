@@ -387,7 +387,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
                   <div className="text-[11px] text-[#5D6673] line-clamp-2 mt-0.5">
                     {campaignBody || 'Texto descritivo do alerta com as principais informações apuradas pela redação.'}
                   </div>
-                  <div className="text-[9px] text-[#8C95A6] mt-1">opatriota.com.br • agora</div>
+                  <div className="text-[9px] text-[#8C95A6] mt-1">www.opatriota.sbs • agora</div>
                 </div>
               </div>
 

@@ -18,7 +18,7 @@ export default function NewsroomLoginPage() {
   const navigate = useNavigate();
   const { loginWithEmail, setCurrentUser } = useAuth();
   
-  const [email, setEmail] = useState('redacao@opatriota.com.br');
+  const [email, setEmail] = useState('redacao@opatriota.sbs');
   const [password, setPassword] = useState('123456');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -37,15 +37,11 @@ export default function NewsroomLoginPage() {
     setLoading(true);
     try {
       const user = await loginWithEmail(email, password);
-      // Ensure editorial permissions
+      // Validação estrita de autorização editorial
       const allowedRoles = ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'];
       if (!allowedRoles.includes(user.role)) {
-        // Automatically give editor access for newsroom login demo
-        const updated = { ...user, role: 'editor' as const };
-        setCurrentUser(updated);
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('opatriota_session', JSON.stringify(updated));
-        }
+        setErrorMessage('Acesso negado: sua conta não possui credenciais autorizadas para o Painel da Redação.');
+        return;
       }
       navigate('/redacao');
     } catch (err: any) {
@@ -65,7 +61,7 @@ export default function NewsroomLoginPage() {
     const session = {
       id: `usr-${role}`,
       name: roleLabels[role],
-      email: `${role}@opatriota.com.br`,
+      email: `${role}@opatriota.sbs`,
       role,
       subscription: { plan: 'premium' as const, status: 'ativo' as const, validUntil: '2026-12-31', autoRenew: true },
       bookmarks: [],
@@ -108,7 +104,7 @@ export default function NewsroomLoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="seu.nome@opatriota.com.br"
+              placeholder="seu.nome@opatriota.sbs"
               className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-lg text-sm text-[#17202A] placeholder-gray-400 focus:outline-none focus:border-[#0B5FFF] focus:ring-1 focus:ring-[#0B5FFF] transition"
             />
           </div>
@@ -120,7 +116,7 @@ export default function NewsroomLoginPage() {
               Senha de Acesso
             </label>
             <Link
-              to="/redacao/esqueci-a-senha"
+              to="/auth/esqueci-a-senha/redacao"
               className="text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-medium"
             >
               Esqueceu a senha?

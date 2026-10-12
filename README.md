@@ -77,7 +77,7 @@ Os acessos aos ambientes restritos e painéis operacionais são documentados a s
 No ambiente da aplicação, o acesso pode ser verificado através das credenciais:
 
 1. **Jornalista / Repórter**:
-   - E-mail: `thiago.jornalista@opatriota.com.br`
+   - E-mail: `thiago.jornalista@opatriota.sbs`
    - Função: Criação de pautas, apuração e envio para revisão na esteira editorial.
 2. **Editor-Chefe / Administrador**:
    - Acesso irrestrito à Central de Fontes Oficiais, triagem de feeds RSS e exportação do tema/plugin WordPress.

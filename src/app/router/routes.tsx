@@ -76,20 +76,30 @@ const EDITORIAL_ROLES = ['jornalista', 'revisor', 'editor', 'editor_chefe', 'adm
 export const router = createBrowserRouter([
   // ─── PÁGINAS DE AUTENTICAÇÃO INDEPENDENTES (LAYOUT DEDICADO) ───
   // 1. Cliente / Leitor
-  { path: '/login', element: <LazyAuth><ClientLoginPage /></LazyAuth> },
-  { path: '/cadastro', element: <LazyAuth><ClientRegisterPage /></LazyAuth> },
-  { path: '/esqueci-a-senha', element: <LazyAuth><ClientForgotPasswordPage /></LazyAuth> },
-  { path: '/redefinir-senha', element: <LazyAuth><ClientResetPasswordPage /></LazyAuth> },
+  { path: '/auth/login', element: <LazyAuth><ClientLoginPage /></LazyAuth> },
+  { path: '/login', element: <Navigate to="/auth/login" replace /> },
+  { path: '/auth/cadastro', element: <LazyAuth><ClientRegisterPage /></LazyAuth> },
+  { path: '/cadastro', element: <Navigate to="/auth/cadastro" replace /> },
+  { path: '/auth/esqueci-a-senha', element: <LazyAuth><ClientForgotPasswordPage /></LazyAuth> },
+  { path: '/esqueci-a-senha', element: <Navigate to="/auth/esqueci-a-senha" replace /> },
+  { path: '/auth/redefinir-senha', element: <LazyAuth><ClientResetPasswordPage /></LazyAuth> },
+  { path: '/redefinir-senha', element: <Navigate to="/auth/redefinir-senha" replace /> },
 
   // 2. Redação Jornalística
-  { path: '/redacao/login', element: <LazyAuth><NewsroomLoginPage /></LazyAuth> },
-  { path: '/redacao/esqueci-a-senha', element: <LazyAuth><NewsroomForgotPasswordPage /></LazyAuth> },
-  { path: '/redacao/redefinir-senha', element: <LazyAuth><NewsroomResetPasswordPage /></LazyAuth> },
+  { path: '/auth/login/redacao', element: <LazyAuth><NewsroomLoginPage /></LazyAuth> },
+  { path: '/redacao/login', element: <Navigate to="/auth/login/redacao" replace /> },
+  { path: '/auth/esqueci-a-senha/redacao', element: <LazyAuth><NewsroomForgotPasswordPage /></LazyAuth> },
+  { path: '/redacao/esqueci-a-senha', element: <Navigate to="/auth/esqueci-a-senha/redacao" replace /> },
+  { path: '/auth/redefinir-senha/redacao', element: <LazyAuth><NewsroomResetPasswordPage /></LazyAuth> },
+  { path: '/redacao/redefinir-senha', element: <Navigate to="/auth/redefinir-senha/redacao" replace /> },
 
   // 3. Administração
-  { path: '/admin/login', element: <LazyAuth><AdminLoginPage /></LazyAuth> },
-  { path: '/admin/esqueci-a-senha', element: <LazyAuth><AdminForgotPasswordPage /></LazyAuth> },
-  { path: '/admin/redefinir-senha', element: <LazyAuth><AdminResetPasswordPage /></LazyAuth> },
+  { path: '/auth/login/admin', element: <LazyAuth><AdminLoginPage /></LazyAuth> },
+  { path: '/admin/login', element: <Navigate to="/auth/login/admin" replace /> },
+  { path: '/auth/esqueci-a-senha/admin', element: <LazyAuth><AdminForgotPasswordPage /></LazyAuth> },
+  { path: '/admin/esqueci-a-senha', element: <Navigate to="/auth/esqueci-a-senha/admin" replace /> },
+  { path: '/auth/redefinir-senha/admin', element: <LazyAuth><AdminResetPasswordPage /></LazyAuth> },
+  { path: '/admin/redefinir-senha', element: <Navigate to="/auth/redefinir-senha/admin" replace /> },
 
   // 4. Retorno de autenticação & Acesso Negado
   { path: '/auth/callback', element: <LazyAuth><AuthCallbackPage /></LazyAuth> },
@@ -100,7 +110,7 @@ export const router = createBrowserRouter([
   {
     path: '/admin',
     element: (
-      <RequireRole roles={ADMIN_ROLES} loginRedirect="/admin/login">
+      <RequireRole roles={ADMIN_ROLES} loginRedirect="/auth/login/admin">
         <PanelLayout showHeader={false} />
       </RequireRole>
     ),
@@ -115,7 +125,7 @@ export const router = createBrowserRouter([
   {
     path: '/redacao',
     element: (
-      <RequireRole roles={EDITORIAL_ROLES} loginRedirect="/redacao/login">
+      <RequireRole roles={EDITORIAL_ROLES} loginRedirect="/auth/login/redacao">
         <PanelLayout showHeader={false} />
       </RequireRole>
     ),

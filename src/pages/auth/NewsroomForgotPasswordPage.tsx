@@ -50,13 +50,13 @@ export default function NewsroomForgotPasswordPage() {
           </p>
           <div className="space-y-3">
             <Link
-              to="/redacao/redefinir-senha"
+              to="/auth/redefinir-senha/redacao"
               className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-[#0B5FFF] hover:bg-[#0848C7] text-white text-xs font-bold rounded-lg transition"
             >
               Já possuo o código / Redefinir agora
             </Link>
             <Link
-              to="/redacao/login"
+              to="/auth/login/redacao"
               className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-[#0B2345] text-xs font-bold rounded-lg transition"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -87,7 +87,7 @@ export default function NewsroomForgotPasswordPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="seu.nome@opatriota.com.br"
+                  placeholder="seu.nome@opatriota.sbs"
                   className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-lg text-sm text-[#17202A] placeholder-gray-400 focus:outline-none focus:border-[#0B5FFF] focus:ring-1 focus:ring-[#0B5FFF] transition"
                 />
               </div>
@@ -110,7 +110,7 @@ export default function NewsroomForgotPasswordPage() {
 
             <div className="text-center pt-2">
               <Link
-                to="/redacao/login"
+                to="/auth/login/redacao"
                 className="inline-flex items-center gap-1.5 text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-bold"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

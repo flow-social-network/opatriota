@@ -1,0 +1,49 @@
+# ==========================================
+# O PATRIOTA BRASIL — Robôs de Busca (SEO)
+# Domínio Oficial: https://www.opatriota.sbs/
+# ==========================================
+
+User-agent: *
+Allow: /
+Allow: /noticia/
+Allow: /categoria/
+Allow: /autor/
+Allow: /busca
+Allow: /arquivo
+Allow: /sobre-o-patriota/
+Allow: /expediente/
+Allow: /principios-editoriais/
+Allow: /fontes-e-metodologia/
+Allow: /politica-de-correcoes/
+Allow: /contato/
+Allow: /politica-de-privacidade/
+Allow: /termos-de-uso/
+Allow: /gestao-de-dados/
+Allow: /seguranca-da-informacao/
+Allow: /central-de-ajuda/
+Allow: /perguntas-frequentes/
+Allow: /anuncie-conosco/
+Allow: /fale-com-a-redacao/
+Allow: /fale-com-o-comercial/
+Allow: /trabalhe-conosco/
+Allow: /mapa-do-site/
+Allow: /cookies/
+Allow: /newsletter/
+Allow: /planos
+Allow: /apoie
+
+# Proteção de áreas restritas, painéis e endpoints administrativos
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /redacao
+Disallow: /redacao/*
+Disallow: /auth/
+Disallow: /auth/*
+Disallow: /api/
+Disallow: /api/*
+Disallow: /minha-conta
+Disallow: /minha-conta/*
+Disallow: /checkout
+Disallow: /checkout/*
+
+Sitemap: https://www.opatriota.sbs/sitemap.xml

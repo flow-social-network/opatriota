@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: O Patriota Editorial
- * Plugin URI: https://opatriota.com.br
+ * Plugin URI: https://www.opatriota.sbs
  * Description: Sistema editorial jornalístico avançado para O Patriota: central de fontes oficiais, ingestão segura de feeds RSS, deduplicação em 5 camadas, fila de triagem editorial, checagem de fatos e auditoria.
  * Version: 1.0.0
  * Author: Equipe de Engenharia O Patriota
- * Author URI: https://opatriota.com.br/expediente
+ * Author URI: https://www.opatriota.sbs/expediente
  * License: GPL-2.0-or-later
  * Text Domain: o-patriota-editorial
  * Requires PHP: 8.0

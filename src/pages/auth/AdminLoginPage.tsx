@@ -18,7 +18,7 @@ export default function AdminLoginPage() {
   const navigate = useNavigate();
   const { loginWithEmail, setCurrentUser } = useAuth();
   
-  const [email, setEmail] = useState('admin@opatriota.com.br');
+  const [email, setEmail] = useState('admin@opatriota.sbs');
   const [password, setPassword] = useState('123456');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
@@ -60,7 +60,7 @@ export default function AdminLoginPage() {
     const adminSession = {
       id: 'usr-admin-master',
       name: 'Administrador Marcos Dresbach',
-      email: 'admin@opatriota.com.br',
+      email: 'admin@opatriota.sbs',
       role: 'administrador' as const,
       subscription: { plan: 'premium' as const, status: 'ativo' as const, validUntil: '2026-12-31', autoRenew: true },
       bookmarks: [],
@@ -109,7 +109,7 @@ export default function AdminLoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@opatriota.com.br"
+              placeholder="admin@opatriota.sbs"
               className="w-full pl-10 pr-3.5 py-2.5 bg-white border border-[#CBD5E1] rounded-lg text-sm text-[#17202A] placeholder-gray-400 focus:outline-none focus:border-[#FFCC29] focus:ring-1 focus:ring-[#FFCC29] transition"
             />
           </div>
@@ -121,7 +121,7 @@ export default function AdminLoginPage() {
               Senha Administrativa
             </label>
             <Link
-              to="/admin/esqueci-a-senha"
+              to="/auth/esqueci-a-senha/admin"
               className="text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-medium"
             >
               Recuperar chave?

@@ -51,7 +51,7 @@ export default function ClientResetPasswordPage() {
             Você já pode acessar sua conta de assinante com a nova senha criada.
           </p>
           <button
-            onClick={() => navigate('/login')}
+            onClick={() => navigate('/auth/login')}
             className="w-full py-3 px-4 bg-[#0B2345] hover:bg-[#132D50] text-[#FFCC29] text-sm font-bold rounded-lg shadow-md transition cursor-pointer"
           >
             Fazer Login Agora
@@ -147,7 +147,7 @@ export default function ClientResetPasswordPage() {
 
             <div className="text-center pt-2">
               <Link
-                to="/login"
+                to="/auth/login"
                 className="inline-flex items-center gap-1.5 text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-bold"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

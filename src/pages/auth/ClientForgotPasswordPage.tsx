@@ -50,13 +50,13 @@ export default function ClientForgotPasswordPage() {
           </p>
           <div className="space-y-3">
             <Link
-              to="/redefinir-senha"
+              to="/auth/redefinir-senha"
               className="inline-flex items-center justify-center w-full py-2.5 px-4 bg-[#0B2345] hover:bg-[#132D50] text-white text-xs font-bold rounded-lg transition"
             >
               Já tenho o código / Redefinir agora
             </Link>
             <Link
-              to="/login"
+              to="/auth/login"
               className="inline-flex items-center justify-center gap-1.5 w-full py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-[#0B2345] text-xs font-bold rounded-lg transition"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -110,7 +110,7 @@ export default function ClientForgotPasswordPage() {
 
             <div className="text-center pt-2">
               <Link
-                to="/login"
+                to="/auth/login"
                 className="inline-flex items-center gap-1.5 text-xs text-[#0B5FFF] hover:text-[#0848C7] hover:underline font-bold"
               >
                 <ArrowLeft className="w-3.5 h-3.5" />

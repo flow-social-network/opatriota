@@ -74,7 +74,7 @@ export const DEFAULT_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     id: 'soc-in',
     name: 'LinkedIn',
     platform: 'linkedin',
-    url: 'https://linkedin.com/company/opatriotabrasil',
+    url: 'https://www.linkedin.com/company/journal-o-patriota',
     active: true,
     order: 5,
     ariaLabel: 'Página oficial de O Patriota no LinkedIn'

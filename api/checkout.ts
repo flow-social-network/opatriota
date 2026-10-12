@@ -1,8 +1,10 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { CATALOG, json, mpRequest, newId, readBody, validEmail, verifyFirebaseIdToken, type BillingCycle, type PlanId } from './_lib/billing';
 import { documentWrite } from './_lib/storage';
+import { handleCors } from './_lib/cors';
 
 export default async function handler(req: IncomingMessage & { method?: string; headers: any; body?: any }, res: ServerResponse & { statusCode: number; setHeader(name:string,value:string):void; end(body?:string):void }) {
+  if (handleCors(req, res)) return;
   if (req.method !== 'POST') { res.setHeader('Allow','POST'); return json(res,405,{error:'METHOD_NOT_ALLOWED'}); }
   try {
     const body=await readBody(req);
@@ -17,7 +19,7 @@ export default async function handler(req: IncomingMessage & { method?: string; 
     if(!validEmail(email) || !name) return json(res,400,{error:'CUSTOMER_DATA_REQUIRED',message:'Informe nome e e-mail válidos.'});
     if(amount<=0) return json(res,400,{error:'FREE_PLAN_NOT_PAYABLE',message:'O plano gratuito não deve gerar cobrança.'});
     if(!['pix','card'].includes(body.paymentMethod)) return json(res,400,{error:'INVALID_PAYMENT_METHOD'});
-    const configuredSiteUrl = process.env.PUBLIC_SITE_URL || (process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : '');
+    const configuredSiteUrl = process.env.PUBLIC_SITE_URL || (process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'https://www.opatriota.sbs');
     if (!configuredSiteUrl || !configuredSiteUrl.startsWith('https://')) return json(res,503,{error:'PUBLIC_SITE_URL_NOT_CONFIGURED',message:'Configure a URL HTTPS pública do jornal nas variáveis de ambiente.'});
     const siteUrl=configuredSiteUrl.replace(/\/$/,'');
     const orderId=newId();

@@ -302,36 +302,36 @@ export const ContactPageView: React.FC<ContactPageViewProps> = ({
               <div className="space-y-4 text-xs">
                 <div>
                   <span className="font-bold text-[#0B2345] block">Pauta & Notícias:</span>
-                  <a href="mailto:pauta@opatriota.com.br" className="text-[#0B5FFF] hover:underline">
-                    pauta@opatriota.com.br
+                  <a href="mailto:pauta@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
+                    pauta@opatriota.sbs
                   </a>
                 </div>
 
                 <div>
                   <span className="font-bold text-[#0B2345] block">Correções e Erratas:</span>
-                  <a href="mailto:correcoes@opatriota.com.br" className="text-[#0B5FFF] hover:underline">
-                    correcoes@opatriota.com.br
+                  <a href="mailto:correcoes@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
+                    correcoes@opatriota.sbs
                   </a>
                 </div>
 
                 <div>
                   <span className="font-bold text-[#0B2345] block">Área do Assinante & Suporte:</span>
-                  <a href="mailto:assinante@opatriota.com.br" className="text-[#0B5FFF] hover:underline">
-                    assinante@opatriota.com.br
+                  <a href="mailto:assinante@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
+                    assinante@opatriota.sbs
                   </a>
                 </div>
 
                 <div>
                   <span className="font-bold text-[#0B2345] block">Comercial & Publicidade:</span>
-                  <a href="mailto:comercial@opatriota.com.br" className="text-[#0B5FFF] hover:underline">
-                    comercial@opatriota.com.br
+                  <a href="mailto:comercial@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
+                    comercial@opatriota.sbs
                   </a>
                 </div>
 
                 <div>
                   <span className="font-bold text-[#0B2345] block">Privacidade e Dados (DPO):</span>
-                  <a href="mailto:privacidade@opatriota.com.br" className="text-[#0B5FFF] hover:underline">
-                    privacidade@opatriota.com.br
+                  <a href="mailto:privacidade@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
+                    privacidade@opatriota.sbs
                   </a>
                 </div>
               </div>

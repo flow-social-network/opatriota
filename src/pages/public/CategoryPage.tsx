@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { CategoryPageView } from '../../components/pages/CategoryPageView';
 import { NotFoundPageView } from '../../components/pages/NotFoundPageView';
 import { useData } from '../../app/contexts/DataContext';
+import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 import type { CategorySlug } from '../../types';
 
 export default function CategoryPage() {
@@ -11,6 +12,12 @@ export default function CategoryPage() {
   const { articles, categories } = useData();
 
   const category = categories.find(c => c.slug === slug);
+
+  useSeoMetadata({
+    title: category ? `Notícias de ${category.name}` : undefined,
+    description: category?.description || `Acompanhe as principais notícias sobre ${category?.name} no portal O Patriota.`,
+    pathname: category ? `/categoria/${category.slug}` : undefined,
+  });
 
   if (!category) {
     return (

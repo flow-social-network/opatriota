@@ -4,6 +4,7 @@ import { ArticleView } from '../../components/ArticleView';
 import { NotFoundPageView } from '../../components/pages/NotFoundPageView';
 import { useData } from '../../app/contexts/DataContext';
 import { useAuth } from '../../app/contexts/AuthContext';
+import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
@@ -12,6 +13,22 @@ export default function ArticlePage() {
   const { currentUser, toggleBookmark } = useAuth();
 
   const article = articles.find(a => a.slug === slug || a.id === slug);
+
+  useSeoMetadata({
+    title: article?.seo?.metaTitle || article?.title,
+    description: article?.seo?.metaDescription || article?.subtitle,
+    pathname: article ? `/noticia/${article.slug}` : undefined,
+    canonicalUrl: article?.seo?.canonicalUrl,
+    imageUrl: article?.imageUrl,
+    type: 'article',
+    articleMeta: article ? {
+      publishedTime: article.publishedAt,
+      modifiedTime: article.updatedAt,
+      author: article.author,
+      section: article.category,
+      tags: article.tags,
+    } : undefined,
+  });
 
   if (!article) {
     return (

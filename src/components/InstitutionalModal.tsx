@@ -49,7 +49,7 @@ export const InstitutionalModal: React.FC<InstitutionalModalProps> = ({ pageId, 
               </div>
               <div>
                 <strong className="block text-[#0B2345]">Contato da Redação</strong>
-                <p className="text-[#5D6673]">redacao@opatriota.com.br • Brasília - DF</p>
+                <p className="text-[#5D6673]">redacao@opatriota.sbs • Brasília - DF</p>
               </div>
             </div>
           )
@@ -123,7 +123,7 @@ export const InstitutionalModal: React.FC<InstitutionalModalProps> = ({ pageId, 
                 O PATRIOTA respeita rigorosamente a Lei Geral de Proteção de Dados (LGPD). Não comercializamos, compartilhamos ou repassamos informações pessoais fornecidas por assinantes de newsletter ou apoiadores.
               </p>
               <p>
-                Qualquer titular de dados pode solicitar a exclusão de seu e-mail de nossas listas a qualquer momento pelo canal: privacidade@opatriota.com.br.
+                Qualquer titular de dados pode solicitar a exclusão de seu e-mail de nossas listas a qualquer momento pelo canal: privacidade@opatriota.sbs.
               </p>
             </div>
           )
@@ -141,7 +141,7 @@ export const InstitutionalModal: React.FC<InstitutionalModalProps> = ({ pageId, 
                 Disponibilizamos formatos de banners no cabeçalho, rodapé, barra lateral e patrocínios de editorias devidamente identificados como espaço publicitário.
               </p>
               <p>
-                Contato comercial: comercial@opatriota.com.br.
+                Contato comercial: comercial@opatriota.sbs.
               </p>
             </div>
           )

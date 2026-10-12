@@ -1,7 +1,9 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { CATALOG, json } from './_lib/billing';
+import { handleCors } from './_lib/cors';
 
-export default function handler(req: IncomingMessage & { method?: string }, res: ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void }) {
+export default function handler(req: IncomingMessage & { method?: string; headers: any }, res: ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void }) {
+  if (handleCors(req, res)) return;
   if (req.method !== 'GET') {
     res.setHeader('Allow', 'GET');
     return json(res, 405, { error: 'METHOD_NOT_ALLOWED', message: 'Método não permitido.' });

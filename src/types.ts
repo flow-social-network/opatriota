@@ -634,3 +634,42 @@ export interface SiteBrandingConfig {
   contactCity: string;
   socialNetworks: SocialNetworkItem[];
 }
+
+export interface ColumnistProfile {
+  id: string;
+  name: string;
+  role: string;
+  bio: string;
+  avatarUrl: string;
+  status: string;
+  articlesCount: number;
+  email: string;
+}
+
+export interface EditorialAgendaItem {
+  id: string;
+  date: string;
+  dayLabel: string;
+  monthLabel: string;
+  time: string;
+  title: string;
+  description: string;
+  type: string;
+  responsible: string;
+  status: string;
+  priority: string;
+}
+
+export interface EditorialPauta {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  responsible: string;
+  deadline?: string;
+  priority: string;
+  status: string;
+  sources?: string[];
+  notes?: string;
+}
+
