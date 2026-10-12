@@ -5,6 +5,9 @@ import { streamChat } from './chat-service'
 import { AgentRuntime } from './runtime'
 import { createAgents } from '../agents/catalog'
 import { createBuiltinTools } from '../tools/builtins'
+import { discoverImportedCapabilities } from '../registry'
+import { KnowledgeVault } from '../adapters/knowledge-vault'
+import { NotebookLmAdapter } from '../adapters/notebooklm'
 
 const runtime = new AgentRuntime(); createAgents().forEach(runtime.registerAgent.bind(runtime)); createBuiltinTools().forEach(runtime.registerTool.bind(runtime))
 const project: Project = { id: 'local', name: 'NoteAgents Workspace', root: process.cwd(), ownerId: 'local-owner', createdAt: new Date().toISOString() }
@@ -17,6 +20,9 @@ export const server = createServer(async (req, res) => {
   try {
     if (req.url === '/health') return json(res, 200, { status: 'ok', service: 'noteagents' })
     if (req.url === '/api/agents' && req.method === 'GET') return json(res, 200, createAgents().map(agent => ({ name: agent.name, description: agent.description })))
+    if (req.url === '/api/capabilities' && req.method === 'GET') return json(res, 200, await discoverImportedCapabilities())
+    if (req.url === '/api/knowledge' && req.method === 'GET') return json(res, 200, await new KnowledgeVault().list())
+    if (req.url === '/api/notebooklm/health' && req.method === 'GET') return json(res, 200, await new NotebookLmAdapter().health())
     if (req.url === '/api/models' && req.method === 'GET') { const { NVIDIA_FREE_MODELS } = await import('../integrations/nvidia'); return json(res, 200, { provider: 'NVIDIA NIM', models: NVIDIA_FREE_MODELS }) }
     if (req.url === '/api/runs' && req.method === 'GET') return json(res, 200, runtime.listRuns(project.id))
     if (req.url === '/api/runs' && req.method === 'POST') { const input = await body(req); const run = await runtime.execute(String(input.agent || 'orchestrator'), String(input.prompt || ''), actor, project, async () => false); return json(res, 201, run) }
