@@ -44,7 +44,6 @@ interface AdminDashboardProps {
   onSyncResult: (sources: RssSource[], queue: EditorialQueueItem[]) => void;
   portalSettings: PortalSettings;
   onSavePortalSettings: (newSettings: PortalSettings) => void;
-  initialTab?: string;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -58,7 +57,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onSyncResult,
   portalSettings,
   onSavePortalSettings,
-  initialTab = 'painel'
 }) => {
   const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
   const handleTabChange = (tab: AdminTab) => {
