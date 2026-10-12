@@ -241,7 +241,7 @@ export default async function handler(req: Req, res: Res) {
         date: String(order.createdAt || ''),
         amount: Number(order.amount || 0),
         planName: String(order.planName || order.planId || 'Assinatura'),
-        status: order.status === 'approved' ? 'concluido' : order.status === 'refunded' ? 'reembolsado' : 'processando',
+        status: ['approved', 'paid'].includes(String(order.status)) ? 'concluido' : ['refunded', 'cancelled'].includes(String(order.status)) ? 'reembolsado' : 'processando',
         invoiceNumber: String(order.orderId || order.id)
       }));
       return json(res, 200, payments);
@@ -250,15 +250,20 @@ export default async function handler(req: Req, res: Res) {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       const sub = await documentGet('subscriptions', identity.uid);
       if (sub && sub.status === 'active') {
-        return json(res, 200, {
-          plan: sub.planId || 'gratuito',
-          status: 'ativo',
-          validUntil: sub.validUntil || sub.activatedAt,
-          autoRenew: sub.autoRenew !== false,
-          provider: sub.provider,
-          amount: sub.amount,
-          billingCycle: sub.billingCycle,
-        });
+        const expiry = sub.validUntil
+          ? Date.parse(String(sub.validUntil))
+          : subscriptionExpiry(sub.activatedAt, sub.billingCycle);
+        if (Number.isFinite(expiry) && expiry > Date.now()) {
+          return json(res, 200, {
+            plan: sub.planId || 'gratuito',
+            status: 'ativo',
+            validUntil: new Date(expiry).toISOString(),
+            autoRenew: sub.autoRenew !== false,
+            provider: sub.provider,
+            amount: sub.amount,
+            billingCycle: sub.billingCycle,
+          });
+        }
       }
       return json(res, 200, { plan: 'gratuito', status: 'inativo', autoRenew: false });
     }
