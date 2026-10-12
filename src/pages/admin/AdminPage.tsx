@@ -38,7 +38,7 @@ export default function AdminPage() {
   }
 
   // Map sub-route parameter to tab
-  const tabMapping: Record<string, 'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes'> = {
+  const tabMapping: Record<string, 'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'usuarios' | 'permissoes'> = {
     painel: 'painel',
     dashboard: 'painel',
     users: 'usuarios',
@@ -57,10 +57,9 @@ export default function AdminPage() {
     ads: 'publicidade',
     publicidade: 'publicidade',
     push: 'push',
-    download: 'download',
-    wordpress: 'download',
   };
 
+  if (section && !tabMapping[section]) return <Navigate to="/404" replace />;
   const initialTab = (section && tabMapping[section]) || 'painel';
 
   return (
