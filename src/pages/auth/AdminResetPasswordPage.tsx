@@ -26,11 +26,8 @@ export default function AdminResetPasswordPage() {
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
-    }, 800);
+    setLoading(false);
+    setErrorMessage('A recuperação da chave administrativa ainda precisa ser concluída pelo administrador do sistema.');
   };
 
   return (

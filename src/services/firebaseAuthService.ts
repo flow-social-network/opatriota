@@ -7,6 +7,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   sendPasswordResetEmail,
+  confirmPasswordReset,
   updateProfile,
   signOut,
   type User as FirebaseUser,
@@ -75,6 +76,11 @@ export async function registerWithEmail(name: string, email: string, password: s
 export async function requestPasswordReset(email: string): Promise<void> {
   if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
   await sendPasswordResetEmail(auth, email.trim());
+}
+
+export async function confirmPasswordResetCode(code: string, newPassword: string): Promise<void> {
+  if (!auth) throw new Error('AUTH_NOT_CONFIGURED');
+  await confirmPasswordReset(auth, code.trim(), newPassword);
 }
 
 export async function signOutFromFirebase() {

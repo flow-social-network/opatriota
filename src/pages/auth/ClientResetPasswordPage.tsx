@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
+import { useAuth } from '../../app/contexts/AuthContext';
 import { Lock, Eye, EyeOff, CheckCircle2, AlertCircle, KeyRound, ArrowLeft } from 'lucide-react';
 
 export default function ClientResetPasswordPage() {
   const navigate = useNavigate();
+  const { confirmPasswordReset } = useAuth();
   const [token, setToken] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -13,10 +15,14 @@ export default function ClientResetPasswordPage() {
   const [success, setSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
+    if (!token.trim()) {
+      setErrorMessage('Informe o código recebido no e-mail de recuperação.');
+      return;
+    }
     if (newPassword.length < 6) {
       setErrorMessage('A nova senha deve ter no mínimo 6 dígitos.');
       return;
@@ -27,10 +33,14 @@ export default function ClientResetPasswordPage() {
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await confirmPasswordReset(token, newPassword);
       setSuccess(true);
-    }, 700);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Não foi possível redefinir a senha. Verifique o código e tente novamente.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

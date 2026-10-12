@@ -5,6 +5,7 @@ import {
   signInWithEmail,
   registerWithEmail,
   requestPasswordReset,
+  confirmPasswordResetCode,
   signOutFromFirebase,
   refreshUserProfile,
 } from '../../services/firebaseAuthService';
@@ -22,6 +23,7 @@ interface AuthContextValue {
   loginWithEmail: (email: string, password: string) => Promise<UserSession>;
   register: (name: string, email: string, password: string) => Promise<UserSession>;
   resetPassword: (email: string) => Promise<void>;
+  confirmPasswordReset: (code: string, newPassword: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<UserSession | null>;
   toggleBookmark: (articleId: string) => Promise<void>;
@@ -88,6 +90,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await requestPasswordReset(email);
   }, []);
 
+  const confirmResetPassword = useCallback(async (code: string, newPassword: string) => {
+    await confirmPasswordResetCode(code, newPassword);
+  }, []);
+
   const logout = useCallback(async () => {
     await api.post('/editorial/auth/logout', undefined, { auth: false }).catch(() => undefined);
     await signOutFromFirebase();
@@ -125,6 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithEmail,
         register,
         resetPassword,
+        confirmPasswordReset: confirmResetPassword,
         logout,
         refreshProfile,
         toggleBookmark,
