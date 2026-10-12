@@ -3,7 +3,7 @@ import { createHmac } from 'node:crypto';
 import { constantTimeHexEqual, json, mpRequest } from '../_lib/billing';
 import { documentGet, documentWrite } from '../_lib/storage';
 
-function addBillingCycle(startValue: string | Date, cycle: unknown): string {
+export function addBillingCycle(startValue: string | Date, cycle: unknown): string {
   const start = new Date(startValue);
   if (!Number.isFinite(start.getTime())) throw new Error('INVALID_SUBSCRIPTION_START_DATE');
   if (cycle === 'annual') {
