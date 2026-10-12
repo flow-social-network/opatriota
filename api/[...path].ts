@@ -253,7 +253,7 @@ export default async function handler(req: Req, res: Res) {
         const expiry = sub.validUntil
           ? Date.parse(String(sub.validUntil))
           : subscriptionExpiry(sub.activatedAt, sub.billingCycle);
-        if (Number.isFinite(expiry) && expiry > Date.now()) {
+        if (expiry !== null && Number.isFinite(expiry) && expiry > Date.now()) {
           return json(res, 200, {
             plan: sub.planId || 'gratuito',
             status: 'ativo',
