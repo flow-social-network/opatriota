@@ -42,8 +42,7 @@ export const AdsManager: React.FC<AdsManagerProps> = ({
 
   const handleSave = () => {
     onSaveAds(adsense, slots);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3500);
+    // Persistência e feedback de sucesso/erro são controlados pelo serviço do painel.
   };
 
   const handleResetDefaults = () => {
