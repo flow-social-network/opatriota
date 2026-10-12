@@ -624,12 +624,42 @@ export default async function handler(req: Req, res: Res) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;
       let records = await documentList(resource.collection);
       if (!isEditorial) records = publicRecords(resource.collection, records);
+
+      if (resource.collection === 'articles') {
+        const staff = Boolean(identity && STAFF.has(identity.role));
+        const access = await paidAccessLevel(identity);
+        records = records.map((article) =>
+          staff || hasArticleAccess(article, access) ? article : lockedArticle(article)
+        );
+      }
       return json(res, 200, records);
     }
     if (method === 'GET' && resource.id) {
       const record = await documentGet(resource.collection, resource.id);
       if (!record) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
-      if (resource.collection === 'articles' && record.editorialStatus !== 'PUBLICADA' && !requireRole(identity, STAFF, res)) return;
+
+      if (resource.collection === 'articles') {
+        const staff = Boolean(identity && STAFF.has(identity.role));
+        if (!staff && !isPublicArticle(record)) {
+          return json(res, 404, { error: 'NOT_FOUND', message: 'Matéria não encontrada.' });
+        }
+        if (!staff && !hasArticleAccess(record, await paidAccessLevel(identity))) {
+          return json(res, 403, {
+            error: 'SUBSCRIPTION_REQUIRED',
+            message: 'Esta matéria exige uma assinatura ativa.',
+            article: lockedArticle(record),
+          });
+        }
+      }
+
+      if (resource.collection === 'pages' && !isPublicPage(record) &&
+          !Boolean(identity && EDITORS.has(identity.role))) {
+        return json(res, 404, { error: 'NOT_FOUND', message: 'Página não encontrada.' });
+      }
+      if (['categories', 'authors', 'columnists'].includes(resource.collection) &&
+          record.active === false && !Boolean(identity && STAFF.has(identity.role))) {
+        return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
+      }
       return json(res, 200, record);
     }
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
