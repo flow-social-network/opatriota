@@ -3,6 +3,21 @@ import { createHmac } from 'node:crypto';
 import { constantTimeHexEqual, json, mpRequest } from '../_lib/billing';
 import { documentGet, documentWrite } from '../_lib/storage';
 
+function addBillingCycle(startValue: string | Date, cycle: unknown): string {
+  const start = new Date(startValue);
+  if (!Number.isFinite(start.getTime())) throw new Error('INVALID_SUBSCRIPTION_START_DATE');
+  if (cycle === 'annual') {
+    start.setUTCFullYear(start.getUTCFullYear() + 1);
+  } else {
+    const day = start.getUTCDate();
+    start.setUTCDate(1);
+    start.setUTCMonth(start.getUTCMonth() + 1);
+    const lastDay = new Date(Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)).getUTCDate();
+    start.setUTCDate(Math.min(day, lastDay));
+  }
+  return start.toISOString();
+}
+
 export default async function handler(req: IncomingMessage & { method?:string; headers:any; query?:Record<string,unknown>; body?:any; url?:string },res:ServerResponse & {statusCode:number;setHeader(name:string,value:string):void;end(body?:string):void}) {
   if(req.method!=='POST') {res.setHeader('Allow','POST');return json(res,405,{error:'METHOD_NOT_ALLOWED'});}
   try {
@@ -39,9 +54,56 @@ export default async function handler(req: IncomingMessage & { method?:string; h
     const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(order.amount) && payment.currency_id==='BRL';
     const orderStatus=approved?'paid':nextStatus;
     await documentWrite('checkoutOrders',orderId,{status:orderStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),updatedAt:new Date().toISOString()});
-    if(approved && order.uid) {
-      const subscriptionId=String(order.uid);
-      await documentWrite('subscriptions',subscriptionId,{uid:order.uid,orderId,planId:order.planId,planName:order.planName,billingCycle:order.cycle,status:'active',amount:order.amount,currency:'BRL',provider:'mercadopago',providerPaymentId:String(payment.id),activatedAt:new Date().toISOString()});
+    if (order.uid && approved) {
+      const subscriptionId = String(order.uid);
+      const paymentKey = String(payment.id);
+      const existing = await documentGet('subscriptions', subscriptionId);
+      const now = new Date();
+
+      // Webhooks are delivered at least once. A repeated notification for the
+      // same payment must not extend the subscription again.
+      if (String(existing?.providerPaymentId || '') === paymentKey) {
+        if (!existing?.validUntil) {
+          const activatedAt = String(existing?.activatedAt || order.createdAt || now.toISOString());
+          await documentWrite('subscriptions', subscriptionId, {
+            validUntil: addBillingCycle(activatedAt, existing?.billingCycle || order.cycle),
+            updatedAt: now.toISOString(),
+          });
+        }
+      } else {
+        const existingExpiry = existing?.validUntil ? Date.parse(String(existing.validUntil)) : Number.NaN;
+        const baseDate = Number.isFinite(existingExpiry) && existingExpiry > now.getTime()
+          ? new Date(existingExpiry)
+          : now;
+        await documentWrite('subscriptions', subscriptionId, {
+          uid: order.uid,
+          orderId,
+          planId: order.planId,
+          planName: order.planName,
+          billingCycle: order.cycle,
+          status: 'active',
+          amount: order.amount,
+          currency: 'BRL',
+          provider: 'mercadopago',
+          providerPaymentId: paymentKey,
+          providerStatus: String(payment.status || ''),
+          activatedAt: now.toISOString(),
+          validUntil: addBillingCycle(baseDate, order.cycle),
+          updatedAt: now.toISOString(),
+        });
+      }
+    } else if (order.uid && ['refunded', 'cancelled'].includes(String(payment.status || ''))) {
+      // An old payment's delayed refund must not revoke a newer renewal.
+      const subscriptionId = String(order.uid);
+      const existing = await documentGet('subscriptions', subscriptionId);
+      if (existing && String(existing.providerPaymentId || '') === String(payment.id)) {
+        await documentWrite('subscriptions', subscriptionId, {
+          status: 'inactive',
+          providerStatus: String(payment.status),
+          revokedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
     }
     return json(res,200,{received:true,status:orderStatus});
   } catch(error:any) {
