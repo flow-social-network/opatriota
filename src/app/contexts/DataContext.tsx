@@ -243,7 +243,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       value={{
         articles, factChecks, sources, queueItems, pages, categories, authors,
         menuConfig, subscriptionPlans, contactSubmissions, lgpdRequests,
-        portalSettings, dataLoading, dataError,
+        portalSettings, dataLoading, dataError, dataErrors,
         setArticles, setSources, setQueueItems, setPages, setCategories, setAuthors,
         setMenuConfig, setContactSubmissions, setLgpdRequests,
         updateArticles, updateSources, updateQueue,
