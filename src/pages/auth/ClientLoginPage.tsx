@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
-import { useAuth, DEMO_MARCOS_VINICIUS } from '../../app/contexts/AuthContext';
+import { useAuth } from '../../app/contexts/AuthContext';
 import { 
   Mail, 
   Lock, 
@@ -10,14 +10,13 @@ import {
   LogIn, 
   AlertCircle, 
   CheckCircle2, 
-  Sparkles,
   ArrowRight
 } from 'lucide-react';
 
 export default function ClientLoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { loginWithEmail, loginWithGoogle, setCurrentUser } = useAuth();
+  const { loginWithEmail, loginWithGoogle } = useAuth();
 
   const searchParams = new URLSearchParams(location.search);
   const nextUrl = searchParams.get('next') || '/minha-conta';
@@ -57,19 +56,10 @@ export default function ClientLoginPage() {
       await loginWithGoogle();
       navigate(nextUrl);
     } catch (err: any) {
-      // Fallback already sets Marcos Vinicius if not configured
-      navigate(nextUrl);
+      setErrorMessage(err?.message || 'Não foi possível autenticar com Google.');
     } finally {
       setGoogleLoading(false);
     }
-  };
-
-  const handleDemoSubscriberLogin = () => {
-    setCurrentUser(DEMO_MARCOS_VINICIUS);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('opatriota_session', JSON.stringify(DEMO_MARCOS_VINICIUS));
-    }
-    navigate(nextUrl);
   };
 
   return (
@@ -219,17 +209,7 @@ export default function ClientLoginPage() {
         </Link>
       </div>
 
-      {/* Quick Demo Login */}
-      <div className="mt-8 pt-6 border-t border-[#E2E8F0]">
-        <button
-          type="button"
-          onClick={handleDemoSubscriberLogin}
-          className="w-full py-2.5 px-3 rounded-lg border border-emerald-300 bg-emerald-50/60 hover:bg-emerald-100/60 text-[#16803C] text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Acesso Rápido — Marcos Vinicius (Assinante Premium)</span>
-        </button>
-      </div>
+
     </AuthLayout>
   );
 }
