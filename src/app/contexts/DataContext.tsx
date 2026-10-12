@@ -39,6 +39,7 @@ interface DataContextValue {
   portalSettings: PortalSettings;
   dataLoading: boolean;
   dataError: string | null;
+  dataErrors: Record<string, string>;
 
   // Setters (exposed for admin/newsroom panels)
   setArticles: Dispatch<SetStateAction<Article[]>>;
@@ -90,6 +91,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [portalSettings, setPortalSettingsState] = useState<PortalSettings>(DEFAULT_PORTAL_SETTINGS);
   const [dataLoading, setDataLoading] = useState(true);
   const [dataError, setDataError] = useState<string | null>(null);
+  const [dataErrors, setDataErrors] = useState<Record<string, string>>({});
 
   // Load portal settings on mount
   useEffect(() => {
