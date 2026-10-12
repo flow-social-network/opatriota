@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
 import { useAuth } from '../../app/contexts/AuthContext';
+import { isFirebaseAuthConfigured } from '../../services/firebaseAuthService';
 import { 
   Mail, 
   Lock, 
@@ -77,8 +78,8 @@ export default function ClientLoginPage() {
         </div>
       )}
 
-      {/* Social Google Login Button */}
-      <div className="mb-5">
+      {/* Google só aparece quando a configuração real está disponível. */}
+      {isFirebaseAuthConfigured() && <div className="mb-5">
         <button
           type="button"
           onClick={handleGoogleLogin}
@@ -105,13 +106,13 @@ export default function ClientLoginPage() {
           </svg>
           <span>Continuar com Google</span>
         </button>
-      </div>
+      </div>}
 
-      <div className="flex items-center my-5">
+      {isFirebaseAuthConfigured() && <div className="flex items-center my-5">
         <div className="flex-1 border-t border-gray-200" />
         <span className="px-3 text-xs text-gray-400 font-medium">ou com seu e-mail</span>
         <div className="flex-1 border-t border-gray-200" />
-      </div>
+      </div>}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

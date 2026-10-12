@@ -616,10 +616,10 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
   {/* Right Icons: Search + authenticated notifications + User Profile */}
-  <div className="flex min-w-0 shrink items-center justify-end gap-0.5">
+  <div className="flex min-w-0 shrink-0 items-center justify-end gap-0.5">
   <button
   onClick={() => setMobileMenuOpen(true)}
-  aria-label="Buscar Notícias"
+  aria-label="Abrir busca"
   className="flex !size-7 !h-7 !max-h-7 shrink-0 self-center items-center justify-center p-0 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
   >
   <Search className="w-4 h-4" />
