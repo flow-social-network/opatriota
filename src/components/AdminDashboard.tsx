@@ -1,4 +1,3 @@
-import { api } from '../services/apiClient';
 import React, { useEffect, useState } from 'react';
 import { EditorialQueueItem, EditorialStatus, PortalSettings } from '../types';
 import { IdentityManager } from './admin/IdentityManager';
