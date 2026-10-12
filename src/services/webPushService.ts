@@ -16,15 +16,12 @@ const hasFirebaseConfig = Object.values(firebaseConfig).every(Boolean);
 const firebaseApp = hasFirebaseConfig
   ? (getApps().length ? getApp() : initializeApp(firebaseConfig))
   : null;
-import { PushSubscriber, PushNotificationCampaign } from '../types';
 
-// VAPID Web Push Public Key provided for O Patriota
-export const DEFAULT_VAPID_PUBLIC_KEY = 'BPA-ZMTWvVvRVhRaSqZiBvBOGl8vjYjtURNbJAbP0zZix6s8BkizVNqijXUxqrP27yLa0sdR9iSsvwqZM8dV2bg';
-export const FCM_PROJECT_ID = 'o-patriota-5db52';
+
+export const DEFAULT_VAPID_PUBLIC_KEY = String(env.VITE_FIREBASE_VAPID_PUBLIC_KEY || '');
+export const FCM_PROJECT_ID = String(env.VITE_FIREBASE_PROJECT_ID || '');
 
 const LOCAL_PUSH_TOKEN_KEY = 'o_patriota_push_token_v1';
-const LOCAL_PUSH_SUBSCRIBERS_KEY = 'o_patriota_push_subscribers_v1';
-const LOCAL_PUSH_CAMPAIGNS_KEY = 'o_patriota_push_campaigns_v1';
 
 /**
  * Checks if browser supports Web Push Notifications & Service Worker.
@@ -80,6 +77,15 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
   permission: NotificationPermission | 'unsupported';
 }> {
   const supported = await isPushNotificationSupported();
+  const permissionBeforeRequest = getPushPermissionStatus();
+  const vapidKey = String(customVapidKey || DEFAULT_VAPID_PUBLIC_KEY).trim();
+  if (!firebaseApp || !vapidKey) {
+    return {
+      success: false,
+      message: 'Web Push não configurado: valide as variáveis Firebase e a chave VAPID pública no ambiente do portal.',
+      permission: permissionBeforeRequest,
+    };
+  }
   if (!supported) {
     return {
       success: false,
@@ -104,9 +110,7 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
     const registration = await registerPushServiceWorker();
 
     // 2. Obtain FCM messaging instance
-    if (!firebaseApp) throw new Error('Firebase não está configurado.');
     const messaging = getMessaging(firebaseApp);
-    const vapidKey = customVapidKey || DEFAULT_VAPID_PUBLIC_KEY;
 
     // 3. Request FCM registration token with the VAPID key
     const currentToken = await getToken(messaging, {
@@ -122,44 +126,35 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
       };
     }
 
-    // 4. Save token in browser storage
-    try {
-      localStorage.setItem(LOCAL_PUSH_TOKEN_KEY, currentToken);
-    } catch (e) {}
-
-    // 5. Detect device info
+    // 4. Detect device info
     const ua = navigator.userAgent;
     const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
     const isTablet = /iPad|Tablet/i.test(ua);
     const deviceType: 'desktop' | 'mobile' | 'tablet' = isTablet ? 'tablet' : (isMobile ? 'mobile' : 'desktop');
 
-    const subscriberData: PushSubscriber = {
-      id: `push-${Date.now()}`,
-      token: currentToken,
-      subscribedAt: new Date().toISOString(),
-      userAgent: ua.slice(0, 150),
-      deviceType,
-      active: true
-    };
-
-    // 6. Save in local subscriber list cache
-    try {
-      const raw = localStorage.getItem(LOCAL_PUSH_SUBSCRIBERS_KEY);
-      const list: PushSubscriber[] = raw ? JSON.parse(raw) : [];
-      if (!list.some(s => s.token === currentToken)) {
-        list.push(subscriberData);
-        localStorage.setItem(LOCAL_PUSH_SUBSCRIBERS_KEY, JSON.stringify(list));
-      }
-    } catch (e) {}
-
-    // 7. Persist through the API so the active database provider owns the record.
+    // Persist the subscription on the server before reporting success.
     try {
       await api.post('/push-subscriptions', {
-        ...subscriberData,
-        vapidPublicKey: vapidKey
+        id: `push-${Date.now()}`,
+        token: currentToken,
+        subscribedAt: new Date().toISOString(),
+        userAgent: navigator.userAgent.slice(0, 150),
+        deviceType,
+        active: true,
+        vapidPublicKey: vapidKey,
       });
-    } catch (apiError) {
-      console.info('[WebPush] Token mantido localmente; a API ainda não persistiu a inscrição.');
+    } catch {
+      return {
+        success: false,
+        message: 'O navegador gerou um token, mas o servidor não confirmou a inscrição. Tente novamente; nenhum sucesso foi registrado localmente.',
+        permission,
+      };
+    }
+
+    try {
+      localStorage.setItem(LOCAL_PUSH_TOKEN_KEY, currentToken);
+    } catch {
+      // The server subscription is already persisted; local caching is optional.
     }
 
     return {
@@ -188,58 +183,6 @@ export function getStoredPushToken(): string | null {
   } catch (e) {
     return null;
   }
-}
-
-/**
- * List registered push campaigns
- */
-export function getPushCampaigns(): PushNotificationCampaign[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(LOCAL_PUSH_CAMPAIGNS_KEY);
-    if (raw) return JSON.parse(raw);
-  } catch (e) {}
-
-  // Initial seed campaigns for demonstration
-  return [
-    {
-      id: 'camp-1',
-      title: 'URGENTE: Nova votação no Congresso Nacional',
-      body: 'Plenário inicia análise de projeto com impacto direto na economia e liberdades civis.',
-      url: '/artigo/votacao-congresso',
-      sentAt: '08/10/2026 14:32',
-      recipientCount: 1420,
-      status: 'enviado'
-    },
-    {
-      id: 'camp-2',
-      title: 'ALERTA METEOROLÓGICO: Defesa Civil RS',
-      body: 'Inmet emite alerta meteorológico para capitais do Sul e Sudeste nesta quinta-feira.',
-      url: '/artigo/alerta-meteorologico-inmet',
-      sentAt: '07/10/2026 09:15',
-      recipientCount: 1380,
-      status: 'enviado'
-    }
-  ];
-}
-
-/**
- * Records a new push campaign broadcast
- */
-export function recordPushCampaign(campaign: Omit<PushNotificationCampaign, 'id' | 'sentAt'>): PushNotificationCampaign {
-  const newCamp: PushNotificationCampaign = {
-    ...campaign,
-    id: `camp-${Date.now()}`,
-    sentAt: new Date().toLocaleString('pt-BR')
-  };
-
-  try {
-    const list = getPushCampaigns();
-    list.unshift(newCamp);
-    localStorage.setItem(LOCAL_PUSH_CAMPAIGNS_KEY, JSON.stringify(list));
-  } catch (e) {}
-
-  return newCamp;
 }
 
 /**
