@@ -39,81 +39,81 @@ export const DEFAULT_SOCIAL_NETWORKS: SocialNetworkItem[] = [
     name: 'Facebook',
     platform: 'facebook',
     url: 'https://www.facebook.com/opatriota.news.brasil/',
-    active: true,
+    active: false,
     order: 1,
-    ariaLabel: 'Página oficial de O Patriota no Facebook'
+    ariaLabel: 'URL pendente de verificação — página de O Patriota no Facebook'
   },
   {
     id: 'soc-ig',
     name: 'Instagram',
     platform: 'instagram',
     url: 'https://www.instagram.com/journal_opatriota/',
-    active: true,
+    active: false,
     order: 2,
-    ariaLabel: 'Perfil oficial de O Patriota no Instagram (@journal_opatriota)'
+    ariaLabel: 'URL pendente de verificação — perfil de O Patriota no Instagram (@journal_opatriota)'
   },
   {
     id: 'soc-yt',
     name: 'YouTube',
     platform: 'youtube',
     url: 'https://www.youtube.com/@opatriotabrasil',
-    active: true,
+    active: false,
     order: 3,
-    ariaLabel: 'Canal oficial de O Patriota no YouTube'
+    ariaLabel: 'URL pendente de verificação — canal de O Patriota no YouTube'
   },
   {
     id: 'soc-x',
     name: 'X (Twitter)',
     platform: 'x',
     url: 'https://x.com/opatriotabr',
-    active: true,
+    active: false,
     order: 4,
-    ariaLabel: 'Conta oficial de O Patriota no X'
+    ariaLabel: 'URL pendente de verificação — conta de O Patriota no X'
   },
   {
     id: 'soc-in',
     name: 'LinkedIn',
     platform: 'linkedin',
     url: 'https://www.linkedin.com/company/journal-o-patriota',
-    active: true,
+    active: false,
     order: 5,
-    ariaLabel: 'Página oficial de O Patriota no LinkedIn'
+    ariaLabel: 'URL pendente de verificação — página de O Patriota no LinkedIn'
   },
   {
     id: 'soc-tg',
     name: 'Telegram',
     platform: 'telegram',
     url: 'https://t.me/opatriotabrasil',
-    active: true,
+    active: false,
     order: 6,
-    ariaLabel: 'Canal oficial de O Patriota no Telegram'
+    ariaLabel: 'URL pendente de verificação — canal de O Patriota no Telegram'
   },
   {
     id: 'soc-wa',
     name: 'WhatsApp',
     platform: 'whatsapp',
     url: 'https://whatsapp.com/channel/opatriotabrasil',
-    active: true,
+    active: false,
     order: 7,
-    ariaLabel: 'Canal oficial de transmissão no WhatsApp'
+    ariaLabel: 'URL pendente de verificação — canal de transmissão no WhatsApp'
   },
   {
     id: 'soc-kw',
     name: 'Kwai',
     platform: 'kwai',
     url: 'https://k.kwai.com/u/@jornal-opatriota/WPiCxD5Te',
-    active: true,
+    active: false,
     order: 8,
-    ariaLabel: 'Perfil oficial de O Patriota no Kwai (@jornal-opatriota)'
+    ariaLabel: 'URL pendente de verificação — perfil de O Patriota no Kwai (@jornal-opatriota)'
   },
   {
     id: 'soc-rss',
     name: 'Feed RSS',
     platform: 'rss',
     url: '/rss.xml',
-    active: true,
+    active: false,
     order: 9,
-    ariaLabel: 'Feed RSS de Notícias de O Patriota'
+    ariaLabel: 'URL pendente de verificação — feed RSS de Notícias de O Patriota'
   }
 ];
 
@@ -133,7 +133,7 @@ export const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     width: 728,
     height: 90,
     active: false,
-    platform: 'adsense',
+    platform: 'empty',
     slotId: '',
     demoTitle: 'Espaço Publicitário Superior (728x90)'
   },
@@ -144,8 +144,8 @@ export const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     format: 'billboard_970x250',
     width: 970,
     height: 120,
-    active: true,
-    platform: 'adsense',
+    active: false,
+    platform: 'empty',
     slotId: '',
     demoTitle: 'Espaço Publicitário Pós-Plantão (970x120)'
   },
@@ -156,8 +156,8 @@ export const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     format: 'medium_rectangle_300x250',
     width: 300,
     height: 250,
-    active: true,
-    platform: 'adsense',
+    active: false,
+    platform: 'empty',
     slotId: '',
     demoTitle: 'Espaço Publicitário Lateral (300x250)'
   },
@@ -168,8 +168,8 @@ export const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     format: 'responsive_banner',
     width: 1200,
     height: 100,
-    active: true,
-    platform: 'adsense',
+    active: false,
+    platform: 'empty',
     slotId: '',
     demoTitle: 'Espaço Publicitário Entre Seções Editoriais'
   },
@@ -180,8 +180,8 @@ export const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     format: 'billboard_970x250',
     width: 970,
     height: 120,
-    active: true,
-    platform: 'adsense',
+    active: false,
+    platform: 'empty',
     slotId: '',
     demoTitle: 'Espaço Publicitário Pré-Rodapé Institucional'
   },
@@ -192,8 +192,8 @@ export const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     format: 'responsive_banner',
     width: 800,
     height: 120,
-    active: true,
-    platform: 'adsense',
+    active: false,
+    platform: 'empty',
     slotId: '',
     demoTitle: 'Espaço Publicitário ao Final da Matéria'
   },
@@ -204,17 +204,17 @@ export const DEFAULT_AD_SLOTS: AdSlotConfig[] = [
     format: 'half_page_300x600',
     width: 300,
     height: 600,
-    active: true,
-    platform: 'adsense',
+    active: false,
+    platform: 'empty',
     slotId: '',
     demoTitle: 'Espaço Publicitário Half-Page (300x600)'
   }
 ];
 
 export const DEFAULT_WEBPUSH_CONFIG: WebPushConfig = {
-  enabled: true,
-  vapidPublicKey: 'BPA-ZMTWvVvRVhRaSqZiBvBOGl8vjYjtURNbJAbP0zZix6s8BkizVNqijXUxqrP27yLa0sdR9iSsvwqZM8dV2bg',
-  projectId: 'o-patriota-5db52',
+  enabled: false,
+  vapidPublicKey: '',
+  projectId: '',
   autoPrompt: false,
   welcomeTitle: 'O Patriota Brasil — Notificações Ativadas',
   welcomeMessage: 'Você receberá notícias urgentes, plantões e reportagens investigativas em primeira mão.'
