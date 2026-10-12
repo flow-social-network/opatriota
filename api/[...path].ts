@@ -14,6 +14,73 @@ const STAFF = new Set(['jornalista', 'revisor', 'editor', 'editor_chefe', 'admin
 const EDITORS = new Set(['editor', 'editor_chefe', 'administrador']);
 const ADMINS = new Set(['administrador']);
 
+export type PaidAccessLevel = 'none' | 'assinante' | 'premium';
+
+export function isPublicArticle(article: Record<string, any>): boolean {
+  const status = String(article.status || '').trim().toLowerCase();
+  return String(article.editorialStatus || '').trim().toUpperCase() === 'PUBLICADA' &&
+    !['rascunho', 'draft', 'despublicada', 'unpublished', 'rejeitada', 'arquivada'].includes(status);
+}
+
+export function isPublicPage(page: Record<string, any>): boolean {
+  const status = String(page.status || '').trim().toLowerCase();
+  if (['rascunho', 'draft', 'revisao', 'review', 'despublicada', 'unpublished'].includes(status)) return false;
+  return ['publicado', 'publicada', 'published'].includes(status) || page.published === true;
+}
+
+function subscriptionExpiry(startValue: unknown, cycle: unknown): number | null {
+  const date = new Date(String(startValue || ''));
+  if (!Number.isFinite(date.getTime())) return null;
+  if (cycle === 'annual') {
+    date.setUTCFullYear(date.getUTCFullYear() + 1);
+  } else {
+    const day = date.getUTCDate();
+    date.setUTCDate(1);
+    date.setUTCMonth(date.getUTCMonth() + 1);
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+    date.setUTCDate(Math.min(day, lastDay));
+  }
+  return date.getTime();
+}
+
+export async function paidAccessLevel(
+  identity: { uid: string; role: string } | null,
+): Promise<PaidAccessLevel> {
+  if (!identity) return 'none';
+  if (STAFF.has(identity.role)) return 'premium';
+
+  const subscription = await documentGet('subscriptions', identity.uid);
+  if (!subscription || subscription.status !== 'active') return 'none';
+  const expiry = subscription.validUntil
+    ? Date.parse(String(subscription.validUntil))
+    : subscriptionExpiry(subscription.activatedAt, subscription.billingCycle);
+  if (!Number.isFinite(expiry) || expiry <= Date.now()) return 'none';
+
+  return String(subscription.planId || '').toLowerCase().includes('premium')
+    ? 'premium'
+    : 'assinante';
+}
+
+export function hasArticleAccess(article: Record<string, any>, paidLevel: PaidAccessLevel): boolean {
+  const required = String(article.accessLevel || 'aberto').trim().toLowerCase();
+  if (['aberto', 'open', 'free'].includes(required)) return true;
+  if (required === 'premium') return paidLevel === 'premium';
+  if (required === 'assinante' || required === 'subscriber') return paidLevel === 'assinante' || paidLevel === 'premium';
+  return false;
+}
+
+export function lockedArticle(article: Record<string, any>): Record<string, any> {
+  const {
+    content: _content,
+    body: _body,
+    htmlContent: _htmlContent,
+    fullText: _fullText,
+    videoIframeHtml: _videoIframeHtml,
+    ...teaser
+  } = article;
+  return { ...teaser, premiumLocked: true };
+}
+
 function routeName(url: string): string {
   const pathname = new URL(url, 'https://api.local').pathname;
   return pathname.replace(/^\/api\/?/, '').replace(/\/$/, '');
@@ -63,8 +130,8 @@ function canonicalizeUrl(value: string): string {
 }
 
 function publicRecords(collection: string, records: any[]): any[] {
-  if (collection === 'articles') return records.filter(item => item.editorialStatus === 'PUBLICADA' && item.status !== 'rascunho');
-  if (collection === 'pages') return records.filter(item => item.status === 'publicado' || item.status === 'publicada' || item.published === true);
+  if (collection === 'articles') return records.filter(isPublicArticle);
+  if (collection === 'pages') return records.filter(isPublicPage);
   if (collection === 'categories' || collection === 'authors' || collection === 'columnists') return records.filter(item => item.active !== false);
   return records;
 }
