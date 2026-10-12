@@ -444,42 +444,74 @@ export default async function handler(req: Req, res: Res) {
     }
 
     if (path === 'editorial/stats' && method === 'GET') {
+      if (!requireRole(identity, STAFF, res)) return;
       const allArticles = await documentList('articles');
-      const inProduction = allArticles.filter(a => a.editorialStatus === 'EM REDAÇÃO' || a.editorialStatus === 'EM APURAÇÃO' || a.status === 'em_producao').length || 24;
-      const inReview = allArticles.filter(a => a.editorialStatus === 'EM REVISÃO' || a.status === 'em_revisao').length || 6;
-      const awaitingApproval = allArticles.filter(a => a.editorialStatus === 'RECEBIDA' || a.editorialStatus === 'EM TRIAGEM' || a.status === 'aguardando_aprovacao').length || 3;
-      const scheduled = allArticles.filter(a => a.editorialStatus === 'AGENDADA' || a.status === 'agendada').length || 12;
-      const publishedMonth = allArticles.filter(a => a.editorialStatus === 'PUBLICADA' || a.status === 'publicada').length || 148;
-      const drafts = allArticles.filter(a => a.status === 'rascunho' || a.editorialStatus === 'RASCUNHO').length || 12;
+      const monthStart = new Date();
+      monthStart.setUTCDate(1);
+      monthStart.setUTCHours(0, 0, 0, 0);
+      const inProduction = allArticles.filter(a => a.editorialStatus === 'EM REDAÇÃO' || a.editorialStatus === 'EM APURAÇÃO' || a.status === 'em_producao').length;
+      const inReview = allArticles.filter(a => a.editorialStatus === 'EM REVISÃO' || a.status === 'em_revisao').length;
+      const awaitingApproval = allArticles.filter(a => a.editorialStatus === 'RECEBIDA' || a.editorialStatus === 'EM TRIAGEM' || a.status === 'aguardando_aprovacao').length;
+      const scheduled = allArticles.filter(a => a.editorialStatus === 'AGENDADA' || a.status === 'agendada').length;
+      const publishedMonth = allArticles.filter(a => {
+        const publishedAt = Date.parse(String(a.publishedAt || ''));
+        return (a.editorialStatus === 'PUBLICADA' || a.status === 'publicada') &&
+          Number.isFinite(publishedAt) && publishedAt >= monthStart.getTime();
+      }).length;
+      const drafts = allArticles.filter(a => a.status === 'rascunho' || a.editorialStatus === 'RASCUNHO').length;
       return json(res, 200, {
-        inProduction,
-        inReview,
-        awaitingApproval,
-        scheduled,
-        publishedMonth,
-        drafts,
+        inProduction, inReview, awaitingApproval, scheduled, publishedMonth, drafts,
         totalArticles: allArticles.length,
       });
     }
 
     if (path === 'system/status' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
       const rawStatus = await documentGet('systemStatus', 'current');
-      return json(res, 200, rawStatus || {
-        allOperational: true,
+      if (rawStatus && rawStatus.lastCheck &&
+          Date.now() - Date.parse(String(rawStatus.lastCheck)) < 5 * 60 * 1000) {
+        return json(res, 200, rawStatus);
+      }
+      const services = [
+        {
+          name: 'Banco de dados',
+          configured: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.DATABASE_URL),
+          status: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.DATABASE_URL
+            ? 'Configurado; conexão não verificada'
+            : 'Não configurado',
+          healthy: null,
+        },
+        {
+          name: 'Autenticação Firebase',
+          configured: Boolean(process.env.FIREBASE_WEB_API_KEY),
+          status: process.env.FIREBASE_WEB_API_KEY ? 'Chave configurada; login não verificado' : 'Não configurado',
+          healthy: null,
+        },
+        {
+          name: 'Mercado Pago',
+          configured: Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN && process.env.MERCADOPAGO_WEBHOOK_SECRET),
+          status: process.env.MERCADOPAGO_ACCESS_TOKEN && process.env.MERCADOPAGO_WEBHOOK_SECRET
+            ? 'Credenciais configuradas; transação não verificada'
+            : 'Não configurado',
+          healthy: null,
+        },
+        {
+          name: 'IA editorial',
+          configured: Boolean(process.env.GEMINI_API_KEY),
+          status: process.env.GEMINI_API_KEY ? 'Chave configurada; chamada não verificada' : 'Não configurado',
+          healthy: null,
+        },
+      ];
+      return json(res, 200, {
+        allOperational: false,
+        verification: 'configuration-only',
         lastCheck: new Date().toISOString(),
-        services: [
-          { name: 'Sistema da Redação', status: 'Operacional', healthy: true },
-          { name: 'Banco de Dados (Neon / MySQL)', status: 'Operacional', healthy: true },
-          { name: 'Autenticação (Firebase)', status: 'Operacional', healthy: true },
-          { name: 'Publicação no Site', status: 'Operacional', healthy: true },
-          { name: 'Integração Facebook', status: 'Operacional', healthy: true },
-          { name: 'Serviços de E-mail', status: 'Operacional', healthy: true },
-          { name: 'Armazenamento de Mídia', status: 'Operacional', healthy: true }
-        ]
+        services,
       });
     }
 
     if (path === 'editorial/ai-text' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
       const body = cleanObject(await readBody(req));
       const type = String(body.type || 'texto');
       const prompt = String(body.prompt || '').trim();
@@ -499,13 +531,15 @@ export default async function handler(req: Req, res: Res) {
             const aiData: any = await aiRes.json();
             const textResult = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
             if (textResult) {
+              const generatedAt = new Date().toISOString();
               return json(res, 200, {
                 generatedText: textResult,
-                results: [
-                  { id: 'gen-1', title: `Texto — ${prompt.slice(0, 30)}`, date: 'Hoje, ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), content: textResult },
-                  { id: 'gen-2', title: `Resumo Executivo`, date: 'Hoje, ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), content: textResult.slice(0, 300) + '...' },
-                  { id: 'gen-3', title: `Análise de Impactos`, date: 'Hoje, ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), content: `Impactos fiscais e institucionais apurados para: ${prompt}` }
-                ]
+                results: [{
+                  id: newId(),
+                  title: `Texto gerado — ${prompt.slice(0, 60)}`,
+                  generatedAt,
+                  content: textResult,
+                }],
               });
             }
           }
@@ -521,6 +555,7 @@ export default async function handler(req: Req, res: Res) {
     }
 
     if (path === 'editorial/ai-image' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
       const body = cleanObject(await readBody(req));
       const prompt = String(body.prompt || '').trim().slice(0, 2000);
       const style = String(body.style || 'Realista').trim().slice(0, 120);
@@ -534,38 +569,17 @@ export default async function handler(req: Req, res: Res) {
     }
 
     if (path === 'editorial/ai-risk' && method === 'POST') {
-      const body = cleanObject(await readBody(req));
-      const title = String(body.title || '');
-      const content = String(body.content || '');
-      const sources = Array.isArray(body.sources) ? body.sources : [];
-      
-      const hasTitle = title.trim().length > 10;
-      const hasContent = content.trim().length > 50;
-      const hasSources = sources.length > 0 || content.includes('http') || content.includes('segundo') || content.includes('afirmou');
-      
-      return json(res, 200, {
-        score: 82,
-        level: 'Baixo risco',
-        checklist: {
-          factualContent: hasTitle && hasContent,
-          sourcesVerified: true,
-          noMisinformation: true,
-          properLanguage: true,
-          noLegalRisk: true
-        },
-        editorialChecks: {
-          attractiveTitle: hasTitle,
-          completeLead: hasContent,
-          sourcesVerified: hasSources,
-          imagesAdded: Boolean(body.imageUrl),
-          spellChecked: true,
-          basicSeo: Boolean(body.seoTitle || title),
-          publishOrSchedule: true
-        }
+      if (!requireRole(identity, STAFF, res)) return;
+      return json(res, 503, {
+        error: process.env.GEMINI_API_KEY ? 'AI_RISK_NOT_IMPLEMENTED' : 'AI_NOT_CONFIGURED',
+        message: process.env.GEMINI_API_KEY
+          ? 'A análise de risco ainda não possui um avaliador validado conectado. Nenhuma pontuação fictícia foi gerada.'
+          : 'A análise de risco depende de um serviço de IA configurado no servidor.',
       });
     }
 
     if (path === 'editorial/chat' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
       const body = cleanObject(await readBody(req));
       const message = String(body.message || '').trim();
       const apiKey = process.env.GEMINI_API_KEY;
