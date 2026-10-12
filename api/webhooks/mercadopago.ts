@@ -107,7 +107,11 @@ export default async function handler(req: IncomingMessage & { method?:string; h
     }
     return json(res,200,{received:true,status:orderStatus});
   } catch(error:any) {
-    console.error('mercadopago.webhook failed:',String(error?.message||error));
+    const message = String(error?.message || '');
+    if (message.toLowerCase().includes('not configured')) {
+      return json(res, 503, { error: 'WEBHOOK_STORAGE_NOT_CONFIGURED' });
+    }
+    console.error('mercadopago.webhook failed:', message);
     return json(res,500,{error:'WEBHOOK_PROCESSING_FAILED'});
   }
 }
