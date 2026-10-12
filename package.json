@@ -19,6 +19,7 @@
     "noteagents:server": "node --env-file-if-exists=docs/noteagents/.env.local --import tsx docs/noteagents/server/http-server.ts",
     "noteagents:web": "vite --config docs/noteagents/vite.config.ts",
     "noteagents:mcp": "node --import tsx docs/noteagents/mcp/server.ts",
+    "noteagents:mcp:http": "NOTEAGENTS_MCP_MODE=http node --import tsx docs/noteagents/mcp/http-server.ts",
     "noteagents:install-browser": "playwright install chromium"
   },
   "dependencies": {

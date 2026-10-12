@@ -19,6 +19,7 @@ Permitir que uma pessoa descreva uma aplicação em linguagem natural, envie ima
 - [Utilitários integrados](./07-UTILITARIOS-INTEGRADOS.md)
 - [Registro de importações](./imports/README.md)
 - [MCP, LSP e Playwright](./08-MCP-LSP-PLAYWRIGHT.md)
+- [Catálogo de ferramentas](./09-CATALOGO-FERRAMENTAS.md)
 
 ## Princípios
 

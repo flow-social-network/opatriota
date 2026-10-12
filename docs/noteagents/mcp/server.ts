@@ -6,6 +6,7 @@ import { resolve, relative } from 'node:path'
 import { chromium } from 'playwright'
 
 const workspace = resolve(process.env.NOTEAGENTS_WORKSPACE ?? process.cwd())
+export const createMcpServer = () => {
 const server = new McpServer({ name: 'noteagents', version: '1.0.0' })
 const safePath = (value: string) => { const target = resolve(workspace, value); if (relative(workspace, target).startsWith('..')) throw new Error('PATH_OUTSIDE_WORKSPACE'); return target }
 
@@ -18,4 +19,10 @@ server.registerTool('browser_open', { description: 'Abre uma URL no navegador Pl
 server.registerTool('browser_screenshot', { description: 'Captura screenshot de uma URL', inputSchema: { url: z.string().url(), path: z.string().default('/tmp/noteagents.png') } }, async ({ url, path }) => { const browser = await chromium.launch({ headless: true }); const page = await browser.newPage({ viewport: { width: 1440, height: 900 } }); await page.goto(url, { waitUntil: 'networkidle' }); await page.screenshot({ path, fullPage: true }); await browser.close(); return { content: [{ type: 'text', text: `Screenshot salvo em ${path}` }] } })
 server.registerPrompt('implement', { description: 'Prompt padrão de implementação segura', argsSchema: { request: z.string() } }, ({ request }) => ({ messages: [{ role: 'user', content: { type: 'text', text: `Inspecione o workspace, implemente com mudanças mínimas, valide com LSP, testes e Playwright. Pedido: ${request}` } }] }))
 
-await server.connect(new StdioServerTransport())
+return server
+}
+
+if (process.env.NOTEAGENTS_MCP_MODE !== 'http') {
+  const server = createMcpServer()
+  await server.connect(new StdioServerTransport())
+}
