@@ -73,7 +73,7 @@ export default function NewsroomPage() {
         pages={pages}
         onSavePage={savePage}
         onDeletePage={deletePage}
-        onPreviewPage={(slug) => navigate(`/${slug.replace(/^\\/+|\\/+$/g, '')}?preview=1`)}
+        onPreviewPage={(slug) => navigate(`/${slug.split('/').filter(Boolean).join('/')}?preview=1`)}
         categories={categories}
         onSaveCategory={saveCategory}
         onSaveMenuConfig={saveMenuConfig}
