@@ -19,9 +19,10 @@ const ADMINS = new Set(['administrador']);
 export type PaidAccessLevel = 'none' | 'assinante' | 'premium';
 
 export function isPublicArticle(article: Record<string, any>): boolean {
+  const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
   const status = String(article.status || '').trim().toLowerCase();
-  return String(article.editorialStatus || '').trim().toUpperCase() === 'PUBLICADA' &&
-    !['rascunho', 'draft', 'despublicada', 'unpublished', 'rejeitada', 'arquivada'].includes(status);
+  return editorialStatus === 'PUBLICADA' &&
+    ['', 'publicada', 'publicado', 'published'].includes(status);
 }
 
 export function isPublicPage(page: Record<string, any>): boolean {
