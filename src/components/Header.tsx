@@ -572,7 +572,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* ═══════════════════════════════════════════════════════════════════
             1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
            ═══════════════════════════════════════════════════════════════════ */}
-        <div className="lg:hidden site-utility-bar" data-header-band="utility-mobile">
+        <div className="hidden lg:hidden site-utility-bar" data-header-band="utility-mobile">
           <div className="flex min-h-8 items-center justify-center gap-2 bg-[#F4F7FB] px-2 text-[10px] text-[#334155] border-b border-[#DDE5EF]">
             <span className="font-medium">{formattedFullDate}</span><span className="text-[#CBD5E1]">|</span><button type="button" onClick={() => handleOpenWeather('taquara')} className="font-semibold">Taquara (RS) · 24°C · INMET</button>
           </div>
@@ -645,13 +645,13 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="text-[#0B2345]">⌄</span>
                   </button>
                 ) : (
-                  <button onClick={onGoogleLogin} className="flex shrink-0 items-center gap-0.5 text-[#0B2345] font-bold text-[11px] cursor-pointer whitespace-nowrap" aria-label="Entrar">
+                  <button onClick={onGoogleLogin} className="hidden" aria-label="Entrar">
                     <User className="w-5 h-5" />
                     <span>Entrar</span>
                   </button>
                 )}
-                <span className="shrink-0 bg-[#16A34A] text-white font-black text-[10px] px-1.5 py-1 rounded">DIGITAL</span>
-                <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="shrink-0 border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-1.5 py-1 text-[9px] font-black transition-colors cursor-pointer whitespace-nowrap">Anuncie</button>
+                <span className="hidden bg-[#16A34A] text-white font-black text-[10px] px-1.5 py-1 rounded">DIGITAL</span>
+                <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="hidden border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-1.5 py-1 text-[9px] font-black transition-colors cursor-pointer whitespace-nowrap">Anuncie</button>
               </div>
             </div>
           </div>
@@ -1064,6 +1064,11 @@ export const Header: React.FC<HeaderProps> = ({
                     POR UM BRASIL MAIS FORTE
                   </p>
                 </div>
+
+                <div className="mb-3 flex items-center justify-center gap-2 text-[9px] text-white/80">
+                  <span>{formattedFullDate}</span><span className="text-white/40">|</span><span>Brasília (DF) · 30°C · Céu limpo</span>
+                </div>
+                {!currentUser && <button type="button" onClick={() => { window.location.assign('/login'); setMobileMenuOpen(false); }} className="mb-3 w-full rounded-lg border border-white/25 py-2 text-xs font-bold text-white">Entrar na conta</button>}
 
                 {/* Campo de Busca Integrado no Topo */}
                 <form 
