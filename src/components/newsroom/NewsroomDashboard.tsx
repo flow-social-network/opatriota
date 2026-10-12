@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Article, 
   CategorySlug, 
@@ -38,7 +38,11 @@ import { NewsroomEditorTab } from './NewsroomEditorTab';
 import { NewsroomMediaTab } from './NewsroomMediaTab';
 import { CorrectionRequestModal } from './CorrectionRequestModal';
 
+type NewsroomTab = 'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus';
+
 interface NewsroomDashboardProps {
+  initialTab?: NewsroomTab;
+  onTabChange?: (tab: NewsroomTab) => void;
   articles: Article[];
   sources: RssSource[];
   onUpdateSources?: (sources: RssSource[]) => void;
@@ -56,6 +60,8 @@ interface NewsroomDashboardProps {
 }
 
 export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
+  initialTab = 'painel',
+  onTabChange,
   articles,
   sources,
   onUpdateSources,
@@ -71,8 +77,15 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   menuConfig,
   onSaveMenuConfig
 }) => {
-  // Navigation tabs in newsroom
-  const [activeTab, setActiveTab] = useState<'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus'>('painel');
+  // Navigation tabs are URL-addressable, so deep links and browser history stay in sync.
+  const [activeTab, setActiveTab] = useState<NewsroomTab>(initialTab);
+  const handleTabChange = (tab: NewsroomTab) => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   // Article filters
   const [statusFilter, setStatusFilter] = useState<string>('TODAS');
@@ -156,7 +169,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     setFormMetaTitle(art.seo?.metaTitle || art.title);
     setFormMetaDesc(art.seo?.metaDescription || art.subtitle);
     setAiSuggestions(null);
-    setActiveTab('editor');
+    handleTabChange('editor');
   };
 
   // Open editor for brand new article
@@ -527,12 +540,12 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const active = activeTab === item.id;
-                return <button key={item.id} onClick={() => { setActiveTab(item.id as any); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'}`}><Icon className="size-4" />{item.label}</button>;
+                return <button key={item.id} onClick={() => { handleTabChange(item.id as NewsroomTab); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'}`}><Icon className="size-4" />{item.label}</button>;
               })}
             </div>
             <p className="px-3 pt-6 pb-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Fluxo editorial</p>
             <div className="flex flex-col gap-1 text-[12px] font-semibold text-[#52677a]">
-              {['Agenda Editorial', 'Fila de Revisão', 'Aprovação Final', 'Relatórios', 'Configurações', 'Integrações (APIs)'].map((label) => <button key={label} onClick={() => setActiveTab('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><CheckCircle className="size-4 text-[#7b9bb5]" />{label}</button>)}
+              {['Agenda Editorial', 'Fila de Revisão', 'Aprovação Final', 'Relatórios', 'Configurações', 'Integrações (APIs)'].map((label) => <button key={label} onClick={() => handleTabChange('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><CheckCircle className="size-4 text-[#7b9bb5]" />{label}</button>)}
             </div>
           </nav>
           <div className="border-t border-[#e1ebf3] p-3 text-[11px] text-[#52677a]">{currentUser.name}<div className="text-[10px] text-[#8ba0b2]">{currentUser.role.replace('_', ' ')}</div></div>
