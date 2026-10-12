@@ -23,9 +23,16 @@ export default function InstitutionalInfoPage() {
   const { currentUser } = useAuth();
   const previewRequested = new URLSearchParams(location.search).get('preview') === '1';
   const canPreviewDraft = Boolean(previewRequested && currentUser && ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(String(currentUser.role)));
-  const pathSlug = location.pathname.replace(/^\/+|\/+$/g, '');
+  const pathSlug = location.pathname.split('/').filter(Boolean).join('/');
   const candidates = [pathSlug, PAGE_ALIASES[pathSlug]].filter(Boolean);
-  const page = pages.find((item) => candidates.includes(item.slug) && (canPreviewDraft || ['publicado', 'publicada', 'published'].includes(String((item as any).status || '').trim().toLowerCase()) || (!String((item as any).status || '').trim() && (item as any).published === true));
+  const page = pages.find((item) => {
+    if (!candidates.includes(item.slug)) return false;
+    if (canPreviewDraft) return true;
+    const status = String((item as any).status || '').trim().toLowerCase();
+    return status
+      ? ['publicado', 'publicada', 'published'].includes(status)
+      : (item as any).published === true;
+  });
 
   useSeoMetadata({
     title: page?.seo?.metaTitle || page?.title,
