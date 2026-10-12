@@ -89,6 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
+    await api.post('/editorial/auth/logout', undefined, { auth: false }).catch(() => undefined);
     await signOutFromFirebase();
     setCurrentUser(null);
   }, []);

@@ -1,12 +1,27 @@
 import { Pool } from 'pg';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
-const connectionString = process.env.opatriota_DATABASE_URL || process.env.DATABASE_URL;
+function resolveConnectionString() {
+  return process.env.opatriota_DATABASE_URL
+    || process.env.opatriota_POSTGRES_URL
+    || process.env.DATABASE_URL
+    || process.env.POSTGRES_URL
+    || process.env.POSTGRES_PRISMA_URL;
+}
+
+function getConnectionLabel() {
+  if (process.env.opatriota_DATABASE_URL || process.env.opatriota_POSTGRES_URL) return 'Neon';
+  if (process.env.DATABASE_URL || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL) return 'Postgres';
+  return 'nenhum';
+}
 let pool: Pool | undefined;
 
 function getPool() {
-  if (!connectionString) throw new Error('Neon database is not configured');
-  pool ??= new Pool({ connectionString, ssl: { rejectUnauthorized: false }, max: 5 });
+  const configuredConnectionString = resolveConnectionString();
+  if (!configuredConnectionString) throw new Error(`Editorial auth database is not configured (provider: ${getConnectionLabel()})`);
+  const connectionUrl = new URL(configuredConnectionString);
+  for (const parameter of ['sslmode', 'sslrootcert', 'sslcert', 'sslkey']) connectionUrl.searchParams.delete(parameter);
+  pool ??= new Pool({ connectionString: connectionUrl.toString(), ssl: { rejectUnauthorized: false }, max: 5 });
   return pool;
 }
 
@@ -52,6 +67,12 @@ export async function authenticateEditorialUser(email: string, password: string)
   const tokenHash = scryptSync(rawToken, 'opatriota-session', 32).toString('hex');
   await getPool().query('INSERT INTO editorial_sessions (token_hash, user_id, expires_at) VALUES ($1, $2, NOW() + INTERVAL \'12 hours\')', [tokenHash, user.id]);
   return { token: rawToken, user: { id: user.id, email: user.email, name: user.name, role: user.role } };
+}
+
+export async function revokeEditorialSession(token: string) {
+  if (!token) return;
+  const tokenHash = scryptSync(token, 'opatriota-session', 32).toString('hex');
+  await getPool().query('DELETE FROM editorial_sessions WHERE token_hash = $1', [tokenHash]);
 }
 
 export async function getEditorialIdentity(token: string) {

@@ -5,7 +5,7 @@ import {
 } from './_lib/billing';
 import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
 import { handleCors } from './_lib/cors';
-import { authenticateEditorialUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, sessionCookie } from './_lib/neonAuth';
+import { authenticateEditorialUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
 
 type Req = IncomingMessage & { method?: string; headers: Record<string, string | string[] | undefined>; body?: unknown };
 type Res = ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void };
@@ -92,6 +92,15 @@ export default async function handler(req: Req, res: Res) {
       if (!result) return json(res, 401, { error: 'INVALID_CREDENTIALS', message: 'Credenciais inválidas.' });
       res.setHeader('Set-Cookie', sessionCookie(result.token));
       return json(res, 200, { user: editorialUserToSession(result.user) });
+    }
+    if (path === 'editorial/auth/logout' && method === 'POST') {
+      const raw = req.headers.authorization;
+      const header = Array.isArray(raw) ? raw[0] : raw || '';
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = header.startsWith('Bearer ') ? header.slice(7).trim() : readSessionCookie(cookie);
+      if (token) await revokeEditorialSession(token);
+      res.setHeader('Set-Cookie', 'opatriota_editorial_session=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0');
+      return json(res, 200, { success: true });
     }
     if (path === 'plans' && method === 'GET') return json(res, 200, [
       { id: 'gratuito', name: 'Acesso Livre', description: 'Acesso às notícias abertas.', monthlyPrice: 0, annualPrice: 0, currency: 'BRL', accessLevel: 'aberto', features: [], active: true },
