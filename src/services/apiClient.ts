@@ -82,6 +82,7 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       headers,
       body,
       signal: controller.signal,
+      credentials: 'include',
     });
 
     if (response.status === 204) {

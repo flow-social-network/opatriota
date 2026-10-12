@@ -23,6 +23,7 @@
     "jszip": "^3.10.2",
     "lucide-react": "^0.546.0",
     "mysql2": "^3.24.5",
+    "pg": "^8.23.1",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-router-dom": "^7.18.4",
@@ -31,6 +32,7 @@
   "devDependencies": {
     "@types/jszip": "^3.4.1",
     "@types/node": "^22.14.0",
+    "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "esbuild": "^0.25.0",

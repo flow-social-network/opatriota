@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
 import { useAuth } from '../../app/contexts/AuthContext';
+import { api } from '../../services/apiClient';
+import type { UserSession } from '../../types';
 import { 
   Mail, 
   Lock, 
@@ -15,10 +17,10 @@ import {
 
 export default function NewsroomLoginPage() {
   const navigate = useNavigate();
-  const { loginWithEmail } = useAuth();
+  const { setCurrentUser } = useAuth();
   
-  const [email, setEmail] = useState('redacao@opatriota.sbs');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -35,7 +37,9 @@ export default function NewsroomLoginPage() {
 
     setLoading(true);
     try {
-      const user = await loginWithEmail(email, password);
+      const response = await api.post<{ user: UserSession }>('/editorial/auth/login', { email, password }, { auth: false });
+      const user = response.user;
+      setCurrentUser(user);
       const allowedRoles = ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'];
       if (!allowedRoles.includes(user.role)) {
         setErrorMessage('Acesso negado: sua conta não possui credenciais autorizadas para o Painel da Redação.');
