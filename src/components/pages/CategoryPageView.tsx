@@ -69,10 +69,8 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
     return false;
   });
 
-  // Effective articles: ensure no section is empty
-  const effectiveArticles = categoryArticles.length > 0 
-    ? categoryArticles 
-    : articles.filter(a => a.editorialStatus === 'PUBLICADA').slice(0, 6);
+  // Uma editoria vazia deve permanecer honesta: nunca misture matérias de outras editorias.
+  const effectiveArticles = categoryArticles;
 
   // If there are articles, separate the featured headline and the rest
   const featuredArticle = effectiveArticles.length > 0 ? effectiveArticles[0] : null;
