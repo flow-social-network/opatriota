@@ -946,6 +946,10 @@ export const Header: React.FC<HeaderProps> = ({
                     >
                       <button
                         onClick={() => {
+                          if (hasSubcategories) {
+                            setActiveDropdownSlug(isDropdownOpen ? null : item.label);
+                            return;
+                          }
                           setActiveDropdownSlug(null);
                           onSelectCategory(item.slug);
                         }}
@@ -1106,6 +1110,10 @@ export const Header: React.FC<HeaderProps> = ({
                         <div className="flex items-center justify-between">
                           <button
                             onClick={() => {
+                              if (hasSubcategories) {
+                                toggleMobileCategory(item.label);
+                                return;
+                              }
                               onSelectCategory(item.slug);
                               setMobileMenuOpen(false);
                             }}
