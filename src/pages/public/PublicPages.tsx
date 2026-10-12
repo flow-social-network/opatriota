@@ -224,9 +224,20 @@ export function InstitutionalPage() {
 export function CustomPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { currentUser } = useAuth();
   const { pages, dataLoading, dataErrors } = useData();
-
-  const page = pages.find(p => p.slug === slug);
+  const previewRequested = new URLSearchParams(location.search).get('preview') === '1';
+  const canPreviewDraft = Boolean(previewRequested && currentUser &&
+    ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(String(currentUser.role)));
+  const page = pages.find((item) => {
+    if (item.slug !== slug) return false;
+    if (canPreviewDraft) return true;
+    const status = String((item as any).status || '').trim().toLowerCase();
+    return status
+      ? ['publicado', 'publicada', 'published'].includes(status)
+      : (item as any).published === true;
+  });
 
   if (dataLoading && !page) return <PageLoading label="Carregando página…" />;
   if (!page && dataErrors['/pages']) return <PageDataError message={dataErrors['/pages']} />;
