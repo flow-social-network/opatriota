@@ -26,8 +26,8 @@ export function isPublicArticle(article: Record<string, any>): boolean {
 
 export function isPublicPage(page: Record<string, any>): boolean {
   const status = String(page.status || '').trim().toLowerCase();
-  if (['rascunho', 'draft', 'revisao', 'review', 'despublicada', 'unpublished'].includes(status)) return false;
-  return ['publicado', 'publicada', 'published'].includes(status) || page.published === true;
+  if (!status) return page.published === true;
+  return ['publicado', 'publicada', 'published'].includes(status);
 }
 
 export function isPublicFactCheck(item: Record<string, any>): boolean {
@@ -70,28 +70,34 @@ export async function paidAccessLevel(
     : subscriptionExpiry(subscription.activatedAt, subscription.billingCycle);
   if (expiry === null || !Number.isFinite(expiry) || expiry <= Date.now()) return 'none';
 
-  return String(subscription.planId || '').toLowerCase().includes('premium')
-    ? 'premium'
-    : 'assinante';
+  const plan = String(subscription.planId || '').trim().toLowerCase();
+  if (plan.includes('premium')) return 'premium';
+  if (plan.includes('digital') || plan.includes('assinante') || plan.includes('subscriber')) return 'assinante';
+  return 'none';
 }
 
 export function hasArticleAccess(article: Record<string, any>, paidLevel: PaidAccessLevel): boolean {
   const required = String(article.accessLevel || 'aberto').trim().toLowerCase();
   if (['aberto', 'open', 'free'].includes(required)) return true;
-  if (required === 'premium') return paidLevel === 'premium';
-  if (required === 'assinante' || required === 'subscriber') return paidLevel === 'assinante' || paidLevel === 'premium';
+  if (['premium', 'assinante_premium'].includes(required)) return paidLevel === 'premium';
+  if (['assinante', 'subscriber', 'digital', 'assinante_digital'].includes(required)) {
+    return paidLevel === 'assinante' || paidLevel === 'premium';
+  }
   return false;
 }
 
 export function lockedArticle(article: Record<string, any>): Record<string, any> {
-  const {
-    content: _content,
-    body: _body,
-    htmlContent: _htmlContent,
-    fullText: _fullText,
-    videoIframeHtml: _videoIframeHtml,
-    ...teaser
-  } = article;
+  const safeFields = [
+    'id', 'slug', 'title', 'subtitle', 'kicker', 'category', 'subcategory',
+    'tags', 'author', 'authorId', 'authorRole', 'publishedAt', 'updatedAt',
+    'createdAt', 'readTimeMinutes', 'imageUrl', 'imageCaption', 'imageCredits',
+    'sourceName', 'sourceUrl', 'accessLevel', 'editorialStatus', 'status',
+    'priority', 'featured', 'isBreaking', 'breaking',
+  ];
+  const teaser: Record<string, any> = {};
+  for (const key of safeFields) {
+    if (Object.prototype.hasOwnProperty.call(article, key)) teaser[key] = article[key];
+  }
   return { ...teaser, premiumLocked: true };
 }
 
