@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArchivePageView } from '../../components/pages/ArchivePageView';
 import { ContactPageView } from '../../components/pages/ContactPageView';
 import { LgpdPageView } from '../../components/pages/LgpdPageView';
@@ -183,9 +183,17 @@ export function AuthorPage() {
 export function InstitutionalPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { currentUser } = useAuth();
   const { pages, dataLoading, dataErrors } = useData();
-
-  const page = pages.find(p => p.slug === slug);
+  const previewRequested = new URLSearchParams(location.search).get('preview') === '1';
+  const canPreviewDraft = Boolean(previewRequested && currentUser &&
+    ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(String(currentUser.role)));
+  const page = pages.find((item) => item.slug === slug && (
+    canPreviewDraft ||
+    (['publicado', 'publicada', 'published'].includes(String((item as any).status || '').trim().toLowerCase()) ||
+      (!String((item as any).status || '').trim() && (item as any).published === true))
+  ));
 
   useSeoMetadata({
     title: page?.seo?.metaTitle || page?.title,
