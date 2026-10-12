@@ -70,9 +70,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
 
   // Transition queue status
-  const handleStatusChange = (id: number, newStatus: EditorialStatus) => {
+  const handleStatusChange = (id: string | number, newStatus: EditorialStatus) => {
     const updated = queueItems.map((item) => {
-      if (item.id === id) {
+      if (String(item.id) === String(id)) {
         return {
           ...item,
           editorialStatus: newStatus
