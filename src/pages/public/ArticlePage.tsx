@@ -12,20 +12,8 @@ export default function ArticlePage() {
   const { articles, categories, toggleCategory } = useArticleNavigation();
   const { currentUser, toggleBookmark } = useAuth();
 
-  const isOldEnergySlug = slug === 'brasil-lidera-em-energia-renovavel-na-america-latina';
-  const targetSlug = isOldEnergySlug
-    ? 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista'
-    : slug;
-
-  const article = isOldEnergySlug
-    ? (articles.find(a => a.slug === 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista' || a.id === 'art-policia-metro-divergem-paulista' || a.id === 'art-4') || articles[0])
-    : (articles.find(a => a.slug === targetSlug || a.id === targetSlug || a.slug === slug || a.id === slug));
-
-  React.useEffect(() => {
-    if (isOldEnergySlug && article && article.slug !== 'brasil-lidera-em-energia-renovavel-na-america-latina') {
-      navigate(`/noticia/${article.slug}`, { replace: true });
-    }
-  }, [isOldEnergySlug, article, navigate]);
+  const article = articles.find((item) => item.slug === slug || item.id === slug);
+  const isPremiumLocked = Boolean((article as (typeof article & { premiumLocked?: boolean }))?.premiumLocked);
 
   useSeoMetadata({
     title: article?.seo?.metaTitle || article?.title,
@@ -54,6 +42,36 @@ export default function ArticlePage() {
           onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
           onSearch={(q) => navigate(`/busca?q=${encodeURIComponent(q)}`)}
         />
+      </div>
+    );
+  }
+
+  if (isPremiumLocked) {
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <div className="overflow-hidden rounded-xl border border-[#D9DEE7] bg-white shadow-sm">
+          {article.imageUrl && <img src={article.imageUrl} alt="" className="max-h-80 w-full object-cover" />}
+          <div className="p-6 sm:p-8">
+            <p className="text-xs font-bold uppercase tracking-widest text-[#0B5FFF]">
+              Conteúdo {article.accessLevel === 'premium' ? 'premium' : 'para assinantes'}
+            </p>
+            <h1 className="mt-3 font-serif text-2xl font-black leading-tight text-[#0B2345] sm:text-3xl">{article.title}</h1>
+            {article.subtitle && <p className="mt-3 text-base leading-relaxed text-[#5D6673]">{article.subtitle}</p>}
+            <p className="mt-5 text-sm leading-6 text-[#344054]">
+              O texto integral exige uma assinatura ativa com o nível de acesso correspondente. O conteúdo completo não foi enviado pela API.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button type="button" onClick={() => navigate('/planos')} className="min-h-11 rounded-lg bg-[#0B2345] px-5 py-2.5 text-sm font-bold text-white hover:bg-[#0B5FFF]">
+                Ver planos de assinatura
+              </button>
+              {!currentUser && (
+                <button type="button" onClick={() => navigate('/minha-conta?tab=entrar')} className="min-h-11 rounded-lg border border-[#CBD5E0] px-5 py-2.5 text-sm font-semibold text-[#0B2345] hover:bg-[#F8FAFC]">
+                  Entrar na conta
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
