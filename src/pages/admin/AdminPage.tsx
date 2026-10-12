@@ -12,8 +12,8 @@ export default function AdminPage() {
     sources, 
     queueItems, 
     portalSettings,
-    setSources, 
-    setQueueItems, 
+    updateSources,
+    updateQueue,
     savePortalSettings,
   } = useData();
 
@@ -65,9 +65,9 @@ export default function AdminPage() {
       sources={sources}
       queueItems={queueItems}
       onBack={() => navigate('/')}
-      onUpdateSource={(s) => setSources(s)}
-      onUpdateQueue={(q) => setQueueItems(q)}
-      onSyncResult={(s, q) => { setSources(s); setQueueItems(q); }}
+      onUpdateSource={(s) => { void updateSources(s); }}
+      onUpdateQueue={(q) => { void updateQueue(q); }}
+      onSyncResult={(s, q) => { void updateSources(s); void updateQueue(q); }}
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}

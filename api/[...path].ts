@@ -47,6 +47,21 @@ function requireRole(identity: { role: string } | null, allowed: Set<string>, re
   if (!allowed.has(identity.role)) { json(res, 403, { error: 'FORBIDDEN', message: 'Sua conta não tem permissão para esta operação.' }); return false; }
   return true;
 }
+function canonicalizeUrl(value: string): string {
+  try {
+    const url = new URL(value);
+    url.hash = '';
+    for (const key of [...url.searchParams.keys()]) {
+      if (/^(utm_|fbclid$|gclid$|mc_|ref$|source$)/i.test(key)) url.searchParams.delete(key);
+    }
+    url.hostname = url.hostname.toLowerCase();
+    url.pathname = url.pathname.replace(/\/+$/, '') || '/';
+    return url.toString();
+  } catch {
+    return value.trim();
+  }
+}
+
 function publicRecords(collection: string, records: any[]): any[] {
   if (collection === 'articles') return records.filter(item => item.editorialStatus === 'PUBLICADA' && item.status !== 'rascunho');
   if (collection === 'pages') return records.filter(item => item.status === 'publicado' || item.status === 'publicada' || item.published === true);
@@ -252,7 +267,9 @@ export default async function handler(req: Req, res: Res) {
       if (!requireRole(identity, STAFF, res)) return;
       const sources = await documentList('editorialSources');
       const existingQueue = await documentList('editorialQueue');
-      const seen = new Set(existingQueue.map(item => String(item.canonicalUrl || item.originalUrl || '').trim()).filter(Boolean));
+      const seen = new Set(existingQueue
+        .map(item => canonicalizeUrl(String(item.canonicalUrl || item.originalUrl || '')))
+        .filter(Boolean));
       const updatedSources: any[] = [];
       const newItems: any[] = [];
       for (const source of sources.filter(item => item.isActive !== false && item.rssUrl)) {
@@ -281,10 +298,11 @@ export default async function handler(req: Req, res: Res) {
             const titleMatch = block.match(/<title(?:\s[^>]*)?>([\s\S]*?)<\/title>/i);
             const linkMatch = block.match(/<link(?:\s[^>]*href=["']([^"']+)["'][^>]*)?\s*\/?>/i) || block.match(/<link(?:\s[^>]*)?>([\s\S]*?)<\/link>/i) || block.match(/<guid(?:\s[^>]*)?>([\s\S]*?)<\/guid>/i);
             const descMatch = block.match(/<(description|summary|content:encoded)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/i);
+            const dateMatch = block.match(/<(pubDate|published|updated|dc:date)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/i);
             const title = decodeXml(titleMatch?.[1] || '');
             let link = decodeXml(linkMatch?.[1] || linkMatch?.[2] || '');
             if (!title || !link) continue;
-            try { const normalized = new URL(link, parsedUrl); if (normalized.protocol !== 'https:') continue; link = normalized.toString(); } catch { continue; }
+            try { const normalized = new URL(link, parsedUrl); if (normalized.protocol !== 'https:') continue; link = canonicalizeUrl(normalized.toString()); } catch { continue; }
             if (seen.has(link)) continue;
             seen.add(link);
             const id = Date.now() + newItems.length;
@@ -292,6 +310,11 @@ export default async function handler(req: Req, res: Res) {
               id, title: title.slice(0, 500),
               summary: decodeXml(descMatch?.[2] || '').slice(0, 2000),
               originalUrl: link, canonicalUrl: link,
+              originalPublishedAt: (() => {
+                const raw = decodeXml(dateMatch?.[2] || '');
+                const parsed = raw ? Date.parse(raw) : Number.NaN;
+                return Number.isNaN(parsed) ? undefined : new Date(parsed).toISOString();
+              })(),
               sourceName: String(source.name || parsedUrl.hostname).slice(0, 200),
               category: String(source.category || 'brasil'),
               capturedAt: new Date().toISOString(),
@@ -422,30 +445,24 @@ export default async function handler(req: Req, res: Res) {
         } catch { /* fallback */ }
       }
 
-      const contextualContent = `A reforma tributária e a política de contenção fiscal representam marcos estruturais no cenário econômico brasileiro. Especialistas apontam que a previsibilidade e a simplificação do sistema tributário são pilares indispensáveis para a atração de capital produtivo e a modernização da indústria nacional. As discussões no Congresso Nacional convergem para a busca de equilíbrio entre austeridade orçamentária e sustentabilidade dos investimentos prioritários.`;
-      return json(res, 200, {
-        generatedText: contextualContent,
-        results: [
-          { id: 'gen-1', title: `Texto — Reforma (${prompt.slice(0, 20) || 'Geral'})`, date: 'Hoje, 14:28', content: contextualContent },
-          { id: 'gen-2', title: 'Resumo Executivo', date: 'Hoje, 14:15', content: 'Resumo dos principais pontos abordados na proposta e cronograma de tramitação legislativa.' },
-          { id: 'gen-3', title: 'Análise de Impactos', date: 'Hoje, 13:52', content: 'Detalhamento dos efeitos econômicos sobre setores produtivos e arrecadação dos entes federados.' }
-        ]
+      return json(res, 503, {
+        error: apiKey ? 'AI_GENERATION_FAILED' : 'AI_NOT_CONFIGURED',
+        message: apiKey
+          ? 'O serviço de IA não devolveu um resultado válido. Tente novamente.'
+          : 'A geração de conteúdo depende da configuração do serviço de IA no servidor.'
       });
     }
 
     if (path === 'editorial/ai-image' && method === 'POST') {
       const body = cleanObject(await readBody(req));
-      const prompt = String(body.prompt || 'Congresso Nacional');
-      const style = String(body.style || 'Realista');
-      return json(res, 200, {
+      const prompt = String(body.prompt || '').trim().slice(0, 2000);
+      const style = String(body.style || 'Realista').trim().slice(0, 120);
+      if (!prompt) return json(res, 400, { error: 'INVALID_IMAGE_PROMPT', message: 'Informe uma descrição para gerar a imagem.' });
+      return json(res, 503, {
+        error: 'AI_IMAGE_NOT_CONFIGURED',
+        message: 'A geração de imagens depende de uma integração de imagens configurada no servidor.',
         prompt,
-        style,
-        images: [
-          { id: 'img-1', url: '/images/hero_congresso.jpg', title: 'Congresso com bandeira do Brasil', selected: true },
-          { id: 'img-2', url: '/images/news_economia.jpg', title: 'Plenário e debates legislativos', selected: false },
-          { id: 'img-3', url: '/images/news_infraestrutura.jpg', title: 'Esplanada dos Ministérios em ângulo aberto', selected: false },
-          { id: 'img-4', url: '/images/factcheck_smartphone.jpg', title: 'Comunicação e cobertura jornalística', selected: false }
-        ]
+        style
       });
     }
 

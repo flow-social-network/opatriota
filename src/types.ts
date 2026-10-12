@@ -81,6 +81,13 @@ export interface Article {
   subtitle: string;
   kicker: string;
   category: CategorySlug;
+  subcategory?: string;
+  originalPublishedAt?: string;
+  sourceUpdatedAt?: string;
+  capturedAt?: string;
+  originalUrl?: string;
+  imageLicense?: string;
+  imageSourceUrl?: string;
   tags?: string[];
   content: string;
   author: string;
