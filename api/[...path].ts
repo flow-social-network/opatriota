@@ -28,7 +28,7 @@ export function isPublicPage(page: Record<string, any>): boolean {
   return ['publicado', 'publicada', 'published'].includes(status) || page.published === true;
 }
 
-function subscriptionExpiry(startValue: unknown, cycle: unknown): number | null {
+export function subscriptionExpiry(startValue: unknown, cycle: unknown): number | null {
   const date = new Date(String(startValue || ''));
   if (!Number.isFinite(date.getTime())) return null;
   if (cycle === 'annual') {
