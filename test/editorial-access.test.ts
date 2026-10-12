@@ -22,6 +22,7 @@ test('draft and review pages cannot become public through a stale published flag
   assert.equal(isPublicPage({ status: 'publicada' }), true);
   assert.equal(isPublicPage({ status: 'published' }), true);
   assert.equal(isPublicPage({ published: true }), true);
+  assert.equal(isPublicPage({ status: 'unknown', published: true }), false);
 });
 
 test('article access levels fail closed for unknown values', () => {
@@ -30,6 +31,7 @@ test('article access levels fail closed for unknown values', () => {
   assert.equal(hasArticleAccess({ accessLevel: 'premium' }, 'assinante'), false);
   assert.equal(hasArticleAccess({ accessLevel: 'premium' }, 'premium'), true);
   assert.equal(hasArticleAccess({ accessLevel: 'unexpected' }, 'premium'), false);
+  assert.equal(hasArticleAccess({ accessLevel: 'assinante_digital' }, 'assinante'), true);
 });
 
 test('locked article payload omits full content and embedded HTML', () => {
@@ -39,6 +41,9 @@ test('locked article payload omits full content and embedded HTML', () => {
     content: 'Texto integral secreto',
     htmlContent: '<script>alert(1)</script>',
     fullText: 'Texto completo',
+    markdown: 'Texto em markdown secreto',
+    text: 'Texto alternativo secreto',
+    summary: 'Resumo que não deve ser enviado',
     videoIframeHtml: '<iframe src="unsafe"></iframe>',
     subtitle: 'Chamada pública',
   });
@@ -50,4 +55,7 @@ test('locked article payload omits full content and embedded HTML', () => {
   assert.equal('htmlContent' in result, false);
   assert.equal('fullText' in result, false);
   assert.equal('videoIframeHtml' in result, false);
+  assert.equal('markdown' in result, false);
+  assert.equal('text' in result, false);
+  assert.equal('summary' in result, false);
 });
