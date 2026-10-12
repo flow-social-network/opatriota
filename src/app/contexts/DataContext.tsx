@@ -6,21 +6,6 @@ import {
   savePortalSettings,
   DEFAULT_PORTAL_SETTINGS,
 } from '../../services/siteConfigService';
-import {
-  INITIAL_ARTICLES,
-  INITIAL_FACT_CHECKS,
-  INITIAL_RSS_SOURCES,
-  INITIAL_EDITORIAL_QUEUE,
-  SUBSCRIPTION_PLANS,
-} from '../../data/mockData';
-import {
-  INITIAL_PAGES,
-  INITIAL_CATEGORIES,
-  INITIAL_AUTHORS,
-  INITIAL_MENU_CONFIG,
-  INITIAL_CONTACT_SUBMISSIONS,
-  INITIAL_LGPD_REQUESTS,
-} from '../../data/pagesData';
 import { useToast } from './ToastContext';
 import { useAuth } from './AuthContext';
 import type {
@@ -53,6 +38,7 @@ interface DataContextValue {
   lgpdRequests: LgpdRequest[];
   portalSettings: PortalSettings;
   dataLoading: boolean;
+  dataError: string | null;
 
   // Setters (exposed for admin/newsroom panels)
   setArticles: Dispatch<SetStateAction<Article[]>>;
@@ -88,19 +74,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const { currentUser } = useAuth();
   const { showToast } = useToast();
 
-  const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
-  const [factChecks, setFactChecks] = useState<FactCheckItem[]>(INITIAL_FACT_CHECKS);
-  const [sources, setSources] = useState<RssSource[]>(INITIAL_RSS_SOURCES);
-  const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>(INITIAL_EDITORIAL_QUEUE);
-  const [pages, setPages] = useState<InstitutionalPage[]>(INITIAL_PAGES);
-  const [categories, setCategories] = useState<CategoryDetail[]>(INITIAL_CATEGORIES);
-  const [authors, setAuthors] = useState<AuthorDetail[]>(INITIAL_AUTHORS);
-  const [menuConfig, setMenuConfig] = useState<SiteMenuConfig>(INITIAL_MENU_CONFIG);
-  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>(INITIAL_CONTACT_SUBMISSIONS);
-  const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>(INITIAL_LGPD_REQUESTS);
-  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>(SUBSCRIPTION_PLANS);
+  // Collections start empty. Editorial/demo fixtures belong in tests, never as production fallbacks.
+  const [articles, setArticles] = useState<Article[]>([]);
+  const [factChecks, setFactChecks] = useState<FactCheckItem[]>([]);
+  const [sources, setSources] = useState<RssSource[]>([]);
+  const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>([]);
+  const [pages, setPages] = useState<InstitutionalPage[]>([]);
+  const [categories, setCategories] = useState<CategoryDetail[]>([]);
+  const [authors, setAuthors] = useState<AuthorDetail[]>([]);
+  const [menuConfig, setMenuConfig] = useState<SiteMenuConfig>(DEFAULT_MENU);
+  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>([]);
+  const [lgpdRequests, setLgpdRequests] = useState<LgpdRequest[]>([]);
+  const [subscriptionPlans, setSubscriptionPlans] = useState<SubscriptionPlan[]>([]);
   const [portalSettings, setPortalSettingsState] = useState<PortalSettings>(DEFAULT_PORTAL_SETTINGS);
-  const [dataLoading, setDataLoading] = useState(false);
+  const [dataLoading, setDataLoading] = useState(true);
+  const [dataError, setDataError] = useState<string | null>(null);
 
   // Load portal settings on mount
   useEffect(() => {
@@ -114,6 +102,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // Load data from API whenever auth state changes
   useEffect(() => {
     if (!isApiConfigured()) {
+      setDataError('API_NOT_CONFIGURED');
       setDataLoading(false);
       return;
     }
@@ -123,24 +112,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const result = await api.get<T>(path, { auth });
         if (active) setter(result);
       } catch (error) {
-        console.warn('Falha ao carregar ' + path + '; mantendo dados padrão locais:', error instanceof Error ? error.message : error);
+        const message = error instanceof Error ? error.message : 'Falha ao carregar dados da API.';
+        console.error('Falha ao carregar ' + path, error);
+        if (active && path === '/articles') {
+          setArticles([]);
+          setDataError(message);
+        }
       }
     };
     setDataLoading(true);
+    setDataError(null);
     void Promise.all([
-      load<SubscriptionPlan[]>('/plans', setSubscriptionPlans),
-      load<Article[]>('/articles', (apiArticles) => {
-        setArticles(() => {
-          if (!apiArticles || !apiArticles.length) return INITIAL_ARTICLES;
-          const apiMap = new Map(apiArticles.map(a => [a.id, a]));
-          const merged = INITIAL_ARTICLES.map(initial => apiMap.get(initial.id) || initial);
-          for (const apiArt of apiArticles) {
-            if (!INITIAL_ARTICLES.some(init => init.id === apiArt.id)) {
-              merged.push(apiArt);
-            }
-          }
-          return merged;
-        });
+      load<SubscriptionPlan[]>('/plans', (items) => setSubscriptionPlans(Array.isArray(items) ? items : [])),
+      load<Article[]>('/articles', (items) => {
+        setArticles(Array.isArray(items) ? items : []);
+        setDataError(null);
       }),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
       load<RssSource[]>('/editorial/sources', setSources, true),
@@ -254,7 +240,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       value={{
         articles, factChecks, sources, queueItems, pages, categories, authors,
         menuConfig, subscriptionPlans, contactSubmissions, lgpdRequests,
-        portalSettings, dataLoading,
+        portalSettings, dataLoading, dataError,
         setArticles, setSources, setQueueItems, setPages, setCategories,
         setMenuConfig, setContactSubmissions, setLgpdRequests,
         updateArticles, updateSources, updateQueue,
