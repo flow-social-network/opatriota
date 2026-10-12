@@ -364,7 +364,7 @@ export const Header: React.FC<HeaderProps> = ({
     }
   };
 
-  const socialIconsConfig = (portalSettings.socialNetworks || [])
+  const socialIconsConfig = (portalSettings?.socialNetworks || [])
     .filter((item) => item.active && isSafeSocialUrl(item))
     .sort((a, b) => a.order - b.order)
     .map((item) => ({
