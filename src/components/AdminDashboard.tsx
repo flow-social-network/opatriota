@@ -1,5 +1,5 @@
 import { api } from '../services/apiClient';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { RssSource, EditorialQueueItem, EditorialStatus, PortalSettings } from '../types';
 import { OfficialSourcesHub } from './admin/OfficialSourcesHub';
 import { IdentityManager } from './admin/IdentityManager';
@@ -31,7 +31,11 @@ import {
   Shield
 } from 'lucide-react';
 
+type AdminTab = 'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes';
+
 interface AdminDashboardProps {
+  initialTab?: AdminTab;
+  onTabChange?: (tab: AdminTab) => void;
   sources: RssSource[];
   queueItems: EditorialQueueItem[];
   onBack: () => void;
@@ -44,6 +48,8 @@ interface AdminDashboardProps {
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  initialTab = 'painel',
+  onTabChange,
   sources,
   queueItems,
   onBack,
@@ -54,9 +60,14 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onSavePortalSettings,
   initialTab = 'painel'
 }) => {
-  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes'>(
-    (initialTab as any) || 'painel'
-  );
+  const [activeTab, setActiveTab] = useState<AdminTab>(initialTab);
+  const handleTabChange = (tab: AdminTab) => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
 
