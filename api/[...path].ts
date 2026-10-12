@@ -195,6 +195,68 @@ export default async function handler(req: Req, res: Res) {
       throw new Error('Invalid Firebase ID token');
     });
 
+    if (path === 'admin/users' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const [profiles, roleRecords] = await Promise.all([
+        documentList('userProfiles'),
+        documentList('userRoles'),
+      ]);
+      const profileById = new Map(profiles.map((profile) => [String(profile.id || ''), profile]));
+      const roleById = new Map(roleRecords.map((record) => [String(record.id || ''), record]));
+      const ids = new Set([...profileById.keys(), ...roleById.keys()].filter(Boolean));
+      const users = [...ids].map((uid) => {
+        const profile = profileById.get(uid) || {};
+        const roleRecord = roleById.get(uid) || {};
+        return {
+          id: uid,
+          name: String(profile.name || ''),
+          email: String(profile.email || ''),
+          role: String(roleRecord.role || 'leitor_gratuito'),
+          createdAt: profile.createdAt || roleRecord.createdAt || null,
+          updatedAt: profile.updatedAt || roleRecord.updatedAt || null,
+        };
+      }).sort((a, b) => a.email.localeCompare(b.email));
+      return json(res, 200, users);
+    }
+
+    const adminUserMatch = path.match(/^admin\/users\/([^/]+)$/);
+    if (adminUserMatch && method === 'PATCH') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const uid = decodeURIComponent(adminUserMatch[1]);
+      const body = cleanObject(await readBody(req));
+      const allowedRoles = new Set([
+        'leitor_gratuito', 'assinante_digital', 'assinante_premium',
+        'jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador',
+      ]);
+      const nextRole = String(body.role || '');
+      if (!allowedRoles.has(nextRole)) return json(res, 400, { error: 'INVALID_ROLE' });
+      if (uid === identity!.uid && nextRole !== 'administrador') {
+        return json(res, 409, { error: 'SELF_DEMOTION_BLOCKED', message: 'Não é permitido remover a própria função administrativa.' });
+      }
+      const [profile, currentRole] = await Promise.all([
+        documentGet('userProfiles', uid),
+        documentGet('userRoles', uid),
+      ]);
+      if (!profile && !currentRole) return json(res, 404, { error: 'USER_NOT_FOUND', message: 'Usuário não encontrado no cadastro do portal.' });
+      const updatedAt = new Date().toISOString();
+      await documentWrite('userRoles', uid, {
+        role: nextRole,
+        updatedAt,
+        updatedBy: identity!.uid,
+      });
+      return json(res, 200, {
+        id: uid,
+        name: String(profile?.name || ''),
+        email: String(profile?.email || ''),
+        role: nextRole,
+        updatedAt,
+      });
+    }
+    if (adminUserMatch && method !== 'GET' && method !== 'PATCH') {
+      res.setHeader('Allow', 'GET, PATCH');
+      return json(res, 405, { error: 'METHOD_NOT_ALLOWED' });
+    }
+
     if (path === 'me' && method === 'PATCH') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       const body = cleanObject(await readBody(req));
