@@ -733,7 +733,7 @@ export default async function handler(req: Req, res: Res) {
     const resource = collectionFor(path);
     if (!resource) return json(res, 404, { error: 'NOT_FOUND', message: 'Rota da API não encontrada.' });
     const isEditorial = resource.collection.startsWith('editorial');
-    const required = isEditorial ? STAFF : resource.collection === 'articles' ? STAFF : resource.collection === 'pages' || resource.collection === 'categories' ? EDITORS : ADMINS;
+    const required = isEditorial ? STAFF : resource.collection === 'articles' ? STAFF : ['pages', 'categories', 'authors', 'columnists'].includes(resource.collection) ? EDITORS : ADMINS;
 
     if (method === 'GET' && !resource.id) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;
@@ -896,17 +896,62 @@ export default async function handler(req: Req, res: Res) {
 
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
       if (!requireRole(identity, required, res)) return;
+
       if (method === 'DELETE') {
         if (!resource.id) return json(res, 400, { error: 'RESOURCE_ID_REQUIRED', message: 'Informe o identificador do registro.' });
+        const existing = await documentGet(resource.collection, resource.id);
+        if (!existing) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
         await documentDelete(resource.collection, resource.id);
         return json(res, 204, null);
       }
+
       const body = cleanObject(await readBody(req));
-      if (resource.collection === 'articles' && method === 'POST' && (!String(body.title || '').trim() || !String(body.content || '').trim())) return json(res, 400, { error: 'INVALID_ARTICLE', message: 'Título e conteúdo são obrigatórios.' });
       const id = resource.id || String(body.id || newId());
-      const record = { ...body, id, updatedAt: new Date().toISOString(), ...(method === 'POST' ? { createdAt: new Date().toISOString() } : {}) };
-      if (method === 'POST' && await documentGet(resource.collection, id)) return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe um registro com este identificador.' });
-      await documentWrite(resource.collection, id, record, method !== 'POST');
+      const current = method === 'POST' ? null : await documentGet(resource.collection, id);
+      if (method !== 'POST' && !current) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
+      if (method === 'POST' && await documentGet(resource.collection, id)) {
+        return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe um registro com este identificador.' });
+      }
+      const merged = { ...(current || {}), ...body, id };
+
+      if (resource.collection === 'pages' || resource.collection === 'categories') {
+        const titleOrName = String(merged.title || merged.name || '').trim().slice(0, 300);
+        const slug = slugify(String(merged.slug || titleOrName));
+        if (!titleOrName || !slug) {
+          return json(res, 400, {
+            error: resource.collection === 'pages' ? 'INVALID_PAGE' : 'INVALID_CATEGORY',
+            message: 'Título/nome e slug são obrigatórios.',
+          });
+        }
+        const records = await documentList(resource.collection);
+        if (records.some((item) =>
+          String(item.id || '') !== String(id) &&
+          String(item.slug || '').toLowerCase() === slug.toLowerCase()
+        )) {
+          return json(res, 409, { error: 'SLUG_CONFLICT', message: 'Já existe um registro com este endereço.' });
+        }
+        merged.slug = slug;
+        if (resource.collection === 'pages') {
+          const allowedPageStatuses = ['publicado', 'publicada', 'rascunho', 'revisao', 'despublicada'];
+          const status = String(merged.status || 'rascunho').toLowerCase();
+          if (!allowedPageStatuses.includes(status)) return json(res, 400, { error: 'INVALID_PAGE_STATUS' });
+          merged.status = status;
+          merged.published = ['publicado', 'publicada'].includes(status);
+        } else {
+          merged.name = titleOrName;
+          merged.active = merged.active !== false;
+          merged.order = Number.isFinite(Number(merged.order)) ? Number(merged.order) : 0;
+        }
+      }
+
+      const now = new Date().toISOString();
+      const record = {
+        ...merged,
+        id,
+        updatedAt: now,
+        ...(method === 'POST' ? { createdAt: now } : {}),
+      };
+      await documentWrite(resource.collection, id, record, method === 'PATCH');
       return json(res, method === 'POST' ? 201 : 200, record);
     }
     res.setHeader('Allow', 'GET, POST, PATCH, PUT, DELETE');
