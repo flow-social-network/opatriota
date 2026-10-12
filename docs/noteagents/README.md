@@ -13,6 +13,9 @@ Permitir que uma pessoa descreva uma aplicação em linguagem natural, envie ima
 - [Integrações, dados e segurança](./03-INTEGRACOES-DADOS-E-SEGURANCA.md)
 - [Produto, preview, Git e deploy](./04-PRODUTO-PREVIEW-GIT-E-DEPLOY.md)
 - [Plano de implementação](./05-PLANO-DE-IMPLEMENTACAO.md)
+- [PostgreSQL local](./06-BANCO-POSTGRESQL-LOCAL.md)
+- [Prompt do instalador de banco](./PROMPT-INSTALADOR-BANCO.md)
+- [Schema PostgreSQL](./database/schema.sql)
 
 ## Princípios
 
