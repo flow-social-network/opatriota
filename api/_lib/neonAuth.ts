@@ -2,11 +2,29 @@ import { Pool } from 'pg';
 import { randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 
 function resolveConnectionString() {
-  return process.env.opatriota_DATABASE_URL
+  const configuredUrl = process.env.opatriota_DATABASE_URL
     || process.env.opatriota_POSTGRES_URL
     || process.env.DATABASE_URL
     || process.env.POSTGRES_URL
-    || process.env.POSTGRES_PRISMA_URL;
+    || process.env.POSTGRES_PRISMA_URL
+    || process.env.POSTGRES_URL_NON_POOLING
+    || process.env.DATABASE_URL_UNPOOLED;
+  if (configuredUrl) return configuredUrl;
+
+  const host = process.env.PGHOST || process.env.POSTGRES_HOST;
+  const user = process.env.PGUSER || process.env.POSTGRES_USER;
+  const password = process.env.PGPASSWORD || process.env.POSTGRES_PASSWORD;
+  const database = process.env.PGDATABASE || process.env.POSTGRES_DATABASE;
+  if (!host || !user || !password || !database) return undefined;
+
+  const url = new URL('postgresql://localhost');
+  url.hostname = host;
+  url.username = user;
+  url.password = password;
+  url.pathname = `/${database}`;
+  url.port = process.env.PGPORT || '5432';
+  url.searchParams.set('sslmode', 'require');
+  return url.toString();
 }
 
 function getConnectionLabel() {
@@ -58,6 +76,28 @@ export async function ensureAuthSchema() {
   )`);
 }
 
+export async function registerPublicUser(name: string, email: string, password: string) {
+  await ensureAuthSchema();
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = await getPool().query('SELECT id FROM editorial_users WHERE lower(email) = lower($1) LIMIT 1', [normalizedEmail]);
+  if (existing.rows[0]) return null;
+  const id = `reader-${randomBytes(12).toString('hex')}`;
+  const hash = hashPassword(password);
+  await getPool().query('INSERT INTO editorial_users (id, email, name, password_hash, role) VALUES ($1, $2, $3, $4, $5)', [id, normalizedEmail, name.trim().slice(0, 120), hash, 'leitor_gratuito']);
+  return authenticatePublicUser(normalizedEmail, password);
+}
+
+export async function authenticatePublicUser(email: string, password: string) {
+  await ensureAuthSchema();
+  const result = await getPool().query('SELECT id, email, name, password_hash, role FROM editorial_users WHERE lower(email) = lower($1) AND active = TRUE LIMIT 1', [email.trim().toLowerCase()]);
+  const user = result.rows[0];
+  if (!user || !verifyPassword(password, user.password_hash)) return null;
+  const rawToken = randomBytes(32).toString('base64url');
+  const tokenHash = scryptSync(rawToken, 'opatriota-session', 32).toString('hex');
+  await getPool().query('INSERT INTO editorial_sessions (token_hash, user_id, expires_at) VALUES ($1, $2, NOW() + INTERVAL \'30 days\')', [tokenHash, user.id]);
+  return { token: rawToken, user: { id: user.id, email: user.email, name: user.name, role: user.role } };
+}
+
 export async function authenticateEditorialUser(email: string, password: string) {
   await ensureAuthSchema();
   const result = await getPool().query('SELECT id, email, name, password_hash, role FROM editorial_users WHERE lower(email) = lower($1) AND active = TRUE LIMIT 1', [email.trim()]);
@@ -93,7 +133,11 @@ export async function provisionEditorialAdmin(password: string) {
 }
 
 export function sessionCookie(token: string) {
-  return `opatriota_editorial_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=43200`;
+  const isProduction = process.env.NODE_ENV === 'production';
+  const domain = isProduction ? '; Domain=.opatriota.sbs' : '';
+  const sameSite = isProduction ? 'None' : 'Lax';
+  const secure = isProduction ? '; Secure' : '';
+  return `opatriota_editorial_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=${sameSite}${domain}${secure}; Max-Age=43200`;
 }
 
 export function readSessionCookie(cookieHeader: string | undefined) {

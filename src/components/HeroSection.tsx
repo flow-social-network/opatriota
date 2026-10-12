@@ -3,8 +3,6 @@ import { Article } from '../types';
 import { ArticleImage } from './ArticleImage';
 import { 
   Play, 
-  ChevronLeft, 
-  ChevronRight, 
   Calendar, 
   MessageSquare, 
   Clock, 
@@ -115,21 +113,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             {/* Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-[#07172E] via-[#07172E]/60 to-transparent" />
 
-            {/* Navigation Arrows */}
-            <button
-              onClick={handlePrev}
-              aria-label="Slide anterior"
-              className="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-80 hover:opacity-100 cursor-pointer"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handleNext}
-              aria-label="Próximo slide"
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center transition-all opacity-80 hover:opacity-100 cursor-pointer"
-            >
-              <ChevronRight className="w-5 h-5" />
-            </button>
+
 
             {/* Content Overlay at Bottom */}
             <div className="relative z-10 p-5 sm:p-6 text-white">

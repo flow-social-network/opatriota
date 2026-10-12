@@ -5,6 +5,7 @@ import {
   signInWithEmail,
   registerWithEmail,
   requestPasswordReset,
+  confirmPasswordResetCode,
   signOutFromFirebase,
   refreshUserProfile,
 } from '../../services/firebaseAuthService';
@@ -22,6 +23,7 @@ interface AuthContextValue {
   loginWithEmail: (email: string, password: string) => Promise<UserSession>;
   register: (name: string, email: string, password: string) => Promise<UserSession>;
   resetPassword: (email: string) => Promise<void>;
+  confirmPasswordReset: (code: string, newPassword: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<UserSession | null>;
   toggleBookmark: (articleId: string) => Promise<void>;
@@ -35,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { showToast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
     const unsubscribe = observeAuth((user) => {
       if (user) {
         setCurrentUser(user);
@@ -51,7 +54,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
-    return unsubscribe;
+
+    // A sessão da Administração/Redação é HttpOnly e não é observável pelo Firebase.
+    // Recuperá-la aqui evita pedir login novamente após recarregar um painel.
+    void api.get<{ user: UserSession }>('/editorial/auth/me', { auth: false })
+      .then(({ user }) => {
+        if (mounted && user) setCurrentUser(user);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const loginWithGoogle = useCallback(async () => {
@@ -86,6 +101,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const resetPassword = useCallback(async (email: string) => {
     await requestPasswordReset(email);
+  }, []);
+
+  const confirmResetPassword = useCallback(async (code: string, newPassword: string) => {
+    await confirmPasswordResetCode(code, newPassword);
   }, []);
 
   const logout = useCallback(async () => {
@@ -125,6 +144,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loginWithEmail,
         register,
         resetPassword,
+        confirmPasswordReset: confirmResetPassword,
         logout,
         refreshProfile,
         toggleBookmark,
@@ -139,4 +159,8 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuth must be used within AuthProvider');
   return ctx;
+}
+
+export function useAuthOptional() {
+  return useContext(AuthContext);
 }

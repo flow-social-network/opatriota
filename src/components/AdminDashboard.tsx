@@ -35,8 +35,8 @@ interface AdminDashboardProps {
   sources: RssSource[];
   queueItems: EditorialQueueItem[];
   onBack: () => void;
-  onUpdateSource: (sources: RssSource[]) => void;
-  onUpdateQueue: (items: EditorialQueueItem[]) => void;
+  onUpdateSource: (sources: RssSource[]) => void | Promise<void>;
+  onUpdateQueue: (items: EditorialQueueItem[]) => void | Promise<void>;
   onSyncResult: (sources: RssSource[], queue: EditorialQueueItem[]) => void;
   portalSettings: PortalSettings;
   onSavePortalSettings: (newSettings: PortalSettings) => void;
@@ -91,8 +91,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         importedCount: number;
         checkedSources: number;
       }>('/editorial/sources/sync', {});
-      onUpdateSource(result.sources);
-      if (result.queueItems.length) onUpdateQueue([...result.queueItems, ...queueItems]);
+      await onUpdateSource(result.sources);
+      if (result.queueItems.length) await onUpdateQueue([...result.queueItems, ...queueItems]);
       setSyncMessage(`Sincronização concluída: ${result.checkedSources} fontes consultadas; ${result.importedCount} pautas novas.`);
       setTimeout(() => setSyncMessage(null), 5000);
     } catch (error) {
@@ -103,7 +103,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   };
 
   // Add source handler
-  const handleAddSource = (e: React.FormEvent) => {
+  const handleAddSource = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newSourceName || !newRssUrl) return;
 
@@ -122,15 +122,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       itemsReceived: 0
     };
 
-    onUpdateSource([...sources, newSource]);
-    setNewSourceName('');
-    setNewSourceUrl('');
-    setNewRssUrl('');
-    setShowAddSource(false);
+    try {
+      await onUpdateSource([...sources, newSource]);
+      setNewSourceName('');
+      setNewSourceUrl('');
+      setNewRssUrl('');
+      setShowAddSource(false);
+    } catch {
+      setSyncMessage('A fonte não foi gravada no banco. Nenhuma alteração local foi aplicada.');
+    }
   };
 
   // Transition queue status
-  const handleStatusChange = (id: number, newStatus: EditorialStatus) => {
+  const handleStatusChange = async (id: number, newStatus: EditorialStatus) => {
     const updated = queueItems.map((item) => {
       if (item.id === id) {
         return {
@@ -141,7 +145,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       }
       return item;
     });
-    onUpdateQueue(updated);
+    await onUpdateQueue(updated);
   };
 
   // Run interactive deduplication evaluation

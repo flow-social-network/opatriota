@@ -14,11 +14,14 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"No tests configured yet\" && exit 0"
+    "test": "pnpm test:header",
+    "test:header": "node --import tsx scripts/test-header-contract.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.1",
+    "better-auth": "^1.7.7",
+    "drizzle-orm": "^0.45.4",
     "firebase": "^13.0.0",
     "jszip": "^3.10.2",
     "lucide-react": "^0.546.0",

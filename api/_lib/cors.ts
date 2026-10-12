@@ -1,10 +1,18 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
+const configuredOrigins = [
+  process.env.PUBLIC_APP_URL,
+  process.env.APP_ORIGIN,
+  process.env.VITE_APP_URL,
+  process.env.VITE_PUBLIC_SITE_URL,
+].flatMap((value) => value ? [value.replace(/\/$/, '')] : []);
+
 const ALLOWED_ORIGINS = new Set([
   'https://www.opatriota.sbs',
   'https://opatriota.sbs',
   'https://opatriota.com.br',
   'https://www.opatriota.com.br',
+  ...configuredOrigins,
   'http://localhost:3000',
   'http://localhost:5173',
   'http://127.0.0.1:3000',

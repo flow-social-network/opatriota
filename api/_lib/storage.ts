@@ -1,12 +1,14 @@
-import type { Pool } from 'mysql2/promise';
+import type { Pool as MysqlPool } from 'mysql2/promise';
+import type { Pool as PostgresPool } from 'pg';
 import { firestoreDelete, firestoreGet, firestoreList, firestoreWrite } from './billing';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { getInitialSeedData } from './seedData';
 
-export type DatabaseProvider = 'firestore' | 'mysql' | 'local_disk';
+export type DatabaseProvider = 'firestore' | 'postgres' | 'mysql' | 'local_disk';
 
-let mysqlPool: Promise<Pool> | undefined;
+let mysqlPool: Promise<MysqlPool> | undefined;
+let postgresPool: Promise<PostgresPool> | undefined;
 
 const DATA_DIR = join(process.cwd(), '.data');
 const DATA_FILE = join(DATA_DIR, 'store.json');
@@ -37,12 +39,16 @@ function saveLocalStore(store: Record<string, Record<string, any>>): void {
 }
 
 export function getDatabaseProvider(): DatabaseProvider {
+  const databaseUrl = process.env.DATABASE_URL || '';
+  // Neon/Postgres is the source of truth when configured. Firebase is retained
+  // only for deployments that explicitly do not provide a relational database.
+  if (databaseUrl.startsWith('postgres://') || databaseUrl.startsWith('postgresql://')) return 'postgres';
   if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) return 'firestore';
-  if (process.env.DATABASE_URL) return 'mysql';
+  if (databaseUrl.startsWith('mysql://') || databaseUrl.startsWith('mysql2://')) return 'mysql';
   return 'local_disk';
 }
 
-async function getMysqlPool(): Promise<Pool> {
+async function getMysqlPool(): Promise<MysqlPool> {
   const connectionString = process.env.DATABASE_URL;
   if (!connectionString) throw new Error('DATABASE_URL is required when DATABASE_PROVIDER=mysql');
 
@@ -72,6 +78,44 @@ async function getMysqlPool(): Promise<Pool> {
   return mysqlPool;
 }
 
+function getPostgresConnectionUrls(): string[] {
+  return [
+    process.env.DATABASE_URL,
+    process.env.POSTGRES_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.POSTGRES_URL_NON_POOLING,
+  ].filter((value, index, urls): value is string => Boolean(value) && urls.indexOf(value) === index);
+}
+
+async function getPostgresPool(): Promise<PostgresPool> {
+  const connectionUrls = getPostgresConnectionUrls();
+  if (!connectionUrls.length) throw new Error('DATABASE_URL or POSTGRES_URL is required when DATABASE_PROVIDER=postgres');
+  if (!postgresPool) {
+    postgresPool = (async () => {
+      const { Pool } = await import('pg');
+      let lastError: unknown;
+
+      for (const connectionString of connectionUrls) {
+        const candidate = new Pool({ connectionString, max: Number(process.env.POSTGRES_POOL_MAX || 10) });
+        try {
+          const client = await candidate.connect();
+          client.release();
+          return candidate;
+        } catch (error) {
+          lastError = error;
+          await candidate.end().catch(() => undefined);
+        }
+      }
+
+      throw lastError instanceof Error ? lastError : new Error('Nenhuma conexão PostgreSQL disponível');
+    })().catch((error) => {
+      postgresPool = undefined;
+      throw error;
+    });
+  }
+  return postgresPool;
+}
+
 function decodeJsonObject(value: unknown): Record<string, any> {
   const parsed = typeof value === 'string' ? JSON.parse(value) : value;
   return parsed && typeof parsed === 'object' && !Array.isArray(parsed)
@@ -79,9 +123,39 @@ function decodeJsonObject(value: unknown): Record<string, any> {
     : {};
 }
 
+async function postgresGet(collection: string, documentId: string) {
+  const pool = await getPostgresPool();
+  const result = await pool.query('SELECT document_id, data FROM public.opatriota_documents WHERE collection_name = $1 AND document_id = $2', [collection, documentId]);
+  const row = result.rows[0];
+  return row ? { id: row.document_id, ...decodeJsonObject(row.data) } : null;
+}
+
+async function postgresWrite(collection: string, documentId: string, fields: Record<string, unknown>, merge: boolean) {
+  const pool = await getPostgresPool();
+  await pool.query(
+    `INSERT INTO public.opatriota_documents (collection_name, document_id, data)
+     VALUES ($1, $2, $3::jsonb)
+     ON CONFLICT (collection_name, document_id) DO UPDATE
+     SET data = ${merge ? 'public.opatriota_documents.data || EXCLUDED.data' : 'EXCLUDED.data'}, updated_at = CURRENT_TIMESTAMP`,
+    [collection, documentId, JSON.stringify(fields)],
+  );
+}
+
+async function postgresList(collection: string) {
+  const pool = await getPostgresPool();
+  const result = await pool.query('SELECT document_id, data FROM public.opatriota_documents WHERE collection_name = $1 ORDER BY updated_at DESC', [collection]);
+  return result.rows.map((row) => ({ id: row.document_id, ...decodeJsonObject(row.data) }));
+}
+
+async function postgresDelete(collection: string, documentId: string) {
+  const pool = await getPostgresPool();
+  await pool.query('DELETE FROM public.opatriota_documents WHERE collection_name = $1 AND document_id = $2', [collection, documentId]);
+}
+
 export async function documentGet(collection: string, documentId: string): Promise<any | null> {
   const provider = getDatabaseProvider();
   if (provider === 'firestore') return firestoreGet(collection, documentId);
+  if (provider === 'postgres') return postgresGet(collection, documentId);
 
   if (provider === 'mysql') {
     const pool = await getMysqlPool();
@@ -107,6 +181,7 @@ export async function documentWrite(
 ): Promise<void> {
   const provider = getDatabaseProvider();
   if (provider === 'firestore') return firestoreWrite(collection, documentId, fields, merge);
+  if (provider === 'postgres') return postgresWrite(collection, documentId, fields, merge);
 
   if (provider === 'mysql') {
     if (collection.length > 100 || documentId.length > 191) {
@@ -145,6 +220,7 @@ export async function documentWrite(
 export async function documentList(collection: string): Promise<any[]> {
   const provider = getDatabaseProvider();
   if (provider === 'firestore') return firestoreList(collection);
+  if (provider === 'postgres') return postgresList(collection);
 
   if (provider === 'mysql') {
     const pool = await getMysqlPool();
@@ -167,6 +243,7 @@ export async function documentList(collection: string): Promise<any[]> {
 export async function documentDelete(collection: string, documentId: string): Promise<void> {
   const provider = getDatabaseProvider();
   if (provider === 'firestore') return firestoreDelete(collection, documentId);
+  if (provider === 'postgres') return postgresDelete(collection, documentId);
 
   if (provider === 'mysql') {
     const pool = await getMysqlPool();

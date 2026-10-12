@@ -29,10 +29,10 @@ export default function AdminPage() {
   }
 
   // Handle unauthorized access
-  if (!currentUser) {
+  if (!currentUser || currentUser.role !== 'administrador') {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#F7F8FA]">
-        <p className="text-[#64748B]">Faça login para acessar o painel administrativo.</p>
+        <p className="text-[#64748B]">Acesso restrito ao administrador master.</p>
       </div>
     );
   }
@@ -65,9 +65,9 @@ export default function AdminPage() {
       sources={sources}
       queueItems={queueItems}
       onBack={() => navigate('/')}
-      onUpdateSource={(s) => { void updateSources(s); }}
-      onUpdateQueue={(q) => { void updateQueue(q); }}
-      onSyncResult={(s, q) => { void updateSources(s); void updateQueue(q); }}
+          onUpdateSource={(s) => updateSources(s)}
+          onUpdateQueue={(q) => updateQueue(q)}
+          onSyncResult={(s, q) => { void updateSources(s); void updateQueue(q); }}
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}

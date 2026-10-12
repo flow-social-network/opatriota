@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { InstitutionalPage } from '../../types';
+import { api } from '../../services/apiClient';
 import { Breadcrumbs } from './Breadcrumbs';
 import { sanitizeHtml } from '../../utils/sanitizeHtml';
 import { 
@@ -30,6 +31,8 @@ export const InstitutionalPageView: React.FC<InstitutionalPageViewProps> = ({
 }) => {
   const [copied, setCopied] = useState(false);
   const [activeToc, setActiveToc] = useState<string>('');
+  const [commercialStatus, setCommercialStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [commercialMessage, setCommercialMessage] = useState('');
 
   const handleShare = () => {
     if (navigator.clipboard) {
@@ -41,6 +44,25 @@ export const InstitutionalPageView: React.FC<InstitutionalPageViewProps> = ({
 
   const handlePrint = () => {
     window.print();
+  };
+
+  const handleCommercialSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setCommercialStatus('submitting');
+    setCommercialMessage('');
+    const form = new FormData(event.currentTarget);
+    try {
+      const result = await api.post<{ id: string; message: string }>('/advertising/inquiries', {
+        contactName: form.get('contactName'), companyName: form.get('companyName'), email: form.get('email'), phone: form.get('phone'),
+        format: form.get('format'), placement: form.get('placement'), period: form.get('period'), budget: form.get('budget'), message: form.get('message'), consent: form.get('consent') === 'on',
+      }, { auth: false });
+      setCommercialStatus('success');
+      setCommercialMessage(`${result.message} Protocolo: ${result.id}`);
+      event.currentTarget.reset();
+    } catch (error) {
+      setCommercialStatus('error');
+      setCommercialMessage(error instanceof Error ? error.message : 'Não foi possível registrar a solicitação.');
+    }
   };
 
   const scrollToSection = (id: string) => {
@@ -252,6 +274,26 @@ export const InstitutionalPageView: React.FC<InstitutionalPageViewProps> = ({
                   Fotografia documental institucional • Arquivo Oficial O Patriota
                 </div>
               </div>
+            )}
+
+            {page.slug === 'anuncie-conosco' && (
+              <form onSubmit={handleCommercialSubmit} className="mb-10 rounded-lg border border-[#D9DEE7] bg-[#F8FAFC] p-5 md:p-7" aria-labelledby="commercial-form-title">
+                <h2 id="commercial-form-title" className="font-serif text-2xl font-bold text-[#0B2345]">Solicite uma proposta comercial</h2>
+                <p className="mt-2 text-sm text-[#5D6673]">Sua solicitação será registrada antes da confirmação. Nossa equipe comercial fará a análise e o contato.</p>
+                <div className="mt-5 grid gap-4 md:grid-cols-2">
+                  <label className="text-xs font-semibold text-[#0B2345]">Nome do responsável<input required name="contactName" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                  <label className="text-xs font-semibold text-[#0B2345]">Empresa<input required name="companyName" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                  <label className="text-xs font-semibold text-[#0B2345]">E-mail<input required type="email" name="email" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                  <label className="text-xs font-semibold text-[#0B2345]">Telefone<input name="phone" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                  <label className="text-xs font-semibold text-[#0B2345]">Formato desejado<select required name="format" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm"><option value="">Selecione</option><option>Banner display</option><option>Patrocínio de editoria</option><option>Branded content</option><option>Outro</option></select></label>
+                  <label className="text-xs font-semibold text-[#0B2345]">Posição ou editoria<input required name="placement" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                  <label className="text-xs font-semibold text-[#0B2345]">Período desejado<input required name="period" placeholder="Ex.: 30 dias" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                  <label className="text-xs font-semibold text-[#0B2345]">Orçamento estimado (opcional)<input name="budget" className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                  <label className="text-xs font-semibold text-[#0B2345] md:col-span-2">Mensagem<textarea required name="message" rows={4} className="mt-1 w-full rounded border border-[#D9DEE7] bg-white p-2.5 text-sm" /></label>
+                </div>
+                <label className="mt-4 flex items-start gap-2 text-xs text-[#5D6673]"><input required type="checkbox" name="consent" className="mt-0.5" />Autorizo o contato comercial sobre esta solicitação.</label>
+                <div className="mt-5 flex flex-wrap items-center gap-4"><button type="submit" disabled={commercialStatus === 'submitting'} className="rounded bg-[#0B2345] px-5 py-2.5 text-xs font-bold text-white hover:bg-[#0B5FFF] disabled:opacity-60">{commercialStatus === 'submitting' ? 'Registrando...' : 'Enviar solicitação'}</button>{commercialMessage && <p role="status" className={`text-xs font-semibold ${commercialStatus === 'success' ? 'text-[#16803C]' : 'text-[#B42318]'}`}>{commercialMessage}</p>}</div>
+              </form>
             )}
 
             {/* Render HTML content with custom typography */}

@@ -26,11 +26,8 @@ export default function NewsroomResetPasswordPage() {
       return;
     }
 
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
-    }, 800);
+    setLoading(false);
+    setErrorMessage('A recuperação de acesso da redação ainda precisa ser concluída pelo administrador do sistema.');
   };
 
   return (

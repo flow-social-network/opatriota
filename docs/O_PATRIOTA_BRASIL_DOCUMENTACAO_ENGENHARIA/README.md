@@ -12,5 +12,12 @@ A branch solicitada anteriormente `feature/efi-assinaturas` retornou 404 ao busc
 - `DEPLOYMENT_TESTING.md`: deploy, testes e erro 404.
 - `REMEDIATION_RUNBOOK.md`: prioridades e procedimentos.
 - `TRACEABILITY.md`: evidências e pendências.
+- `AI_HANDOFF.md`: instruções de execução para uma IA, critérios de pronto e relatório obrigatório.
+- `API_CONTRACTS.md`: inventário de handlers, regras de contrato e matriz de testes.
+- `OPERATIONS_CHECKLIST.md`: checklists de merge, produção, pós-deploy e incidentes.
 
-**Escopo:** leitura da árvore e de arquivos selecionados via GitHub. Não houve execução de testes, build, deploy, migrações nem alterações no código. O frontend permaneceu intocado.
+**Escopo:** documentação de engenharia baseada na árvore acessível e nas evidências registradas. A documentação não substitui execução de build, testes, deploy, migrações ou validação em provedores externos. O estado de cada item deve ser atualizado somente com evidência verificável.
+
+**Roteiro recomendado para uma IA:** começar por `AI_HANDOFF.md`, conferir `AUDIT_REPORT.md`, completar os contratos em `API_CONTRACTS.md`, executar o `OPERATIONS_CHECKLIST.md` e atualizar `TRACEABILITY.md` com comandos, commit, ambiente e resultados.
+
+**Regra de segurança:** esta documentação não autoriza acesso a produção, migrações destrutivas, publicação de conteúdo ou alteração de pagamentos.

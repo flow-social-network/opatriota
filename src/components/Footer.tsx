@@ -209,7 +209,7 @@ export const Footer: React.FC<FooterProps> = ({
       </div>
 
 
-      {/* ═══════════════════════════════════════════════════════════════════
+      {/* ═════════��═════════════════════════════════════════════════════════
           ÁREA PRINCIPAL: GRADE EQUILIBRADA DE 6 COLUNAS
          ═══════════════════════════════════════════════════════════════════ */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
@@ -260,7 +260,7 @@ export const Footer: React.FC<FooterProps> = ({
                     aria-label={soc.name}
                     title={`${soc.name} do O Patriota`}
                     style={{ borderRadius: '9999px' }}
-                    className={`w-9 h-9 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all ring-2 ring-white/20 border border-white/15 overflow-hidden`}
+                    className={`size-7 sm:size-8 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-md hover:scale-110 active:scale-95 transition-all ring-1 ring-white/20 border border-white/15 overflow-hidden`}
                   >
                     {soc.icon}
                   </a>

@@ -2,24 +2,24 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
 import { useAuth } from '../../app/contexts/AuthContext';
+import { api } from '../../services/apiClient';
+import type { UserSession } from '../../types';
 import { 
   Mail, 
   Lock, 
   Eye, 
   EyeOff, 
-  LogIn, 
+  LogIn,
   AlertCircle, 
-  ShieldAlert, 
-  CheckCircle2, 
-  KeyRound 
+  ShieldAlert
 } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const navigate = useNavigate();
-  const { loginWithEmail, setCurrentUser } = useAuth();
+  const { setCurrentUser } = useAuth();
   
-  const [email, setEmail] = useState('admin@opatriota.sbs');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -36,42 +36,19 @@ export default function AdminLoginPage() {
 
     setLoading(true);
     try {
-      const user = await loginWithEmail(email, password);
-      // Give administrator role
-      const adminSession = {
-        ...user,
-        role: 'administrador' as const,
-        name: user.name || 'Administrador Central',
-        email: email
-      };
-      setCurrentUser(adminSession);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('opatriota_session', JSON.stringify(adminSession));
+      const response = await api.post<{ user: UserSession }>('/editorial/auth/login', { email, password }, { auth: false });
+      const user = response.user;
+      if (user.role !== 'administrador') {
+        setErrorMessage('Acesso negado: esta conta não possui perfil administrativo.');
+        return;
       }
+      setCurrentUser(user);
       navigate('/admin');
     } catch (err: any) {
       setErrorMessage(err?.message || 'Falha na autenticação administrativa. Verifique suas credenciais.');
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDemoAdminLogin = () => {
-    const adminSession = {
-      id: 'usr-admin-master',
-      name: 'Administrador Marcos Dresbach',
-      email: 'admin@opatriota.sbs',
-      role: 'administrador' as const,
-      subscription: { plan: 'premium' as const, status: 'ativo' as const, validUntil: '2026-12-31', autoRenew: true },
-      bookmarks: [],
-      notificationPrefs: { breakingNews: true, dailyBrief: true, factChecks: true, weeklyDigest: true },
-      createdAt: '2026-10-09T10:00:00Z',
-    };
-    setCurrentUser(adminSession);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('opatriota_session', JSON.stringify(adminSession));
-    }
-    navigate('/admin');
   };
 
   return (
@@ -179,17 +156,6 @@ export default function AdminLoginPage() {
         </button>
       </form>
 
-      {/* QUICK ADMIN DEMO SHORTCUT */}
-      <div className="mt-8 pt-6 border-t border-[#E2E8F0]">
-        <button
-          type="button"
-          onClick={handleDemoAdminLogin}
-          className="w-full py-2.5 px-3 rounded-lg border border-[#0B2345]/20 bg-slate-50 hover:bg-slate-100 text-[#0B2345] text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer"
-        >
-          <KeyRound className="w-3.5 h-3.5 text-[#FFCC29]" />
-          <span>Acesso Rápido — Marcos Dresbach (Administrador)</span>
-        </button>
-      </div>
     </AuthLayout>
   );
 }

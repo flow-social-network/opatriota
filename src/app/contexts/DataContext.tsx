@@ -22,7 +22,7 @@ import {
   INITIAL_LGPD_REQUESTS,
 } from '../../data/pagesData';
 import { useToast } from './ToastContext';
-import { useAuth } from './AuthContext';
+import { useAuthOptional } from './AuthContext';
 import type {
   Article,
   CategorySlug,
@@ -71,6 +71,7 @@ interface DataContextValue {
   savePage: (page: InstitutionalPage) => Promise<void>;
   deletePage: (pageId: string) => Promise<void>;
   saveCategory: (category: CategoryDetail) => Promise<void>;
+  saveAuthor: (author: AuthorDetail) => Promise<void>;
   saveMenuConfig: (config: SiteMenuConfig) => Promise<void>;
   savePortalSettings: (settings: PortalSettings) => Promise<void>;
 
@@ -85,7 +86,8 @@ const DEFAULT_MENU: SiteMenuConfig = {
 };
 
 export function DataProvider({ children }: { children: ReactNode }) {
-  const { currentUser } = useAuth();
+  const auth = useAuthOptional();
+  const currentUser = auth?.currentUser ?? null;
   const { showToast } = useToast();
 
   const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
@@ -176,6 +178,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       setter(next);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'A API não confirmou as alterações; os dados locais foram mantidos.');
+      throw error;
     }
   }, [showToast]);
 
@@ -200,6 +203,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast(`Página "${persisted.title}" salva no servidor.`);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Falha ao salvar página.');
+      throw error;
     }
   }, [pages, showToast]);
 
@@ -210,6 +214,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast('Página excluída no servidor.');
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Falha ao excluir página.');
+      throw error;
     }
   }, [showToast]);
 
@@ -225,8 +230,23 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast(`Editoria "${persisted.name}" salva no servidor.`);
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Falha ao salvar editoria.');
+      throw error;
     }
   }, [categories, showToast]);
+
+  const saveAuthor = useCallback(async (author: AuthorDetail) => {
+    try {
+      const exists = authors.some(item => item.id === author.id);
+      const saved = exists
+        ? await api.patch<AuthorDetail>(`/authors/${encodeURIComponent(author.id)}`, author)
+        : await api.post<AuthorDetail>('/authors', author);
+      setAuthors(current => exists ? current.map(item => item.id === saved.id ? saved : item) : [...current, saved]);
+      showToast('Usuário gravado no servidor.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Falha ao gravar usuário.');
+      throw error;
+    }
+  }, [authors, showToast]);
 
   const saveMenuConfigHandler = useCallback(async (config: SiteMenuConfig) => {
     try {
@@ -235,12 +255,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast('Menus gravados no servidor.');
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Não foi possível gravar os menus.');
+      throw error;
     }
   }, [showToast]);
 
   const savePortalSettingsHandler = useCallback(async (settings: PortalSettings) => {
     const res = await savePortalSettings(settings);
-    if (res.success) setPortalSettingsState(settings);
+    if (!res.success) {
+      showToast(res.message);
+      throw new Error(res.message);
+    }
+    setPortalSettingsState(settings);
     showToast(res.message);
   }, [showToast]);
 
@@ -258,7 +283,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setArticles, setSources, setQueueItems, setPages, setCategories,
         setMenuConfig, setContactSubmissions, setLgpdRequests,
         updateArticles, updateSources, updateQueue,
-        savePage, deletePage, saveCategory,
+        savePage, deletePage, saveCategory, saveAuthor,
         saveMenuConfig: saveMenuConfigHandler,
         savePortalSettings: savePortalSettingsHandler,
         handleSelectCategory,

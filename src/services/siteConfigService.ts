@@ -238,35 +238,12 @@ export const DEFAULT_PORTAL_SETTINGS: PortalSettings = {
   updatedAt: new Date().toISOString()
 };
 
-const LOCAL_STORAGE_KEY = 'o_patriota_portal_settings_v1';
-const SUPABASE_SETTINGS_ID = 'main';
-
 /**
- * Loads current settings from Firestore with local storage cache fallback.
+ * Loads settings from the server of record. Defaults are used only when the
+ * public read endpoint is unavailable; browser storage is never treated as
+ * authoritative application data.
  */
 export async function loadPortalSettings(): Promise<PortalSettings> {
-  // First check localStorage for cached settings to allow immediate render and offline resilience
-  let cached: PortalSettings | null = null;
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed && typeof parsed === 'object') {
-        cached = {
-          identity: { ...DEFAULT_IDENTITY_CONFIG, ...(parsed.identity || {}) },
-          socialNetworks: Array.isArray(parsed.socialNetworks) ? parsed.socialNetworks : DEFAULT_SOCIAL_NETWORKS,
-          adsense: { ...DEFAULT_ADSENSE_CONFIG, ...(parsed.adsense || {}) },
-          adSlots: Array.isArray(parsed.adSlots) ? parsed.adSlots : DEFAULT_AD_SLOTS,
-          webPush: { ...DEFAULT_WEBPUSH_CONFIG, ...(parsed.webPush || {}) },
-          marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(parsed.marketTicker || {}) },
-          updatedAt: parsed.updatedAt || new Date().toISOString()
-        };
-      }
-    }
-  } catch {
-    /* ignore localStorage parse issues */
-  }
-
   try {
     const data = await api.get<Partial<PortalSettings>>('/site-settings', { auth: false });
     if (data && typeof data === 'object') {
@@ -279,25 +256,21 @@ export async function loadPortalSettings(): Promise<PortalSettings> {
         marketTicker: { ...DEFAULT_MARKET_TICKER_CONFIG, ...(data.marketTicker || {}) },
         updatedAt: data.updatedAt || new Date().toISOString()
       };
-      try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(merged)); } catch { /* cache is optional */ }
       return merged;
     }
-    return cached || DEFAULT_PORTAL_SETTINGS;
-  } catch (error) {
-    // When API is unreachable or returns 502/network failure, seamlessly fallback to cached or default settings
-    console.warn('Configurações persistidas não puderam ser obtidas da API; usando configurações locais/padrão:', error instanceof Error ? error.message : error);
-    return cached || DEFAULT_PORTAL_SETTINGS;
+    return DEFAULT_PORTAL_SETTINGS;
+  } catch {
+    return DEFAULT_PORTAL_SETTINGS;
   }
 }
 
 /**
- * Saves settings to Firestore and local storage.
+ * Saves settings to the server of record.
  */
 export async function savePortalSettings(settings: PortalSettings): Promise<{ success: boolean; message: string }> {
   const updatedSettings: PortalSettings = { ...settings, updatedAt: new Date().toISOString() };
   try {
     await api.patch<PortalSettings>('/site-settings', updatedSettings);
-    try { localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(updatedSettings)); } catch { /* cache is optional */ }
     return { success: true, message: 'Configurações gravadas no servidor.' };
   } catch (error) {
     return { success: false, message: error instanceof Error ? error.message : 'Falha ao persistir configurações.' };

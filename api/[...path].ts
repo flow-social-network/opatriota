@@ -5,7 +5,7 @@ import {
 } from './_lib/billing';
 import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
 import { handleCors } from './_lib/cors';
-import { authenticateEditorialUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
+import { authenticateEditorialUser, authenticatePublicUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, registerPublicUser, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
 
 type Req = IncomingMessage & { method?: string; headers: Record<string, string | string[] | undefined>; body?: unknown };
 type Res = ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void };
@@ -13,6 +13,7 @@ type Res = ServerResponse & { statusCode: number; setHeader(name: string, value:
 const STAFF = new Set(['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador']);
 const EDITORS = new Set(['editor', 'editor_chefe', 'administrador']);
 const ADMINS = new Set(['administrador']);
+const CONTENT_MANAGERS = ADMINS;
 
 function routeName(url: string): string {
   const pathname = new URL(url, 'https://api.local').pathname;
@@ -97,7 +98,85 @@ export default async function handler(req: Req, res: Res) {
   const method = req.method || 'GET';
   const path = routeName(req.url || '/');
   try {
+    const identity = await getIdentity(req).catch(error => {
+      if (String(error?.message || '').includes('not configured')) throw error;
+      throw new Error('Invalid Firebase ID token');
+    });
     if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
+
+    if (path === 'auth/register' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const name = String(body.name || '').trim();
+      const email = String(body.email || '').trim().toLowerCase();
+      const password = String(body.password || '');
+      if (name.length < 2 || !validEmail(email) || password.length < 8) return json(res, 400, { error: 'INVALID_CREDENTIALS', message: 'Informe nome, e-mail válido e senha com pelo menos 8 caracteres.' });
+      const result = await registerPublicUser(name, email, password);
+      if (!result) return json(res, 409, { error: 'EMAIL_IN_USE', message: 'Não foi possível criar a conta com este e-mail.' });
+      res.setHeader('Set-Cookie', sessionCookie(result.token));
+      return json(res, 201, { user: editorialUserToSession(result.user) });
+    }
+    if (path === 'auth/login' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const result = await authenticatePublicUser(String(body.email || ''), String(body.password || ''));
+      if (!result) return json(res, 401, { error: 'INVALID_CREDENTIALS', message: 'E-mail ou senha inválidos.' });
+      res.setHeader('Set-Cookie', sessionCookie(result.token));
+      return json(res, 200, { user: editorialUserToSession(result.user) });
+    }
+    if (path === 'auth/me' && method === 'GET') {
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = readSessionCookie(cookie);
+      const user = token ? await getEditorialIdentity(token) : null;
+      if (!user) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Sessão ausente.' });
+      return json(res, 200, { user: editorialUserToSession(user) });
+    }
+    if (path === 'auth/logout' && method === 'POST') {
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = readSessionCookie(cookie);
+      if (token) await revokeEditorialSession(token);
+      res.setHeader('Set-Cookie', 'opatriota_editorial_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+      return json(res, 200, { success: true });
+    }
+
+    if (path === 'advertising/inquiries' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const required = ['contactName', 'companyName', 'email', 'format', 'placement', 'period', 'message'];
+      const missing = required.find((field) => !String(body[field] || '').trim());
+      const email = String(body.email || '').trim().toLowerCase();
+      if (missing || !validEmail(email) || body.consent !== true) {
+        return json(res, 400, { error: 'INVALID_ADVERTISING_INQUIRY', message: 'Preencha os campos obrigatórios e aceite o contato comercial.' });
+      }
+      const id = newId();
+      const now = new Date().toISOString();
+      const inquiry = {
+        id, contactName: String(body.contactName).trim().slice(0, 120), companyName: String(body.companyName).trim().slice(0, 160),
+        email: email.slice(0, 254), phone: String(body.phone || '').trim().slice(0, 40), format: String(body.format).trim().slice(0, 100),
+        placement: String(body.placement).trim().slice(0, 160), period: String(body.period).trim().slice(0, 120), budget: String(body.budget || '').trim().slice(0, 80),
+        message: String(body.message).trim().slice(0, 4000), consent: true, status: 'received', createdAt: now, updatedAt: now,
+      };
+      await documentWrite('advertisingInquiries', id, inquiry, false);
+      return json(res, 201, { id, status: inquiry.status, createdAt: now, message: 'Solicitação registrada com sucesso.' });
+    }
+    if (path === 'admin/advertising/inquiries' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const inquiries = await documentList('advertisingInquiries');
+      const query = String(new URL(req.url || '/', 'https://api.local').searchParams.get('q') || '').toLowerCase();
+      const status = String(new URL(req.url || '/', 'https://api.local').searchParams.get('status') || '');
+      return json(res, 200, inquiries.filter((item) => (!query || [item.companyName, item.contactName, item.email].some((value) => String(value || '').toLowerCase().includes(query))) && (!status || item.status === status)).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))));
+    }
+    if (path.match(/^admin\/advertising\/inquiries\/[^/]+$/) && method === 'PATCH') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const id = decodeURIComponent(path.split('/').pop() || '');
+      const body = cleanObject(await readBody(req));
+      const current = await documentGet('advertisingInquiries', id);
+      if (!current) return json(res, 404, { error: 'INQUIRY_NOT_FOUND', message: 'Solicitação não encontrada.' });
+      const allowedStatuses = new Set(['received', 'in_review', 'contacted', 'converted', 'rejected', 'archived']);
+      const nextStatus = body.status === undefined ? current.status : String(body.status);
+      if (!allowedStatuses.has(nextStatus)) return json(res, 400, { error: 'INVALID_INQUIRY_STATUS', message: 'Status comercial inválido.' });
+      const updated = { ...current, status: nextStatus, updatedAt: new Date().toISOString(), updatedBy: identity?.uid };
+      await documentWrite('advertisingInquiries', id, updated, false);
+      await documentWrite('advertisingAudit', newId(), { entityId: id, action: 'status_changed', from: current.status, to: nextStatus, actorId: identity?.uid, createdAt: updated.updatedAt }, false);
+      return json(res, 200, updated);
+    }
     if (path === 'editorial/auth/login' && method === 'POST') {
       const body = cleanObject(await readBody(req));
       const email = String(body.email || '').trim();
@@ -108,13 +187,24 @@ export default async function handler(req: Req, res: Res) {
       res.setHeader('Set-Cookie', sessionCookie(result.token));
       return json(res, 200, { user: editorialUserToSession(result.user) });
     }
+    if (path === 'editorial/auth/me' && method === 'GET') {
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = readSessionCookie(cookie);
+      const user = token ? await getEditorialIdentity(token) : null;
+      if (!user) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Sessão editorial ausente ou expirada.' });
+      return json(res, 200, { user: editorialUserToSession(user) });
+    }
     if (path === 'editorial/auth/logout' && method === 'POST') {
       const raw = req.headers.authorization;
       const header = Array.isArray(raw) ? raw[0] : raw || '';
       const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
       const token = header.startsWith('Bearer ') ? header.slice(7).trim() : readSessionCookie(cookie);
       if (token) await revokeEditorialSession(token);
-      res.setHeader('Set-Cookie', 'opatriota_editorial_session=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0');
+      const isProduction = process.env.NODE_ENV === 'production';
+      const domain = isProduction ? '; Domain=.opatriota.sbs' : '';
+      const sameSite = isProduction ? 'None' : 'Lax';
+      const secure = isProduction ? '; Secure' : '';
+      res.setHeader('Set-Cookie', `opatriota_editorial_session=; Path=/; HttpOnly; SameSite=${sameSite}${domain}${secure}; Max-Age=0`);
       return json(res, 200, { success: true });
     }
     if (path === 'plans' && method === 'GET') return json(res, 200, [
@@ -123,10 +213,46 @@ export default async function handler(req: Req, res: Res) {
       { id: 'premium', name: 'CP Digital Anual Econômico', description: 'Acesso premium.', monthlyPrice: 5.24, annualPrice: 62.9, currency: 'BRL', accessLevel: 'premium', features: [], active: true }
     ]);
 
-    const identity = await getIdentity(req).catch(error => {
-      if (String(error?.message || '').includes('not configured')) throw error;
-      throw new Error('Invalid Firebase ID token');
-    });
+    if (path === 'analytics/events' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const allowedTypes = new Set(['page_view', 'session_start', 'auth_login', 'signup_completed', 'subscription_started', 'unauthorized_access']);
+      const eventType = String(body.eventType || '');
+      const pagePath = String(body.pagePath || '').trim();
+      const sessionKey = String(body.sessionKey || '').trim();
+      if (!allowedTypes.has(eventType) || !pagePath || pagePath.length > 2048 || !sessionKey || sessionKey.length > 160) {
+        return json(res, 400, { error: 'INVALID_ANALYTICS_EVENT', message: 'Evento de audiência inválido.' });
+      }
+      const deduplicationKey = String(body.deduplicationKey || `${eventType}:${sessionKey}:${pagePath}`).slice(0, 300);
+      const existing = await documentGet('portalEventDedup', deduplicationKey);
+      if (existing) return json(res, 202, { accepted: true, deduplicated: true });
+      await documentWrite('portalEventDedup', deduplicationKey, { createdAt: new Date().toISOString() }, false);
+      const userAgent = String(req.headers['user-agent'] || '');
+      const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      const eventId = newId();
+      await documentWrite('portalEvents', eventId, {
+        id: eventId, eventType, occurredAt: new Date().toISOString(), sessionKey,
+        visitorKind: identity?.role === 'administrador' ? 'admin' : identity ? 'authenticated' : 'anonymous',
+        userId: identity?.uid || null, pagePath, pageTitle: String(body.pageTitle || '').slice(0, 300),
+        category: String(body.category || '').slice(0, 120), articleId: String(body.articleId || '').slice(0, 160),
+        referrerHost: String(body.referrerHost || '').slice(0, 255), campaignSource: String(body.campaignSource || '').slice(0, 120),
+        deviceType: ['desktop', 'mobile', 'tablet', 'unknown'].includes(String(body.deviceType)) ? String(body.deviceType) : 'unknown',
+        userAgentHash: createHash('sha256').update(userAgent).digest('hex'),
+        ipHash: forwardedFor ? createHash('sha256').update(forwardedFor).digest('hex') : null,
+        metadata: cleanObject(body.metadata),
+      }, false);
+      return json(res, 202, { accepted: true, deduplicated: false });
+    }
+
+    if (path === 'analytics/summary' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const since = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const events = (await documentList('portalEvents')).filter(event => Date.parse(String(event.occurredAt || '')) >= since);
+      const pageViews = events.filter(event => event.eventType === 'page_view');
+      const uniqueSessions = new Set(pageViews.map(event => event.sessionKey)).size;
+      const byPath = new Map<string, number>();
+      pageViews.forEach(event => byPath.set(event.pagePath, (byPath.get(event.pagePath) || 0) + 1));
+      return json(res, 200, { periodDays: 30, totals: { events: events.length, pageViews: pageViews.length, uniqueSessions }, topPages: [...byPath.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([pagePath, views]) => ({ pagePath, views })) });
+    }
 
     if (path === 'me' && method === 'PATCH') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
@@ -199,7 +325,7 @@ export default async function handler(req: Req, res: Res) {
       const body = cleanObject(await readBody(req));
       const token = String(body.token || '');
       if (token.length < 20 || token.length > 4096) {
-        return json(res, 400, { error: 'INVALID_PUSH_TOKEN', message: 'A inscrição de notificações é inválida.' });
+        return json(res, 400, { error: 'INVALID_PUSH_TOKEN', message: 'A inscrição de notifica��ões é inválida.' });
       }
       const id = createHash('sha256').update(token).digest('hex');
       const existing = await documentGet('pushSubscriptions', id);
@@ -551,7 +677,7 @@ export default async function handler(req: Req, res: Res) {
     const resource = collectionFor(path);
     if (!resource) return json(res, 404, { error: 'NOT_FOUND', message: 'Rota da API não encontrada.' });
     const isEditorial = resource.collection.startsWith('editorial');
-    const required = isEditorial ? STAFF : resource.collection === 'articles' ? STAFF : resource.collection === 'pages' || resource.collection === 'categories' ? EDITORS : ADMINS;
+    const required = isEditorial ? STAFF : resource.collection === 'articles' ? CONTENT_MANAGERS : resource.collection === 'pages' || resource.collection === 'categories' ? CONTENT_MANAGERS : ADMINS;
 
     if (method === 'GET' && !resource.id) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;

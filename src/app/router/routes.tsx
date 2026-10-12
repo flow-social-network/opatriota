@@ -70,7 +70,7 @@ function LazyPanel({ children }: { children: React.ReactNode }) {
   return <Suspense fallback={<PanelFallback />}>{children}</Suspense>;
 }
 
-const ADMIN_ROLES = ['editor_chefe', 'administrador'];
+const ADMIN_ROLES = ['administrador'];
 const EDITORIAL_ROLES = ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'];
 
 export const router = createBrowserRouter([
