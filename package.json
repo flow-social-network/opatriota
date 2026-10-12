@@ -17,7 +17,9 @@
     "test": "pnpm test:header",
     "test:header": "node --import tsx scripts/test-header-contract.ts",
     "noteagents:server": "node --env-file-if-exists=docs/noteagents/.env.local --import tsx docs/noteagents/server/http-server.ts",
-    "noteagents:web": "vite --config docs/noteagents/vite.config.ts"
+    "noteagents:web": "vite --config docs/noteagents/vite.config.ts",
+    "noteagents:mcp": "node --import tsx docs/noteagents/mcp/server.ts",
+    "noteagents:install-browser": "playwright install chromium"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
@@ -37,7 +39,9 @@
     "vite": "^8.3.0",
     "vscode-languageserver": "^10.1.2",
     "vscode-languageserver-textdocument": "^1.0.15",
-    "vscode-uri": "^3.2.0"
+    "vscode-languageserver-types": "^3.18.4",
+    "vscode-uri": "^3.2.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/jszip": "^3.4.1",

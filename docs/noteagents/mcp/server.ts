@@ -1,35 +1,21 @@
-import { createServer, type IncomingMessage, type ServerResponse } from 'node:http'
-import { stdin, stdout } from 'node:process'
-import { readFile, readdir } from 'node:fs/promises'
-import { join, relative, resolve } from 'node:path'
-import { runBrowserTool } from './playwright-tools'
-import { inspectWithLsp } from './lsp-tools'
+import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
+import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
+import { z } from 'zod'
+import { readFile } from 'node:fs/promises'
+import { resolve, relative } from 'node:path'
+import { chromium } from 'playwright'
 
-const root = resolve(process.env.NOTEAGENTS_WORKSPACE || process.cwd())
-const json = (value: unknown) => JSON.stringify(value)
-const tools = [
-  { name: 'noteagents.project.inspect', description: 'Inspeciona arquivos do workspace sem alterar dados.', inputSchema: { type: 'object', properties: { path: { type: 'string' } } } },
-  { name: 'noteagents.tests.run', description: 'Executa testes autorizados no workspace.', inputSchema: { type: 'object', properties: { command: { type: 'string' } }, required: ['command'] } },
-  { name: 'noteagents.browser.open', description: 'Abre uma URL do preview com Playwright.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } },
-  { name: 'noteagents.browser.snapshot', description: 'Retorna texto acessível da página aberta.', inputSchema: { type: 'object', properties: {} } },
-  { name: 'noteagents.browser.screenshot', description: 'Captura screenshot do preview.', inputSchema: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] } },
-  { name: 'noteagents.lsp.diagnostics', description: 'Retorna diagnósticos TypeScript de um arquivo.', inputSchema: { type: 'object', properties: { path: { type: 'string' } }, required: ['path'] } },
-]
-const resources = [{ uri: 'noteagents://workspace', name: 'Workspace', description: 'Arquivos do workspace autorizado.' }, { uri: 'noteagents://capabilities', name: 'Capabilities', description: 'Ferramentas MCP disponíveis.' }]
-const prompts = [{ name: 'full_repository_audit', description: 'Auditoria completa com evidências.', arguments: [] }]
-function safePath(value: string) { const path = resolve(root, value || '.'); if (path !== root && !path.startsWith(`${root}/`)) throw new Error('WORKSPACE_PATH_FORBIDDEN'); return path }
-async function inspect(path = '.') { const absolute = safePath(path); const entries = await readdir(absolute, { withFileTypes: true }); return entries.filter(entry => entry.name !== 'node_modules' && !entry.name.startsWith('.git')).map(entry => relative(root, join(absolute, entry.name))) }
-async function call(name: string, args: Record<string, unknown>) {
-  if (name === 'noteagents.project.inspect') return inspect(String(args.path || '.'))
-  if (name === 'noteagents.browser.open' || name.startsWith('noteagents.browser.')) return runBrowserTool(name, args)
-  if (name === 'noteagents.lsp.diagnostics') return inspectWithLsp(safePath(String(args.path)))
-  if (name === 'noteagents.tests.run') throw new Error('APPROVAL_REQUIRED: execução de comandos exige aprovação do host')
-  throw new Error(`UNKNOWN_TOOL:${name}`)
-}
-async function handle(request: any) { if (request.method === 'initialize') return { protocolVersion: '2025-06-18', capabilities: { tools: {}, resources: {}, prompts: {} }, serverInfo: { name: 'noteagents-mcp', version: '1.0.0' } }; if (request.method === 'tools/list') return { tools }; if (request.method === 'resources/list') return { resources }; if (request.method === 'prompts/list') return { prompts }; if (request.method === 'resources/read') return { contents: [{ uri: request.params.uri, text: request.params.uri === 'noteagents://capabilities' ? json(tools) : json(await inspect('.')) }] }; if (request.method === 'tools/call') return { content: [{ type: 'text', text: json(await call(request.params.name, request.params.arguments || {})) }] }; throw new Error(`METHOD_NOT_FOUND:${request.method}`) }
-function response(id: unknown, result: unknown, error?: unknown) { return JSON.stringify(error ? { jsonrpc: '2.0', id, error: { code: -32000, message: String(error instanceof Error ? error.message : error) } } : { jsonrpc: '2.0', id, result }) }
-export async function handleJsonRpcLine(line: string) { const request = JSON.parse(line); try { return response(request.id, await handle(request)) } catch (error) { return response(request.id, null, error) } }
-if (process.argv.includes('--stdio')) { let buffer = ''; stdin.setEncoding('utf8'); stdin.on('data', async chunk => { buffer += chunk; const lines = buffer.split('\n'); buffer = lines.pop() || ''; for (const line of lines.filter(Boolean)) stdout.write(`${await handleJsonRpcLine(line)}\n`) }) }
-export function createMcpHttpServer() { return createServer(async (req: IncomingMessage, res: ServerResponse) => { if (req.method !== 'POST' || req.url !== '/mcp') { res.statusCode = 404; return res.end() }; let body = ''; req.on('data', chunk => { body += chunk }); req.on('end', async () => { const result = await handleJsonRpcLine(body); res.setHeader('content-type', 'application/json'); res.end(result) }) }) }
-if (process.argv.includes('--http')) createMcpHttpServer().listen(Number(process.env.NOTEAGENTS_MCP_PORT || 8788), '127.0.0.1')
-export { tools, resources, prompts }
+const workspace = resolve(process.env.NOTEAGENTS_WORKSPACE ?? process.cwd())
+const server = new McpServer({ name: 'noteagents', version: '1.0.0' })
+const safePath = (value: string) => { const target = resolve(workspace, value); if (relative(workspace, target).startsWith('..')) throw new Error('PATH_OUTSIDE_WORKSPACE'); return target }
+
+server.registerResource('workspace-file', 'workspace:///{path}', { description: 'Arquivo somente leitura do workspace' }, async (uri) => {
+  const path = decodeURIComponent(uri.pathname).replace(/^\//, '')
+  return { contents: [{ uri: uri.href, mimeType: 'text/plain', text: await readFile(safePath(path), 'utf8') }] }
+})
+server.registerTool('workspace_list', { description: 'Lista arquivos do workspace', inputSchema: { path: z.string().default('.') } }, async ({ path }) => { const items = await (await import('node:fs/promises')).readdir(safePath(path), { withFileTypes: true }); return { content: [{ type: 'text', text: items.map(item => `${item.isDirectory() ? 'dir' : 'file'} ${item.name}`).join('\n') }] } })
+server.registerTool('browser_open', { description: 'Abre uma URL no navegador Playwright', inputSchema: { url: z.string().url() } }, async ({ url }) => { const browser = await chromium.launch({ headless: true }); const page = await browser.newPage(); await page.goto(url, { waitUntil: 'domcontentloaded' }); const title = await page.title(); const text = (await page.locator('body').innerText()).slice(0, 4000); await browser.close(); return { content: [{ type: 'text', text: JSON.stringify({ url, title, text }) }] } })
+server.registerTool('browser_screenshot', { description: 'Captura screenshot de uma URL', inputSchema: { url: z.string().url(), path: z.string().default('/tmp/noteagents.png') } }, async ({ url, path }) => { const browser = await chromium.launch({ headless: true }); const page = await browser.newPage({ viewport: { width: 1440, height: 900 } }); await page.goto(url, { waitUntil: 'networkidle' }); await page.screenshot({ path, fullPage: true }); await browser.close(); return { content: [{ type: 'text', text: `Screenshot salvo em ${path}` }] } })
+server.registerPrompt('implement', { description: 'Prompt padrão de implementação segura', argsSchema: { request: z.string() } }, ({ request }) => ({ messages: [{ role: 'user', content: { type: 'text', text: `Inspecione o workspace, implemente com mudanças mínimas, valide com LSP, testes e Playwright. Pedido: ${request}` } }] }))
+
+await server.connect(new StdioServerTransport())

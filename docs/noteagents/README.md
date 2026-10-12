@@ -18,6 +18,7 @@ Permitir que uma pessoa descreva uma aplicação em linguagem natural, envie ima
 - [Schema PostgreSQL](./database/schema.sql)
 - [Utilitários integrados](./07-UTILITARIOS-INTEGRADOS.md)
 - [Registro de importações](./imports/README.md)
+- [MCP, LSP e Playwright](./08-MCP-LSP-PLAYWRIGHT.md)
 
 ## Princípios
 

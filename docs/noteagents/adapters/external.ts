@@ -9,7 +9,7 @@ export class PostgresAdapter implements DatabaseAdapter {
   private readonly pool: Pool
   constructor(connectionString: string) { if (!connectionString) throw new Error('DATABASE_URL_REQUIRED'); this.pool = new Pool({ connectionString, ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: false } : undefined }) }
   async schema() { const result = await this.pool.query("select table_name from information_schema.tables where table_schema = 'public' order by table_name"); return result.rows.map(row => row.table_name) }
-  async query<T>(sql: string, params: unknown[] = []) { const result = await this.pool.query(sql, params); return result.rows as T[] }
+  async query<T>(sql: string, params: unknown[] = []) { const result = await this.pool.query(sql, params); return result.rows as unknown as T[] }
   async migrate(sql: string) { await this.pool.query('begin'); try { await this.pool.query(sql); await this.pool.query('commit') } catch (error) { await this.pool.query('rollback'); throw error } }
   async health() { const result = await this.pool.query<{ now: string }>('select now()::text as now'); return { connected: true, serverTime: result.rows[0]?.now } }
   async close() { await this.pool.end() }
