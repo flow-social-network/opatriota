@@ -14,7 +14,8 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"No tests configured yet\" && exit 0"
+    "test": "pnpm test:header",
+    "test:header": "node --import tsx scripts/test-header-contract.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",

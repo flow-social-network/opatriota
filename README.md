@@ -2,6 +2,8 @@
 
 > **"INFORMAÇÃO COM LIBERDADE POR UM BRASIL MAIS FORTE."**
 > Notícia • Análise • Opinião • Brasil • Sempre
+>
+> Contrato estrutural obrigatório do cabeçalho: [CONTRATO ESTRUTURAL DO CABEÇALHO — O PATRIOTA BRASIL](docs/CONTRATO-ESTRUTURAL-CABECALHO.md).
 
 O PATRIOTA é um portal digital de notícias de cobertura nacional, estruturado sobre WordPress FSE (Full Site Editing) com plugin editorial avançado de ingestão de fontes, deduplicação em 5 camadas, checagem de fatos com ClaimReview Schema.org e redação integrada.
 

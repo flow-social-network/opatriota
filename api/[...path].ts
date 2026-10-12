@@ -98,7 +98,52 @@ export default async function handler(req: Req, res: Res) {
   const method = req.method || 'GET';
   const path = routeName(req.url || '/');
   try {
+    const identity = await getIdentity(req).catch(error => {
+      if (String(error?.message || '').includes('not configured')) throw error;
+      throw new Error('Invalid Firebase ID token');
+    });
     if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
+
+    if (path === 'advertising/inquiries' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const required = ['contactName', 'companyName', 'email', 'format', 'placement', 'period', 'message'];
+      const missing = required.find((field) => !String(body[field] || '').trim());
+      const email = String(body.email || '').trim().toLowerCase();
+      if (missing || !validEmail(email) || body.consent !== true) {
+        return json(res, 400, { error: 'INVALID_ADVERTISING_INQUIRY', message: 'Preencha os campos obrigatórios e aceite o contato comercial.' });
+      }
+      const id = newId();
+      const now = new Date().toISOString();
+      const inquiry = {
+        id, contactName: String(body.contactName).trim().slice(0, 120), companyName: String(body.companyName).trim().slice(0, 160),
+        email: email.slice(0, 254), phone: String(body.phone || '').trim().slice(0, 40), format: String(body.format).trim().slice(0, 100),
+        placement: String(body.placement).trim().slice(0, 160), period: String(body.period).trim().slice(0, 120), budget: String(body.budget || '').trim().slice(0, 80),
+        message: String(body.message).trim().slice(0, 4000), consent: true, status: 'received', createdAt: now, updatedAt: now,
+      };
+      await documentWrite('advertisingInquiries', id, inquiry, false);
+      return json(res, 201, { id, status: inquiry.status, createdAt: now, message: 'Solicitação registrada com sucesso.' });
+    }
+    if (path === 'admin/advertising/inquiries' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const inquiries = await documentList('advertisingInquiries');
+      const query = String(new URL(req.url || '/', 'https://api.local').searchParams.get('q') || '').toLowerCase();
+      const status = String(new URL(req.url || '/', 'https://api.local').searchParams.get('status') || '');
+      return json(res, 200, inquiries.filter((item) => (!query || [item.companyName, item.contactName, item.email].some((value) => String(value || '').toLowerCase().includes(query))) && (!status || item.status === status)).sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt))));
+    }
+    if (path.match(/^admin\/advertising\/inquiries\/[^/]+$/) && method === 'PATCH') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const id = decodeURIComponent(path.split('/').pop() || '');
+      const body = cleanObject(await readBody(req));
+      const current = await documentGet('advertisingInquiries', id);
+      if (!current) return json(res, 404, { error: 'INQUIRY_NOT_FOUND', message: 'Solicitação não encontrada.' });
+      const allowedStatuses = new Set(['received', 'in_review', 'contacted', 'converted', 'rejected', 'archived']);
+      const nextStatus = body.status === undefined ? current.status : String(body.status);
+      if (!allowedStatuses.has(nextStatus)) return json(res, 400, { error: 'INVALID_INQUIRY_STATUS', message: 'Status comercial inválido.' });
+      const updated = { ...current, status: nextStatus, updatedAt: new Date().toISOString(), updatedBy: identity?.uid };
+      await documentWrite('advertisingInquiries', id, updated, false);
+      await documentWrite('advertisingAudit', newId(), { entityId: id, action: 'status_changed', from: current.status, to: nextStatus, actorId: identity?.uid, createdAt: updated.updatedAt }, false);
+      return json(res, 200, updated);
+    }
     if (path === 'editorial/auth/login' && method === 'POST') {
       const body = cleanObject(await readBody(req));
       const email = String(body.email || '').trim();
@@ -134,11 +179,6 @@ export default async function handler(req: Req, res: Res) {
       { id: 'digital', name: 'Digital Mensal Completa', description: 'Acesso a conteúdos exclusivos para assinantes.', monthlyPrice: 6.5, annualPrice: 78, currency: 'BRL', accessLevel: 'assinante', features: [], active: true },
       { id: 'premium', name: 'CP Digital Anual Econômico', description: 'Acesso premium.', monthlyPrice: 5.24, annualPrice: 62.9, currency: 'BRL', accessLevel: 'premium', features: [], active: true }
     ]);
-
-    const identity = await getIdentity(req).catch(error => {
-      if (String(error?.message || '').includes('not configured')) throw error;
-      throw new Error('Invalid Firebase ID token');
-    });
 
     if (path === 'analytics/events' && method === 'POST') {
       const body = cleanObject(await readBody(req));

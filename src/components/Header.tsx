@@ -572,6 +572,12 @@ export const Header: React.FC<HeaderProps> = ({
         {/* ═══════════════════════════════════════════════════════════════════
             1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
            ═══════════════════════════════════════════════════════════════════ */}
+        <div className="lg:hidden site-utility-bar" data-header-band="utility-mobile">
+          <div className="flex min-h-8 items-center justify-center gap-2 bg-[#F4F7FB] px-2 text-[10px] text-[#334155] border-b border-[#DDE5EF]">
+            <span className="font-medium">{formattedFullDate}</span><span className="text-[#CBD5E1]">|</span><button type="button" onClick={() => handleOpenWeather('taquara')} className="font-semibold">Taquara (RS) · 24°C · INMET</button>
+          </div>
+        </div>
+
         <div className="lg:hidden">
           {/* Main White Bar: Hamburger + Centered Logo + Search, Bell, Profile */}
           <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] shadow-xs">
@@ -650,8 +656,32 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
+          {/* CONTRATO: Faixa 1 cinza fixa; não fundir com mercado ou cabeçalho principal. */}
+          <div className="hidden lg:block site-utility-bar" data-header-band="utility">
+            <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
+              <div className="w-full mx-auto flex items-center justify-between gap-5">
+                <div className="flex items-center gap-2.5 shrink-0">
+                  <span className="font-medium text-[#1E293B] text-[11px]">{formattedFullDate}</span>
+                  <span className="text-[#CBD5E1] text-xs">|</span>
+                  <button type="button" onClick={() => handleOpenWeather('taquara')} className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] whitespace-nowrap" title="Clique para ver a previsão meteorológica (INMET)">
+                    <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
+                    <span className="font-bold">Taquara (RS)</span><span className="font-bold">24°C</span><span className="text-[#64748B] text-[10px]">Céu limpo</span><span className="bg-[#10B981] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">INMET</span>
+                  </button>
+                </div>
+                <form onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }} className="flex items-center flex-1 min-w-[220px] max-w-[390px] bg-white border border-[#CBD5E1] rounded overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors">
+                  <Search className="w-[18px] h-[18px] text-[#94A3B8] ml-2 shrink-0" />
+                  <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="w-full px-2 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
+                  <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-[18px] h-[18px] text-white" /></button>
+                </form>
+                <div className="flex items-center gap-2 shrink-0" aria-label="Redes sociais oficiais">
+                  {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex items-center justify-center size-8 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-[18px]`}>{soc.icon}</a>)}
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
-          <div className="bg-[#061A35] text-white px-5 py-3 text-[13px] font-medium border-b border-[#0d223a]">
+          <div data-header-band="market" className="lg:mt-[58px] bg-[#061A35] text-white px-5 py-3 text-[13px] font-medium border-b border-[#0d223a]">
             <div className="w-full mx-auto flex items-center justify-between gap-5">
               <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
                 {/* Ponto verde pulsante + MERCADOS AO VIVO */}
