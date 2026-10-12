@@ -81,7 +81,7 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
 
   // Modal State for adding/editing
   const [modalOpen, setModalOpen] = useState(false);
-  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<string | number | null>(null);
 
   // Form Fields
   const [formName, setFormName] = useState('');
@@ -258,17 +258,17 @@ export const OfficialSourcesHub: React.FC<OfficialSourcesHubProps> = ({
     setTimeout(() => setFeedback(null), 4000);
   };
 
-  const handleToggleActive = (id: number) => {
-    const updated = sources.map(s => s.id === id ? { ...s, isActive: !s.isActive } : s);
+  const handleToggleActive = (id: string | number) => {
+    const updated = sources.map(s => String(s.id) === String(id) ? { ...s, isActive: !s.isActive } : s);
     onUpdateSources(updated);
   };
 
-  const handleTestVerify = (id: number) => {
-    const target = sources.find(s => s.id === id);
+  const handleTestVerify = (id: string | number) => {
+    const target = sources.find(s => String(s.id) === String(id));
     if (!target) return;
 
     const updated = sources.map(s => {
-      if (s.id === id) {
+      if (String(s.id) === String(id)) {
         return {
           ...s,
           lastPolled: 'Agora mesmo',
