@@ -15,23 +15,30 @@ export default function CategoryPage({ defaultCategory }: { defaultCategory?: st
   let category = categories.find(c => c.slug === activeSlug);
 
   if (!category && activeSlug && activeSlug !== 'todos') {
-    const formattedTitle = activeSlug
-      .split('-')
-      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-
-    category = {
-      id: `cat-dynamic-${activeSlug}`,
-      slug: activeSlug as CategorySlug,
-      name: formattedTitle,
-      description: `Cobertura completa e notícias atualizadas sobre ${formattedTitle} em O Patriota.`,
-      introText: `Acompanhe as reportagens, análises e acontecimentos mais recentes sobre ${formattedTitle}.`,
-      bannerImage: '/images/hero_congresso.jpg',
-      seoTitle: `${formattedTitle} — Notícias e Cobertura | O Patriota`,
-      seoDescription: `Acompanhe notícias sobre ${formattedTitle} com apuração factual e fontes oficiais.`,
-      active: true,
-      order: 99
-    };
+    const matchingArticle = articles.find((article) => {
+      const categorySlug = String(article.category || '').normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      return categorySlug === activeSlug;
+    });
+    if (matchingArticle) {
+      const formattedTitle = String(matchingArticle.category || activeSlug)
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+      category = {
+        id: `category-from-articles-${activeSlug}`,
+        slug: activeSlug as CategorySlug,
+        name: formattedTitle,
+        description: '',
+        introText: '',
+        bannerImage: matchingArticle.imageUrl || '',
+        seoTitle: `${formattedTitle} | O Patriota Brasil`,
+        seoDescription: '',
+        active: true,
+        order: 99,
+      };
+    }
   }
 
   useSeoMetadata({
