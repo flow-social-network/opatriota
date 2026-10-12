@@ -84,15 +84,18 @@
 }
 
 .site-utility-bar[data-header-band="utility"] svg {
-  width: 17px;
-  height: 17px;
-  flex: 0 0 17px;
+  width: 12px !important;
+  height: 12px !important;
+  flex: 0 0 12px;
 }
 
 .site-utility-bar[data-header-band="utility"] a {
-  width: 24px;
-  height: 24px;
-  flex: 0 0 24px;
+  width: 18px !important;
+  height: 18px !important;
+  min-height: 18px !important;
+  max-height: 18px !important;
+  flex: 0 0 18px;
+  align-self: center;
 }
 
 .site-utility-bar[data-header-band="utility-mobile"] {

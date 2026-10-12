@@ -673,8 +673,8 @@ export const Header: React.FC<HeaderProps> = ({
                   <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="w-full px-2 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
                   <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-[18px] h-[18px] text-white" /></button>
                 </form>
-                <div className="flex shrink-0 items-center gap-1.5 xl:gap-2" aria-label="Redes sociais oficiais">
-                  {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-[17px]`}>{soc.icon}</a>)}
+                <div className="flex shrink-0 items-center gap-1" aria-label="Redes sociais oficiais">
+                  {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex size-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-3`}>{soc.icon}</a>)}
                 </div>
               </div>
             </div>
