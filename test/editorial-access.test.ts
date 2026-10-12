@@ -9,7 +9,7 @@ import {
 
 test('draft, rejected, archived and unpublished articles are not public', () => {
   assert.equal(isPublicArticle({ editorialStatus: 'PUBLICADA', status: 'publicada' }), true);
-  for (const status of ['rascunho', 'despublicada', 'unpublished', 'rejeitada', 'arquivada']) {
+  for (const status of ['rascunho', 'em revisão', 'em apuração', 'despublicada', 'unpublished', 'rejeitada', 'arquivada', 'unexpected']) {
     assert.equal(isPublicArticle({ editorialStatus: 'PUBLICADA', status }), false, status);
   }
   assert.equal(isPublicArticle({ editorialStatus: 'EM REVISÃO', status: 'publicada' }), false);
