@@ -17,7 +17,7 @@ import {
   RefreshCw,
   Info
 } from 'lucide-react';
-import { WebPushConfig, PushNotificationCampaign, PushSubscriber } from '../../types';
+import { WebPushConfig, PushNotificationCampaign } from '../../types';
 import { 
   subscribeToWebPush, 
   getStoredPushToken, 
