@@ -43,7 +43,9 @@ export function getDatabaseProvider(): DatabaseProvider {
   // The seeded file store is for local development only. Serverless production
   // instances have ephemeral filesystems and must fail closed when no durable
   // database is configured, rather than silently serving seed/demo content.
-  if (process.env.NODE_ENV !== 'production') return 'local_disk';
+  const isProduction = process.env.NODE_ENV === 'production' ||
+    process.env.VERCEL === '1' || process.env.VERCEL_ENV === 'production';
+  if (!isProduction) return 'local_disk';
 
   throw new Error(
     'Database provider is not configured: set FIREBASE_SERVICE_ACCOUNT_JSON or DATABASE_URL',
