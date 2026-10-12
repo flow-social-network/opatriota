@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { CategorySlug, SiteMenuConfig, SocialPlatform } from '../types';
+import { CategorySlug, SiteMenuConfig, SocialNetworkItem, SocialPlatform } from '../types';
 import { 
   Facebook, 
   Instagram, 
@@ -35,6 +35,7 @@ interface FooterProps {
   onNavigatePage: (slug: string) => void;
   onOpenSubscriberModal?: (modalType: SubscriberModalType) => void;
   menuConfig?: SiteMenuConfig;
+  socialNetworks?: SocialNetworkItem[];
 }
 
 export const Footer: React.FC<FooterProps> = ({
@@ -42,7 +43,8 @@ export const Footer: React.FC<FooterProps> = ({
   onOpenSupport,
   onNavigatePage,
   onOpenSubscriberModal,
-  menuConfig
+  menuConfig,
+  socialNetworks = [],
 }) => {
   const auth = useAuth();
   const currentUser = auth?.currentUser;
@@ -80,93 +82,52 @@ export const Footer: React.FC<FooterProps> = ({
     }
   };
 
-  // 10 Redes Sociais Oficiais — Links reais e cores oficiais
-  const socialIconsConfig: {
-    platform: SocialPlatform;
-    name: string;
-    url: string;
-    bgColor: string;
-    icon: React.ReactNode;
-  }[] = [
-    {
-      platform: 'facebook',
-      name: 'Facebook',
-      url: 'https://www.facebook.com/opatriota.news.brasil/',
-      bgColor: 'bg-[#1877F2]',
-      icon: <Facebook className="w-4 h-4 text-white fill-current" />
-    },
-    {
-      platform: 'instagram',
-      name: 'Instagram',
-      url: 'https://www.instagram.com/journal_opatriota/',
-      bgColor: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]',
-      icon: <Instagram className="w-4 h-4 text-white" />
-    },
-    {
-      platform: 'youtube',
-      name: 'YouTube',
-      url: 'https://www.youtube.com/@jornal_opatriota',
-      bgColor: 'bg-[#FF0000]',
-      icon: <Youtube className="w-4 h-4 text-white fill-current" />
-    },
-    {
-      platform: 'x',
-      name: 'X (Twitter)',
-      url: 'https://x.com/opatriotabr',
-      bgColor: 'bg-[#000000]',
-      icon: <Twitter className="w-4 h-4 text-white fill-current" />
-    },
-    {
-      platform: 'linkedin',
-      name: 'LinkedIn',
-      url: 'https://www.linkedin.com/company/journal-o-patriota',
-      bgColor: 'bg-[#0A66C2]',
-      icon: <Linkedin className="w-4 h-4 text-white fill-current" />
-    },
-    {
-      platform: 'whatsapp',
-      name: 'WhatsApp Oficial',
-      url: 'https://whatsapp.com/channel/0029VbDzzEo4o7qIuMMRBp2n',
-      bgColor: 'bg-[#25D366]',
-      icon: <MessageCircle className="w-4 h-4 text-white fill-current" />
-    },
-    {
-      platform: 'telegram',
-      name: 'Telegram',
-      url: 'https://t.me/opatriotabrasil',
-      bgColor: 'bg-[#229ED9]',
-      icon: <Send className="w-4 h-4 text-white fill-current" />
-    },
-    {
-      platform: 'tiktok',
-      name: 'TikTok Marcos Dresbach',
-      url: 'https://www.tiktok.com/@marcosdresbach',
-      bgColor: 'bg-[#000000]',
-      icon: (
-        <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
-          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.3 6.3 0 0 0 1.88-4.49V8.75a8.28 8.28 0 0 0 3.89 1.15V6.69z"/>
-        </svg>
-      )
-    },
-    {
-      platform: 'kwai',
-      name: 'Kwai Oficial',
-      url: 'https://k.kwai.com/u/@jornal-opatriota/WPiCxD5Te',
-      bgColor: 'bg-[#FF5000]',
-      icon: (
-        <svg className="w-4 h-4 fill-white" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l7 4.5-7 4.5z"/>
-        </svg>
-      )
-    },
-    {
-      platform: 'rss',
-      name: 'Feed RSS',
-      url: '/rss.xml',
-      bgColor: 'bg-[#EE802F]',
-      icon: <Rss className="w-4 h-4 text-white" />
+  const socialBackgrounds: Record<SocialPlatform, string> = {
+    facebook: 'bg-[#1877F2]',
+    instagram: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]',
+    youtube: 'bg-[#FF0000]',
+    x: 'bg-black',
+    linkedin: 'bg-[#0A66C2]',
+    whatsapp: 'bg-[#25D366]',
+    telegram: 'bg-[#229ED9]',
+    kwai: 'bg-[#FF5000]',
+    tiktok: 'bg-black',
+    rss: 'bg-[#F97316]',
+  };
+
+  const renderSocialIcon = (platform: SocialPlatform) => {
+    switch (platform) {
+      case 'facebook': return <Facebook className="h-4 w-4 fill-current text-white" />;
+      case 'instagram': return <Instagram className="h-4 w-4 text-white" />;
+      case 'youtube': return <Youtube className="h-4 w-4 fill-current text-white" />;
+      case 'x': return <Twitter className="h-4 w-4 fill-current text-white" />;
+      case 'linkedin': return <Linkedin className="h-4 w-4 fill-current text-white" />;
+      case 'whatsapp': return <MessageCircle className="h-4 w-4 fill-current text-white" />;
+      case 'telegram': return <Send className="h-4 w-4 text-white" />;
+      case 'rss': return <Rss className="h-4 w-4 text-white" />;
+      case 'kwai': return <span aria-hidden="true" className="text-xs font-black text-white">Kw</span>;
+      case 'tiktok': return <span aria-hidden="true" className="text-base font-black text-white">♪</span>;
+      default: return null;
     }
-  ];
+  };
+
+  const isSafeSocialUrl = (item: SocialNetworkItem) => {
+    if (item.platform === 'rss' && item.url.startsWith('/') && !item.url.startsWith('//')) return true;
+    try {
+      return new URL(item.url).protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  const socialIconsConfig = socialNetworks
+    .filter((item) => item.active && isSafeSocialUrl(item))
+    .sort((a, b) => a.order - b.order)
+    .map((item) => ({
+      ...item,
+      bgColor: socialBackgrounds[item.platform],
+      icon: renderSocialIcon(item.platform),
+    }));
 
   return (
     <footer className="w-full bg-[#061525] text-white select-none font-sans border-t border-[#0d223a]">
@@ -248,9 +209,10 @@ export const Footer: React.FC<FooterProps> = ({
             {/* Ícones Coloridos Redondos Proporcionais */}
             <div className="pt-2">
               <span className="block text-[10px] font-bold uppercase tracking-wider text-white/60 mb-2">
-                Canais Oficiais
+                Canais sociais cadastrados
               </span>
-              <div className="flex flex-wrap items-center gap-2.5 max-w-[240px]">
+              {socialIconsConfig.length > 0 ? (
+                <div className="flex flex-wrap items-center gap-2.5 max-w-[240px]">
                 {socialIconsConfig.map((soc) => (
                   <a
                     key={soc.platform}
@@ -265,7 +227,10 @@ export const Footer: React.FC<FooterProps> = ({
                     {soc.icon}
                   </a>
                 ))}
-              </div>
+                </div>
+              ) : (
+                <p className="max-w-[240px] text-xs leading-5 text-white/60">Nenhum canal social foi verificado e ativado na configuração do portal.</p>
+              )}
             </div>
           </div>
 
@@ -551,15 +516,15 @@ export const Footer: React.FC<FooterProps> = ({
             </span>
           </div>
 
-          {/* E-mail de Contato Institucional */}
           <div className="flex items-center gap-4 flex-wrap justify-center text-white/80">
-            <a 
-              href="mailto:contato@opatriota.sbs" 
+            <button
+              type="button"
+              onClick={() => onNavigatePage('contato')}
               className="hover:text-white flex items-center gap-1.5 transition-colors"
             >
               <Mail className="w-3.5 h-3.5 text-[#FFCC29]" />
-              <span>contato@opatriota.sbs</span>
-            </a>
+              <span>Fale com a redação pelo formulário de contato</span>
+            </button>
           </div>
 
           {/* Links Legais e Símbolo Nacional */}
