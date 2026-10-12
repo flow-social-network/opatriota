@@ -1,7 +1,6 @@
 import { api } from '../services/apiClient';
 import React, { useEffect, useState } from 'react';
-import { RssSource, EditorialQueueItem, EditorialStatus, PortalSettings } from '../types';
-import { OfficialSourcesHub } from './admin/OfficialSourcesHub';
+import { EditorialQueueItem, EditorialStatus, PortalSettings } from '../types';
 import { IdentityManager } from './admin/IdentityManager';
 import { SocialMediaManager } from './admin/SocialMediaManager';
 import { AdsManager } from './admin/AdsManager';
@@ -14,7 +13,6 @@ import { PermissionsPage } from '../pages/admin/PermissionsPage';
 import { DEFAULT_WEBPUSH_CONFIG } from '../services/siteConfigService';
 import { 
   SlidersHorizontal, 
-  Rss, 
   Layers, 
   GitPullRequest, 
   CheckCircle2, 
@@ -28,17 +26,14 @@ import {
   Shield
 } from 'lucide-react';
 
-type AdminTab = 'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'usuarios' | 'permissoes';
+type AdminTab = 'painel' | 'fila' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'usuarios' | 'permissoes';
 
 interface AdminDashboardProps {
   initialTab?: AdminTab;
   onTabChange?: (tab: AdminTab) => void;
-  sources: RssSource[];
   queueItems: EditorialQueueItem[];
   onBack: () => void;
-  onUpdateSource: (sources: RssSource[]) => void;
   onUpdateQueue: (items: EditorialQueueItem[]) => void;
-  onSyncResult: (sources: RssSource[], queue: EditorialQueueItem[]) => void;
   portalSettings: PortalSettings;
   onSavePortalSettings: (newSettings: PortalSettings) => void;
 }
@@ -46,12 +41,9 @@ interface AdminDashboardProps {
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   initialTab = 'painel',
   onTabChange,
-  sources,
   queueItems,
   onBack,
-  onUpdateSource,
   onUpdateQueue,
-  onSyncResult,
   portalSettings,
   onSavePortalSettings,
 }) => {
@@ -63,15 +55,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
-  const [isSyncing, setIsSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
-
-  // State for adding a new source
-  const [newSourceName, setNewSourceName] = useState('');
-  const [newSourceUrl, setNewSourceUrl] = useState('');
-  const [newRssUrl, setNewRssUrl] = useState('');
-  const [newCategory, setNewCategory] = useState('politica');
-  const [showAddSource, setShowAddSource] = useState(false);
 
   // State for interactive deduplication tester
   const [testTitle, setTestTitle] = useState('');
@@ -81,55 +65,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Status filter for editorial queue
   const [queueFilter, setQueueFilter] = useState<string>('TODAS');
 
-
-  // The backend performs the actual RSS fetch and persists source/queue updates.
-  const handleSyncAll = async () => {
-    setIsSyncing(true);
-    setSyncMessage('Consultando feeds RSS reais e persistindo as pautas...');
-    try {
-      const result = await api.post<{
-        sources: RssSource[];
-        queueItems: EditorialQueueItem[];
-        importedCount: number;
-        checkedSources: number;
-      }>('/editorial/sources/sync', {});
-      onUpdateSource(result.sources);
-      if (result.queueItems.length) onUpdateQueue([...result.queueItems, ...queueItems]);
-      setSyncMessage(`Sincronização concluída: ${result.checkedSources} fontes consultadas; ${result.importedCount} pautas novas.`);
-      setTimeout(() => setSyncMessage(null), 5000);
-    } catch (error) {
-      setSyncMessage(error instanceof Error ? error.message : 'Falha na sincronização. Nenhuma pauta fictícia foi criada.');
-    } finally {
-      setIsSyncing(false);
-    }
-  };
-
-  // Add source handler
-  const handleAddSource = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newSourceName || !newRssUrl) return;
-
-    const newSource: RssSource = {
-      id: Date.now(),
-      name: newSourceName,
-      officialUrl: newSourceUrl || newRssUrl,
-      rssUrl: newRssUrl,
-      sourceType: 'órgão público',
-      category: newCategory as any,
-      isActive: true,
-      pollFrequencyMin: 30,
-      lastPolled: 'Pendente',
-      lastSuccess: 'Pendente',
-      lastError: null,
-      itemsReceived: 0
-    };
-
-    onUpdateSource([...sources, newSource]);
-    setNewSourceName('');
-    setNewSourceUrl('');
-    setNewRssUrl('');
-    setShowAddSource(false);
-  };
 
   // Transition queue status
   const handleStatusChange = (id: number, newStatus: EditorialStatus) => {
@@ -268,15 +203,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <span>Fila Editorial ({queueItems.length})</span>
           </button>
 
-          <button
-            onClick={() => handleTabChange('fontes')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'fontes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
-            }`}
-          >
-            <Rss className="w-4 h-4" />
-            <span>Central de Fontes ({sources.length})</span>
-          </button>
+
 
           <button
             onClick={() => handleTabChange('dedup')}
@@ -371,18 +298,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         )}
 
         {/* TAB 3: CENTRAL DE FONTES */}
-        {activeTab === 'fontes' && (
-          <div className="bg-white p-6 rounded-xl border border-[#D9DEE7] shadow-xs">
-            <OfficialSourcesHub
-              sources={sources}
-              onUpdateSources={onUpdateSource}
-              onSyncAll={handleSyncAll}
-              isSyncing={isSyncing}
-            />
-          </div>
-        )}
-
-        {/* TAB 4: DEDUPLICAÇÃO */}
         {activeTab === 'dedup' && (
           <AdminDedupTab
             testTitle={testTitle}
