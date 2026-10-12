@@ -46,6 +46,7 @@ interface NewsroomDashboardProps {
   articles: Article[];
   currentUser: UserSession;
   onUpdateArticles: (articles: Article[]) => void;
+  onPreviewArticle?: (article: Article) => void;
   pages?: InstitutionalPage[];
   onSavePage?: (page: InstitutionalPage) => void;
   onDeletePage?: (pageId: string) => void;
@@ -64,6 +65,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   articles,
   currentUser,
   onUpdateArticles,
+  onPreviewArticle,
   pages = [],
   onSavePage,
   onDeletePage,
@@ -596,6 +598,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             onOpenEdit={handleOpenEdit}
+            onPreviewArticle={(article) => onPreviewArticle?.(article)}
             onPublish={handlePublish}
           />
         )}
