@@ -637,13 +637,20 @@ export default async function handler(req: Req, res: Res) {
     if (method === 'GET' && !resource.id) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;
       let records = await documentList(resource.collection);
-      if (!isEditorial) records = publicRecords(resource.collection, records);
+      const staff = Boolean(identity && STAFF.has(identity.role));
+      const editor = Boolean(identity && EDITORS.has(identity.role));
 
-      if (resource.collection === 'articles') {
-        const staff = Boolean(identity && STAFF.has(identity.role));
+      if (!isEditorial) {
+        const canSeeEditorialRecords =
+          (resource.collection === 'articles' && staff) ||
+          (resource.collection === 'pages' && editor);
+        if (!canSeeEditorialRecords) records = publicRecords(resource.collection, records);
+      }
+
+      if (resource.collection === 'articles' && !staff) {
         const access = await paidAccessLevel(identity);
         records = records.map((article) =>
-          staff || hasArticleAccess(article, access) ? article : lockedArticle(article)
+          hasArticleAccess(article, access) ? article : lockedArticle(article)
         );
       }
       return json(res, 200, records);
