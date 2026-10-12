@@ -662,6 +662,94 @@ export default async function handler(req: Req, res: Res) {
       }
       return json(res, 200, record);
     }
+    if (resource.collection === 'articles' && ['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
+      if (!requireRole(identity, STAFF, res)) return;
+      const user = identity!;
+      const isEditor = EDITORS.has(user.role);
+      const isReviewer = user.role === 'revisor';
+
+      if (method === 'DELETE') {
+        if (!isEditor) return json(res, 403, { error: 'EDITOR_REQUIRED', message: 'Somente editores podem excluir matérias.' });
+        if (!resource.id) return json(res, 400, { error: 'RESOURCE_ID_REQUIRED', message: 'Informe o identificador da matéria.' });
+        const existing = await documentGet('articles', resource.id);
+        if (!existing) return json(res, 404, { error: 'NOT_FOUND', message: 'Matéria não encontrada.' });
+        await documentDelete('articles', resource.id);
+        return json(res, 204, null);
+      }
+
+      const body = cleanObject(req.body || await readBody(req));
+      const authorFields = new Set([
+        'title', 'subtitle', 'kicker', 'category', 'subcategory', 'tags', 'content',
+        'imageUrl', 'imageCaption', 'imageCredits', 'sourceName', 'sourceUrl',
+        'sourcesConsulted', 'seo', 'videoEmbedUrl', 'isFactCheck', 'factVerdict',
+        'factClaim', 'factDocuments', 'originalUrl', 'originalPublishedAt',
+        'sourceUpdatedAt', 'imageLicense', 'imageSourceUrl', 'readTimeMinutes',
+      ]);
+      const editorFields = new Set([
+        ...authorFields, 'author', 'authorId', 'authorRole', 'accessLevel',
+        'priority', 'publishedAt', 'scheduledFor', 'editorialStatus', 'status',
+      ]);
+      const allowedFields = isEditor ? editorFields : authorFields;
+      const editable = Object.fromEntries(Object.entries(body).filter(([key]) => allowedFields.has(key)));
+
+      if (method === 'POST') {
+        const title = String(editable.title || '').trim().slice(0, 300);
+        const articleContent = String(editable.content || '').trim();
+        if (!title || !articleContent) return json(res, 400, { error: 'INVALID_ARTICLE', message: 'Título e conteúdo são obrigatórios.' });
+        const id = String(body.id || newId()).trim().slice(0, 160);
+        if (!id) return json(res, 400, { error: 'INVALID_ARTICLE_ID' });
+        if (await documentGet('articles', id)) return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe uma matéria com este identificador.' });
+        const requestedPublication = isEditor && String(editable.editorialStatus || '').toUpperCase() === 'PUBLICADA';
+        const requestedAccess = String(editable.accessLevel || 'aberto');
+        const record = {
+          ...editable,
+          id,
+          title,
+          content: articleContent,
+          createdBy: user.uid,
+          authorId: isEditor ? String(editable.authorId || user.uid) : user.uid,
+          authorRole: isEditor ? String(editable.authorRole || user.role) : user.role,
+          editorialStatus: requestedPublication ? 'PUBLICADA' : 'EM REDAÇÃO',
+          status: requestedPublication ? String(editable.status || 'publicada') : 'rascunho',
+          accessLevel: ['aberto', 'assinante', 'premium'].includes(requestedAccess) ? requestedAccess : 'aberto',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await documentWrite('articles', id, record, false);
+        return json(res, 201, record);
+      }
+
+      if (!resource.id) return json(res, 400, { error: 'RESOURCE_ID_REQUIRED', message: 'Informe o identificador da matéria.' });
+      const existing = await documentGet('articles', resource.id);
+      if (!existing) return json(res, 404, { error: 'NOT_FOUND', message: 'Matéria não encontrada.' });
+      const owner = [existing.createdBy, existing.authorUid, existing.authorId]
+        .some((value) => String(value || '') === user.uid);
+      if (!isEditor && !isReviewer && !owner) {
+        return json(res, 403, { error: 'ARTICLE_NOT_OWNED', message: 'Jornalistas só podem alterar as próprias matérias.' });
+      }
+      const next = {
+        ...existing,
+        ...editable,
+        id: String(existing.id || resource.id),
+        createdBy: String(existing.createdBy || user.uid),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!isEditor) {
+        next.editorialStatus = 'EM REVISÃO';
+        next.status = 'rascunho';
+        next.authorId = String(existing.authorId || user.uid);
+      }
+      if (typeof next.title !== 'string' || !next.title.trim() || typeof next.content !== 'string' || !next.content.trim()) {
+        return json(res, 400, { error: 'INVALID_ARTICLE', message: 'Título e conteúdo são obrigatórios.' });
+      }
+      const nextAccess = String(next.accessLevel || 'aberto');
+      if (!['aberto', 'assinante', 'premium'].includes(nextAccess)) {
+        return json(res, 400, { error: 'INVALID_ACCESS_LEVEL' });
+      }
+      await documentWrite('articles', String(existing.id || resource.id), next);
+      return json(res, 200, next);
+    }
+
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
       if (!requireRole(identity, required, res)) return;
       if (method === 'DELETE') {
