@@ -506,120 +506,48 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     return matchesStatus && matchesCategory && matchesSearch;
   });
 
+  const navigation = [
+    { id: 'painel', label: 'Painel', icon: SlidersHorizontal },
+    { id: 'materias', label: 'Matérias', icon: FileText },
+    { id: 'editor', label: 'Nova Matéria', icon: Plus },
+    { id: 'fontes', label: 'Fontes e Contatos', icon: BookOpen },
+    { id: 'midia', label: 'Mídia (Imagens/Vídeos)', icon: ImageIcon },
+    { id: 'paginas', label: 'Páginas', icon: Globe },
+    { id: 'categorias', label: 'Editorias', icon: Compass },
+    { id: 'menus', label: 'Menus', icon: Menu },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#F1F3F5] text-[#17202A] select-none pb-16">
-      
-      {/* 1. TOP NEWSROOM CONTROL BAR */}
-      <div className="bg-[#07172E] text-white px-6 py-3 border-b border-[#0B2345] flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <button
-            onClick={onBackToHome}
-            className="flex items-center gap-1.5 text-xs font-bold text-white/80 hover:text-white px-2.5 py-1 rounded bg-white/10 transition cursor-pointer"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>PORTAL PÚBLICO</span>
-          </button>
-          <span className="text-white/30">|</span>
-          <div className="flex items-center gap-2">
-            <span className="text-[#FFCC29] font-black text-sm">O PATRIOTA</span>
-            <span className="text-xs text-white/70 font-mono">REDAÇÃO JORNALÍSTICA</span>
+    <div className="min-h-screen bg-[#eef5fb] text-[#17202A] select-none">
+      <div className="flex min-h-screen">
+        <aside className="hidden w-56 shrink-0 flex-col bg-white border-r border-[#c7d9ea] lg:flex">
+          <div className="h-[74px] bg-[#0875bd] px-4 flex items-center gap-2 text-white">
+            <div className="size-9 rounded-md bg-white flex items-center justify-center text-[#0875bd] font-black">OP</div>
+            <div><div className="text-[13px] font-black leading-tight">O PATRIOTA</div><div className="text-[9px] text-white/80">Sistema de Redação</div></div>
           </div>
-        </div>
-
-        {/* STAFF IDENTITY SWITCHER (CRITICAL FOR DEMONSTRATING REAL ROLES & RESTRICTIONS) */}
-        <div className="flex items-center gap-3 text-xs">
-          <span className="text-white/70 hidden sm:inline">Operando como:</span>
-          <div className="flex items-center gap-2 bg-[#0B2345] border border-white/20 px-2.5 py-1 rounded">
-            <UserCheck className="w-3.5 h-3.5 text-[#FFCC29]" />
-            <span className="font-bold text-white">{currentUser.name}</span>
-            <span className="text-[10px] uppercase font-mono bg-white/10 px-1.5 py-0.5 rounded text-[#FFCC29]">
-              {currentUser.role.replace('_', ' ')}
-            </span>
-          </div>
-
-          {/* Quick test buttons to change role */}
-          <div className="flex items-center gap-1">
-            <button
-              onClick={() => onSwitchStaffRole('jornalista')}
-              className={`px-2 py-1 text-[10px] font-bold rounded transition cursor-pointer ${
-                currentUser.role === 'jornalista' ? 'bg-[#0B5FFF] text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-              title="Testar como Repórter/Jornalista (não pode auto-aprovar)"
-            >
-              Jornalista
-            </button>
-            <button
-              onClick={() => onSwitchStaffRole('revisor')}
-              className={`px-2 py-1 text-[10px] font-bold rounded transition cursor-pointer ${
-                currentUser.role === 'revisor' ? 'bg-[#0B5FFF] text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-              title="Testar como Revisor Textual"
-            >
-              Revisor
-            </button>
-            <button
-              onClick={() => onSwitchStaffRole('editor_chefe')}
-              className={`px-2 py-1 text-[10px] font-bold rounded transition cursor-pointer ${
-                currentUser.role === 'editor_chefe' ? 'bg-[#16803C] text-white' : 'bg-white/10 text-white/70 hover:bg-white/20'
-              }`}
-              title="Testar como Editor-Chefe (aprova e publica)"
-            >
-              Editor-Chefe
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* FEEDBACK BANNER */}
-      {feedbackMsg && (
-        <div className={`px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${
-          feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'
-        }`}>
-          {feedbackMsg.type === 'error' ? <AlertTriangle className="w-4 h-4 shrink-0" /> : <CheckCircle className="w-4 h-4 shrink-0" />}
-          <span>{feedbackMsg.text}</span>
-        </div>
-      )}
-
-      {/* 2. MAIN NEWSROOM CONTAINER */}
-      <div className="max-w-[1440px] mx-auto px-4 py-6">
-        
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-6 border-b border-[#D9DEE7] pb-2">
-          <div className="flex gap-2">
-            {[
-              { id: 'painel', label: 'Painel Geral & Métricas', icon: SlidersHorizontal },
-              { id: 'materias', label: `Todas as Matérias (${articles.length})`, icon: FileText },
-              { id: 'paginas', label: `Gestor de Páginas (${pages.length})`, icon: Globe },
-              { id: 'categorias', label: `Editorias & Categorias (${categories.length})`, icon: Compass },
-              { id: 'menus', label: 'Gestor de Menus', icon: Menu },
-              { id: 'fontes', label: `Fontes Oficiais (${sources.length})`, icon: BookOpen },
-              { id: 'midia', label: `Biblioteca de Mídia (${mediaList.length})`, icon: ImageIcon },
-            ].map((t) => {
-              const Icon = t.icon;
-              const isActive = activeTab === t.id;
-              return (
-                <button
-                  key={t.id}
-                  onClick={() => { setActiveTab(t.id as any); setEditingArticle(null); }}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-t font-bold text-xs transition cursor-pointer ${
-                    isActive ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{t.label}</span>
-                </button>
-              );
-            })}
-          </div>
-
-          <button
-            onClick={handleOpenCreate}
-            className="flex items-center gap-1.5 bg-[#16803C] hover:bg-[#22A447] text-white text-xs font-bold px-3.5 py-2 rounded transition cursor-pointer shadow-xs active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>NOVA MATÉRIA</span>
-          </button>
-        </div>
+          <nav className="flex-1 p-3" aria-label="Navegação da redação">
+            <p className="px-3 py-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Redação</p>
+            <div className="flex flex-col gap-1">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const active = activeTab === item.id;
+                return <button key={item.id} onClick={() => { setActiveTab(item.id as any); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'}`}><Icon className="size-4" />{item.label}</button>;
+              })}
+            </div>
+            <p className="px-3 pt-6 pb-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Fluxo editorial</p>
+            <div className="flex flex-col gap-1 text-[12px] font-semibold text-[#52677a]">
+              {['Agenda Editorial', 'Fila de Revisão', 'Aprovação Final', 'Relatórios', 'Configurações', 'Integrações (APIs)'].map((label) => <button key={label} onClick={() => setActiveTab('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><CheckCircle className="size-4 text-[#7b9bb5]" />{label}</button>)}
+            </div>
+          </nav>
+          <div className="border-t border-[#e1ebf3] p-3 text-[11px] text-[#52677a]">{currentUser.name}<div className="text-[10px] text-[#8ba0b2]">{currentUser.role.replace('_', ' ')}</div></div>
+        </aside>
+        <main className="min-w-0 flex-1">
+          <header className="h-[74px] border-b border-[#c7d9ea] bg-white px-4 md:px-7 flex items-center justify-between gap-4">
+            <div><p className="text-[11px] font-bold text-[#8195a8]">O PATRIOTA / REDAÇÃO</p><h1 className="text-lg font-black text-[#153d61]">{activeTab === 'painel' ? 'Painel Principal' : navigation.find((item) => item.id === activeTab)?.label || 'Redação'}</h1></div>
+            <div className="flex items-center gap-3"><div className="hidden md:flex h-9 w-64 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center px-3 text-xs text-[#8aa0b2]">Buscar matérias, pautas, autores...</div><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova</button><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
+          </header>
+          {feedbackMsg && <div className={`px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'}`}><AlertTriangle className="size-4" /><span>{feedbackMsg.text}</span></div>}
+          <div className="mx-auto max-w-[1440px] px-4 py-5 md:px-7">
 
         {/* TAB 1: PAINEL GERAL & MÉTRICAS */}
         {activeTab === 'painel' && (
@@ -748,6 +676,8 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
           />
         )}
 
+          </div>
+        </main>
       </div>
 
       {/* MODAL: SOLICITAÇÃO DE CORREÇÕES */}
