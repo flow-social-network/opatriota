@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { useToast } from '../../app/contexts/ToastContext';
@@ -7,7 +7,22 @@ import { NewsroomDashboard } from '../../components/newsroom/NewsroomDashboard';
 
 export default function NewsroomPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { currentUser, authLoading } = useAuth();
+  const section = location.pathname.split('/').filter(Boolean)[1] || 'painel';
+  const tabMapping: Record<string, 'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus'> = {
+    painel: 'painel',
+    materias: 'materias',
+    artigos: 'materias',
+    editor: 'editor',
+    nova: 'editor',
+    fontes: 'fontes',
+    midia: 'midia',
+    paginas: 'paginas',
+    categorias: 'categorias',
+    menus: 'menus',
+  };
+  const initialTab = tabMapping[section] || 'painel';
   const {
     articles, sources, pages, categories, authors, subscriptionPlans,
     updateArticles, updateSources, savePage, deletePage,
@@ -37,6 +52,8 @@ export default function NewsroomPage() {
   return (
     <div className="min-h-screen bg-[#F7F8FA] flex flex-col font-sans antialiased text-[#17202A]">
       <NewsroomDashboard
+        initialTab={initialTab}
+        onTabChange={(tab) => navigate(tab === 'painel' ? '/redacao' : `/redacao/${tab}`)}
         articles={articles}
         sources={sources}
         onUpdateSources={updateSources}
