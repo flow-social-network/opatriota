@@ -1,15 +1,14 @@
 /**
  * Servidor API local para desenvolvimento.
- * Empacota os handlers estilo Vercel em um servidor Node simples.
+ * Empacota handlers estilo Vercel em um servidor Node simples.
  *
- * Uso: npx tsx api-dev-server.ts
+ * Uso: pnpm exec tsx api-dev-server.ts
  */
 import { createServer } from 'node:http';
 import { readFileSync, existsSync } from 'node:fs';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-// Carrega .env manualmente (sem dependência externa)
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const envPath = join(__dirname, '.env');
 if (existsSync(envPath)) {
@@ -22,20 +21,15 @@ if (existsSync(envPath)) {
 }
 
 const PORT = Number(process.env.API_PORT || 3010);
-
 type Handler = (req: any, res: any) => void | Promise<void>;
-
-// Cache de handlers carregados dinamicamente
 const handlerCache = new Map<string, Handler>();
 
 async function loadHandler(name: string): Promise<Handler | null> {
   if (handlerCache.has(name)) return handlerCache.get(name)!;
-
   const candidates = [
     resolve(__dirname, 'api', `${name}.ts`),
     resolve(__dirname, 'api', name, 'index.ts'),
   ];
-
   for (const file of candidates) {
     if (!existsSync(file)) continue;
     try {
@@ -53,28 +47,37 @@ async function loadHandler(name: string): Promise<Handler | null> {
 }
 
 function parseBody(req: any): Promise<unknown> {
-  return new Promise((resolvePromise) => {
+  return new Promise((resolvePromise, rejectPromise) => {
     if (req.method === 'GET' || req.method === 'DELETE') {
       resolvePromise(undefined);
       return;
     }
     const chunks: Buffer[] = [];
-    req.on('data', (c: Buffer) => chunks.push(c));
+    let totalBytes = 0;
+    req.on('data', (chunk: Buffer | string) => {
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      totalBytes += buffer.length;
+      if (totalBytes > 1_000_000) {
+        rejectPromise(new Error('REQUEST_BODY_TOO_LARGE'));
+        req.destroy();
+        return;
+      }
+      chunks.push(buffer);
+    });
     req.on('end', () => {
       const raw = Buffer.concat(chunks).toString('utf-8');
       if (!raw) return resolvePromise(undefined);
       try {
         resolvePromise(JSON.parse(raw));
       } catch {
-        resolvePromise(raw);
+        rejectPromise(new Error('INVALID_JSON_BODY'));
       }
     });
-    req.on('error', () => resolvePromise(undefined));
+    req.on('error', rejectPromise);
   });
 }
 
 async function main() {
-  // Pré-carrega handlers
   const catchAll = await loadHandler('[...path]');
   const plans = await loadHandler('plans');
   const checkout = await loadHandler('checkout');
@@ -83,18 +86,20 @@ async function main() {
   const privacy = await loadHandler('privacy-requests');
   const webhookMp = await loadHandler('webhooks/mercadopago');
 
+  // Handlers dedicados devem ser usados também no servidor local, com as
+  // mesmas regras de autorização e acesso do ambiente Vercel.
+  const articles = await loadHandler('articles');
+  const articleDetail = await loadHandler('articles/[id]');
+  const pages = await loadHandler('pages');
+  const pageDetail = await loadHandler('pages/[id]');
+
   console.log('Loaded handlers:', {
-    catchAll: !!catchAll,
-    plans: !!plans,
-    checkout: !!checkout,
-    donation: !!donation,
-    contact: !!contact,
-    privacy: !!privacy,
-    webhookMp: !!webhookMp,
+    catchAll: !!catchAll, plans: !!plans, checkout: !!checkout, donation: !!donation,
+    contact: !!contact, privacy: !!privacy, webhookMp: !!webhookMp,
+    articles: !!articles, articleDetail: !!articleDetail, pages: !!pages, pageDetail: !!pageDetail,
   });
 
   const server = createServer(async (req, res) => {
-    // CORS para dev
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
@@ -108,52 +113,70 @@ async function main() {
     const url = new URL(req.url || '/', `http://localhost:${PORT}`);
     const pathname = url.pathname.replace(/\/$/, '') || '/';
 
-    // Parse body
-    (req as any).body = await parseBody(req);
+    try {
+      (req as any).body = await parseBody(req);
+    } catch (error) {
+      const code = String((error as Error)?.message || '');
+      res.statusCode = code === 'REQUEST_BODY_TOO_LARGE' ? 413 : 400;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.end(JSON.stringify({ error: code === 'REQUEST_BODY_TOO_LARGE' ? code : 'INVALID_JSON_BODY' }));
+      return;
+    }
+
+    // Vercel preenche req.query automaticamente; o servidor local precisa fazê-lo.
+    (req as any).query = Object.fromEntries(url.searchParams.entries());
 
     try {
-      // Rotas específicas primeiro
-      if (pathname === '/api/plans' && plans) {
-        return await plans(req, res);
-      }
-      if (pathname === '/api/checkout' && checkout) {
-        return await checkout(req, res);
-      }
-      if (pathname === '/api/donation' && donation) {
-        return await donation(req, res);
-      }
-      if (pathname === '/api/contact-submissions' && contact) {
-        return await contact(req, res);
-      }
-      if (pathname === '/api/privacy-requests' && privacy) {
-        return await privacy(req, res);
-      }
-      if (pathname === '/api/webhooks/mercadopago' && webhookMp) {
-        return await webhookMp(req, res);
+      if (pathname === '/api/plans' && plans) return await plans(req, res);
+      if (pathname === '/api/checkout' && checkout) return await checkout(req, res);
+      if (pathname === '/api/donation' && donation) return await donation(req, res);
+      if (pathname === '/api/contact-submissions' && contact) return await contact(req, res);
+      if (pathname === '/api/privacy-requests' && privacy) return await privacy(req, res);
+      if (pathname === '/api/webhooks/mercadopago' && webhookMp) return await webhookMp(req, res);
+
+      if (pathname === '/api/articles' && articles) return await articles(req, res);
+      const articleMatch = pathname.match(/^\/api\/articles\/([^/]+)$/);
+      if (articleMatch && articleDetail) {
+        try {
+          (req as any).query.id = decodeURIComponent(articleMatch[1]);
+        } catch {
+          res.statusCode = 400;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end(JSON.stringify({ error: 'INVALID_ARTICLE_ID' }));
+          return;
+        }
+        return await articleDetail(req, res);
       }
 
-      // Catch-all
-      if (catchAll) {
-        // Ensure req.url includes /api prefix for the catch-all router
-        return await catchAll(req, res);
+      if (pathname === '/api/pages' && pages) return await pages(req, res);
+      const pageMatch = pathname.match(/^\/api\/pages\/([^/]+)$/);
+      if (pageMatch && pageDetail) {
+        try {
+          (req as any).query.id = decodeURIComponent(pageMatch[1]);
+        } catch {
+          res.statusCode = 400;
+          res.setHeader('Content-Type', 'application/json; charset=utf-8');
+          res.end(JSON.stringify({ error: 'INVALID_PAGE_ID' }));
+          return;
+        }
+        return await pageDetail(req, res);
       }
 
+      if (catchAll) return await catchAll(req, res);
       res.statusCode = 404;
-      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
       res.end(JSON.stringify({ error: 'NOT_FOUND', message: `No handler for ${pathname}` }));
     } catch (err: any) {
       console.error(`API error [${pathname}]:`, err?.message || err);
       if (!res.headersSent) {
         res.statusCode = 500;
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ error: 'INTERNAL_ERROR', message: err?.message || 'Internal error' }));
+        res.setHeader('Content-Type', 'application/json; charset=utf-8');
+        res.end(JSON.stringify({ error: 'INTERNAL_ERROR' }));
       }
     }
   });
 
-  server.listen(PORT, () => {
-    console.log(`✅ API dev server: http://localhost:${PORT}/api`);
-  });
+  server.listen(PORT, () => console.log(`API dev server: http://localhost:${PORT}/api`));
 }
 
 main().catch((err) => {
