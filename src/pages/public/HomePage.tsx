@@ -69,12 +69,12 @@ export default function HomePage() {
         adsense={portalSettings?.adsense || { enabled: false, publisherId: '', autoAds: false, clientStatus: 'nao_configurado', testMode: true }}
       />
       <RecipesSection
-        articles={articles}
+        articles={publicArticles}
         onSelectArticle={handleSelectArticle}
         onViewAll={() => navigate('/categoria/receita')}
       />
       <OpinionColumnistsSection
-        articles={articles}
+        articles={publicArticles}
         authors={publicAuthors}
         onSelectArticle={handleSelectArticle}
       />
