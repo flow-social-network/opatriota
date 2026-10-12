@@ -359,6 +359,7 @@ export interface AuthorDetail {
   id: string;
   slug: string;
   name: string;
+  active?: boolean;
   role: string;
   bio: string;
   avatarUrl: string;
