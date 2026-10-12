@@ -69,7 +69,7 @@ export default function CategoryPage({ defaultCategory }: { defaultCategory?: st
       <div className="max-w-[1360px] mx-auto px-4 py-8">
         <NotFoundPageView
           categories={categories}
-          recentArticles={articles.slice(0, 4)}
+          recentArticles={articles.filter((article) => String(article.editorialStatus || '').toUpperCase() === 'PUBLICADA' && ['', 'publicada', 'publicado', 'published'].includes(String((article as any).status || '').trim().toLowerCase())).slice(0, 4)}
           onNavigateHome={() => navigate('/')}
           onSelectCategory={(cat) => navigate(cat === 'todos' ? '/' : `/categoria/${cat}`)}
           onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
