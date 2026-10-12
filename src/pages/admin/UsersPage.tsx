@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useData } from '../../app/contexts/DataContext';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useToast } from '../../app/contexts/ToastContext';
 
 export function UsersPage() {
-  const { authors, dataLoading } = useData();
+  const { authors, dataLoading, saveAuthor } = useData();
   const { currentUser, role } = useAuth();
   const { showToast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [authorRole, setAuthorRole] = useState('jornalista');
+  const [saving, setSaving] = useState(false);
 
   if (role !== 'administrador') {
     return (
@@ -69,14 +74,21 @@ export function UsersPage() {
         </div>
       )}
 
-      {/* Action button area */}
-      {role === 'administrador' && (
-        <p className="mt-4">
-          <button className="bg-[#0B2345] text-white px-4 py-2 rounded hover:bg-[#132D50] transition-colors">
-            Adicionar Novo Usuário
-          </button>
-        </p>
-      )}
+      {showForm && <form className="mt-6 grid gap-3 rounded border border-[#CBD5E0] bg-[#F8FAFC] p-4 md:grid-cols-4" onSubmit={async (event) => {
+        event.preventDefault();
+        if (!name.trim() || !email.trim()) { showToast('Nome e e-mail são obrigatórios.'); return; }
+        setSaving(true);
+        try {
+          await saveAuthor({ id: `author-${crypto.randomUUID()}`, slug: name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-'), name: name.trim(), email: email.trim(), role: authorRole, bio: '', avatarUrl: '' });
+          setName(''); setEmail(''); setAuthorRole('jornalista'); setShowForm(false);
+        } finally { setSaving(false); }
+      }}>
+        <input value={name} onChange={(event) => setName(event.target.value)} placeholder="Nome completo" aria-label="Nome completo" className="rounded border border-[#CBD5E0] px-3 py-2 text-sm" />
+        <input value={email} onChange={(event) => setEmail(event.target.value)} type="email" placeholder="E-mail" aria-label="E-mail" className="rounded border border-[#CBD5E0] px-3 py-2 text-sm" />
+        <select value={authorRole} onChange={(event) => setAuthorRole(event.target.value)} aria-label="Papel" className="rounded border border-[#CBD5E0] px-3 py-2 text-sm"><option value="jornalista">Jornalista</option><option value="revisor">Revisor</option><option value="editor">Editor</option><option value="editor_chefe">Editor-chefe</option><option value="administrador">Administrador</option></select>
+        <button disabled={saving} className="rounded bg-[#0B2345] px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{saving ? 'Gravando...' : 'Gravar usuário'}</button>
+      </form>}
+      {role === 'administrador' && <p className="mt-4"><button onClick={() => setShowForm(value => !value)} className="bg-[#0B2345] text-white px-4 py-2 rounded hover:bg-[#132D50] transition-colors">{showForm ? 'Cancelar' : 'Adicionar Novo Usuário'}</button></p>}
     </div>
   );
 }

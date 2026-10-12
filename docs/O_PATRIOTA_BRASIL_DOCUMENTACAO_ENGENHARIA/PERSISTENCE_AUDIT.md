@@ -2,60 +2,61 @@
 
 Data: 12/10/2026  
 Branch: `v0/auditoria-fluxos-auth`  
-Escopo: Painel Administrativo (`/admin`) e Redação (`/redacao`)
+Commit base desta etapa: `1b2df56`
+Escopo: site público, Painel Administrativo (`/admin`) e Redação (`/redacao`)
 
 ## Regra de conclusão
 
-Uma ação só pode ser exibida como concluída depois de uma resposta bem-sucedida da API. O frontend não deve tratar estado local, `localStorage` ou um callback não aguardado como persistência.
+Uma ação só é marcada como aprovada quando há confirmação HTTP do backend. TypeScript, lint e build não comprovam persistência no Neon.
 
 ## Matriz de evidências
 
-| Módulo | Página | Operação | Componente | Endpoint | Persistência | Estado anterior | Correção/estado atual | Teste | Resultado | Pendência |
-|---|---|---|---|---|---|---|---|---|---|---|
-| Administração | `/admin` | Adicionar fonte RSS | `AdminDashboard.handleAddSource` | `POST /editorial/sources` via diff de coleção | Neon/document store | Parcial: callback não aguardado | Aguarda `onUpdateSource`; erro mantém estado confirmado | TypeScript, lint, build | Aprovado em contrato | Testar gravação e leitura em ambiente Neon |
-| Administração | `/admin` | Alterar status da fila | `AdminDashboard.handleStatusChange` | `PATCH /editorial/queue/:id` | Neon/document store | Parcial: falha podia parecer concluída | Aguarda persistência; contexto propaga erro | TypeScript, lint, build | Aprovado em contrato | Testar cada transição com sessão admin |
-| Administração | `/admin` | Sincronizar fontes | `AdminDashboard.handleSyncAll` | `POST /editorial/sources/sync` + persistência da resposta | Neon/document store | Parcial: atualizações derivadas não aguardadas | Fontes e fila agora são aguardadas antes da mensagem de sucesso | TypeScript, lint, build | Aprovado em contrato | Teste externo RSS/SSRF e leitura posterior |
-| Administração | `/admin` | Salvar páginas | `DataContext.savePage` | `POST/PATCH /pages` | Neon/document store | Implementação real; erro era absorvido | Atualiza contexto apenas após resposta confirmada e relança erro | TypeScript, lint, build | Aprovado em contrato | CRUD completo de UI e teste de leitura posterior |
-| Administração | `/admin` | Excluir páginas | `DataContext.deletePage` | `DELETE /pages/:id` | Neon/document store | Implementação real | Estado local muda somente após HTTP 2xx | Código revisado | Aprovado em contrato | Teste de autorização e inexistente |
-| Administração | `/admin` | Salvar editorias | `DataContext.saveCategory` | `POST/PATCH /categories` | Neon/document store | Implementação real; erro era absorvido | Erro é propagado ao chamador | TypeScript, lint, build | Aprovado em contrato | Teste de slug duplicado |
-| Administração | `/admin` | Salvar menus | `DataContext.saveMenuConfigHandler` | `PATCH /site-settings/menu` | Neon/document store | Implementação real | Atualiza após resposta confirmada | Código revisado | Aprovado em contrato | Exercitar UI e recarregar |
-| Administração | `/admin` | Identidade, redes e publicidade | Configuração do portal | `PATCH /site-settings` | Neon/document store | Havia cache `localStorage` que podia mascarar falha | Removido cache local como fonte de verdade; API é autoridade | TypeScript, lint, build | Corrigido | Testar por seção com sessão admin |
-| Redação | `/redacao` | Criar/editar matéria | `NewsroomDashboard` | `/articles` | Neon/document store | Bloqueado para modo técnico | Apenas administrador pode alterar; backend exige autorização | TypeScript, lint, build | Regra aplicada | Implementar/exercitar editor administrativo completo |
-| Redação | `/redacao` | Aprovar/publicar | `NewsroomDashboard` | `/articles/:id` | Neon/document store | Bloqueado para modo técnico | Ações exclusivas do administrador; aprovação humana preservada | TypeScript, lint, build | Regra aplicada | Teste de tentativa direta por jornalista |
-| Redação | `/redacao` | IA/pesquisa | componentes editoriais | `/editorial/ai-*`, `/editorial/sources/sync` | Serviços externos + Neon quando importado | Algumas funções dependem de configuração externa | Erros de configuração são retornados, sem sucesso simulado | Endpoint review | Parcial | Validar chaves e limites de fornecedor |
+| Módulo | Funcionalidade | Resultado esperado | Evidência/teste | Situação |
+|---|---|---|---|---|
+| Admin | Criar usuário | `POST /authors`, autorização admin, retorno persistido no contexto | Implementado nesta etapa; tsc/lint/build ainda pendentes | CORRIGIDO |
+| Admin | Listar usuários | `GET /authors`, dados reais do backend | Rota existente no DataContext; leitura Neon não exercitada | BLOQUEADO |
+| Admin | Alterar papel | Permitir somente admin e persistir | Endpoint genérico exige ADMINS; UI de edição ainda não implementada | NÃO TESTADO |
+| Admin | Páginas/editorias/menus | Gravar somente após resposta API | Callbacks aguardados e erros propagados | CORRIGIDO |
+| Admin | Identidade/redes/publicidade | `PATCH /site-settings`, sem localStorage como autoridade | Serviço usa servidor; teste de sessão admin não executado | PARCIAL |
+| Admin | Fontes/RSS | Sincronizar e persistir fontes/fila | Callbacks aguardados; RSS externo depende de rede/configuração | PARCIAL |
+| Redação | Rascunho/revisão/aprovação/publicação | Estados confirmados pelo backend, aprovação humana | Callbacks editoriais aguardados; navegador autenticado não disponível | PARCIAL |
+| Público | Categorias e páginas institucionais | Links existentes e conteúdo/estado vazio correto | Rotas públicas compiladas e navegação básica verificada | PARCIAL |
+| Público | Cabeçalho/rodapé | Cabeçalho fixo e links preservados | Alteração visual aplicada; cobertura integral de links pendente | PARCIAL |
 
-## Contratos backend verificados
+## Endpoints de escrita identificados
 
-- `POST /editorial/auth/login`
-- `GET /editorial/auth/me`
-- `POST /editorial/auth/logout`
+- `POST /authors`, `PATCH /authors/:id`
+- `POST/PATCH/DELETE /articles/:id`
+- `POST/PATCH/DELETE /pages/:id`
+- `POST/PATCH/DELETE /categories/:id`
+- `PATCH /site-settings` e `PATCH /site-settings/menu`
 - `POST /editorial/sources/sync`
-- `POST /editorial/ai-review`
-- `POST /editorial/ai-text`
-- `POST /editorial/ai-image`
-- `POST /editorial/ai-risk`
-- `POST /editorial/chat`
-- `GET/POST/PATCH/PUT/DELETE /articles`
-- `GET/POST/PATCH/PUT/DELETE /pages`
-- `GET/POST/PATCH/PUT/DELETE /categories`
-- `GET/POST/PATCH/PUT/DELETE /authors`
-- `GET/PATCH /site-settings` e `PATCH /site-settings/menu`
+- `PATCH /editorial/queue/:id`
+- `POST /admin/push-campaigns`
+- `POST /contact-submissions`, `/privacy-requests` e `/newsletter/subscriptions`
 
-Todos os endpoints de escrita devem passar por sessão validada e autorização no backend. A confirmação de persistência no banco Neon ainda precisa ser demonstrada em ambiente conectado para cada mutação; build e lint não são essa evidência.
+Todos devem validar sessão e papel no backend. Não foi executada migração destrutiva nem deploy.
 
-## Pendências honestas
+## Correções desta etapa
 
-1. Exercitar cada mutação contra um banco Neon de teste e reler o registro após recarregar.
-2. Adicionar testes de integração para autorização, validação, conflito e rollback visual.
-3. Completar as telas de usuários, integrações, redes, publicidade, newsletter e segurança com ações reais quando ainda forem apenas navegação ou estado local.
-4. Não declarar os painéis 100% funcionais até que essas operações tenham evidência HTTP + leitura posterior.
-5. Nunca aprovar ou publicar automaticamente conteúdo editorial por IA.
+- Adicionado `saveAuthor` ao `DataContext`, com `POST/PATCH /authors`, atualização do estado somente após resposta e propagação de falhas.
+- Substituído o botão decorativo “Adicionar Novo Usuário” por formulário real com validação mínima, seleção de papel e estado de gravação.
+- Preservado o bloqueio de administração para não administradores.
+- Mantida a aprovação/publicação humana e separada.
 
-## Verificações executadas nesta etapa
+## Verificações
 
-- `git status` e confirmação do commit base `f201f39`.
-- Auditoria textual de callbacks, endpoints de escrita e persistência do `DataContext`.
-- Alteração para aguardar mutações e propagar falhas.
-- Remoção do `localStorage` como fonte de verdade para configurações do portal.
+- Estado inicial confirmado: branch `v0/auditoria-fluxos-auth`, commit `1b2df56`.
+- Auditoria textual de componentes, contexto, endpoints e documentação executada.
+- Teste automatizado configurado no projeto: inexistente; `pnpm test` apenas retorna “No tests configured yet”, portanto não é evidência de cobertura.
+- Persistência real no Neon: BLOQUEADO nesta etapa por ausência de credencial/conta de teste autorizada para criar e limpar registros com segurança.
 
-As verificações de `tsc`, lint, build e navegador devem ser executadas após as alterações desta etapa antes do commit final.
+## Pendências
+
+1. Executar teste de integração isolado: criar, reler, atualizar, reler após reload e testar falha de autorização.
+2. Implementar edição/desativação de usuário e trilha de auditoria antes de marcar usuários como aprovado.
+3. Auditar individualmente publicidade, redes sociais, integrações, segurança, newsletter e push.
+4. Percorrer navegador autenticado com contas de teste de cada papel.
+5. Criar cobertura Playwright/E2E para rotas e mutações críticas.
+
+Nenhum item bloqueado foi contabilizado como aprovado. Não houve deploy.

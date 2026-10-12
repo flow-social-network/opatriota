@@ -71,6 +71,7 @@ interface DataContextValue {
   savePage: (page: InstitutionalPage) => Promise<void>;
   deletePage: (pageId: string) => Promise<void>;
   saveCategory: (category: CategoryDetail) => Promise<void>;
+  saveAuthor: (author: AuthorDetail) => Promise<void>;
   saveMenuConfig: (config: SiteMenuConfig) => Promise<void>;
   savePortalSettings: (settings: PortalSettings) => Promise<void>;
 
@@ -232,6 +233,20 @@ export function DataProvider({ children }: { children: ReactNode }) {
     }
   }, [categories, showToast]);
 
+  const saveAuthor = useCallback(async (author: AuthorDetail) => {
+    try {
+      const exists = authors.some(item => item.id === author.id);
+      const saved = exists
+        ? await api.patch<AuthorDetail>(`/authors/${encodeURIComponent(author.id)}`, author)
+        : await api.post<AuthorDetail>('/authors', author);
+      setAuthors(current => exists ? current.map(item => item.id === saved.id ? saved : item) : [...current, saved]);
+      showToast('Usuário gravado no servidor.');
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Falha ao gravar usuário.');
+      throw error;
+    }
+  }, [authors, showToast]);
+
   const saveMenuConfigHandler = useCallback(async (config: SiteMenuConfig) => {
     try {
       const saved = await api.patch<SiteMenuConfig>('/site-settings/menu', config);
@@ -267,7 +282,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setArticles, setSources, setQueueItems, setPages, setCategories,
         setMenuConfig, setContactSubmissions, setLgpdRequests,
         updateArticles, updateSources, updateQueue,
-        savePage, deletePage, saveCategory,
+        savePage, deletePage, saveCategory, saveAuthor,
         saveMenuConfig: saveMenuConfigHandler,
         savePortalSettings: savePortalSettingsHandler,
         handleSelectCategory,
