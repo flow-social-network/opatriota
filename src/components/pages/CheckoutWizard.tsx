@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, ArrowRight, Check, ShieldCheck, LockKeyhole, CreditCard, QrCode, UserRound, CircleCheck, Newspaper } from 'lucide-react';
 import type { SubscriptionPlan, UserSession } from '../../types';
 import { getFirebaseIdToken } from '../../services/firebaseAuthService';
