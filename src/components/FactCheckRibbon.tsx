@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import { Search, Mail, ArrowRight, CheckCircle2 } from 'lucide-react';
+import React from 'react';
+import { Search, ArrowRight } from 'lucide-react';
 import { FactCheckItem } from '../types';
-import { subscribeToNewsletter } from '../services/siteConfigService';
 
 interface FactCheckRibbonProps {
   factChecks: FactCheckItem[];
@@ -14,27 +13,6 @@ export const FactCheckRibbon: React.FC<FactCheckRibbonProps> = ({
   onOpenFactCheck,
   onOpenHub
 }) => {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
-  const [subscribeError, setSubscribeError] = useState<string | null>(null);
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSubscribeError(null);
-    if (!email.trim()) return;
-    setSubmitting(true);
-    try {
-      const result = await subscribeToNewsletter(email);
-      if (!result.success) throw new Error(result.message);
-      setSubscribed(true);
-      setEmail('');
-    } catch (error) {
-      setSubscribeError(error instanceof Error ? error.message : 'Não foi possível concluir a inscrição.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
 
   return (
     <section className="mb-14 select-none">
@@ -111,45 +89,6 @@ export const FactCheckRibbon: React.FC<FactCheckRibbonProps> = ({
               );
             })}
             </div>
-          </div>
-
-          {/* 3. RECEBA NOSSA NEWSLETTER (3 cols on lg) */}
-          <div className="lg:col-span-3 flex flex-col justify-center pl-0 lg:pl-2">
-            <div className="flex items-center gap-2 mb-1">
-              <Mail className="w-4 h-4 text-[#0B2345]" />
-              <h4 className="font-bold text-xs uppercase tracking-wider text-[#0B2345]">
-                RECEBA NOSSA NEWSLETTER
-              </h4>
-            </div>
-            <p className="text-[11px] text-[#5D6673] mb-3 leading-snug">
-              As principais notícias no seu e-mail, sem spam, com responsabilidade.
-            </p>
-
-            {subscribed ? (
-              <div className="p-3 bg-[#EBF7EE] border border-[#16803C]/30 text-[#16803C] rounded text-xs flex items-center gap-2 font-semibold">
-                <CheckCircle2 className="w-4 h-4 shrink-0" />
-                <span>Inscrição realizada com sucesso!</span>
-              </div>
-            ) : (
-              <form onSubmit={handleSubscribe} className="flex flex-col gap-2">
-                <input
-                  type="email"
-                  placeholder="Seu melhor e-mail..."
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="w-full border border-[#D9DEE7] text-xs px-3 py-2 rounded focus:outline-none focus:border-[#0B5FFF] bg-[#F7F8FA]"
-                  required
-                />
-                <button
-                  type="submit" disabled={submitting}
-                  className="w-full bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-xs font-bold py-2 px-3 rounded transition-all flex items-center justify-center gap-1.5 cursor-pointer shadow-xs active:scale-95"
-                >
-                  <span>INSCREVER-SE</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
-                            {subscribeError && <p role="alert" className="mt-2 text-[11px] text-[#B42318]">{subscribeError}</p>}
-</form>
-            )}
           </div>
 
         </div>
