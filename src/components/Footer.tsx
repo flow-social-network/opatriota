@@ -504,15 +504,9 @@ export const Footer: React.FC<FooterProps> = ({
       <div className="bg-[#040F1C] border-t border-white/10 py-6 px-4 sm:px-6 lg:px-8 text-xs text-white/70">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
           
-          {/* Identificação Empresarial Oficial & Sede em Taquara–RS */}
-          <div className="flex items-center gap-2 flex-wrap justify-center md:justify-start">
+          <div className="flex items-center justify-center md:justify-start">
             <span className="font-normal">
-              © 2026 DEEVO Soluções Financeiras LTDA — CNPJ: 63.187.175/0001-70. Todos os direitos reservados.
-            </span>
-            <span className="text-white/30 hidden sm:inline">•</span>
-            <span className="text-white/90 font-semibold flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-[#FFCC29]" />
-              <span>Sede: Taquara–RS</span>
+              © {new Date().getFullYear()} O Patriota Brasil. Todos os direitos reservados.
             </span>
           </div>
 
