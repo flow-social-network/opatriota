@@ -580,7 +580,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <div className="lg:hidden">
           {/* Main White Bar: Hamburger + Centered Logo + Search, Bell, Profile */}
-          <div className="bg-white px-3 py-2 flex items-center justify-between border-b border-[#E2E8F0] shadow-xs">
+          <div className="bg-white px-2 sm:px-3 py-2 flex min-w-0 items-center justify-between gap-1 border-b border-[#E2E8F0] shadow-xs">
             {/* Hamburger Button */}
             <button
               onClick={() => setMobileMenuOpen((open) => !open)}
@@ -597,7 +597,7 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => onSelectCategory('todos')}
               className="flex flex-col items-center justify-center text-center cursor-pointer focus:outline-none"
             >
-              <div className="w-40 h-7 flex items-center justify-center -mb-1">
+              <div className="w-32 sm:w-40 h-7 flex items-center justify-center -mb-1">
                 <svg viewBox="0 0 320 80" className="w-full h-full" fill="none">
                   <path d="M 30,48 C 90,14 230,14 290,48 C 250,22 70,22 30,48 Z" fill="#16803C" />
                   <path d="M 50,52 C 100,30 220,30 270,52 C 220,38 100,38 50,52 Z" fill="#FFCC29" />
@@ -607,7 +607,7 @@ export const Header: React.FC<HeaderProps> = ({
                   </g>
                 </svg>
               </div>
-              <span className="font-serif text-2xl font-black text-[#0B2345] tracking-tight leading-none">
+              <span className="font-serif text-xl sm:text-2xl font-black text-[#0B2345] tracking-tight leading-none">
                 O PATRIOT<span className="tracking-normal">A</span>
               </span>
               <span className="text-[7px] font-bold tracking-[0.14em] uppercase text-[#5D6673] mt-0.5">
@@ -616,7 +616,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
   {/* Right Icons: Search + authenticated notifications + User Profile */}
-  <div className="flex items-center gap-1">
+  <div className="flex min-w-0 shrink items-center justify-end gap-0.5">
   <button
   onClick={() => setMobileMenuOpen(true)}
   aria-label="Buscar Notícias"
@@ -645,22 +645,22 @@ export const Header: React.FC<HeaderProps> = ({
                     <span className="text-[#0B2345]">⌄</span>
                   </button>
                 ) : (
-                  <button onClick={onGoogleLogin} className="flex items-center gap-1 text-[#0B2345] font-bold text-xs cursor-pointer" aria-label="Entrar">
+                  <button onClick={onGoogleLogin} className="flex shrink-0 items-center gap-0.5 text-[#0B2345] font-bold text-[11px] cursor-pointer whitespace-nowrap" aria-label="Entrar">
                     <User className="w-5 h-5" />
                     <span>Entrar</span>
                   </button>
                 )}
-                <span className="bg-[#16A34A] text-white font-black text-[11px] px-2.5 py-1 rounded">DIGITAL</span>
-                <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-2 py-1 text-[10px] font-black transition-colors cursor-pointer">Anuncie</button>
+                <span className="shrink-0 bg-[#16A34A] text-white font-black text-[10px] px-1.5 py-1 rounded">DIGITAL</span>
+                <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="shrink-0 border border-[#0B5FFF] text-[#0B5FFF] hover:bg-[#0B5FFF] hover:text-white rounded px-1.5 py-1 text-[9px] font-black transition-colors cursor-pointer whitespace-nowrap">Anuncie</button>
               </div>
             </div>
           </div>
 
           {/* CONTRATO: Faixa 1 cinza fixa; não fundir com mercado ou cabeçalho principal. */}
-          <div className="hidden lg:block site-utility-bar" data-header-band="utility">
-            <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
-              <div className="w-full mx-auto flex items-center justify-between gap-5">
-                <div className="flex items-center gap-2.5 shrink-0">
+          <div className="hidden lg:block site-utility-bar fixed inset-x-0 top-0 z-[60]" data-header-band="utility">
+            <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-4 xl:px-5 py-2 text-xs text-[#334155]">
+              <div className="w-full mx-auto flex min-w-0 items-center justify-between gap-3 xl:gap-5">
+                <div className="flex min-w-0 shrink items-center gap-2 xl:gap-2.5">
                   <span className="font-medium text-[#1E293B] text-[11px]">{formattedFullDate}</span>
                   <span className="text-[#CBD5E1] text-xs">|</span>
                   <button type="button" onClick={() => handleOpenWeather('taquara')} className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] whitespace-nowrap" title="Clique para ver a previsão meteorológica (INMET)">
@@ -673,8 +673,8 @@ export const Header: React.FC<HeaderProps> = ({
                   <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="w-full px-2 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
                   <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-[18px] h-[18px] text-white" /></button>
                 </form>
-                <div className="flex items-center gap-2 shrink-0" aria-label="Redes sociais oficiais">
-                  {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex items-center justify-center size-7 sm:size-8 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-4`}>{soc.icon}</a>)}
+                <div className="flex shrink-0 items-center gap-1.5 xl:gap-2" aria-label="Redes sociais oficiais">
+                  {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex size-6 shrink-0 items-center justify-center overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-[17px]`}>{soc.icon}</a>)}
                 </div>
               </div>
             </div>

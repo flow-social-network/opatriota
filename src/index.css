@@ -78,9 +78,25 @@
 }
 
 .site-utility-bar {
-  position: sticky;
-  top: 0;
-  z-index: 50;
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 60;
+}
+
+.site-utility-bar[data-header-band="utility"] svg {
+  width: 17px;
+  height: 17px;
+  flex: 0 0 17px;
+}
+
+.site-utility-bar[data-header-band="utility"] a {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+}
+
+.site-utility-bar[data-header-band="utility-mobile"] {
+  position: static;
 }
 
 .market-ticker {
