@@ -46,7 +46,7 @@ export function getDatabaseProvider(): DatabaseProvider {
   if (process.env.NODE_ENV !== 'production') return 'local_disk';
 
   throw new Error(
-    'DATABASE_PROVIDER_NOT_CONFIGURED: configure FIREBASE_SERVICE_ACCOUNT_JSON or DATABASE_URL',
+    'Database provider is not configured: set FIREBASE_SERVICE_ACCOUNT_JSON or DATABASE_URL',
   );
 }
 
