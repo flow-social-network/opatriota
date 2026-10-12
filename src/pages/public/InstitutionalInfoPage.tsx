@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { InstitutionalPageView } from '../../components/pages/InstitutionalPageView';
 import { NotFoundPageView } from '../../components/pages/NotFoundPageView';
@@ -19,9 +20,12 @@ export default function InstitutionalInfoPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { pages, categories, articles, dataLoading, dataErrors } = useData();
+  const { currentUser } = useAuth();
+  const previewRequested = new URLSearchParams(location.search).get('preview') === '1';
+  const canPreviewDraft = Boolean(previewRequested && currentUser && ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(String(currentUser.role)));
   const pathSlug = location.pathname.replace(/^\/+|\/+$/g, '');
   const candidates = [pathSlug, PAGE_ALIASES[pathSlug]].filter(Boolean);
-  const page = pages.find((item) => candidates.includes(item.slug));
+  const page = pages.find((item) => candidates.includes(item.slug) && (canPreviewDraft || ['publicado', 'publicada', 'published'].includes(String((item as any).status || '').trim().toLowerCase()) || (!String((item as any).status || '').trim() && (item as any).published === true));
 
   useSeoMetadata({
     title: page?.seo?.metaTitle || page?.title,
