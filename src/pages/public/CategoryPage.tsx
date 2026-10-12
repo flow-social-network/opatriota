@@ -9,7 +9,7 @@ import type { CategorySlug } from '../../types';
 export default function CategoryPage({ defaultCategory }: { defaultCategory?: string }) {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { articles, categories } = useData();
+  const { articles, categories, dataLoading, dataErrors } = useData();
 
   const activeSlug = slug || defaultCategory || 'todos';
   let category = categories.find(c => c.slug === activeSlug);
@@ -47,6 +47,18 @@ export default function CategoryPage({ defaultCategory }: { defaultCategory?: st
     pathname: category ? `/categoria/${category.slug}` : undefined,
   });
 
+  if (dataLoading && !category) {
+    return <main className="mx-auto max-w-4xl px-4 py-16" role="status">Carregando editoria…</main>;
+  }
+  if (!category && (dataErrors['/categories'] || dataErrors['/articles'])) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-16" role="alert">
+        <h1 className="text-xl font-bold text-slate-900">Não foi possível carregar a editoria</h1>
+        <p className="mt-2 text-sm text-slate-600">{dataErrors['/categories'] || dataErrors['/articles']}</p>
+        <button type="button" onClick={() => window.location.reload()} className="mt-4 rounded-lg bg-[#0B2345] px-4 py-2 text-sm font-semibold text-white">Tentar novamente</button>
+      </main>
+    );
+  }
   if (!category) {
     return (
       <div className="max-w-[1360px] mx-auto px-4 py-8">
