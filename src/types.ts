@@ -189,7 +189,7 @@ export type FactualClassification =
   | 'inconclusivo';           // Informação inconclusiva
 
 export interface RssSource {
-  id: number;
+  id: string | number;
   name: string;
   sourceCategory?: OfficialSourceCategory;
   uf?: string; // 'BR', 'RS', etc.
