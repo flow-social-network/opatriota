@@ -9,10 +9,8 @@ export default function AdminPage() {
   const { section } = useParams();
   const { currentUser, authLoading } = useAuth();
   const {
-    sources, 
     queueItems, 
     portalSettings,
-    updateSources,
     updateQueue,
     savePortalSettings,
   } = useData();
@@ -45,8 +43,6 @@ export default function AdminPage() {
     usuarios: 'usuarios',
     permissions: 'permissoes',
     permissoes: 'permissoes',
-    sources: 'fontes',
-    fontes: 'fontes',
     queue: 'fila',
     fila: 'fila',
     dedup: 'dedup',
@@ -64,12 +60,9 @@ export default function AdminPage() {
 
   return (
     <AdminDashboard
-      sources={sources}
       queueItems={queueItems}
       onBack={() => navigate('/')}
-      onUpdateSource={(s) => { void updateSources(s); }}
       onUpdateQueue={(q) => { void updateQueue(q); }}
-      onSyncResult={(s, q) => { void updateSources(s); void updateQueue(q); }}
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}
