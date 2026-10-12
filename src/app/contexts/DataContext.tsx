@@ -46,6 +46,7 @@ interface DataContextValue {
   setQueueItems: Dispatch<SetStateAction<EditorialQueueItem[]>>;
   setPages: Dispatch<SetStateAction<InstitutionalPage[]>>;
   setCategories: Dispatch<SetStateAction<CategoryDetail[]>>;
+  setAuthors: Dispatch<SetStateAction<AuthorDetail[]>>;
   setMenuConfig: Dispatch<SetStateAction<SiteMenuConfig>>;
   setContactSubmissions: Dispatch<SetStateAction<ContactSubmission[]>>;
   setLgpdRequests: Dispatch<SetStateAction<LgpdRequest[]>>;
@@ -241,7 +242,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         articles, factChecks, sources, queueItems, pages, categories, authors,
         menuConfig, subscriptionPlans, contactSubmissions, lgpdRequests,
         portalSettings, dataLoading, dataError,
-        setArticles, setSources, setQueueItems, setPages, setCategories,
+        setArticles, setSources, setQueueItems, setPages, setCategories, setAuthors,
         setMenuConfig, setContactSubmissions, setLgpdRequests,
         updateArticles, updateSources, updateQueue,
         savePage, deletePage, saveCategory,
