@@ -1,5 +1,13 @@
 import type { LlmMessage, LlmProvider } from '../server/contracts'
 
+export const NVIDIA_FREE_MODELS = [
+  { id: 'meta/llama-3.1-8b-instruct', name: 'Llama 3.1 8B Instruct', family: 'Llama', context: '128k', free: true },
+  { id: 'meta/llama-3.1-70b-instruct', name: 'Llama 3.1 70B Instruct', family: 'Llama', context: '128k', free: true },
+  { id: 'mistralai/mistral-7b-instruct-v0.3', name: 'Mistral 7B Instruct', family: 'Mistral', context: '32k', free: true },
+  { id: 'google/gemma-2-9b-it', name: 'Gemma 2 9B IT', family: 'Gemma', context: '8k', free: true },
+  { id: 'qwen/qwen2.5-72b-instruct', name: 'Qwen 2.5 72B Instruct', family: 'Qwen', context: '128k', free: true },
+]
+
 export class NvidiaProvider implements LlmProvider {
   constructor(private readonly endpoint = process.env.NVIDIA_BASE_URL || 'https://integrate.api.nvidia.com/v1', private readonly model = process.env.NVIDIA_MODEL || 'meta/llama-3.1-70b-instruct') {}
   async *stream(messages: LlmMessage[], signal?: AbortSignal) {
