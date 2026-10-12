@@ -28,6 +28,8 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
   const [planId, setPlanId] = useState<string>(initialPlan?.id ?? 'gratuito');
   const [cycle, setCycle] = useState<'monthly' | 'annual'>(initialPlan?.id === 'premium' ? 'annual' : 'monthly');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [billingName, setBillingName] = useState('');
+  useEffect(() => { setBillingName(currentUser?.name || ''); }, [currentUser?.id, currentUser?.name]);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   const [notice, setNotice] = useState('');
   const [submittingPayment, setSubmittingPayment] = useState(false);
@@ -61,6 +63,10 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
         setNotice('Entre ou crie uma conta para associar a assinatura e o histórico de pagamentos ao seu usuário.');
         return;
       }
+      if (!(currentUser.name || billingName).trim()) {
+        setNotice('Informe o nome para faturamento antes de continuar.');
+        return;
+      }
       if (!acceptedTerms) {
         setNotice('Leia e aceite os Termos de Uso e a Política de Privacidade.');
         return;
@@ -78,6 +84,12 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
     }
     if (isFree) {
       onOpenAccount('dashboard');
+      return;
+    }
+    const customerName = (currentUser.name || billingName).trim();
+    if (!customerName) {
+      setNotice('Informe o nome para faturamento antes de continuar.');
+      setStep(2);
       return;
     }
     if (!acceptedTerms) {
@@ -98,7 +110,7 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
           planId,
           cycle,
           paymentMethod,
-          name: currentUser.name,
+          name: customerName,
           email: currentUser.email,
         }),
       });
@@ -188,7 +200,13 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
                 {currentUser ? (
                   <div className="mt-5 rounded-xl border border-[#B9E4C4] bg-[#EBF7EE] p-4">
                     <div className="flex items-center gap-2 font-bold text-[#166534]"><CircleCheck size={18} /> Você já está conectado</div>
-                    <p className="mt-1 text-sm text-[#365C43]">{currentUser.name} · {currentUser.email}</p>
+                    <p className="mt-1 text-sm text-[#365C43]">{currentUser.name || 'Nome de perfil não informado'} · {currentUser.email}</p>
+                    {!currentUser.name?.trim() && (
+                      <label className="mt-4 block text-sm font-semibold text-[#0B2345]">
+                        Nome para faturamento
+                        <input value={billingName} onChange={(event) => setBillingName(event.target.value)} autoComplete="name" required maxLength={120} className="mt-1.5 min-h-11 w-full rounded-lg border border-[#CBD5E0] bg-white px-3 font-normal" />
+                      </label>
+                    )}
                     <button type="button" onClick={() => onOpenAccount('dashboard')} className="mt-3 text-sm font-bold text-[#0B5FFF] underline">Gerenciar minha conta</button>
                   </div>
                 ) : (
