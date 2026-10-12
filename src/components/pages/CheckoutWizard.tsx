@@ -27,8 +27,6 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
   const [step, setStep] = useState<CheckoutStep>(1);
   const [planId, setPlanId] = useState<string>(initialPlan?.id ?? 'gratuito');
   const [cycle, setCycle] = useState<'monthly' | 'annual'>(initialPlan?.id === 'premium' ? 'annual' : 'monthly');
-  const [name, setName] = useState(currentUser?.name ?? '');
-  const [email, setEmail] = useState(currentUser?.email ?? '');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   const [notice, setNotice] = useState('');
@@ -59,8 +57,8 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
       return;
     }
     if (step === 2) {
-      if (!currentUser && (!name.trim() || !email.trim())) {
-        setNotice('Informe seu nome e e-mail para continuar.');
+      if (!currentUser) {
+        setNotice('Entre ou crie uma conta para associar a assinatura e o histórico de pagamentos ao seu usuário.');
         return;
       }
       if (!acceptedTerms) {
@@ -73,17 +71,17 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
 
   const startPayment = async () => {
     setNotice('');
+    if (!currentUser) {
+      setNotice('Entre ou crie uma conta antes de continuar. Assim, o pagamento poderá ser associado corretamente à sua assinatura.');
+      setStep(2);
+      return;
+    }
     if (isFree) {
-      setNotice('O plano gratuito não gera cobrança. Entre ou crie sua conta para ativar o acesso livre.');
+      onOpenAccount('dashboard');
       return;
     }
     if (!acceptedTerms) {
       setNotice('Aceite os Termos de Uso e a Política de Privacidade para continuar.');
-      setStep(2);
-      return;
-    }
-    if (!currentUser && (!name.trim() || !email.trim())) {
-      setNotice('Informe seu nome e e-mail antes de continuar.');
       setStep(2);
       return;
     }
@@ -194,10 +192,18 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
                     <button type="button" onClick={() => onOpenAccount('dashboard')} className="mt-3 text-sm font-bold text-[#0B5FFF] underline">Gerenciar minha conta</button>
                   </div>
                 ) : (
-                  <div className="mt-5 space-y-4">
-                    <label className="block text-sm font-semibold text-[#263445]">Nome completo<input value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CBD3DF] px-3 py-2 font-normal outline-none focus:border-[#0B5FFF] focus:ring-2 focus:ring-[#0B5FFF]/10" placeholder="Seu nome completo" /></label>
-                    <label className="block text-sm font-semibold text-[#263445]">E-mail<input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" className="mt-1.5 min-h-12 w-full rounded-lg border border-[#CBD3DF] px-3 py-2 font-normal outline-none focus:border-[#0B5FFF] focus:ring-2 focus:ring-[#0B5FFF]/10" placeholder="voce@exemplo.com.br" /></label>
-                    <div className="rounded-lg bg-[#F7F8FA] p-3 text-xs leading-5 text-[#5D6673]">Se ainda não tem conta, será necessário concluir o cadastro antes de ativar uma assinatura. Não solicitamos senha ou dados de cartão nesta etapa.</div>
+                  <div className="mt-5 rounded-xl border border-amber-300 bg-amber-50 p-4">
+                    <p className="text-sm font-semibold text-amber-950">É necessário entrar na sua conta</p>
+                    <p className="mt-1 text-sm leading-5 text-amber-900">
+                      Nome e e-mail digitados neste formulário não comprovam identidade. Entre ou crie uma conta para que a assinatura e os pagamentos sejam vinculados ao usuário correto.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => onOpenAccount('entrar')}
+                      className="mt-4 min-h-11 rounded-lg bg-[#0B2345] px-4 py-2 text-sm font-bold text-white hover:bg-[#0B5FFF]"
+                    >
+                      Entrar ou criar conta
+                    </button>
                   </div>
                 )}
                 <label className="mt-5 flex items-start gap-3 rounded-lg border border-[#D9DEE7] p-3 text-xs leading-5 text-[#5D6673]"><input type="checkbox" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="mt-1 h-4 w-4 shrink-0 accent-[#0B5FFF]" /><span>Li e aceito os <strong className="text-[#0B2345]">Termos de Uso</strong> e a <strong className="text-[#0B2345]">Política de Privacidade</strong> do O PATRIOTA.</span></label>
@@ -228,7 +234,7 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
                 </div>
                 <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row">
                   <button type="button" onClick={() => setStep(2)} className="min-h-12 rounded-xl border border-[#D9DEE7] px-4 py-3 text-sm font-bold text-[#0B2345]">Voltar</button>
-                  <button type="button" onClick={startPayment} disabled={submittingPayment} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#16803C] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#116B31] disabled:cursor-wait disabled:opacity-60"><LockKeyhole size={17} /> {submittingPayment ? 'Preparando pagamento…' : isFree ? 'Ativar acesso livre' : 'Pagar com segurança'}</button>
+                  <button type="button" onClick={startPayment} disabled={submittingPayment} className="inline-flex min-h-12 flex-1 items-center justify-center gap-2 rounded-xl bg-[#16803C] px-4 py-3 text-sm font-extrabold text-white hover:bg-[#116B31] disabled:cursor-wait disabled:opacity-60"><LockKeyhole size={17} /> {submittingPayment ? 'Preparando pagamento…' : isFree ? 'Continuar para minha conta' : 'Pagar com segurança'}</button>
                 </div>
                 {notice && <p role="status" className="mt-3 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm leading-5 text-amber-900">{notice}</p>}
               </div>
