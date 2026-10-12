@@ -214,7 +214,7 @@ export interface RssSource {
 }
 
 export interface EditorialQueueItem {
-  id: number;
+  id: string | number;
   title: string;
   summary: string;
   originalUrl: string;
