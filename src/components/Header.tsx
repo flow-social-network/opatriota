@@ -610,179 +610,30 @@ export const Header: React.FC<HeaderProps> = ({
               </span>
             </button>
 
-            {/* Right Icons: Search + Bell with badge 5 + User Profile */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setMobileMenuOpen(true)}
-                aria-label="Buscar Notícias"
-                className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-
-              <button
-                onClick={() => onOpenSubscriberModal?.('notificacoes')}
-                aria-label="Notificações"
-                className="relative p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
-              >
-                <Bell className="w-5 h-5" />
-                <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#E11D48] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
-                  5
-                </span>
-              </button>
-
-              <button
-                onClick={() => onOpenSubscriberModal?.('perfil')}
-                aria-label="Perfil do Usuário"
-                className="p-1 text-[#0B2345] hover:bg-slate-100 rounded-full transition cursor-pointer"
-              >
-                <img 
-                  src={displayAvatar} 
-                  alt={displayName} 
-                  className="w-6 h-6 rounded-full object-cover border border-[#15803D]" 
-                />
-              </button>
-            </div>
-          </div>
-
-          {/* Horizontal Scrollable Category Bar (Fundo Azul-Marinho #0B2345) */}
-          <div className="bg-[#0B2345] border-b border-[#0d223a] px-2 py-1.5 overflow-x-auto scrollbar-none flex items-center gap-1 shadow-2xs">
-            {navItems.map((item) => {
-              const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
-              return (
-                <button
-                  key={`${item.label}-${item.slug}`}
-                  onClick={() => onSelectCategory(item.slug)}
-                  className={`px-3 py-1 rounded text-[11px] font-black tracking-wider uppercase whitespace-nowrap transition cursor-pointer ${
-                    isActive
-                      ? 'bg-white/20 text-[#FFCC29] shadow-xs'
-                      : 'text-white/85 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Utility Bar (Cinza Claro): Data + Taquara (RS) 24°C + [INMET] */}
-          <div className="bg-[#F8FAFC] px-3 py-1.5 border-b border-[#E2E8F0] flex items-center justify-between text-[11px] text-[#475569]">
-            <span className="font-medium">{formattedFullDate}</span>
-            <button
-              onClick={() => handleOpenWeather('taquara')}
-              className="flex items-center gap-1.5 font-bold text-[#0F172A] hover:text-[#0284C7] transition cursor-pointer"
-            >
-              <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
-              <span>Taquara (RS)</span>
-              <span>24°C</span>
-              <span className="bg-[#10B981] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase">
-                INMET
-              </span>
-            </button>
-          </div>
-
-          {/* Markets Bar no Mobile */}
-          <div className="bg-white px-3 py-1.5 border-b border-[#E2E8F0] flex items-center text-[11px] font-medium text-[#0F172A]">
-            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#16803C] shrink-0 mr-3">
-              <span className="w-2 h-2 rounded-full bg-[#16803C] animate-pulse" />
-              <span>MERCADOS AO VIVO</span>
-            </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none text-slate-700">
-              <span>Dólar</span>
-              <span className="font-bold">{marketData.usd?.value || 'Indisponível'}</span>
-              <span className="text-[#16803C] font-bold">{marketData.usd ? `▲ ${marketData.usd.variation}` : '—'}</span>
-            </div>
-          </div>
-        </div>
-
-
-        {/* ═══════════════════════════════════════════════════════════════════
-            2. DESKTOP & TABLET HEADER (Fidelidade Absoluta à Imagem de Auditoria)
-           ═══════════════════════════════════════════════════════════════════ */}
-        <div className="hidden lg:block pt-10">
-          
-          {/* TIER 1: BARRA CINZA FIXA — DATA, TAQUARA (RS), INMET, BUSCA E REDES SOCIAIS */}
-          <div className="fixed inset-x-0 top-0 z-40 bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
-            <div className="w-full mx-auto flex items-center justify-between gap-5">
-              
-              {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
-              <div className="flex items-center gap-2.5 shrink-0">
-                <span className="font-medium text-[#1E293B] text-[11px]">
-                  {formattedFullDate}
-                </span>
-
-                <span className="text-[#CBD5E1] text-xs">|</span>
-
-                {/* Previsão do Tempo Oficial de Taquara (RS) */}
-                <button
-                  onClick={() => handleOpenWeather('taquara')}
-                  className="flex items-center gap-1 font-medium text-[#1E293B] hover:text-[#0284C7] transition cursor-pointer text-[11px] whitespace-nowrap"
-                  title="Clique para ver a previsão meteorológica (INMET)"
-                >
-                  <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
-                  <span className="font-bold">Taquara (RS)</span>
-                  <span className="font-bold">24°C</span>
-                  <span className="text-[#64748B] text-[10px]">Céu limpo</span>
-                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">
-                    INMET
-                  </span>
-                </button>
-              </div>
-
-              {/* Redes sociais seguem a ordem da referência: Facebook, Instagram, YouTube, X, LinkedIn e Telegram */}
-              <div className="flex items-center gap-2 shrink-0" aria-label="Redes sociais oficiais">
-                {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => (
-                  <a
-                    key={soc.platform}
-                    href={soc.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={soc.name}
-                    title={soc.name}
-                    className={`inline-flex items-center justify-center w-8 h-8 min-w-8 min-h-8 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:w-[18px] [&>svg]:h-[18px] [&>img]:w-[18px] [&>img]:h-[18px]`}
-                  >
-                    {soc.icon}
-                  </a>
-                ))}
-              </div>
-
-              {/* Centro: Search Input */}
-              <form 
-                onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }}
-                className="flex items-center flex-1 min-w-[220px] max-w-[390px] bg-white border border-[#CBD5E1] rounded overflow-hidden h-9 shadow-xs focus-within:border-[#0B2345] transition-colors"
-              >
-                <Search className="w-[18px] h-[18px] text-[#94A3B8] ml-2 shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Buscar notícias, análises, vídeos..."
-                  value={headerSearchQuery}
-                  onChange={(e) => {
-                    setHeaderSearchQuery(e.target.value);
-                    onSearchChange(e.target.value);
-                  }}
-                  className="w-full px-2 py-1 text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none"
-                />
-                <button
-                  type="submit"
-                  aria-label="Buscar"
-                  className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"
-                >
-                  <Search className="w-[18px] h-[18px] text-white" />
-                </button>
-              </form>
-
-              {/* Lado direito: notificações, perfil e selo Digital */}
-              <div className="flex items-center gap-3 shrink-0">
-                <button
-                  onClick={() => onOpenSubscriberModal?.('notificacoes')}
-                  className="relative p-1 text-[#0B2345] hover:text-[#0284C7] transition cursor-pointer"
-                  title="Notificações"
-                  aria-label="Abrir notificações"
-                >
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF2222] text-white text-[9px] font-black flex items-center justify-center">3</span>
-                </button>
-                {currentUser ? (
+  {/* Right Icons: Search + authenticated notifications + User Profile */}
+  <div className="flex items-center gap-1">
+  <button
+  onClick={() => setMobileMenuOpen(true)}
+  aria-label="Buscar Notícias"
+  className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
+  >
+  <Search className="w-5 h-5" />
+  </button>
+  
+  {currentUser && (
+  <button
+  onClick={() => onOpenSubscriberModal?.('notificacoes')}
+  aria-label="Notificações"
+  className="relative p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
+  >
+  <Bell className="w-5 h-5" />
+  <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#E11D48] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
+  5
+  </span>
+  </button>
+  )}
+  
+  {currentUser ? (
                   <button onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-2 text-[#0B2345] font-bold text-[12px] cursor-pointer" aria-label="Menu do usuário" aria-expanded={userDropdownOpen}>
                     <img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="w-9 h-9 rounded-full object-cover border-2 border-[#0B2345]" />
                     <span className="max-w-[110px] truncate">{currentUser.name}</span>
@@ -896,18 +747,20 @@ export const Header: React.FC<HeaderProps> = ({
               {/* Linha Centralizada: Sino Notificação + Usuário */}
               <div className="hidden">
                 
-                {/* Sino de Notificações com badge 5 */}
-                <button
-                  onClick={() => onOpenSubscriberModal?.('notificacoes')}
-                  className="relative p-2 text-[#0F172A] hover:text-[#0284C7] hover:bg-slate-100 rounded-full transition cursor-pointer shrink-0"
-                  title="5 novas notificações não lidas"
-                  aria-label="Abrir Notificações"
-                >
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-[#E11D48] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
-                    5
-                  </span>
-                </button>
+                {/* Sino de notificações somente para usuários autenticados */}
+                {currentUser && (
+                  <button
+                    onClick={() => onOpenSubscriberModal?.('notificacoes')}
+                    className="relative p-2 text-[#0F172A] hover:text-[#0284C7] hover:bg-slate-100 rounded-full transition cursor-pointer shrink-0"
+                    title="5 novas notificações não lidas"
+                    aria-label="Abrir Notificações"
+                  >
+                    <Bell className="w-5 h-5" />
+                    <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-[#E11D48] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
+                      5
+                    </span>
+                  </button>
+                )}
 
                 {/* Avatar do Usuário com Dropdown ou Botão de Entrar */}
                 {currentUser ? (
@@ -1126,7 +979,6 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
             </div>
           </nav>
-        </div>
 
 
         {/* ═══════════════════════════════════════════════════════════════════
