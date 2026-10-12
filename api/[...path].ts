@@ -5,6 +5,7 @@ import {
 } from './_lib/billing';
 import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
 import { handleCors } from './_lib/cors';
+import { authenticateEditorialUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
 
 type Req = IncomingMessage & { method?: string; headers: Record<string, string | string[] | undefined>; body?: unknown };
 type Res = ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void };
@@ -23,33 +24,22 @@ function cleanObject(value: unknown): Record<string, any> {
 async function getIdentity(req: Req): Promise<{ uid: string; email: string; role: string } | null> {
   const raw = req.headers.authorization;
   const header = Array.isArray(raw) ? raw[0] : raw || '';
+  const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+  const sessionToken = header.startsWith('Bearer ') ? header.slice(7).trim() : readSessionCookie(cookie);
+  if (!header.startsWith('Bearer ') && sessionToken) {
+    const user = await getEditorialIdentity(sessionToken);
+    return user ? { uid: user.id, email: user.email, role: user.role } : null;
+  }
   if (!header.startsWith('Bearer ')) return null;
   const token = header.slice(7).trim();
-  if (token.startsWith('usr-') || token.startsWith('demo-')) {
-    const roleKey = token.replace(/^(usr-|demo-)/, '');
-    const validRoles: Record<string, string> = {
-      jornalista: 'jornalista',
-      revisor: 'revisor',
-      editor: 'editor',
-      editor_chefe: 'editor_chefe',
-      'admin-master': 'administrador',
-      admin: 'administrador',
-      assinante: 'assinante_premium',
-    };
-    const role = validRoles[roleKey] || 'editor_chefe';
-    return { uid: token, email: `${roleKey}@opatriota.sbs`, role };
-  }
   try {
     const user = await verifyFirebaseIdToken(token);
     const uid = String(user.localId || user.uid || '');
     if (!uid) return null;
     const roleRecord = await documentGet('userRoles', uid);
     return { uid, email: String(user.email || ''), role: String(roleRecord?.role || 'leitor_gratuito') };
-  } catch (err) {
-    if (String((err as any)?.message || '').includes('not configured')) {
-      return { uid: 'usr-editor_chefe', email: 'marcos.editor@opatriota.sbs', role: 'editor_chefe' };
-    }
-    throw err;
+  } catch {
+    return null;
   }
 }
 function requireRole(identity: { role: string } | null, allowed: Set<string>, res: Res): boolean {
@@ -93,6 +83,25 @@ export default async function handler(req: Req, res: Res) {
   const path = routeName(req.url || '/');
   try {
     if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
+    if (path === 'editorial/auth/login' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const email = String(body.email || '').trim();
+      const password = String(body.password || '');
+      if (!validEmail(email) || password.length < 8) return json(res, 400, { error: 'INVALID_CREDENTIALS', message: 'Credenciais inválidas.' });
+      const result = await authenticateEditorialUser(email, password);
+      if (!result) return json(res, 401, { error: 'INVALID_CREDENTIALS', message: 'Credenciais inválidas.' });
+      res.setHeader('Set-Cookie', sessionCookie(result.token));
+      return json(res, 200, { user: editorialUserToSession(result.user) });
+    }
+    if (path === 'editorial/auth/logout' && method === 'POST') {
+      const raw = req.headers.authorization;
+      const header = Array.isArray(raw) ? raw[0] : raw || '';
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = header.startsWith('Bearer ') ? header.slice(7).trim() : readSessionCookie(cookie);
+      if (token) await revokeEditorialSession(token);
+      res.setHeader('Set-Cookie', 'opatriota_editorial_session=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0');
+      return json(res, 200, { success: true });
+    }
     if (path === 'plans' && method === 'GET') return json(res, 200, [
       { id: 'gratuito', name: 'Acesso Livre', description: 'Acesso às notícias abertas.', monthlyPrice: 0, annualPrice: 0, currency: 'BRL', accessLevel: 'aberto', features: [], active: true },
       { id: 'digital', name: 'Digital Mensal Completa', description: 'Acesso a conteúdos exclusivos para assinantes.', monthlyPrice: 6.5, annualPrice: 78, currency: 'BRL', accessLevel: 'assinante', features: [], active: true },
@@ -492,8 +501,9 @@ export default async function handler(req: Req, res: Res) {
           }
         } catch { /* fallback */ }
       }
-      return json(res, 200, {
-        reply: `Aqui estão algumas sugestões editoriais para o texto:\n1. Tornar o título mais direto e com verbo na voz ativa.\n2. Incluir dados atualizados apurados nas fontes primárias oficiais.\n3. Revisar o último parágrafo para assegurar precisão factual.`
+      return json(res, 503, {
+        error: 'AI_NOT_CONFIGURED',
+        message: 'O serviço de IA não está disponível ou configurado neste ambiente.'
       });
     }
     if (path === 'newsletter/subscriptions' && method === 'POST') {

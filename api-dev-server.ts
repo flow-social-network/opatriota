@@ -11,8 +11,13 @@ import { fileURLToPath } from 'node:url';
 
 // Carrega .env manualmente (sem dependência externa)
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const envPath = join(__dirname, '.env');
-if (existsSync(envPath)) {
+const envPaths = [
+  join(__dirname, '.env'),
+  join(__dirname, '.env.development.local'),
+  '/vercel/share/.env.project',
+];
+for (const envPath of envPaths) {
+  if (!existsSync(envPath)) continue;
   for (const line of readFileSync(envPath, 'utf-8').split('\n')) {
     const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/);
     if (match && !process.env[match[1]]) {

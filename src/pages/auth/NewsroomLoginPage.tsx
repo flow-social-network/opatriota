@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthLayout } from './AuthLayout';
 import { useAuth } from '../../app/contexts/AuthContext';
+import { api } from '../../services/apiClient';
+import type { UserSession } from '../../types';
 import { 
   Mail, 
   Lock, 
@@ -10,16 +12,15 @@ import {
   LogIn, 
   AlertCircle, 
   CheckCircle2, 
-  PenTool, 
-  UserCheck 
+  PenTool 
 } from 'lucide-react';
 
 export default function NewsroomLoginPage() {
   const navigate = useNavigate();
-  const { loginWithEmail, setCurrentUser } = useAuth();
+  const { setCurrentUser } = useAuth();
   
-  const [email, setEmail] = useState('redacao@opatriota.sbs');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -36,8 +37,9 @@ export default function NewsroomLoginPage() {
 
     setLoading(true);
     try {
-      const user = await loginWithEmail(email, password);
-      // Validação estrita de autorização editorial
+      const response = await api.post<{ user: UserSession }>('/editorial/auth/login', { email, password }, { auth: false });
+      const user = response.user;
+      setCurrentUser(user);
       const allowedRoles = ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'];
       if (!allowedRoles.includes(user.role)) {
         setErrorMessage('Acesso negado: sua conta não possui credenciais autorizadas para o Painel da Redação.');
@@ -49,30 +51,6 @@ export default function NewsroomLoginPage() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleQuickRoleSelect = (role: 'jornalista' | 'revisor' | 'editor' | 'editor_chefe') => {
-    const roleLabels = {
-      jornalista: 'Repórter Carlos Eduardo',
-      revisor: 'Revisora Mariana Rios',
-      editor: 'Editor Paulo Roberto',
-      editor_chefe: 'Editor-Chefe Marcos Vinicius',
-    };
-    const session = {
-      id: `usr-${role}`,
-      name: roleLabels[role],
-      email: `${role}@opatriota.sbs`,
-      role,
-      subscription: { plan: 'premium' as const, status: 'ativo' as const, validUntil: '2026-12-31', autoRenew: true },
-      bookmarks: [],
-      notificationPrefs: { breakingNews: true, dailyBrief: true, factChecks: true, weeklyDigest: true },
-      createdAt: '2026-10-09T10:00:00Z',
-    };
-    setCurrentUser(session);
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('opatriota_session', JSON.stringify(session));
-    }
-    navigate('/redacao');
   };
 
   return (
@@ -174,47 +152,6 @@ export default function NewsroomLoginPage() {
         </button>
       </form>
 
-      {/* QUICK ROLE SELECTOR (FOR VERIFICATION AND TESTING AS SPECIFIED) */}
-      <div className="mt-8 pt-6 border-t border-[#E2E8F0]">
-        <p className="text-[11px] font-bold text-[#64748B] uppercase tracking-wider mb-2.5 flex items-center gap-1.5">
-          <UserCheck className="w-3.5 h-3.5 text-[#0B5FFF]" />
-          <span>Acesso Rápido por Perfil Editorial (Ambiente Homologado):</span>
-        </p>
-        <div className="grid grid-cols-2 gap-2 text-xs">
-          <button
-            type="button"
-            onClick={() => handleQuickRoleSelect('jornalista')}
-            className="p-2 text-left rounded border border-[#E2E8F0] hover:border-[#0B5FFF] hover:bg-blue-50/50 transition cursor-pointer"
-          >
-            <div className="font-bold text-[#0B2345]">Repórter</div>
-            <div className="text-[10px] text-gray-500">Criação & Rascunho</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickRoleSelect('revisor')}
-            className="p-2 text-left rounded border border-[#E2E8F0] hover:border-[#0B5FFF] hover:bg-blue-50/50 transition cursor-pointer"
-          >
-            <div className="font-bold text-[#0B2345]">Revisor</div>
-            <div className="text-[10px] text-gray-500">Checagem de texto</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickRoleSelect('editor')}
-            className="p-2 text-left rounded border border-[#E2E8F0] hover:border-[#0B5FFF] hover:bg-blue-50/50 transition cursor-pointer"
-          >
-            <div className="font-bold text-[#0B2345]">Editor</div>
-            <div className="text-[10px] text-gray-500">Pauta e Aprovação</div>
-          </button>
-          <button
-            type="button"
-            onClick={() => handleQuickRoleSelect('editor_chefe')}
-            className="p-2 text-left rounded border border-[#E2E8F0] hover:border-[#16803C] hover:bg-emerald-50/50 transition cursor-pointer"
-          >
-            <div className="font-bold text-[#16803C]">Editor-Chefe</div>
-            <div className="text-[10px] text-gray-500">Publicação final</div>
-          </button>
-        </div>
-      </div>
     </AuthLayout>
   );
 }
