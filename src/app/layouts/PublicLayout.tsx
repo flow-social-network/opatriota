@@ -96,7 +96,7 @@ export function PublicLayout() {
         portalSettings={portalSettings}
       />
 
-      <main className="flex-1">
+      <main className="min-h-[calc(100vh-5rem)] flex-1">
         <Outlet />
       </main>
 

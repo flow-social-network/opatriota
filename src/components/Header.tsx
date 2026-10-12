@@ -543,7 +543,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="w-full select-none font-sans">
+      <header className="sticky top-0 z-40 w-full select-none bg-white font-sans shadow-sm">
         
         {/* ═══════════════════════════════════════════════════════════════════
             1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
