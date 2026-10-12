@@ -75,7 +75,7 @@ export default function HomePage() {
         onOpenFactCheck={() => navigate('/verificacao')}
         onOpenHub={() => navigate('/verificacao')}
       />
-      <FacebookPostsSection posts={[]} />
+      <FacebookPostsSection />
     </div>
   );
 }
