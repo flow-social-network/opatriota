@@ -23,10 +23,10 @@ import {
   Plus, 
   CheckCircle, 
   AlertTriangle, 
-  ArrowLeft, 
+
   Image as ImageIcon, 
   BookOpen, 
-  UserCheck, 
+
   SlidersHorizontal,
   Globe,
   Compass,
@@ -44,8 +44,6 @@ interface NewsroomDashboardProps {
   onUpdateSources?: (sources: RssSource[]) => void;
   currentUser: UserSession;
   onUpdateArticles: (articles: Article[]) => void;
-  onBackToHome: () => void;
-  onSwitchStaffRole: (roleKey: string) => void;
   pages?: InstitutionalPage[];
   onSavePage?: (page: InstitutionalPage) => void;
   onDeletePage?: (pageId: string) => void;
@@ -63,8 +61,6 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   onUpdateSources,
   currentUser,
   onUpdateArticles,
-  onBackToHome,
-  onSwitchStaffRole,
   pages = [],
   onSavePage,
   onDeletePage,

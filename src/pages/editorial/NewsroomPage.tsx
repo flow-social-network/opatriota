@@ -1,14 +1,13 @@
 import React from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { useToast } from '../../app/contexts/ToastContext';
 import { NewsroomDashboard } from '../../components/newsroom/NewsroomDashboard';
 
 export default function NewsroomPage() {
-  const navigate = useNavigate();
   const location = useLocation();
-  const { currentUser, authLoading, role, setCurrentUser } = useAuth();
+  const { currentUser, authLoading } = useAuth();
   const {
     articles, sources, pages, categories, authors, subscriptionPlans,
     updateArticles, updateSources, savePage, deletePage,
@@ -43,12 +42,6 @@ export default function NewsroomPage() {
         onUpdateSources={updateSources}
         currentUser={currentUser}
         onUpdateArticles={updateArticles}
-        onBackToHome={() => navigate('/')}
-        onSwitchStaffRole={(newRole) => {
-          if (currentUser) {
-            setCurrentUser({ ...currentUser, role: newRole as any });
-          }
-        }}
         pages={pages}
         onSavePage={savePage}
         onDeletePage={deletePage}

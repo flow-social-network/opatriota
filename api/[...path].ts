@@ -501,8 +501,9 @@ export default async function handler(req: Req, res: Res) {
           }
         } catch { /* fallback */ }
       }
-      return json(res, 200, {
-        reply: `Aqui estão algumas sugestões editoriais para o texto:\n1. Tornar o título mais direto e com verbo na voz ativa.\n2. Incluir dados atualizados apurados nas fontes primárias oficiais.\n3. Revisar o último parágrafo para assegurar precisão factual.`
+      return json(res, 503, {
+        error: 'AI_NOT_CONFIGURED',
+        message: 'O serviço de IA não está disponível ou configurado neste ambiente.'
       });
     }
     if (path === 'newsletter/subscriptions' && method === 'POST') {
