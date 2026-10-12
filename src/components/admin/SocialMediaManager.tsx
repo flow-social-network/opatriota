@@ -101,8 +101,7 @@ export const SocialMediaManager: React.FC<SocialMediaManagerProps> = ({
 
   const handleSave = () => {
     onSaveSocialNetworks(items);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3500);
+    // O serviço do painel apresenta o resultado após a resposta do backend.
   };
 
   const handleResetDefaults = () => {
@@ -144,10 +143,10 @@ export const SocialMediaManager: React.FC<SocialMediaManagerProps> = ({
             <span className="text-xs text-[#5D6673]">• Distribuição Editorial</span>
           </div>
           <h2 className="font-serif font-black text-xl text-[#0B2345] mt-1">
-            Gestão de Redes Sociais Oficiais
+            Gestão de Redes Sociais
           </h2>
           <p className="text-xs text-[#5D6673] mt-0.5">
-            Adicione, ative, ordene e configure as URLs dos perfis públicos que aparecem no cabeçalho e na Coluna 5 do rodapé.
+            Cadastre e ordene URLs sociais. Ative um canal somente depois de verificar que o endereço pertence ao jornal.
           </p>
         </div>
 

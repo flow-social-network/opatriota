@@ -1,18 +1,18 @@
 import React from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { AdminDashboard } from '../../components/AdminDashboard';
 
 export default function AdminPage() {
   const navigate = useNavigate();
-  const { section } = useParams();
+  const location = useLocation();
+  const section = location.pathname.split('/').filter(Boolean)[1];
   const { currentUser, authLoading } = useAuth();
   const {
-    sources, 
-    queueItems, 
+    sources,
+    queueItems,
     portalSettings,
-    updateSources,
     updateQueue,
     savePortalSettings,
   } = useData();
@@ -38,13 +38,13 @@ export default function AdminPage() {
   }
 
   // Map sub-route parameter to tab
-  const tabMapping: Record<string, string> = {
+  const tabMapping: Record<string, 'painel' | 'fila' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'usuarios' | 'permissoes'> = {
+    painel: 'painel',
+    dashboard: 'painel',
     users: 'usuarios',
     usuarios: 'usuarios',
     permissions: 'permissoes',
     permissoes: 'permissoes',
-    sources: 'fontes',
-    fontes: 'fontes',
     queue: 'fila',
     fila: 'fila',
     dedup: 'dedup',
@@ -55,22 +55,22 @@ export default function AdminPage() {
     ads: 'publicidade',
     publicidade: 'publicidade',
     push: 'push',
-    wordpress: 'download',
   };
 
+  if (section && !tabMapping[section]) return <Navigate to="/404" replace />;
   const initialTab = (section && tabMapping[section]) || 'painel';
 
   return (
     <AdminDashboard
-      sources={sources}
       queueItems={queueItems}
       onBack={() => navigate('/')}
-      onUpdateSource={(s) => { void updateSources(s); }}
       onUpdateQueue={(q) => { void updateQueue(q); }}
-      onSyncResult={(s, q) => { void updateSources(s); void updateQueue(q); }}
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}
+      sources={sources}
+      onNavigateToSources={() => navigate('/admin/sources')}
+      onTabChange={(tab) => navigate(tab === 'painel' ? '/admin' : `/admin/${tab}`)}
     />
   );
 }

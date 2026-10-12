@@ -1,5 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
+import { isIP } from 'node:net';
+import { lookup } from 'node:dns/promises';
 import {
   json, newId, readBody, validEmail, verifyFirebaseIdToken
 } from './_lib/billing';
@@ -14,12 +16,139 @@ const STAFF = new Set(['jornalista', 'revisor', 'editor', 'editor_chefe', 'admin
 const EDITORS = new Set(['editor', 'editor_chefe', 'administrador']);
 const ADMINS = new Set(['administrador']);
 
+export type PaidAccessLevel = 'none' | 'assinante' | 'premium';
+
+export function isPublicArticle(article: Record<string, any>): boolean {
+  const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+  const status = String(article.status || '').trim().toLowerCase();
+  return editorialStatus === 'PUBLICADA' &&
+    ['', 'publicada', 'publicado', 'published'].includes(status);
+}
+
+export function isPublicPage(page: Record<string, any>): boolean {
+  const status = String(page.status || '').trim().toLowerCase();
+  if (!status) return page.published === true;
+  return ['publicado', 'publicada', 'published'].includes(status);
+}
+
+export function isPublicFactCheck(item: Record<string, any>): boolean {
+  const status = String(item.editorialStatus || item.status || '').trim().toLowerCase();
+  if (['rascunho', 'draft', 'revisao', 'em revisão', 'review', 'despublicada', 'unpublished'].includes(status)) return false;
+  return item.published !== false && item.active !== false;
+}
+
+export function subscriptionExpiry(startValue: unknown, cycle: unknown): number | null {
+  const date = new Date(String(startValue || ''));
+  if (!Number.isFinite(date.getTime())) return null;
+  if (cycle === 'annual') {
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    date.setUTCDate(1);
+    date.setUTCFullYear(date.getUTCFullYear() + 1);
+    date.setUTCMonth(month);
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), month + 1, 0)).getUTCDate();
+    date.setUTCDate(Math.min(day, lastDay));
+  } else {
+    const day = date.getUTCDate();
+    date.setUTCDate(1);
+    date.setUTCMonth(date.getUTCMonth() + 1);
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0)).getUTCDate();
+    date.setUTCDate(Math.min(day, lastDay));
+  }
+  return date.getTime();
+}
+
+export async function paidAccessLevel(
+  identity: { uid: string; role: string } | null,
+): Promise<PaidAccessLevel> {
+  if (!identity) return 'none';
+  if (STAFF.has(identity.role)) return 'premium';
+
+  const subscription = await documentGet('subscriptions', identity.uid);
+  if (!subscription || subscription.status !== 'active') return 'none';
+  const expiry = subscription.validUntil
+    ? Date.parse(String(subscription.validUntil))
+    : subscriptionExpiry(subscription.activatedAt, subscription.billingCycle);
+  if (expiry === null || !Number.isFinite(expiry) || expiry <= Date.now()) return 'none';
+
+  const plan = String(subscription.planId || '').trim().toLowerCase();
+  if (plan.includes('premium')) return 'premium';
+  if (plan.includes('digital') || plan.includes('assinante') || plan.includes('subscriber')) return 'assinante';
+  return 'none';
+}
+
+export function hasArticleAccess(article: Record<string, any>, paidLevel: PaidAccessLevel): boolean {
+  const required = String(article.accessLevel || 'aberto').trim().toLowerCase();
+  if (['aberto', 'open', 'free'].includes(required)) return true;
+  if (['premium', 'assinante_premium'].includes(required)) return paidLevel === 'premium';
+  if (['assinante', 'subscriber', 'digital', 'assinante_digital'].includes(required)) {
+    return paidLevel === 'assinante' || paidLevel === 'premium';
+  }
+  return false;
+}
+
+export function lockedArticle(article: Record<string, any>): Record<string, any> {
+  const safeFields = [
+    'id', 'slug', 'title', 'subtitle', 'kicker', 'category', 'subcategory',
+    'tags', 'author', 'authorId', 'authorRole', 'publishedAt', 'updatedAt',
+    'createdAt', 'readTimeMinutes', 'imageUrl', 'imageCaption', 'imageCredits',
+    'sourceName', 'sourceUrl', 'accessLevel', 'editorialStatus', 'status',
+    'priority', 'featured', 'isBreaking', 'breaking',
+  ];
+  const teaser: Record<string, any> = {};
+  for (const key of safeFields) {
+    if (Object.prototype.hasOwnProperty.call(article, key)) teaser[key] = article[key];
+  }
+  return { ...teaser, premiumLocked: true };
+}
+
 function routeName(url: string): string {
   const pathname = new URL(url, 'https://api.local').pathname;
   return pathname.replace(/^\/api\/?/, '').replace(/\/$/, '');
 }
 function cleanObject(value: unknown): Record<string, any> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
+}
+
+function slugify(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 180);
+}
+
+function isPrivateAddress(address: string): boolean {
+  const normalized = address.toLowerCase().split('%')[0];
+  const version = isIP(normalized);
+  if (version === 4) {
+    const parts = normalized.split('.').map(Number);
+    const [a, b] = parts;
+    return a === 0 || a === 10 || a === 127 || (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) ||
+      (a === 100 && b >= 64 && b <= 127) || (a === 198 && (b === 18 || b === 19)) || a >= 224;
+  }
+  if (version === 6) {
+    return normalized === '::' || normalized === '::1' || normalized.startsWith('fc') ||
+      normalized.startsWith('fd') || /^fe[89ab]/.test(normalized) ||
+      normalized.startsWith('ff') || normalized.startsWith('::ffff:');
+  }
+  return true;
+}
+
+async function readLimitedText(response: Response, maxBytes: number): Promise<string> {
+  if (!response.body) return '';
+  const reader = response.body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > maxBytes) {
+      await reader.cancel();
+      throw new Error('RSS_RESPONSE_TOO_LARGE');
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk))).toString('utf8');
 }
 async function getIdentity(req: Req): Promise<{ uid: string; email: string; role: string } | null> {
   const raw = req.headers.authorization;
@@ -63,8 +192,9 @@ function canonicalizeUrl(value: string): string {
 }
 
 function publicRecords(collection: string, records: any[]): any[] {
-  if (collection === 'articles') return records.filter(item => item.editorialStatus === 'PUBLICADA' && item.status !== 'rascunho');
-  if (collection === 'pages') return records.filter(item => item.status === 'publicado' || item.status === 'publicada' || item.published === true);
+  if (collection === 'articles') return records.filter(isPublicArticle);
+  if (collection === 'pages') return records.filter(isPublicPage);
+  if (collection === 'factChecks') return records.filter(isPublicFactCheck);
   if (collection === 'categories' || collection === 'authors' || collection === 'columnists') return records.filter(item => item.active !== false);
   return records;
 }
@@ -128,6 +258,83 @@ export default async function handler(req: Req, res: Res) {
       throw new Error('Invalid Firebase ID token');
     });
 
+    if (path === 'admin/users' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const [profiles, roleRecords] = await Promise.all([
+        documentList('userProfiles'),
+        documentList('userRoles'),
+      ]);
+      const profileById = new Map(profiles.map((profile) => [String(profile.id || ''), profile]));
+      const roleById = new Map(roleRecords.map((record) => [String(record.id || ''), record]));
+      const ids = new Set([...profileById.keys(), ...roleById.keys()].filter(Boolean));
+      const users = [...ids].map((uid) => {
+        const profile = profileById.get(uid) || {};
+        const roleRecord = roleById.get(uid) || {};
+        return {
+          id: uid,
+          name: String(profile.name || ''),
+          email: String(profile.email || ''),
+          role: String(roleRecord.role || 'leitor_gratuito'),
+          createdAt: profile.createdAt || roleRecord.createdAt || null,
+          updatedAt: profile.updatedAt || roleRecord.updatedAt || null,
+        };
+      }).sort((a, b) => a.email.localeCompare(b.email));
+      return json(res, 200, users);
+    }
+
+    const adminUserMatch = path.match(/^admin\/users\/([^/]+)$/);
+    if (adminUserMatch && method === 'PATCH') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const uid = decodeURIComponent(adminUserMatch[1]);
+      const body = cleanObject(await readBody(req));
+      const allowedRoles = new Set([
+        'leitor_gratuito', 'assinante_digital', 'assinante_premium',
+        'jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador',
+      ]);
+      const nextRole = String(body.role || '');
+      if (!allowedRoles.has(nextRole)) return json(res, 400, { error: 'INVALID_ROLE' });
+      if (uid === identity!.uid && nextRole !== 'administrador') {
+        return json(res, 409, { error: 'SELF_DEMOTION_BLOCKED', message: 'Não é permitido remover a própria função administrativa.' });
+      }
+      const [profile, currentRole] = await Promise.all([
+        documentGet('userProfiles', uid),
+        documentGet('userRoles', uid),
+      ]);
+      if (!profile && !currentRole) return json(res, 404, { error: 'USER_NOT_FOUND', message: 'Usuário não encontrado no cadastro do portal.' });
+      const updatedAt = new Date().toISOString();
+      const auditId = newId();
+      await documentWrite('auditLogs', auditId, {
+        id: auditId,
+        action: 'USER_ROLE_CHANGE_REQUESTED',
+        actorUid: identity!.uid,
+        targetUid: uid,
+        previousRole: String(currentRole?.role || 'leitor_gratuito'),
+        nextRole,
+        status: 'requested',
+        createdAt: updatedAt,
+      }, false);
+      await documentWrite('userRoles', uid, {
+        role: nextRole,
+        updatedAt,
+        updatedBy: identity!.uid,
+      });
+      await documentWrite('auditLogs', auditId, {
+        status: 'applied',
+        completedAt: new Date().toISOString(),
+      });
+      return json(res, 200, {
+        id: uid,
+        name: String(profile?.name || ''),
+        email: String(profile?.email || ''),
+        role: nextRole,
+        updatedAt,
+      });
+    }
+    if (adminUserMatch && method !== 'PATCH') {
+      res.setHeader('Allow', 'PATCH');
+      return json(res, 405, { error: 'METHOD_NOT_ALLOWED' });
+    }
+
     if (path === 'me' && method === 'PATCH') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       const body = cleanObject(await readBody(req));
@@ -174,8 +381,8 @@ export default async function handler(req: Req, res: Res) {
         date: String(order.createdAt || ''),
         amount: Number(order.amount || 0),
         planName: String(order.planName || order.planId || 'Assinatura'),
-        status: order.status === 'approved' ? 'concluido' : order.status === 'refunded' ? 'reembolsado' : 'processando',
-        invoiceNumber: String(order.orderId || order.id)
+        status: ['approved', 'paid'].includes(String(order.status)) ? 'concluido' : String(order.status) === 'refunded' ? 'reembolsado' : String(order.status) === 'cancelled' ? 'cancelado' : ['rejected', 'payment_mismatch'].includes(String(order.status)) ? 'recusado' : 'processando',
+        orderReference: String(order.orderId || order.id)
       }));
       return json(res, 200, payments);
     }
@@ -183,15 +390,20 @@ export default async function handler(req: Req, res: Res) {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       const sub = await documentGet('subscriptions', identity.uid);
       if (sub && sub.status === 'active') {
-        return json(res, 200, {
-          plan: sub.planId || 'gratuito',
-          status: 'ativo',
-          validUntil: sub.validUntil || sub.activatedAt,
-          autoRenew: sub.autoRenew !== false,
-          provider: sub.provider,
-          amount: sub.amount,
-          billingCycle: sub.billingCycle,
-        });
+        const expiry = sub.validUntil
+          ? Date.parse(String(sub.validUntil))
+          : subscriptionExpiry(sub.activatedAt, sub.billingCycle);
+        if (expiry !== null && Number.isFinite(expiry) && expiry > Date.now()) {
+          return json(res, 200, {
+            plan: sub.planId || 'gratuito',
+            status: 'ativo',
+            validUntil: new Date(expiry).toISOString(),
+            autoRenew: sub.autoRenew !== false,
+            provider: sub.provider,
+            amount: sub.amount,
+            billingCycle: sub.billingCycle,
+          });
+        }
       }
       return json(res, 200, { plan: 'gratuito', status: 'inativo', autoRenew: false });
     }
@@ -264,7 +476,7 @@ export default async function handler(req: Req, res: Res) {
       return json(res, failedCount ? 207 : 201, campaign);
     }
     if (path === 'editorial/sources/sync' && method === 'POST') {
-      if (!requireRole(identity, STAFF, res)) return;
+      if (!requireRole(identity, EDITORS, res)) return;
       const sources = await documentList('editorialSources');
       const existingQueue = await documentList('editorialQueue');
       const seen = new Set(existingQueue
@@ -275,21 +487,42 @@ export default async function handler(req: Req, res: Res) {
       for (const source of sources.filter(item => item.isActive !== false && item.rssUrl)) {
         const rssUrl = String(source.rssUrl);
         let parsedUrl: URL;
+        const checkedAt = new Date().toISOString();
         try { parsedUrl = new URL(rssUrl); } catch {
-          updatedSources.push({ ...source, lastError: 'URL de feed inválida', lastPolled: new Date().toISOString() });
+          const updated = { ...source, validationStatus: 'PENDENTE', lastVerified: checkedAt, lastError: 'URL de feed inválida', lastPolled: checkedAt };
+          await documentWrite('editorialSources', String(source.id), updated);
+          updatedSources.push(updated);
           continue;
         }
         const host = parsedUrl.hostname.toLowerCase();
-        if (parsedUrl.protocol !== 'https:' || host === 'localhost' || host.endsWith('.local') ||
-            /^(127\.|10\.|192\.168\.|169\.254\.|0\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host) ||
-            host === '::1' || host.startsWith('fc') || host.startsWith('fe80:')) {
-          updatedSources.push({ ...source, lastError: 'Feed bloqueado por política de segurança; use uma URL HTTPS pública.', lastPolled: new Date().toISOString() });
+        let resolvedAddresses: Array<{ address: string; family: number }> = [];
+        try {
+          const literalHost = host.replace(/^\[|\]$/g, '');
+          if (isIP(literalHost)) resolvedAddresses = [{ address: literalHost, family: isIP(literalHost) }];
+          else resolvedAddresses = await lookup(literalHost, { all: true, verbatim: true });
+        } catch {
+          resolvedAddresses = [];
+        }
+        const privateOrInvalidHost = !resolvedAddresses.length ||
+          resolvedAddresses.some((entry) => isPrivateAddress(entry.address)) ||
+          host === 'localhost' || host.endsWith('.localhost') || host.endsWith('.local') ||
+          host.endsWith('.internal') || host === 'metadata.google.internal';
+        if (parsedUrl.protocol !== 'https:' || privateOrInvalidHost) {
+          const updated = {
+            ...source,
+            validationStatus: 'PENDENTE',
+            lastVerified: checkedAt,
+            lastError: 'Feed bloqueado por política de segurança; use uma URL HTTPS pública.',
+            lastPolled: checkedAt,
+          };
+          await documentWrite('editorialSources', String(source.id), updated);
+          updatedSources.push(updated);
           continue;
         }
         try {
-          const response = await fetch(parsedUrl, { headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' }, signal: AbortSignal.timeout(10000) });
+          const response = await fetch(parsedUrl, { redirect: 'error', headers: { Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml' }, signal: AbortSignal.timeout(10000) });
           if (!response.ok) throw new Error('HTTP ' + response.status);
-          const xml = (await response.text()).slice(0, 2_000_000);
+          const xml = await readLimitedText(response, 2_000_000);
           const entries = [...xml.matchAll(/<(item|entry)(?:\s[^>]*)?>([\s\S]*?)<\/\1>/gi)].slice(0, 50);
           let imported = 0;
           const decodeXml = (value: string) => value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, ' ').replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;|&apos;/g, "'").replace(/\s+/g, ' ').trim();
@@ -305,7 +538,7 @@ export default async function handler(req: Req, res: Res) {
             try { const normalized = new URL(link, parsedUrl); if (normalized.protocol !== 'https:') continue; link = canonicalizeUrl(normalized.toString()); } catch { continue; }
             if (seen.has(link)) continue;
             seen.add(link);
-            const id = Date.now() + newItems.length;
+            const id = newId();
             const record = {
               id, title: title.slice(0, 500),
               summary: decodeXml(descMatch?.[2] || '').slice(0, 2000),
@@ -325,11 +558,13 @@ export default async function handler(req: Req, res: Res) {
             newItems.push(record);
             imported++;
           }
-          const updated = { ...source, lastPolled: new Date().toISOString(), lastSuccess: new Date().toISOString(), lastError: null, itemsReceived: Number(source.itemsReceived || 0) + imported };
+          const checkedAt = new Date().toISOString();
+          const updated = { ...source, validationStatus: 'VALIDADO', lastVerified: checkedAt, lastPolled: checkedAt, lastSuccess: checkedAt, lastError: null, itemsReceived: Number(source.itemsReceived || 0) + imported };
           await documentWrite('editorialSources', String(source.id), updated);
           updatedSources.push(updated);
         } catch (error) {
-          const updated = { ...source, lastPolled: new Date().toISOString(), lastError: String((error as Error)?.message || 'Falha ao consultar feed').slice(0, 300) };
+          const checkedAt = new Date().toISOString();
+          const updated = { ...source, validationStatus: 'PENDENTE', lastVerified: checkedAt, lastPolled: checkedAt, lastError: String((error as Error)?.message || 'Falha ao consultar feed').slice(0, 300) };
           await documentWrite('editorialSources', String(source.id), updated);
           updatedSources.push(updated);
         }
@@ -377,42 +612,75 @@ export default async function handler(req: Req, res: Res) {
     }
 
     if (path === 'editorial/stats' && method === 'GET') {
+      if (!requireRole(identity, STAFF, res)) return;
       const allArticles = await documentList('articles');
-      const inProduction = allArticles.filter(a => a.editorialStatus === 'EM REDAÇÃO' || a.editorialStatus === 'EM APURAÇÃO' || a.status === 'em_producao').length || 24;
-      const inReview = allArticles.filter(a => a.editorialStatus === 'EM REVISÃO' || a.status === 'em_revisao').length || 6;
-      const awaitingApproval = allArticles.filter(a => a.editorialStatus === 'RECEBIDA' || a.editorialStatus === 'EM TRIAGEM' || a.status === 'aguardando_aprovacao').length || 3;
-      const scheduled = allArticles.filter(a => a.editorialStatus === 'AGENDADA' || a.status === 'agendada').length || 12;
-      const publishedMonth = allArticles.filter(a => a.editorialStatus === 'PUBLICADA' || a.status === 'publicada').length || 148;
-      const drafts = allArticles.filter(a => a.status === 'rascunho' || a.editorialStatus === 'RASCUNHO').length || 12;
+      const monthStart = new Date();
+      monthStart.setUTCDate(1);
+      monthStart.setUTCHours(0, 0, 0, 0);
+      const inProduction = allArticles.filter(a => a.editorialStatus === 'EM REDAÇÃO' || a.editorialStatus === 'EM APURAÇÃO' || a.status === 'em_producao').length;
+      const inReview = allArticles.filter(a => a.editorialStatus === 'EM REVISÃO' || a.status === 'em_revisao').length;
+      const awaitingApproval = allArticles.filter(a => a.editorialStatus === 'RECEBIDA' || a.editorialStatus === 'EM TRIAGEM' || a.status === 'aguardando_aprovacao').length;
+      const scheduled = allArticles.filter(a => a.editorialStatus === 'AGENDADA' || a.status === 'agendada').length;
+      const publishedMonth = allArticles.filter(a => {
+        const publishedAt = Date.parse(String(a.publishedAt || ''));
+        return (a.editorialStatus === 'PUBLICADA' || a.status === 'publicada') &&
+          Number.isFinite(publishedAt) && publishedAt >= monthStart.getTime();
+      }).length;
+      const drafts = allArticles.filter(a => a.status === 'rascunho' || a.editorialStatus === 'RASCUNHO').length;
       return json(res, 200, {
-        inProduction,
-        inReview,
-        awaitingApproval,
-        scheduled,
-        publishedMonth,
-        drafts,
+        inProduction, inReview, awaitingApproval, scheduled, publishedMonth, drafts,
         totalArticles: allArticles.length,
       });
     }
 
     if (path === 'system/status' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
       const rawStatus = await documentGet('systemStatus', 'current');
-      return json(res, 200, rawStatus || {
-        allOperational: true,
+      if (rawStatus && rawStatus.verification === 'live-probe' && rawStatus.lastCheck &&
+          Number.isFinite(Date.parse(String(rawStatus.lastCheck))) &&
+          Date.now() - Date.parse(String(rawStatus.lastCheck)) < 5 * 60 * 1000) {
+        return json(res, 200, rawStatus);
+      }
+      const services = [
+        {
+          name: 'Banco de dados',
+          configured: Boolean(process.env.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.DATABASE_URL),
+          status: process.env.FIREBASE_SERVICE_ACCOUNT_JSON || process.env.DATABASE_URL
+            ? 'Configurado; conexão não verificada'
+            : 'Não configurado',
+          healthy: null,
+        },
+        {
+          name: 'Autenticação Firebase',
+          configured: Boolean(process.env.FIREBASE_WEB_API_KEY),
+          status: process.env.FIREBASE_WEB_API_KEY ? 'Chave configurada; login não verificado' : 'Não configurado',
+          healthy: null,
+        },
+        {
+          name: 'Mercado Pago',
+          configured: Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN && process.env.MERCADOPAGO_WEBHOOK_SECRET),
+          status: process.env.MERCADOPAGO_ACCESS_TOKEN && process.env.MERCADOPAGO_WEBHOOK_SECRET
+            ? 'Credenciais configuradas; transação não verificada'
+            : 'Não configurado',
+          healthy: null,
+        },
+        {
+          name: 'IA editorial',
+          configured: Boolean(process.env.GEMINI_API_KEY),
+          status: process.env.GEMINI_API_KEY ? 'Chave configurada; chamada não verificada' : 'Não configurado',
+          healthy: null,
+        },
+      ];
+      return json(res, 200, {
+        allOperational: false,
+        verification: 'configuration-only',
         lastCheck: new Date().toISOString(),
-        services: [
-          { name: 'Sistema da Redação', status: 'Operacional', healthy: true },
-          { name: 'Banco de Dados (Neon / MySQL)', status: 'Operacional', healthy: true },
-          { name: 'Autenticação (Firebase)', status: 'Operacional', healthy: true },
-          { name: 'Publicação no Site', status: 'Operacional', healthy: true },
-          { name: 'Integração Facebook', status: 'Operacional', healthy: true },
-          { name: 'Serviços de E-mail', status: 'Operacional', healthy: true },
-          { name: 'Armazenamento de Mídia', status: 'Operacional', healthy: true }
-        ]
+        services,
       });
     }
 
     if (path === 'editorial/ai-text' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
       const body = cleanObject(await readBody(req));
       const type = String(body.type || 'texto');
       const prompt = String(body.prompt || '').trim();
@@ -432,13 +700,15 @@ export default async function handler(req: Req, res: Res) {
             const aiData: any = await aiRes.json();
             const textResult = aiData.candidates?.[0]?.content?.parts?.[0]?.text || '';
             if (textResult) {
+              const generatedAt = new Date().toISOString();
               return json(res, 200, {
                 generatedText: textResult,
-                results: [
-                  { id: 'gen-1', title: `Texto — ${prompt.slice(0, 30)}`, date: 'Hoje, ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), content: textResult },
-                  { id: 'gen-2', title: `Resumo Executivo`, date: 'Hoje, ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), content: textResult.slice(0, 300) + '...' },
-                  { id: 'gen-3', title: `Análise de Impactos`, date: 'Hoje, ' + new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), content: `Impactos fiscais e institucionais apurados para: ${prompt}` }
-                ]
+                results: [{
+                  id: newId(),
+                  title: `Texto gerado — ${prompt.slice(0, 60)}`,
+                  generatedAt,
+                  content: textResult,
+                }],
               });
             }
           }
@@ -454,6 +724,7 @@ export default async function handler(req: Req, res: Res) {
     }
 
     if (path === 'editorial/ai-image' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
       const body = cleanObject(await readBody(req));
       const prompt = String(body.prompt || '').trim().slice(0, 2000);
       const style = String(body.style || 'Realista').trim().slice(0, 120);
@@ -467,38 +738,17 @@ export default async function handler(req: Req, res: Res) {
     }
 
     if (path === 'editorial/ai-risk' && method === 'POST') {
-      const body = cleanObject(await readBody(req));
-      const title = String(body.title || '');
-      const content = String(body.content || '');
-      const sources = Array.isArray(body.sources) ? body.sources : [];
-      
-      const hasTitle = title.trim().length > 10;
-      const hasContent = content.trim().length > 50;
-      const hasSources = sources.length > 0 || content.includes('http') || content.includes('segundo') || content.includes('afirmou');
-      
-      return json(res, 200, {
-        score: 82,
-        level: 'Baixo risco',
-        checklist: {
-          factualContent: hasTitle && hasContent,
-          sourcesVerified: true,
-          noMisinformation: true,
-          properLanguage: true,
-          noLegalRisk: true
-        },
-        editorialChecks: {
-          attractiveTitle: hasTitle,
-          completeLead: hasContent,
-          sourcesVerified: hasSources,
-          imagesAdded: Boolean(body.imageUrl),
-          spellChecked: true,
-          basicSeo: Boolean(body.seoTitle || title),
-          publishOrSchedule: true
-        }
+      if (!requireRole(identity, STAFF, res)) return;
+      return json(res, 503, {
+        error: process.env.GEMINI_API_KEY ? 'AI_RISK_NOT_IMPLEMENTED' : 'AI_NOT_CONFIGURED',
+        message: process.env.GEMINI_API_KEY
+          ? 'A análise de risco ainda não possui um avaliador validado conectado. Nenhuma pontuação fictícia foi gerada.'
+          : 'A análise de risco depende de um serviço de IA configurado no servidor.',
       });
     }
 
     if (path === 'editorial/chat' && method === 'POST') {
+      if (!requireRole(identity, STAFF, res)) return;
       const body = cleanObject(await readBody(req));
       const message = String(body.message || '').trim();
       const apiKey = process.env.GEMINI_API_KEY;
@@ -551,33 +801,225 @@ export default async function handler(req: Req, res: Res) {
     const resource = collectionFor(path);
     if (!resource) return json(res, 404, { error: 'NOT_FOUND', message: 'Rota da API não encontrada.' });
     const isEditorial = resource.collection.startsWith('editorial');
-    const required = isEditorial ? STAFF : resource.collection === 'articles' ? STAFF : resource.collection === 'pages' || resource.collection === 'categories' ? EDITORS : ADMINS;
+    const required = isEditorial ? STAFF : resource.collection === 'articles' ? STAFF : ['pages', 'categories', 'authors', 'columnists'].includes(resource.collection) ? EDITORS : ADMINS;
 
     if (method === 'GET' && !resource.id) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;
       let records = await documentList(resource.collection);
-      if (!isEditorial) records = publicRecords(resource.collection, records);
+      const staff = Boolean(identity && STAFF.has(identity.role));
+      const editor = Boolean(identity && EDITORS.has(identity.role));
+
+      if (!isEditorial) {
+        const canSeeEditorialRecords =
+          (resource.collection === 'articles' && staff) ||
+          (resource.collection === 'pages' && editor) ||
+          (resource.collection === 'factChecks' && staff) ||
+          (['categories', 'authors', 'columnists'].includes(resource.collection) && editor);
+        if (!canSeeEditorialRecords) records = publicRecords(resource.collection, records);
+      }
+
+      if (resource.collection === 'articles' && !staff) {
+        const access = await paidAccessLevel(identity);
+        records = records.map((article) =>
+          hasArticleAccess(article, access) ? article : lockedArticle(article)
+        );
+      }
       return json(res, 200, records);
     }
     if (method === 'GET' && resource.id) {
       const record = await documentGet(resource.collection, resource.id);
       if (!record) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
-      if (resource.collection === 'articles' && record.editorialStatus !== 'PUBLICADA' && !requireRole(identity, STAFF, res)) return;
+
+      if (resource.collection === 'articles') {
+        const staff = Boolean(identity && STAFF.has(identity.role));
+        if (!staff && !isPublicArticle(record)) {
+          return json(res, 404, { error: 'NOT_FOUND', message: 'Matéria não encontrada.' });
+        }
+        if (!staff && !hasArticleAccess(record, await paidAccessLevel(identity))) {
+          return json(res, 403, {
+            error: 'SUBSCRIPTION_REQUIRED',
+            message: 'Esta matéria exige uma assinatura ativa.',
+            article: lockedArticle(record),
+          });
+        }
+      }
+
+      if (resource.collection === 'pages' && !isPublicPage(record) &&
+          !Boolean(identity && EDITORS.has(identity.role))) {
+        return json(res, 404, { error: 'NOT_FOUND', message: 'Página não encontrada.' });
+      }
+      if (resource.collection === 'factChecks' && !isPublicFactCheck(record) &&
+          !Boolean(identity && STAFF.has(identity.role))) {
+        return json(res, 404, { error: 'NOT_FOUND', message: 'Checagem não encontrada.' });
+      }
+      if (['categories', 'authors', 'columnists'].includes(resource.collection) &&
+          record.active === false && !Boolean(identity && STAFF.has(identity.role))) {
+        return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
+      }
       return json(res, 200, record);
     }
+    if (resource.collection === 'articles' && ['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
+      if (!requireRole(identity, STAFF, res)) return;
+      const user = identity!;
+      const isEditor = EDITORS.has(user.role);
+      const isReviewer = user.role === 'revisor';
+
+      if (method === 'DELETE') {
+        if (!isEditor) return json(res, 403, { error: 'EDITOR_REQUIRED', message: 'Somente editores podem excluir matérias.' });
+        if (!resource.id) return json(res, 400, { error: 'RESOURCE_ID_REQUIRED', message: 'Informe o identificador da matéria.' });
+        const existing = await documentGet('articles', resource.id);
+        if (!existing) return json(res, 404, { error: 'NOT_FOUND', message: 'Matéria não encontrada.' });
+        await documentDelete('articles', resource.id);
+        return json(res, 204, null);
+      }
+
+      const body = cleanObject(req.body || await readBody(req));
+      const authorFields = new Set([
+        'title', 'slug', 'subtitle', 'kicker', 'category', 'subcategory', 'tags', 'content',
+        'imageUrl', 'imageCaption', 'imageCredits', 'sourceName', 'sourceUrl',
+        'sourcesConsulted', 'seo', 'videoEmbedUrl', 'isFactCheck', 'factVerdict',
+        'factClaim', 'factDocuments', 'originalUrl', 'originalPublishedAt',
+        'sourceUpdatedAt', 'imageLicense', 'imageSourceUrl', 'readTimeMinutes',
+      ]);
+      const editorFields = new Set([
+        ...authorFields, 'author', 'authorId', 'authorRole', 'accessLevel',
+        'priority', 'publishedAt', 'scheduledFor', 'editorialStatus', 'status',
+      ]);
+      const allowedFields = isEditor ? editorFields : authorFields;
+      const editable = Object.fromEntries(Object.entries(body).filter(([key]) => allowedFields.has(key)));
+
+      if (method === 'POST') {
+        const title = String(editable.title || '').trim().slice(0, 300);
+        const articleContent = String(editable.content || '').trim();
+        if (!title || !articleContent) return json(res, 400, { error: 'INVALID_ARTICLE', message: 'Título e conteúdo são obrigatórios.' });
+        const id = String(body.id || newId()).trim().slice(0, 160);
+        if (!id) return json(res, 400, { error: 'INVALID_ARTICLE_ID' });
+        if (await documentGet('articles', id)) return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe uma matéria com este identificador.' });
+        const slug = slugify(String(editable.slug || title));
+        if (!slug) return json(res, 400, { error: 'INVALID_ARTICLE_SLUG', message: 'Informe um título que gere um slug válido.' });
+        const existingSlugs = await documentList('articles');
+        if (existingSlugs.some((article) => String(article.slug || '').toLowerCase() === slug.toLowerCase())) {
+          return json(res, 409, { error: 'ARTICLE_SLUG_CONFLICT', message: 'Já existe uma matéria com este endereço.' });
+        }
+        const requestedPublication = isEditor && String(editable.editorialStatus || '').toUpperCase() === 'PUBLICADA';
+        const requestedAccess = String(editable.accessLevel || 'aberto');
+        const record = {
+          ...editable,
+          id,
+          slug,
+          title,
+          content: articleContent,
+          createdBy: user.uid,
+          authorId: isEditor ? String(editable.authorId || user.uid) : user.uid,
+          authorRole: isEditor ? String(editable.authorRole || user.role) : user.role,
+          editorialStatus: requestedPublication ? 'PUBLICADA' : 'EM REDAÇÃO',
+          status: requestedPublication ? String(editable.status || 'publicada') : 'rascunho',
+          accessLevel: ['aberto', 'assinante', 'premium'].includes(requestedAccess) ? requestedAccess : 'aberto',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        await documentWrite('articles', id, record, false);
+        return json(res, 201, record);
+      }
+
+      if (!resource.id) return json(res, 400, { error: 'RESOURCE_ID_REQUIRED', message: 'Informe o identificador da matéria.' });
+      const existing = await documentGet('articles', resource.id);
+      if (!existing) return json(res, 404, { error: 'NOT_FOUND', message: 'Matéria não encontrada.' });
+      const owner = [existing.createdBy, existing.authorUid, existing.authorId]
+        .some((value) => String(value || '') === user.uid);
+      if (!isEditor && !isReviewer && !owner) {
+        return json(res, 403, { error: 'ARTICLE_NOT_OWNED', message: 'Jornalistas só podem alterar as próprias matérias.' });
+      }
+      const next = {
+        ...existing,
+        ...editable,
+        id: String(existing.id || resource.id),
+        slug: slugify(String(editable.slug || existing.slug || editable.title || existing.title || '')),
+        createdBy: String(existing.createdBy || user.uid),
+        updatedAt: new Date().toISOString(),
+      };
+      if (!next.slug) return json(res, 400, { error: 'INVALID_ARTICLE_SLUG' });
+      const existingSlugs = await documentList('articles');
+      if (existingSlugs.some((article) =>
+        String(article.id || '') !== String(existing.id || resource.id) &&
+        String(article.slug || '').toLowerCase() === String(next.slug).toLowerCase()
+      )) {
+        return json(res, 409, { error: 'ARTICLE_SLUG_CONFLICT', message: 'Já existe uma matéria com este endereço.' });
+      }
+      if (!isEditor) {
+        next.editorialStatus = 'EM REVISÃO';
+        next.status = 'rascunho';
+        next.authorId = String(existing.authorId || user.uid);
+      }
+      if (typeof next.title !== 'string' || !next.title.trim() || typeof next.content !== 'string' || !next.content.trim()) {
+        return json(res, 400, { error: 'INVALID_ARTICLE', message: 'Título e conteúdo são obrigatórios.' });
+      }
+      const nextAccess = String(next.accessLevel || 'aberto');
+      if (!['aberto', 'assinante', 'premium'].includes(nextAccess)) {
+        return json(res, 400, { error: 'INVALID_ACCESS_LEVEL' });
+      }
+      await documentWrite('articles', String(existing.id || resource.id), next);
+      return json(res, 200, next);
+    }
+
     if (['POST', 'PATCH', 'PUT', 'DELETE'].includes(method)) {
       if (!requireRole(identity, required, res)) return;
+
       if (method === 'DELETE') {
         if (!resource.id) return json(res, 400, { error: 'RESOURCE_ID_REQUIRED', message: 'Informe o identificador do registro.' });
+        const existing = await documentGet(resource.collection, resource.id);
+        if (!existing) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
         await documentDelete(resource.collection, resource.id);
         return json(res, 204, null);
       }
+
       const body = cleanObject(await readBody(req));
-      if (resource.collection === 'articles' && method === 'POST' && (!String(body.title || '').trim() || !String(body.content || '').trim())) return json(res, 400, { error: 'INVALID_ARTICLE', message: 'Título e conteúdo são obrigatórios.' });
       const id = resource.id || String(body.id || newId());
-      const record = { ...body, id, updatedAt: new Date().toISOString(), ...(method === 'POST' ? { createdAt: new Date().toISOString() } : {}) };
-      if (method === 'POST' && await documentGet(resource.collection, id)) return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe um registro com este identificador.' });
-      await documentWrite(resource.collection, id, record, method !== 'POST');
+      const current = method === 'POST' ? null : await documentGet(resource.collection, id);
+      if (method !== 'POST' && !current) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });
+      if (method === 'POST' && await documentGet(resource.collection, id)) {
+        return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe um registro com este identificador.' });
+      }
+      const merged = { ...(current || {}), ...body, id };
+
+      if (resource.collection === 'pages' || resource.collection === 'categories') {
+        const titleOrName = String(merged.title || merged.name || '').trim().slice(0, 300);
+        const slug = slugify(String(merged.slug || titleOrName));
+        if (!titleOrName || !slug) {
+          return json(res, 400, {
+            error: resource.collection === 'pages' ? 'INVALID_PAGE' : 'INVALID_CATEGORY',
+            message: 'Título/nome e slug são obrigatórios.',
+          });
+        }
+        const records = await documentList(resource.collection);
+        if (records.some((item) =>
+          String(item.id || '') !== String(id) &&
+          String(item.slug || '').toLowerCase() === slug.toLowerCase()
+        )) {
+          return json(res, 409, { error: 'SLUG_CONFLICT', message: 'Já existe um registro com este endereço.' });
+        }
+        merged.slug = slug;
+        if (resource.collection === 'pages') {
+          const allowedPageStatuses = ['publicado', 'publicada', 'rascunho', 'revisao', 'despublicada'];
+          const status = String(merged.status || 'rascunho').toLowerCase();
+          if (!allowedPageStatuses.includes(status)) return json(res, 400, { error: 'INVALID_PAGE_STATUS' });
+          merged.status = status;
+          merged.published = ['publicado', 'publicada'].includes(status);
+        } else {
+          merged.name = titleOrName;
+          merged.active = merged.active !== false;
+          merged.order = Number.isFinite(Number(merged.order)) ? Number(merged.order) : 0;
+        }
+      }
+
+      const now = new Date().toISOString();
+      const record = {
+        ...merged,
+        id,
+        updatedAt: now,
+        ...(method === 'POST' ? { createdAt: now } : {}),
+      };
+      await documentWrite(resource.collection, id, record, method === 'PATCH');
       return json(res, method === 'POST' ? 201 : 200, record);
     }
     res.setHeader('Allow', 'GET, POST, PATCH, PUT, DELETE');

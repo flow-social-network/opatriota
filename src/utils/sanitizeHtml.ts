@@ -6,15 +6,14 @@ export function sanitizeHtml(dirty: string): string {
   if (!dirty) return '';
 
   if (typeof document === 'undefined') {
-    // SSR fallback: remove blocos perigosos por regex
+    // Sem DOMParser, regex não é uma fronteira de segurança confiável para HTML.
+    // Em ambientes sem DOM (SSR/testes), devolve o conteúdo como texto codificado.
     return dirty
-      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-      .replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '')
-      .replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '')
-      .replace(/<embed\b[^>]*>/gi, '')
-      .replace(/\son\w+\s*=\s*"[^"]*"/gi, '')
-      .replace(/\son\w+\s*=\s*'[^']*'/gi, '')
-      .replace(/javascript\s*:/gi, '');
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
   }
 
   const parser = new DOMParser();

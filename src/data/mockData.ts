@@ -212,7 +212,7 @@ export const INITIAL_PAYMENTS: PaymentRecord[] = [
     amount: 29.90,
     planName: 'Assinante Digital (Mensal)',
     status: 'concluido',
-    invoiceNumber: 'NF-PAT-2026-08912'
+    orderReference: 'NF-PAT-2026-08912'
   },
   {
     id: 'pay-100',
@@ -220,7 +220,7 @@ export const INITIAL_PAYMENTS: PaymentRecord[] = [
     amount: 29.90,
     planName: 'Assinante Digital (Mensal)',
     status: 'concluido',
-    invoiceNumber: 'NF-PAT-2026-07841'
+    orderReference: 'NF-PAT-2026-07841'
   },
   {
     id: 'pay-099',
@@ -228,7 +228,7 @@ export const INITIAL_PAYMENTS: PaymentRecord[] = [
     amount: 29.90,
     planName: 'Assinante Digital (Mensal)',
     status: 'concluido',
-    invoiceNumber: 'NF-PAT-2026-06720'
+    orderReference: 'NF-PAT-2026-06720'
   }
 ];
 

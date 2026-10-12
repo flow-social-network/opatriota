@@ -152,6 +152,11 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
   };
 
   const syncMeta = getSyncStateMeta(activeCapital.syncState);
+  const hasUsableWeather = Boolean(
+    activeCapital.lastSuccessfulSync &&
+    Number.isFinite(Date.parse(activeCapital.lastSuccessfulSync)) &&
+    ['live', 'cached', 'source_unavailable', 'error'].includes(activeCapital.syncState),
+  );
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/75 backdrop-blur-xs overflow-y-auto animate-fade-in select-none">
@@ -175,7 +180,7 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                 </span>
               </div>
               <p className="text-xs text-white/75 flex flex-wrap items-center gap-2 mt-0.5">
-                <span>Dados em tempo real:</span>
+                <span>Consulta meteorológica sob demanda:</span>
                 <strong className="text-[#FFCC29]">Open-Meteo API (WMO/ECMWF)</strong>
                 <span>•</span>
                 <span>Referência Institucional de Estações:</span>
@@ -263,7 +268,9 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                   <div className="flex-1">
                     <span className="font-bold uppercase tracking-wider">Fonte Externa Indisponível</span>
                     <span className="mx-1.5">•</span>
-                    <span>O serviço de previsão não respondeu. Exibindo dados locais preservados de <strong>{formatSyncTimestamp(activeCapital.lastSuccessfulSync)}</strong>.</span>
+                    <span>{hasUsableWeather
+                      ? <>O serviço não respondeu. Exibindo o último registro válido de <strong>{formatSyncTimestamp(activeCapital.lastSuccessfulSync)}</strong>.</>
+                      : 'O serviço não respondeu e não há registro válido para exibir. Atualize a consulta antes de usar qualquer valor.'}</span>
                   </div>
                 </div>
               )}
@@ -274,7 +281,7 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                   <div className="flex-1">
                     <span className="font-bold uppercase tracking-wider">Dados Indisponíveis</span>
                     <span className="mx-1.5">•</span>
-                    <span>Nenhuma medição encontrada para estas coordenadas. Exibindo base cadastral histórica ({formatSyncTimestamp(activeCapital.lastSuccessfulSync)}).</span>
+                    <span>Nenhuma consulta meteorológica válida foi concluída para estas coordenadas. Atualize para tentar obter dados reais; valores não verificados serão ocultados.</span>
                   </div>
                 </div>
               )}
@@ -285,7 +292,9 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                   <div className="flex-1">
                     <span className="font-bold uppercase tracking-wider">Erro na Consulta</span>
                     <span className="mx-1.5">•</span>
-                    <span>{activeCapital.syncError || 'Falha de comunicação'}. <strong>Atenção:</strong> O horário da última consulta bem-sucedida foi mantido ({formatSyncTimestamp(activeCapital.lastSuccessfulSync)}).</span>
+                    <span>{activeCapital.syncError || 'Falha de comunicação'}. {hasUsableWeather
+                      ? <>O último registro válido ({formatSyncTimestamp(activeCapital.lastSuccessfulSync)}) foi preservado.</>
+                      : 'Não há dados meteorológicos verificados disponíveis para exibição.'}</span>
                   </div>
                 </div>
               )}
@@ -315,9 +324,11 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                   {activeCapital.fullName}
                 </h3>
                 <p className="text-sm text-[#FFCC29] font-medium mt-1 flex flex-wrap items-center gap-2">
-                  <span>{activeCapital.condition}</span>
-                  <span>•</span>
-                  <span>Sensação térmica de {activeCapital.feelsLike}°C</span>
+                  <span>{hasUsableWeather ? activeCapital.condition : 'Dados meteorológicos não consultados'}</span>
+                  {hasUsableWeather && <>
+                    <span>•</span>
+                    <span>Sensação térmica de {activeCapital.feelsLike}°C</span>
+                  </>}
                   <span>•</span>
                   <span className="text-white/60 text-xs font-mono">Fuso: {activeCapital.timezone}</span>
                 </p>
@@ -326,16 +337,16 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
               {/* Big Temperature Display */}
               <div className="flex items-center gap-4">
                 <div className="p-3 rounded-xl bg-white/10 backdrop-blur-xs border border-white/10">
-                  {renderWeatherIcon(activeCapital.code, "w-12 h-12")}
+                  {hasUsableWeather ? renderWeatherIcon(activeCapital.code, "w-12 h-12") : <Cloud className="w-12 h-12 text-white/50" />}
                 </div>
                 <div>
                   <div className="text-4xl sm:text-5xl font-black text-white leading-none font-serif">
-                    {activeCapital.temp}°C
+                    {hasUsableWeather ? `${activeCapital.temp}°C` : '—'}
                   </div>
                   <div className="text-xs text-white/80 font-medium mt-1 flex items-center gap-2">
-                    <span className="text-blue-300 font-bold">Mín: {activeCapital.min}°C</span>
+                    <span className="text-blue-300 font-bold">Mín: {hasUsableWeather ? `${activeCapital.min}°C` : '—'}</span>
                     <span>/</span>
-                    <span className="text-amber-300 font-bold">Máx: {activeCapital.max}°C</span>
+                    <span className="text-amber-300 font-bold">Máx: {hasUsableWeather ? `${activeCapital.max}°C` : '—'}</span>
                   </div>
                 </div>
               </div>
@@ -347,7 +358,7 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                 <Droplets className="w-5 h-5 text-[#60A5FA] shrink-0" />
                 <div>
                   <div className="text-white/60 text-[11px]">Umidade Relativa</div>
-                  <div className="font-bold text-white text-sm">{activeCapital.humidity}%</div>
+                  <div className="font-bold text-white text-sm">{hasUsableWeather ? `${activeCapital.humidity}%` : '—'}</div>
                 </div>
               </div>
 
@@ -355,7 +366,7 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                 <Wind className="w-5 h-5 text-emerald-400 shrink-0" />
                 <div>
                   <div className="text-white/60 text-[11px]">Vento / Direção</div>
-                  <div className="font-bold text-white text-sm">{activeCapital.windSpeed} km/h ({activeCapital.windDirection})</div>
+                  <div className="font-bold text-white text-sm">{hasUsableWeather ? `${activeCapital.windSpeed} km/h (${activeCapital.windDirection})` : '—'}</div>
                 </div>
               </div>
 
@@ -363,7 +374,7 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                 <Gauge className="w-5 h-5 text-purple-300 shrink-0" />
                 <div>
                   <div className="text-white/60 text-[11px]">Pressão Superfície</div>
-                  <div className="font-bold text-white text-sm">{activeCapital.pressure} hPa</div>
+                  <div className="font-bold text-white text-sm">{hasUsableWeather ? `${activeCapital.pressure} hPa` : '—'}</div>
                 </div>
               </div>
 
@@ -372,10 +383,10 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                 <div>
                   <div className="text-white/60 text-[11px]">Índice UV Máximo</div>
                   <div className="font-bold text-white text-sm flex items-center gap-1.5">
-                    <span>UV {activeCapital.uvIndex}</span>
-                    <span className={`text-[10px] font-medium ${getUvLevel(activeCapital.uvIndex).color}`}>
+                    <span>{hasUsableWeather ? `UV ${activeCapital.uvIndex}` : 'UV —'}</span>
+                    {hasUsableWeather && <span className={`text-[10px] font-medium ${getUvLevel(activeCapital.uvIndex).color}`}>
                       ({getUvLevel(activeCapital.uvIndex).label})
-                    </span>
+                    </span>}
                   </div>
                 </div>
               </div>
@@ -392,25 +403,29 @@ export const WeatherCapitalsModal: React.FC<WeatherCapitalsModalProps> = ({
                   projeção diária oficial
                 </span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                {activeCapital.forecast.map((fc, idx) => (
-                  <div 
-                    key={idx}
-                    className="bg-white/5 border border-white/10 rounded-lg p-3 text-center flex flex-col items-center justify-between hover:bg-white/10 transition"
-                  >
-                    <span className="text-[11px] font-bold text-white/90">{fc.day} ({fc.date})</span>
-                    <div className="my-2">
-                      {renderWeatherIcon(fc.code, "w-6 h-6")}
+              {hasUsableWeather ? (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  {activeCapital.forecast.map((fc, idx) => (
+                    <div
+                      key={idx}
+                      className="bg-white/5 border border-white/10 rounded-lg p-3 text-center flex flex-col items-center justify-between hover:bg-white/10 transition"
+                    >
+                      <span className="text-[11px] font-bold text-white/90">{fc.day} ({fc.date})</span>
+                      <div className="my-2">{renderWeatherIcon(fc.code, "w-6 h-6")}</div>
+                      <span className="text-[10px] text-white/70 line-clamp-1 mb-1">{fc.condition}</span>
+                      <div className="text-xs font-bold text-white">
+                        <span className="text-blue-300">{fc.min}°</span>
+                        <span className="text-white/40 mx-1">/</span>
+                        <span className="text-amber-300">{fc.max}°</span>
+                      </div>
                     </div>
-                    <span className="text-[10px] text-white/70 line-clamp-1 mb-1">{fc.condition}</span>
-                    <div className="text-xs font-bold text-white">
-                      <span className="text-blue-300">{fc.min}°</span>
-                      <span className="text-white/40 mx-1">/</span>
-                      <span className="text-amber-300">{fc.max}°</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="rounded-lg border border-white/10 bg-white/5 p-4 text-xs leading-5 text-white/70">
+                  A previsão estendida será exibida após uma consulta meteorológica bem-sucedida.
+                </p>
+              )}
             </div>
 
             {/* Refresh Action & Official Link Bar */}

@@ -36,6 +36,7 @@ interface SubscriberPortalProps {
   articles: Article[];
   onSelectArticle: (article: Article) => void;
   initialSubpage?: string;
+  onSubpageChange?: (subpage: string) => void;
 }
 
 export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
@@ -45,11 +46,19 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
   onBackToHome,
   articles,
   onSelectArticle,
-  initialSubpage = 'dashboard'
+  initialSubpage = 'dashboard',
+  onSubpageChange,
 }) => {
   const [currentSubpage, setCurrentSubpage] = useState<string>(
     currentUser ? initialSubpage : 'entrar'
   );
+  const changeSubpage = (subpage: string) => {
+    setCurrentSubpage(subpage);
+    onSubpageChange?.(subpage);
+  };
+  React.useEffect(() => {
+    changeSubpage(currentUser ? initialSubpage : 'entrar');
+  }, [initialSubpage, currentUser?.id]);
 
   // Authentication form states
   const [loginEmail, setLoginEmail] = useState('');
@@ -125,7 +134,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
     try {
       const user = await signInWithEmail(loginEmail, loginPassword);
       onLogin(user);
-      setCurrentSubpage('dashboard');
+      changeSubpage('dashboard');
       setLoginAttempts(0);
     } catch (error) {
       const attempts = loginAttempts + 1;
@@ -146,7 +155,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
     try {
       const user = await registerWithEmail(regName, regEmail, regPassword);
       onLogin(user);
-      setCurrentSubpage('dashboard');
+      changeSubpage('dashboard');
       setRegSuccess(true);
     } catch (error) {
       setRegError(error instanceof Error && error.message === 'AUTH_NOT_CONFIGURED'
@@ -286,7 +295,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
             {/* Auth Tabs */}
             <div className="flex border-b border-[#D9DEE7] mb-6">
               <button
-                onClick={() => { setCurrentSubpage('entrar'); setLoginError(null); }}
+                onClick={() => { changeSubpage('entrar'); setLoginError(null); }}
                 className={`flex-1 py-3 text-center text-xs font-bold tracking-wider uppercase transition cursor-pointer ${
                   currentSubpage === 'entrar'
                     ? 'border-b-2 border-[#0B2345] text-[#0B2345]'
@@ -296,7 +305,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                 ENTRAR
               </button>
               <button
-                onClick={() => { setCurrentSubpage('cadastro'); setRegError(null); }}
+                onClick={() => { changeSubpage('cadastro'); setRegError(null); }}
                 className={`flex-1 py-3 text-center text-xs font-bold tracking-wider uppercase transition cursor-pointer ${
                   currentSubpage === 'cadastro'
                     ? 'border-b-2 border-[#0B2345] text-[#0B2345]'
@@ -316,7 +325,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                 onEmailChange={setLoginEmail}
                 onPasswordChange={setLoginPassword}
                 onSubmit={handleLoginSubmit}
-                onForgotPassword={() => setCurrentSubpage('recuperar-senha')}
+                onForgotPassword={() => changeSubpage('recuperar-senha')}
               />
             )}
 
@@ -346,8 +355,8 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                 resetSent={resetSent}
                 onEmailChange={setResetEmail}
                 onSubmit={handlePasswordReset}
-                onBackToLogin={() => setCurrentSubpage('entrar')}
-                onBackToLoginAfterSent={() => { setResetSent(false); setCurrentSubpage('entrar'); }}
+                onBackToLogin={() => changeSubpage('entrar')}
+                onBackToLoginAfterSent={() => { setResetSent(false); changeSubpage('entrar'); }}
               />
             )}
           </div>
@@ -395,7 +404,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                   return (
                     <button
                       key={item.id}
-                      onClick={() => setCurrentSubpage(item.id)}
+                      onClick={() => changeSubpage(item.id)}
                       className={`w-full flex items-center gap-2.5 px-3 py-2 rounded font-semibold transition text-left cursor-pointer ${
                         isActive
                           ? 'bg-[#0B2345] text-white'

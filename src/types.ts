@@ -189,7 +189,7 @@ export type FactualClassification =
   | 'inconclusivo';           // Informação inconclusiva
 
 export interface RssSource {
-  id: number;
+  id: string | number;
   name: string;
   sourceCategory?: OfficialSourceCategory;
   uf?: string; // 'BR', 'RS', etc.
@@ -214,7 +214,7 @@ export interface RssSource {
 }
 
 export interface EditorialQueueItem {
-  id: number;
+  id: string | number;
   title: string;
   summary: string;
   originalUrl: string;
@@ -239,8 +239,8 @@ export interface PaymentRecord {
   date: string;
   amount: number;
   planName: string;
-  status: 'concluido' | 'processando' | 'reembolsado';
-  invoiceNumber: string;
+  status: 'concluido' | 'processando' | 'reembolsado' | 'cancelado' | 'recusado';
+  orderReference: string;
 }
 
 export interface UserSession {
@@ -359,6 +359,7 @@ export interface AuthorDetail {
   id: string;
   slug: string;
   name: string;
+  active?: boolean;
   role: string;
   bio: string;
   avatarUrl: string;

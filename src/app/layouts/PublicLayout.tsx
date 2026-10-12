@@ -106,6 +106,7 @@ export function PublicLayout() {
         onNavigatePage={handleNavigatePage}
         onOpenSubscriberModal={(modalType) => setSubscriberModal(modalType)}
         menuConfig={menuConfig}
+        socialNetworks={portalSettings.socialNetworks}
       />
       <SupportModal isOpen={supportOpen} onClose={() => setSupportOpen(false)} />
       <SubscriberModalsContainer

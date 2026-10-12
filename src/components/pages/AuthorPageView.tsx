@@ -10,7 +10,6 @@ import {
   Calendar, 
   FileText, 
   ArrowRight,
-  ShieldCheck,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
@@ -32,11 +31,17 @@ export const AuthorPageView: React.FC<AuthorPageViewProps> = ({
 }) => {
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Filter articles written by this author (match by author name or authorId)
-  const authorArticles = articles.filter(
-    (a) => a.author.toLowerCase().includes(author.name.toLowerCase()) || 
-           a.authorId === author.id
-  );
+  // Public author pages must never count or display unpublished editorial records.
+  const normalizedAuthorName = author.name.trim().toLowerCase();
+  const authorArticles = articles.filter((article) => {
+    const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+    const status = String((article as any).status || '').trim().toLowerCase();
+    const isPublic = editorialStatus === 'PUBLICADA' &&
+      ['', 'publicada', 'publicado', 'published'].includes(status);
+    const sameAuthor = String(article.authorId || '') === String(author.id) ||
+      String(article.author || '').trim().toLowerCase() === normalizedAuthorName;
+    return isPublic && sameAuthor;
+  });
 
   const totalPages = Math.ceil(authorArticles.length / ITEMS_PER_PAGE) || 1;
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -65,17 +70,21 @@ export const AuthorPageView: React.FC<AuthorPageViewProps> = ({
         {/* Author Bio Card */}
         <header className="bg-white border border-[#D9DEE7] rounded-lg p-6 md:p-10 mb-8 shadow-xs flex flex-col md:flex-row items-center md:items-start gap-8">
           <div className="relative shrink-0">
-            <img
-              src={author.avatarUrl}
-              alt={author.name}
-              className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-[#0B2345] shadow-md"
-            />
-            <span 
-              className="absolute bottom-1 right-1 bg-[#16803C] text-white p-1.5 rounded-full shadow-xs"
-              title="Jornalista credenciado e auditado"
-            >
-              <ShieldCheck className="w-5 h-5" />
-            </span>
+            {author.avatarUrl ? (
+              <img
+                src={author.avatarUrl}
+                alt={author.name}
+                className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover border-4 border-[#0B2345] shadow-md"
+              />
+            ) : (
+              <div
+                role="img"
+                aria-label={`Imagem não cadastrada para ${author.name}`}
+                className="flex h-32 w-32 md:h-40 md:w-40 items-center justify-center rounded-full border-4 border-[#0B2345] bg-[#E7EDF5] text-3xl font-black text-[#0B2345]"
+              >
+                {author.name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]?.toUpperCase()).join('') || 'A'}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 text-center md:text-left">
@@ -85,7 +94,7 @@ export const AuthorPageView: React.FC<AuthorPageViewProps> = ({
               </span>
               {author.credentials && (
                 <span className="text-xs text-[#5D6673] bg-[#F1F3F5] px-2.5 py-1 rounded border border-[#E2E6EC]">
-                  {author.credentials}
+                  Credenciais declaradas: {author.credentials}
                 </span>
               )}
             </div>

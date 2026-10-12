@@ -11,19 +11,25 @@ export default async function handler(req: IncomingMessage & { method?: string; 
     const planId=body.planId as PlanId; const cycle=body.cycle as BillingCycle;
     if(!Object.prototype.hasOwnProperty.call(CATALOG,planId) || !['monthly','annual'].includes(cycle)) return json(res,400,{error:'INVALID_PLAN'});
     const plan=CATALOG[planId]; const amount=cycle==='annual'?plan.annual:plan.monthly;
-    const authHeader=String(req.headers.authorization||'');
-    let user:any=null;
-    if(authHeader.startsWith('Bearer ')) user=await verifyFirebaseIdToken(authHeader.slice(7));
-    const email=String(user?.email||body.email||'').trim().toLowerCase();
-    const name=String(user?.displayName||body.name||'').trim().slice(0,120);
-    if(!validEmail(email) || !name) return json(res,400,{error:'CUSTOMER_DATA_REQUIRED',message:'Informe nome e e-mail válidos.'});
+    const authHeader = String(req.headers.authorization || '');
+    if (!authHeader.startsWith('Bearer ')) {
+      return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre ou crie sua conta antes de contratar uma assinatura.' });
+    }
+    const user: any = await verifyFirebaseIdToken(authHeader.slice(7));
+    const uid = String(user?.localId || user?.uid || '');
+    if (!uid) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Não foi possível associar o pagamento à sua conta.' });
+    const email = String(user?.email || '').trim().toLowerCase();
+    const name = String(user?.displayName || body.name || '').trim().slice(0, 120);
+    if (!validEmail(email) || !name) {
+      return json(res, 400, { error: 'CUSTOMER_DATA_REQUIRED', message: 'A conta precisa ter um e-mail válido e um nome.' });
+    }
     if(amount<=0) return json(res,400,{error:'FREE_PLAN_NOT_PAYABLE',message:'O plano gratuito não deve gerar cobrança.'});
     if(!['pix','card'].includes(body.paymentMethod)) return json(res,400,{error:'INVALID_PAYMENT_METHOD'});
     const configuredSiteUrl = process.env.PUBLIC_SITE_URL || (process.env.VERCEL_URL ? 'https://' + process.env.VERCEL_URL : 'https://www.opatriota.sbs');
     if (!configuredSiteUrl || !configuredSiteUrl.startsWith('https://')) return json(res,503,{error:'PUBLIC_SITE_URL_NOT_CONFIGURED',message:'Configure a URL HTTPS pública do jornal nas variáveis de ambiente.'});
     const siteUrl=configuredSiteUrl.replace(/\/$/,'');
     const orderId=newId();
-    const order={orderId,uid:user?.localId||null,customerName:name,customerEmail:email,planId,planName:plan.name,cycle,amount,status:'pending',paymentProvider:'mercadopago',createdAt:new Date().toISOString(),paymentMethod:body.paymentMethod};
+    const order={orderId,uid,customerName:name,customerEmail:email,planId,planName:plan.name,cycle,amount,status:'pending',paymentProvider:'mercadopago',createdAt:new Date().toISOString(),paymentMethod:body.paymentMethod};
     await documentWrite('checkoutOrders',orderId,order,false);
     const preference:any={
       items:[{id:planId+'-'+cycle,title:'O PATRIOTA — '+plan.name+' ('+(cycle==='annual'?'anual':'mensal')+')',quantity:1,currency_id:'BRL',unit_price:amount}],
@@ -34,7 +40,7 @@ export default async function handler(req: IncomingMessage & { method?: string; 
       auto_return:'approved',
       statement_descriptor:'O PATRIOTA',
       payment_methods:{excluded_payment_types:body.paymentMethod==='pix'?[{id:'credit_card'},{id:'debit_card'},{id:'ticket'}]:[{id:'bank_transfer'},{id:'ticket'}]},
-      metadata:{order_id:orderId,uid:user?.localId||'',plan_id:planId,billing_cycle:cycle,payment_method:body.paymentMethod}
+      metadata:{order_id:orderId,uid,plan_id:planId,billing_cycle:cycle,payment_method:body.paymentMethod}
     };
     const response=await mpRequest('/checkout/preferences',{method:'POST',headers:{'X-Idempotency-Key':orderId},body:JSON.stringify(preference)});
     const data:any=await response.json();

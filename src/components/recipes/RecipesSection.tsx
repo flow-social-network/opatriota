@@ -14,55 +14,17 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
   onSelectArticle,
   onViewAll,
 }) => {
-  // Pre-configured recipes from reference design as fallback
-  const defaultRecipes = [
-    {
-      id: 'rec-1',
-      title: 'Morango Cravejado na Travessa',
-      subtitle: 'Sobremesa irresistível com morangos frescos cravejados em creme aveludado e raspas de chocolate nobre.',
-      time: '1h 20min',
-      portions: '8 porções',
-      imageUrl: '/images/morango-cravejado.jpg',
-      slug: 'morango-cravejado-na-travessa',
-    },
-    {
-      id: 'rec-2',
-      title: 'Pão Caseiro da Dona Nita',
-      subtitle: 'A receita de família passada por gerações: massa fofinha, crosta dourada na manteiga e sabor de fazenda.',
-      time: '2h',
-      portions: '10 porções',
-      imageUrl: '/images/pao-caseiro-nita.jpg',
-      slug: 'pao-caseiro-da-dona-nita',
-    },
-    {
-      id: 'rec-3',
-      title: 'Cuca Gaúcha Tradicional',
-      subtitle: 'A autêntica cuca colonial do Rio Grande do Sul com farofa crocante dourada e recheio de frutas da estação.',
-      time: '1h 30min',
-      portions: '8 porções',
-      imageUrl: '/images/cuca-gaucha.jpg',
-      slug: 'cuca-gaucha-tradicional',
-    },
-  ];
-
-  const recipeArticles = articles.filter((a) => a.category === 'receita');
-
-  const displayedRecipes =
-    recipeArticles.length > 0
-      ? recipeArticles.slice(0, 3).map((art) => ({
-          id: art.id,
-          title: art.title,
-          subtitle: art.subtitle || '',
-          time: `${art.readTimeMinutes || 30} min`,
-          portions: 'Rendimento farto',
-          imageUrl: art.imageUrl,
-          slug: art.slug,
-          article: art,
-        }))
-      : defaultRecipes.map((r) => ({
-          ...r,
-          article: articles.find((a) => a.slug === r.slug) || articles[0],
-        }));
+  const displayedRecipes = articles
+    .filter((article) => article.category === 'receita')
+    .slice(0, 3)
+    .map((article) => ({
+      id: article.id,
+      title: article.title,
+      time: article.readTimeMinutes ? `${article.readTimeMinutes} min de leitura` : 'Tempo não informado',
+      portions: 'Consulte a matéria',
+      imageUrl: article.imageUrl,
+      article,
+    }));
 
   return (
     <div className="bg-white border border-[#D9DEE7] rounded-lg p-5 shadow-2xs select-none">
@@ -86,19 +48,16 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
         )}
       </div>
 
-      {/* Grid of 3 Recipe Cards */}
+      {displayedRecipes.length === 0 ? (
+        <p className="rounded border border-dashed border-[#D9DEE7] p-6 text-sm text-[#5D6673]" role="status">
+          Nenhuma receita publicada no momento.
+        </p>
+      ) : (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {displayedRecipes.map((recipe) => (
           <article
             key={recipe.id}
-            onClick={() => {
-              if (recipe.article) {
-                onSelectArticle(recipe.article);
-              } else {
-                const matched = articles.find((a) => a.slug === recipe.slug || a.category === 'receita') || articles[0];
-                onSelectArticle(matched);
-              }
-            }}
+            onClick={() => onSelectArticle(recipe.article)}
             className="bg-white border border-[#D9DEE7] rounded overflow-hidden flex flex-col group cursor-pointer hover:shadow-md transition-all duration-300 hover:-translate-y-0.5"
           >
             {/* Image */}
@@ -130,6 +89,7 @@ export const RecipesSection: React.FC<RecipesSectionProps> = ({
           </article>
         ))}
       </div>
+      )}
     </div>
   );
 };

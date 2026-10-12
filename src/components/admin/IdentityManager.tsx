@@ -29,8 +29,7 @@ export const IdentityManager: React.FC<IdentityManagerProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSaveIdentity(formData);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3500);
+    // O serviço do painel apresenta o resultado após a resposta do backend.
   };
 
   const handleResetDefaults = () => {

@@ -25,5 +25,7 @@ jobs:
         run: pnpm install --no-frozen-lockfile
       - name: TypeScript validation
         run: pnpm lint
+      - name: Automated tests
+        run: pnpm test
       - name: Production build
         run: pnpm build

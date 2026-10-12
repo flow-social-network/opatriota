@@ -289,114 +289,20 @@ export const ContactPageView: React.FC<ContactPageViewProps> = ({
 
           </main>
 
-          {/* Sidebar Info Column (4 cols) */}
+          {/* Sidebar: no unverified addresses, legal entities or email aliases are published. */}
           <aside className="lg:col-span-4 space-y-6">
-            
-            {/* Direct Departments Card */}
-            <div className="bg-white border border-[#D9DEE7] rounded-lg p-6 shadow-xs">
-              <h3 className="font-serif font-bold text-sm text-[#0B2345] uppercase tracking-wider pb-3 border-b border-[#EAECEF] mb-4 flex items-center gap-2">
-                <Building className="w-4 h-4 text-[#0B5FFF]" />
-                Departamentos da Redação
+            <div className="rounded-lg border border-[#D9DEE7] bg-white p-6 shadow-xs">
+              <h3 className="mb-3 flex items-center gap-2 border-b border-[#EAECEF] pb-3 font-serif text-sm font-bold uppercase tracking-wider text-[#0B2345]">
+                <Mail className="h-4 w-4 text-[#0B5FFF]" />
+                Atendimento editorial
               </h3>
-
-              <div className="space-y-4 text-xs">
-                <div>
-                  <span className="font-bold text-[#0B2345] block">Pauta & Notícias:</span>
-                  <a href="mailto:pauta@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
-                    pauta@opatriota.sbs
-                  </a>
-                </div>
-
-                <div>
-                  <span className="font-bold text-[#0B2345] block">Correções e Erratas:</span>
-                  <a href="mailto:correcoes@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
-                    correcoes@opatriota.sbs
-                  </a>
-                </div>
-
-                <div>
-                  <span className="font-bold text-[#0B2345] block">Área do Assinante & Suporte:</span>
-                  <a href="mailto:assinante@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
-                    assinante@opatriota.sbs
-                  </a>
-                </div>
-
-                <div>
-                  <span className="font-bold text-[#0B2345] block">Comercial & Publicidade:</span>
-                  <a href="mailto:comercial@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
-                    comercial@opatriota.sbs
-                  </a>
-                </div>
-
-                <div>
-                  <span className="font-bold text-[#0B2345] block">Privacidade e Dados (DPO):</span>
-                  <a href="mailto:privacidade@opatriota.sbs" className="text-[#0B5FFF] hover:underline">
-                    privacidade@opatriota.sbs
-                  </a>
-                </div>
-              </div>
+              <p className="text-sm leading-6 text-[#404B5A]">
+                Use o formulário para enviar pautas, pedidos de correção, dúvidas editoriais ou solicitações institucionais. O protocolo só será apresentado quando a API confirmar o recebimento.
+              </p>
+              <p className="mt-3 text-xs leading-5 text-[#64748B]">
+                Endereços de e-mail, telefones, endereço físico e dados da entidade mantenedora não são exibidos aqui enquanto não estiverem confirmados e configurados pelo responsável do portal.
+              </p>
             </div>
-
-            {/* Sede Social da Mantenedora */}
-            <div className="bg-[#F8FAFC] border border-[#D9DEE7] rounded-lg p-6 shadow-xs">
-              <h3 className="font-serif font-bold text-sm text-[#0B2345] uppercase tracking-wider pb-3 border-b border-[#EAECEF] mb-4 flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#FFCC29]" />
-                Empresa Mantenedora
-              </h3>
-
-              <div className="space-y-3 text-xs text-[#404B5A] leading-relaxed">
-                <div>
-                  <span className="font-bold text-[#0B2345] block">Razão Social:</span>
-                  <span>DEEVO SOLUÇÕES FINANCEIRAS LTDA</span>
-                </div>
-                <div>
-                  <span className="font-bold text-[#0B2345] block">CNPJ:</span>
-                  <span className="font-mono text-[#0B2345]">63.187.175/0001-70</span>
-                </div>
-                <div>
-                  <span className="font-bold text-[#0B2345] block">Sede Social:</span>
-                  <span>Taquara, Rio Grande do Sul — Brasil</span>
-                </div>
-                <div className="pt-2 border-t border-[#EAECEF]">
-                  <span className="font-bold text-[#0B2345] block mb-1">Facebook Oficial:</span>
-                  <a 
-                    href="https://www.facebook.com/opatriota.news.brasil" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-[#0B5FFF] hover:underline break-all block"
-                  >
-                    facebook.com/opatriota.news.brasil
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            {/* Address & Hours */}
-            <div className="bg-white border border-[#D9DEE7] rounded-lg p-6 shadow-xs">
-              <h3 className="font-serif font-bold text-sm text-[#0B2345] uppercase tracking-wider pb-3 border-b border-[#EAECEF] mb-4 flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-[#16803C]" />
-                Sede Central Brasília
-              </h3>
-
-              <div className="space-y-3 text-xs text-[#404B5A] leading-relaxed">
-                <p>
-                  <strong>Edifício Centro Empresarial Brasília</strong><br />
-                  Setor Comercial Sul (SCS), Quadra 4, Bloco A, Salas 601-604<br />
-                  Asa Sul — Brasília - DF<br />
-                  CEP 70304-900
-                </p>
-
-                <div className="pt-2 border-t border-[#F1F3F5] flex items-center gap-2 text-[#5D6673]">
-                  <Clock className="w-3.5 h-3.5 text-[#0B2345]" />
-                  <span>Segunda a Sexta: 08h00 às 19h00</span>
-                </div>
-                <div className="flex items-center gap-2 text-[#5D6673]">
-                  <Phone className="w-3.5 h-3.5 text-[#0B2345]" />
-                  <span>Central: (61) 3244-8800</span>
-                </div>
-              </div>
-            </div>
-
           </aside>
 
         </div>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { 
   Article, 
   CategorySlug, 
@@ -16,7 +16,6 @@ import { api } from '../../services/apiClient';
 import { PagesManager } from '../admin/PagesManager';
 import { CategoriesManager } from '../admin/CategoriesManager';
 import { MenusManager } from '../admin/MenusManager';
-import { OfficialSourcesHub } from '../admin/OfficialSourcesHub';
 import { isGloboSource } from '../../utils/editorialPolicy';
 import { 
   FileText, 
@@ -38,12 +37,16 @@ import { NewsroomEditorTab } from './NewsroomEditorTab';
 import { NewsroomMediaTab } from './NewsroomMediaTab';
 import { CorrectionRequestModal } from './CorrectionRequestModal';
 
+type NewsroomTab = 'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus';
+
 interface NewsroomDashboardProps {
+  initialTab?: NewsroomTab;
+  initialStatusFilter?: string;
+  onTabChange?: (tab: NewsroomTab) => void;
   articles: Article[];
-  sources: RssSource[];
-  onUpdateSources?: (sources: RssSource[]) => void;
   currentUser: UserSession;
   onUpdateArticles: (articles: Article[]) => void;
+  onPreviewArticle?: (article: Article) => void;
   pages?: InstitutionalPage[];
   onSavePage?: (page: InstitutionalPage) => void;
   onDeletePage?: (pageId: string) => void;
@@ -56,11 +59,13 @@ interface NewsroomDashboardProps {
 }
 
 export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
+  initialTab = 'painel',
+  initialStatusFilter = 'TODAS',
+  onTabChange,
   articles,
-  sources,
-  onUpdateSources,
   currentUser,
   onUpdateArticles,
+  onPreviewArticle,
   pages = [],
   onSavePage,
   onDeletePage,
@@ -71,11 +76,21 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   menuConfig,
   onSaveMenuConfig
 }) => {
-  // Navigation tabs in newsroom
-  const [activeTab, setActiveTab] = useState<'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus'>('painel');
+  // Navigation tabs are URL-addressable, so deep links and browser history stay in sync.
+  const [activeTab, setActiveTab] = useState<NewsroomTab>(initialTab);
+  const handleTabChange = (tab: NewsroomTab) => {
+    setActiveTab(tab);
+    onTabChange?.(tab);
+  };
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
 
   // Article filters
-  const [statusFilter, setStatusFilter] = useState<string>('TODAS');
+  const [statusFilter, setStatusFilter] = useState<string>(initialStatusFilter);
+  useEffect(() => {
+    if (initialStatusFilter !== 'TODAS') setStatusFilter(initialStatusFilter);
+  }, [initialStatusFilter]);
   const [categoryFilter, setCategoryFilter] = useState<string>('TODAS');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -156,7 +171,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     setFormMetaTitle(art.seo?.metaTitle || art.title);
     setFormMetaDesc(art.seo?.metaDescription || art.subtitle);
     setAiSuggestions(null);
-    setActiveTab('editor');
+    handleTabChange('editor');
   };
 
   // Open editor for brand new article
@@ -177,7 +192,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     setFormMetaTitle('');
     setFormMetaDesc('');
     setAiSuggestions(null);
-    setActiveTab('editor');
+    handleTabChange('editor');
   };
 
   // Save as Draft (Rascunho)
@@ -489,7 +504,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     setFormImageCaption(med.caption || '');
     setFormImageCredits(med.credits || '');
     showFeedback(`Imagem "${med.name}" selecionada como capa!`);
-    setActiveTab('editor');
+    handleTabChange('editor');
   };
 
   // Filtered articles list
@@ -527,12 +542,15 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const active = activeTab === item.id;
-                return <button key={item.id} onClick={() => { setActiveTab(item.id as any); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'}`}><Icon className="size-4" />{item.label}</button>;
+                return <button key={item.id} onClick={() => { handleTabChange(item.id as NewsroomTab); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'}`}><Icon className="size-4" />{item.label}</button>;
               })}
             </div>
             <p className="px-3 pt-6 pb-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Fluxo editorial</p>
             <div className="flex flex-col gap-1 text-[12px] font-semibold text-[#52677a]">
-              {['Agenda Editorial', 'Fila de Revisão', 'Aprovação Final', 'Relatórios', 'Configurações', 'Integrações (APIs)'].map((label) => <button key={label} onClick={() => setActiveTab('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><CheckCircle className="size-4 text-[#7b9bb5]" />{label}</button>)}
+              <button type="button" onClick={() => { setStatusFilter('AGENDADA'); handleTabChange('materias'); }} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Agenda editorial</button>
+              <button type="button" onClick={() => { setStatusFilter('EM REVISÃO'); handleTabChange('materias'); }} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Fila de revisão</button>
+              <button type="button" onClick={() => { setStatusFilter('APROVADA'); handleTabChange('materias'); }} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Aprovação final</button>
+              <button type="button" onClick={() => handleTabChange('fontes')} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Integrações e fontes</button>
             </div>
           </nav>
           <div className="border-t border-[#e1ebf3] p-3 text-[11px] text-[#52677a]">{currentUser.name}<div className="text-[10px] text-[#8ba0b2]">{currentUser.role.replace('_', ' ')}</div></div>
@@ -540,7 +558,14 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         <main className="min-w-0 flex-1">
           <header className="h-[74px] border-b border-[#c7d9ea] bg-white px-4 md:px-7 flex items-center justify-between gap-4">
             <div><p className="text-[11px] font-bold text-[#8195a8]">O PATRIOTA / REDAÇÃO</p><h1 className="text-lg font-black text-[#153d61]">{activeTab === 'painel' ? 'Painel Principal' : navigation.find((item) => item.id === activeTab)?.label || 'Redação'}</h1></div>
-            <div className="flex items-center gap-3"><div className="hidden md:flex h-9 w-64 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center px-3 text-xs text-[#8aa0b2]">Buscar matérias, pautas, autores...</div><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova</button><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
+            <div className="flex items-center gap-3"><input
+              type="search"
+              aria-label="Buscar matérias"
+              value={searchQuery}
+              onChange={(event) => { setSearchQuery(event.target.value); if (activeTab !== 'materias') handleTabChange('materias'); }}
+              placeholder="Buscar matérias…"
+              className="hidden md:block h-9 w-64 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] px-3 text-xs text-[#153d61] placeholder:text-[#8aa0b2] focus:outline-none focus:ring-2 focus:ring-[#0875bd]/30"
+            /><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova</button><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
           </header>
           {feedbackMsg && <div className={`px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'}`}><AlertTriangle className="size-4" /><span>{feedbackMsg.text}</span></div>}
           <div className="mx-auto max-w-[1440px] px-4 py-5 md:px-7">
@@ -573,6 +598,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
             onOpenEdit={handleOpenEdit}
+            onPreviewArticle={(article) => onPreviewArticle?.(article)}
             onPublish={handlePublish}
           />
         )}
@@ -617,15 +643,6 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         )}
 
         {/* TAB 4: CENTRAL DE FONTES OFICIAIS */}
-        {activeTab === 'fontes' && (
-          <div className="bg-white p-6 rounded-xl border border-[#D9DEE7] shadow-xs">
-            <OfficialSourcesHub
-              sources={sources}
-              onUpdateSources={onUpdateSources || (() => {})}
-            />
-          </div>
-        )}
-
         {/* TAB 5: BIBLIOTECA DE MÍDIA */}
         {activeTab === 'midia' && (
           <NewsroomMediaTab

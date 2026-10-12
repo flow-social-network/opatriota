@@ -20,7 +20,7 @@ export const OpinionColumnistsSection: React.FC<OpinionColumnistsSectionProps> =
     (a) => a.category === 'opiniao' || a.kicker?.includes('OPINIÃO') || a.tags?.includes('Opinião')
   );
 
-  const displayArticles = opinionArticles.length > 0 ? opinionArticles : articles.slice(9, 13);
+  const displayArticles = opinionArticles;
 
   return (
     <section className="mb-12 select-none" aria-label="Opinião e Análise">
@@ -45,12 +45,17 @@ export const OpinionColumnistsSection: React.FC<OpinionColumnistsSectionProps> =
         </div>
       </div>
 
-      {/* Columnists Cards Grid */}
+      {/* Only published opinion articles are shown; unrelated articles are never substituted. */}
+      {displayArticles.length === 0 ? (
+        <p className="rounded-lg border border-dashed border-[#D9DEE7] bg-white p-6 text-sm text-[#5D6673]" role="status">
+          Nenhum artigo de opinião publicado no momento.
+        </p>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
-        {displayArticles.slice(0, 4).map((art, idx) => {
+        {displayArticles.slice(0, 4).map((art) => {
           const matchingAuthor = authors.find(
             (aut) => aut.name === art.author || aut.id === art.authorId
-          ) || authors[idx % authors.length];
+          );
 
           return (
             <article
@@ -64,12 +69,18 @@ export const OpinionColumnistsSection: React.FC<OpinionColumnistsSectionProps> =
               <div>
                 {/* Author Avatar & Header */}
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#FFCC29] shrink-0 bg-slate-100 shadow-xs">
-                    <img
-                      src={matchingAuthor?.avatarUrl || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=240&q=80'}
-                      alt={art.author}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
+                  <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#FFCC29] shrink-0 bg-slate-100 shadow-xs flex items-center justify-center">
+                    {matchingAuthor?.avatarUrl ? (
+                      <img
+                        src={matchingAuthor.avatarUrl}
+                        alt={art.author}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <span aria-hidden="true" className="font-bold text-[#0B2345]">
+                        {art.author.trim().charAt(0).toUpperCase() || '?'}
+                      </span>
+                    )}
                   </div>
                   <div>
                     <h4 className="font-bold text-xs text-[#0B2345] group-hover:text-[#0B5FFF] transition-colors">
@@ -106,6 +117,7 @@ export const OpinionColumnistsSection: React.FC<OpinionColumnistsSectionProps> =
           );
         })}
       </div>
+      )}
     </section>
   );
 };

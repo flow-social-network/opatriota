@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { ArchivePageView } from '../../components/pages/ArchivePageView';
 import { ContactPageView } from '../../components/pages/ContactPageView';
 import { LgpdPageView } from '../../components/pages/LgpdPageView';
@@ -10,6 +10,14 @@ import { CustomPageView } from '../../components/pages/CustomPageView';
 import { AuthorPageView } from '../../components/pages/AuthorPageView';
 import { FactCheckHub } from '../../components/FactCheckHub';
 import { useData } from '../../app/contexts/DataContext';
+
+function PageLoading({ label = 'Carregando conteúdo…' }: { label?: string }) {
+  return <main className="mx-auto max-w-4xl px-4 py-16" role="status" aria-live="polite"><p className="text-sm text-slate-600">{label}</p></main>;
+}
+
+function PageDataError({ message }: { message: string }) {
+  return <main className="mx-auto max-w-4xl px-4 py-16" role="alert"><h1 className="text-xl font-bold text-slate-900">Não foi possível carregar esta página</h1><p className="mt-2 text-sm text-slate-600">{message}</p><button type="button" onClick={() => window.location.reload()} className="mt-4 rounded-lg bg-[#0B2345] px-4 py-2 text-sm font-semibold text-white">Tentar novamente</button></main>;
+}
 import { useAuth } from '../../app/contexts/AuthContext';
 import { api } from '../../services/apiClient';
 import { useToast } from '../../app/contexts/ToastContext';
@@ -19,14 +27,21 @@ import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 // ─── Archive ───
 export function ArchivePage() {
   const navigate = useNavigate();
-  const { articles, categories, authors } = useData();
+  const { articles, categories, authors, dataLoading, dataErrors } = useData();
+  const publicArticles = articles.filter((article) => {
+    const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+    const status = String((article as any).status || '').trim().toLowerCase();
+    return editorialStatus === 'PUBLICADA' && ['', 'publicada', 'publicado', 'published'].includes(status);
+  });
+  if (dataLoading) return <PageLoading label="Carregando arquivo editorial…" />;
+  if (dataErrors['/articles']) return <PageDataError message={dataErrors['/articles']} />;
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <ArchivePageView
-        articles={articles}
-        categories={categories}
-        authors={authors}
-        onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
+        articles={publicArticles}
+        categories={categories.filter((category) => category.active !== false)}
+        authors={authors.filter((author) => author.active !== false)}
+        onSelectArticle={(article) => navigate(`/noticia/${article.slug}`)}
         onNavigateHome={() => navigate('/')}
       />
     </div>
@@ -95,11 +110,17 @@ export function PlansPage() {
 // ─── Fact-Check Hub ───
 export function FactCheckPage() {
   const navigate = useNavigate();
-  const { factChecks } = useData();
+  const { factChecks, dataLoading, dataErrors } = useData();
+  const publicFactChecks = factChecks.filter((item: any) => {
+    const status = String(item.status || '').trim().toLowerCase();
+    return item.published !== false && !['rascunho', 'draft', 'revisao', 'review', 'despublicada', 'unpublished'].includes(status);
+  });
+  if (dataLoading) return <PageLoading label="Carregando checagens…" />;
+  if (dataErrors['/fact-checks']) return <PageDataError message={dataErrors['/fact-checks']} />;
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <FactCheckHub
-        factChecks={factChecks}
+        factChecks={publicFactChecks}
         onBack={() => navigate('/')}
         onOpenItem={() => navigate('/verificacao')}
       />
@@ -111,11 +132,16 @@ export function FactCheckPage() {
 export function NotFound() {
   const navigate = useNavigate();
   const { articles, categories } = useData();
+  const publicArticles = articles.filter((article) => {
+    const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+    const status = String((article as any).status || '').trim().toLowerCase();
+    return editorialStatus === 'PUBLICADA' && ['', 'publicada', 'publicado', 'published'].includes(status);
+  });
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <NotFoundPageView
-        categories={categories}
-        recentArticles={articles.slice(0, 4)}
+        categories={categories.filter((category) => category.active !== false)}
+        recentArticles={publicArticles.slice(0, 4)}
         onNavigateHome={() => navigate('/')}
         onSelectCategory={(cat) => navigate(cat === 'todos' ? '/' : `/categoria/${cat}`)}
         onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
@@ -129,15 +155,17 @@ export function NotFound() {
 export function AuthorPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { authors, articles } = useData();
+  const { authors, articles, dataLoading, dataErrors } = useData();
 
-  const author = authors.find(a =>
-    a.slug === slug || a.id === slug || a.name.toLowerCase().replace(/\s+/g, '-') === slug
-  );
+  const author = authors.find((item) => item.active !== false && (
+    item.slug === slug || item.id === slug || item.name.toLowerCase().replace(/\s+/g, '-') === slug
+  ));
 
-  if (!author) {
-    return <NotFound />;
+  if (dataLoading && !author) return <PageLoading label="Carregando perfil de autoria…" />;
+  if (!author && (dataErrors['/authors'] || dataErrors['/articles'])) {
+    return <PageDataError message={dataErrors['/authors'] || dataErrors['/articles']} />;
   }
+  if (!author) return <NotFound />;
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
@@ -155,9 +183,17 @@ export function AuthorPage() {
 export function InstitutionalPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { pages } = useData();
-
-  const page = pages.find(p => p.slug === slug);
+  const location = useLocation();
+  const { currentUser } = useAuth();
+  const { pages, dataLoading, dataErrors } = useData();
+  const previewRequested = new URLSearchParams(location.search).get('preview') === '1';
+  const canPreviewDraft = Boolean(previewRequested && currentUser &&
+    ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(String(currentUser.role)));
+  const page = pages.find((item) => item.slug === slug && (
+    canPreviewDraft ||
+    (['publicado', 'publicada', 'published'].includes(String((item as any).status || '').trim().toLowerCase()) ||
+      (!String((item as any).status || '').trim() && (item as any).published === true))
+  ));
 
   useSeoMetadata({
     title: page?.seo?.metaTitle || page?.title,
@@ -168,6 +204,8 @@ export function InstitutionalPage() {
     type: 'article',
   });
 
+  if (dataLoading && !page) return <PageLoading label="Carregando página institucional…" />;
+  if (!page && dataErrors['/pages']) return <PageDataError message={dataErrors['/pages']} />;
   if (!page) return <NotFound />;
 
   return (
@@ -186,10 +224,23 @@ export function InstitutionalPage() {
 export function CustomPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
-  const { pages } = useData();
+  const location = useLocation();
+  const { currentUser } = useAuth();
+  const { pages, dataLoading, dataErrors } = useData();
+  const previewRequested = new URLSearchParams(location.search).get('preview') === '1';
+  const canPreviewDraft = Boolean(previewRequested && currentUser &&
+    ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(String(currentUser.role)));
+  const page = pages.find((item) => {
+    if (item.slug !== slug) return false;
+    if (canPreviewDraft) return true;
+    const status = String((item as any).status || '').trim().toLowerCase();
+    return status
+      ? ['publicado', 'publicada', 'published'].includes(status)
+      : (item as any).published === true;
+  });
 
-  const page = pages.find(p => p.slug === slug);
-
+  if (dataLoading && !page) return <PageLoading label="Carregando página…" />;
+  if (!page && dataErrors['/pages']) return <PageDataError message={dataErrors['/pages']} />;
   if (!page) return <NotFound />;
 
   return (

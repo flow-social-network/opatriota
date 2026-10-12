@@ -1,16 +1,17 @@
 import React from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { SubscriberPortal } from '../../components/subscriber/SubscriberPortal';
 import { useData } from '../../app/contexts/DataContext';
 import { useAuth } from '../../app/contexts/AuthContext';
 
 export default function ClientPage() {
   const navigate = useNavigate();
+  const { subpage: routeSubpage } = useParams();
   const [searchParams] = useSearchParams();
   const { currentUser, setCurrentUser } = useAuth();
   const { articles } = useData();
 
-  const subpage = searchParams.get('tab') || 'dashboard';
+  const subpage = searchParams.get('tab') || routeSubpage || 'dashboard';
 
   return (
     <div className="flex-1">
@@ -22,6 +23,7 @@ export default function ClientPage() {
         articles={articles}
         onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
         initialSubpage={subpage}
+        onSubpageChange={(tab) => navigate(`/minha-conta?tab=${encodeURIComponent(tab)}`)}
       />
     </div>
   );

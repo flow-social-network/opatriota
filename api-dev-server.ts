@@ -58,23 +58,36 @@ async function loadHandler(name: string): Promise<Handler | null> {
 }
 
 function parseBody(req: any): Promise<unknown> {
-  return new Promise((resolvePromise) => {
+  return new Promise((resolvePromise, rejectPromise) => {
     if (req.method === 'GET' || req.method === 'DELETE') {
       resolvePromise(undefined);
       return;
     }
     const chunks: Buffer[] = [];
-    req.on('data', (c: Buffer) => chunks.push(c));
+    let totalBytes = 0;
+    let tooLarge = false;
+    req.on('data', (chunk: Buffer | string) => {
+      if (tooLarge) return;
+      const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
+      totalBytes += buffer.length;
+      if (totalBytes > 1_000_000) {
+        tooLarge = true;
+        chunks.length = 0;
+        return;
+      }
+      chunks.push(buffer);
+    });
     req.on('end', () => {
+      if (tooLarge) return rejectPromise(new Error('REQUEST_BODY_TOO_LARGE'));
       const raw = Buffer.concat(chunks).toString('utf-8');
       if (!raw) return resolvePromise(undefined);
       try {
         resolvePromise(JSON.parse(raw));
       } catch {
-        resolvePromise(raw);
+        rejectPromise(new Error('INVALID_JSON_BODY'));
       }
     });
-    req.on('error', () => resolvePromise(undefined));
+    req.on('error', rejectPromise);
   });
 }
 
@@ -113,8 +126,17 @@ async function main() {
     const url = new URL(req.url || '/', `http://localhost:${PORT}`);
     const pathname = url.pathname.replace(/\/$/, '') || '/';
 
-    // Parse body
-    (req as any).body = await parseBody(req);
+    // Parse body with a bounded size and explicit JSON errors.
+    try {
+      (req as any).body = await parseBody(req);
+    } catch (error) {
+      const code = String((error as Error)?.message || '');
+      res.statusCode = code === 'REQUEST_BODY_TOO_LARGE' ? 413 : 400;
+      res.setHeader('Content-Type', 'application/json; charset=utf-8');
+      res.end(JSON.stringify({ error: code === 'REQUEST_BODY_TOO_LARGE' ? code : 'INVALID_JSON_BODY' }));
+      return;
+    }
+    (req as any).query = Object.fromEntries(url.searchParams.entries());
 
     try {
       // Rotas específicas primeiro

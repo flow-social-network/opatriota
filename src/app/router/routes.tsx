@@ -42,6 +42,13 @@ const AccessDeniedPage = lazy(() => import('../../pages/auth/AccessDeniedPage'))
 const AdminPage = lazy(() => import('../../pages/admin/AdminPage'));
 const NewsroomPage = lazy(() => import('../../pages/editorial/NewsroomPage'));
 const ClientPage = lazy(() => import('../../pages/client/ClientPage'));
+const AdminOverviewPage = lazy(() => import('../../pages/admin/DashboardPage').then((module) => ({ default: module.DashboardPage })));
+const AdminArticlesPage = lazy(() => import('../../pages/admin/ArticlesPage').then((module) => ({ default: module.ArticlesPage })));
+const AdminCategoriesPage = lazy(() => import('../../pages/admin/CategoriesPage').then((module) => ({ default: module.CategoriesPage })));
+const AdminJournalistsPage = lazy(() => import('../../pages/admin/JournalistsPage').then((module) => ({ default: module.JournalistsPage })));
+const AdminSourcesPage = lazy(() => import('../../pages/admin/SourcesPage').then((module) => ({ default: module.SourcesPage })));
+const AdminUsersPage = lazy(() => import('../../pages/admin/UsersPage').then((module) => ({ default: module.UsersPage })));
+const AdminPermissionsPage = lazy(() => import('../../pages/admin/PermissionsPage').then((module) => ({ default: module.PermissionsPage })));
 
 function AuthFallback() {
   return (
@@ -116,8 +123,30 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <LazyPanel><AdminPage /></LazyPanel> },
-      { path: ':section', element: <LazyPanel><AdminPage /></LazyPanel> },
-      { path: '*', element: <Navigate to="/admin" replace /> },
+      { path: 'dashboard', element: <LazyPanel><AdminOverviewPage /></LazyPanel> },
+      { path: 'articles', element: <LazyPanel><AdminArticlesPage /></LazyPanel> },
+      { path: 'materias', element: <LazyPanel><AdminArticlesPage /></LazyPanel> },
+      { path: 'categories', element: <LazyPanel><AdminCategoriesPage /></LazyPanel> },
+      { path: 'categorias', element: <LazyPanel><AdminCategoriesPage /></LazyPanel> },
+      { path: 'journalists', element: <LazyPanel><AdminJournalistsPage /></LazyPanel> },
+      { path: 'autores', element: <LazyPanel><AdminJournalistsPage /></LazyPanel> },
+      { path: 'sources', element: <LazyPanel><AdminSourcesPage /></LazyPanel> },
+      { path: 'fontes', element: <LazyPanel><AdminSourcesPage /></LazyPanel> },
+      { path: 'users', element: <LazyPanel><AdminUsersPage /></LazyPanel> },
+      { path: 'usuarios', element: <LazyPanel><AdminUsersPage /></LazyPanel> },
+      { path: 'permissions', element: <LazyPanel><AdminPermissionsPage /></LazyPanel> },
+      { path: 'permissoes', element: <LazyPanel><AdminPermissionsPage /></LazyPanel> },
+      { path: 'fila', element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: 'queue', element: <Navigate to="/admin/fila" replace /> },
+      { path: 'dedup', element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: 'identidade', element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: 'identity', element: <Navigate to="/admin/identidade" replace /> },
+      { path: 'redes', element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: 'social', element: <Navigate to="/admin/redes" replace /> },
+      { path: 'publicidade', element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: 'ads', element: <Navigate to="/admin/publicidade" replace /> },
+      { path: 'push', element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: '*', element: <Navigate to="/404" replace /> },
     ],
   },
 
@@ -131,8 +160,18 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <LazyPanel><NewsroomPage /></LazyPanel> },
-      { path: ':section', element: <LazyPanel><NewsroomPage /></LazyPanel> },
-      { path: '*', element: <Navigate to="/redacao" replace /> },
+      { path: 'materias', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'artigos', element: <Navigate to="/redacao/materias" replace /> },
+      { path: 'editor', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'revisao', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'agenda', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'aprovacao', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'midia', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'categorias', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'paginas', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'menus', element: <LazyPanel><NewsroomPage /></LazyPanel> },
+      { path: 'fontes', element: <LazyPanel><AdminSourcesPage /></LazyPanel> },
+      { path: '*', element: <Navigate to="/404" replace /> },
     ],
   },
 

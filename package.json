@@ -14,13 +14,12 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
-    "test": "echo \"No tests configured yet\" && exit 0"
+    "test": "tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react": "^6.1.1",
     "firebase": "^13.0.0",
-    "jszip": "^3.10.2",
     "lucide-react": "^0.546.0",
     "mysql2": "^3.24.5",
     "pg": "^8.23.1",
@@ -30,7 +29,6 @@
     "vite": "^8.3.0"
   },
   "devDependencies": {
-    "@types/jszip": "^3.4.1",
     "@types/node": "^22.14.0",
     "@types/pg": "^8.23.1",
     "@types/react": "^19.3.0",

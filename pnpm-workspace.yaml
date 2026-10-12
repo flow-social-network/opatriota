@@ -2,7 +2,11 @@ packages:
   - "apps/*"
   - "packages/*"
   - "core/*"
+
+# Explicitly allow the audited install scripts required by Firebase and Vite's
+# native build toolchain. These values must be booleans; placeholder strings
+# make pnpm fail with ERR_PNPM_IGNORED_BUILDS in CI.
 allowBuilds:
-  '@firebase/util': set this to true or false
-  esbuild: set this to true or false
-  protobufjs: set this to true or false
+  '@firebase/util': true
+  esbuild: true
+  protobufjs: true

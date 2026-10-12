@@ -1,5 +1,5 @@
 import React from 'react';
-import { Outlet, useNavigate, Link } from 'react-router-dom';
+import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { ArrowLeft, Home } from 'lucide-react';
 
@@ -24,6 +24,31 @@ export function PanelLayout({
 }: PanelLayoutProps) {
   const { currentUser, authLoading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const adminModulePaths = new Set([
+    '/admin', '/admin/dashboard', '/admin/articles', '/admin/materias',
+    '/admin/categories', '/admin/categorias', '/admin/journalists', '/admin/autores',
+    '/admin/sources', '/admin/fontes', '/admin/users', '/admin/usuarios',
+    '/admin/permissions', '/admin/permissoes',
+    '/admin/fila', '/admin/dedup', '/admin/identidade', '/admin/redes', '/admin/publicidade', '/admin/push',
+  ]);
+  const showAdminModuleNavigation = adminModulePaths.has(location.pathname);
+  const adminModuleLinks = [
+    { to: '/admin', label: 'Painel' },
+    { to: '/admin/dashboard', label: 'Visão geral' },
+    { to: '/admin/articles', label: 'Matérias' },
+    { to: '/admin/categories', label: 'Editorias' },
+    { to: '/admin/journalists', label: 'Autores' },
+    { to: '/admin/sources', label: 'Fontes RSS' },
+    { to: '/admin/users', label: 'Usuários' },
+    { to: '/admin/permissions', label: 'Permissões' },
+    { to: '/admin/fila', label: 'Fila editorial' },
+    { to: '/admin/dedup', label: 'Deduplicação' },
+    { to: '/admin/identidade', label: 'Identidade' },
+    { to: '/admin/redes', label: 'Redes sociais' },
+    { to: '/admin/publicidade', label: 'Publicidade' },
+    { to: '/admin/push', label: 'Notificações' },
+  ];
 
   if (authLoading) {
     return (
@@ -84,6 +109,32 @@ export function PanelLayout({
             </nav>
           </div>
         </header>
+      )}
+
+      {showAdminModuleNavigation && (
+        <nav aria-label="Módulos administrativos" className="border-b border-[#D9DEE7] bg-white">
+          <div className="mx-auto flex max-w-[1400px] gap-1 overflow-x-auto px-4 py-2">
+            {adminModuleLinks.map((item) => {
+              const active = location.pathname === item.to ||
+                (item.to === '/admin/articles' && location.pathname === '/admin/materias') ||
+                (item.to === '/admin/categories' && location.pathname === '/admin/categorias') ||
+                (item.to === '/admin/journalists' && location.pathname === '/admin/autores') ||
+                (item.to === '/admin/sources' && location.pathname === '/admin/fontes') ||
+                (item.to === '/admin/users' && location.pathname === '/admin/usuarios') ||
+                (item.to === '/admin/permissions' && location.pathname === '/admin/permissoes');
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  aria-current={active ? 'page' : undefined}
+                  className={`shrink-0 rounded-md px-3 py-2 text-xs font-semibold transition ${active ? 'bg-[#0B2345] text-white' : 'text-[#475569] hover:bg-[#F1F5F9] hover:text-[#0B2345]'}`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+        </nav>
       )}
 
       <main className="flex-1">

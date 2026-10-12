@@ -42,6 +42,8 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
   }, []);
 
   if (!enabled) return null;
+  const hasUpdatedData = items.some((item) => item.status === 'atualizado' && Boolean(item.value) && Boolean(item.observedAt));
+  const hasLastKnownData = items.some((item) => item.status === 'último valor' && Boolean(item.value));
 
   const renderItems = (copy = false) => items.map((item) => (
     <div key={`${item.symbol}-${copy ? 'copy' : 'primary'}`} className="market-ticker__item" aria-hidden={copy}>
@@ -79,7 +81,10 @@ export const BreakingNewsTicker: React.FC<BreakingNewsTickerProps> = ({
         >
           {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
         </button>
-        <span className="market-ticker__live"><Radio aria-hidden="true" /> Dados verificados</span>
+        <span className="market-ticker__live">
+          <Radio aria-hidden="true" />
+          {hasUpdatedData ? 'Dados atualizados' : hasLastKnownData ? 'Últimos valores disponíveis' : 'Fontes não configuradas'}
+        </span>
       </div>
     </section>
   );

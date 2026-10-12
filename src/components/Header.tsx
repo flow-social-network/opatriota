@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Logo } from './Logo';
-import { CategorySlug, UserSession, PortalSettings, SocialPlatform } from '../types';
+import { CategorySlug, UserSession, PortalSettings, SocialNetworkItem, SocialPlatform } from '../types';
 import { 
   Search, 
   ChevronDown, 
@@ -326,93 +326,52 @@ export const Header: React.FC<HeaderProps> = ({
   const formattedFullDate = fullDateText.charAt(0).toUpperCase() + fullDateText.slice(1);
   const mobileShortDate = `Taquara (RS), ${now.toLocaleDateString('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })}`;
 
-  // Circular colored social icons matching Image 3
-  const socialIconsConfig: {
-    platform: SocialPlatform;
-    name: string;
-    url: string;
-    bgColor: string;
-    icon: React.ReactNode;
-  }[] = [
-    {
-      platform: 'facebook',
-      name: 'Facebook',
-      url: 'https://www.facebook.com/opatriota.news.brasil/',
-      bgColor: 'bg-[#1877F2]',
-      icon: <Facebook className="w-3.5 h-3.5 text-white fill-current" />
-    },
-    {
-      platform: 'instagram',
-      name: 'Instagram',
-      url: 'https://www.instagram.com/journal_opatriota/',
-      bgColor: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]',
-      icon: <Instagram className="w-3.5 h-3.5 text-white" />
-    },
-    {
-      platform: 'youtube',
-      name: 'YouTube',
-      url: 'https://www.youtube.com/@jornal_opatriota',
-      bgColor: 'bg-[#FF0000]',
-      icon: <Youtube className="w-3.5 h-3.5 text-white fill-current" />
-    },
-    {
-      platform: 'x',
-      name: 'X',
-      url: 'https://x.com/opatriotabr',
-      bgColor: 'bg-[#000000]',
-      icon: <Twitter className="w-3.5 h-3.5 text-white fill-current" />
-    },
-    {
-      platform: 'linkedin',
-      name: 'LinkedIn',
-      url: 'https://www.linkedin.com/company/journal-o-patriota',
-      bgColor: 'bg-[#0A66C2]',
-      icon: <Linkedin className="w-3.5 h-3.5 text-white fill-current" />
-    },
-    {
-      platform: 'telegram',
-      name: 'Telegram',
-      url: 'https://t.me/opatriotabrasil',
-      bgColor: 'bg-[#229ED9]',
-      icon: <Send className="w-3.5 h-3.5 text-white fill-current" />
-    },
-    {
-      platform: 'whatsapp',
-      name: 'WhatsApp',
-      url: 'https://whatsapp.com/channel/0029VbDzzEo4o7qIuMMRBp2n',
-      bgColor: 'bg-[#25D366]',
-      icon: <MessageCircle className="w-3.5 h-3.5 text-white fill-current" />
-    },
-    {
-      platform: 'rss',
-      name: 'RSS',
-      url: '/rss.xml',
-      bgColor: 'bg-[#EE802F]',
-      icon: <Rss className="w-3.5 h-3.5 text-white" />
-    },
-    {
-      platform: 'tiktok',
-      name: 'TikTok Marcos Dresbach',
-      url: 'https://www.tiktok.com/@marcosdresbach',
-      bgColor: 'bg-[#000000]',
-      icon: (
-        <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
-          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.82 4.49 6.3 6.3 0 0 0 1.88-4.49V8.75a8.28 8.28 0 0 0 3.89 1.15V6.69z"/>
-        </svg>
-      )
-    },
-    {
-      platform: 'kwai',
-      name: 'Kwai',
-      url: 'https://k.kwai.com/u/@jornal-opatriota/WPiCxD5Te',
-      bgColor: 'bg-[#FF5000]',
-      icon: (
-        <svg className="w-3.5 h-3.5 fill-white" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14.5v-9l7 4.5-7 4.5z"/>
-        </svg>
-      )
+  const socialBackgrounds: Record<SocialPlatform, string> = {
+    facebook: 'bg-[#1877F2]',
+    instagram: 'bg-gradient-to-tr from-[#F58529] via-[#DD2A7B] to-[#8134AF]',
+    youtube: 'bg-[#FF0000]',
+    x: 'bg-black',
+    linkedin: 'bg-[#0A66C2]',
+    whatsapp: 'bg-[#25D366]',
+    telegram: 'bg-[#229ED9]',
+    kwai: 'bg-[#FF5000]',
+    tiktok: 'bg-black',
+    rss: 'bg-[#F97316]',
+  };
+
+  const renderSocialIcon = (platform: SocialPlatform) => {
+    switch (platform) {
+      case 'facebook': return <Facebook className="h-3.5 w-3.5 fill-current text-white" />;
+      case 'instagram': return <Instagram className="h-3.5 w-3.5 text-white" />;
+      case 'youtube': return <Youtube className="h-3.5 w-3.5 fill-current text-white" />;
+      case 'x': return <Twitter className="h-3.5 w-3.5 fill-current text-white" />;
+      case 'linkedin': return <Linkedin className="h-3.5 w-3.5 fill-current text-white" />;
+      case 'whatsapp': return <MessageCircle className="h-3.5 w-3.5 fill-current text-white" />;
+      case 'telegram': return <Send className="h-3.5 w-3.5 fill-current text-white" />;
+      case 'rss': return <Rss className="h-3.5 w-3.5 text-white" />;
+      case 'kwai': return <span aria-hidden="true" className="text-[9px] font-black text-white">Kw</span>;
+      case 'tiktok': return <span aria-hidden="true" className="text-xs font-black text-white">♪</span>;
+      default: return <Share2 className="h-3.5 w-3.5 text-white" />;
     }
-  ];
+  };
+
+  const isSafeSocialUrl = (item: SocialNetworkItem) => {
+    if (item.platform === 'rss' && item.url.startsWith('/') && !item.url.startsWith('//')) return true;
+    try {
+      return new URL(item.url).protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  const socialIconsConfig = (portalSettings?.socialNetworks || [])
+    .filter((item) => item.active && isSafeSocialUrl(item))
+    .sort((a, b) => a.order - b.order)
+    .map((item) => ({
+      ...item,
+      bgColor: socialBackgrounds[item.platform],
+      icon: renderSocialIcon(item.platform),
+    }));
 
   // Papéis autorizados para Redação e Painel Administrativo
   const EDITORIAL_ROLES = ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'];
@@ -601,9 +560,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="relative p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#E11D48] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
-                  5
-                </span>
+                
               </button>
 
               <button
@@ -649,25 +606,11 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
               <span>Taquara (RS)</span>
-              <span>24°C</span>
-              <span className="bg-[#10B981] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase">
-                INMET
-              </span>
+              <span className="text-[#64748B] font-medium">Consultar previsão</span>
             </button>
           </div>
 
-          {/* Markets Bar no Mobile */}
-          <div className="bg-white px-3 py-1.5 border-b border-[#E2E8F0] flex items-center text-[11px] font-medium text-[#0F172A]">
-            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#16803C] shrink-0 mr-3">
-              <span className="w-2 h-2 rounded-full bg-[#16803C] animate-pulse" />
-              <span>MERCADOS AO VIVO</span>
-            </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none text-slate-700">
-              <span>Dólar</span>
-              <span className="font-bold">R$ 5,45</span>
-              <span className="text-[#16803C] font-bold">▲ +0,32%</span>
-            </div>
-          </div>
+          <BreakingNewsTicker enabled />
         </div>
 
 
@@ -696,11 +639,7 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
                   <span className="font-bold">Taquara (RS)</span>
-                  <span className="font-bold">24°C</span>
-                  <span className="text-[#64748B] text-[10px]">Céu limpo</span>
-                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">
-                    INMET
-                  </span>
+                  <span className="text-[#64748B] text-[10px]">Previsão não verificada</span>
                 </button>
               </div>
 
@@ -755,7 +694,7 @@ export const Header: React.FC<HeaderProps> = ({
                   aria-label="Abrir notificações"
                 >
                   <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF2222] text-white text-[9px] font-black flex items-center justify-center">3</span>
+                  
                 </button>
                 {currentUser ? (
                   <button onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-2 text-[#0B2345] font-bold text-[12px] cursor-pointer" aria-label="Menu do usuário" aria-expanded={userDropdownOpen}>
@@ -775,54 +714,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
-          <div className="bg-[#061A35] text-white px-5 py-3 text-[13px] font-medium border-b border-[#0d223a]">
-            <div className="w-full mx-auto flex items-center justify-between gap-5">
-              <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
-                {/* Ponto verde pulsante + MERCADOS AO VIVO */}
-                <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#22C55E] shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                  <span>MERCADOS AO VIVO</span>
-                </div>
-
-                <span className="text-white/20">|</span>
-
-                {/* Indicadores Econômicos */}
-                <div className="flex items-center gap-4 text-white/90">
-                  <div className="flex items-center gap-1">
-                    <span className="text-white/60">Dólar</span>
-                    <span className="font-bold text-white">R$ 5,45</span>
-                    <span className="text-[#22C55E] font-bold">▲ +0,32%</span>
-                  </div>
-
-                  <span className="text-white/20">|</span>
-
-                  <div className="flex items-center gap-1">
-                    <span className="text-white/60">Euro</span>
-                    <span className="font-bold text-white">R$ 5,89</span>
-                    <span className="text-[#EF4444] font-bold">▼ -0,14%</span>
-                  </div>
-
-                  <span className="text-white/20">|</span>
-
-                  <div className="flex items-center gap-1">
-                    <span className="text-white/60">Ibovespa</span>
-                    <span className="font-bold text-white">145.320</span>
-                    <span className="text-[#22C55E] font-bold">▲ +0,68%</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mais Cotações */}
-              <button 
-                onClick={() => onSelectCategory('economia')}
-                className="text-white/70 hover:text-white flex items-center gap-1 text-[11px] shrink-0 transition cursor-pointer"
-              >
-                <span>Mais cotações</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
+          <BreakingNewsTicker enabled />
 
           {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E CONTROLES DE NOTIFICAÇÃO/USUÁRIO */}
           <div className="bg-white py-7 px-9 border-b border-[#E2E8F0]">

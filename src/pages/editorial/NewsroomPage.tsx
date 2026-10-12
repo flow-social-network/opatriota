@@ -1,5 +1,5 @@
 import React from 'react';
-import { useLocation } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { useToast } from '../../app/contexts/ToastContext';
@@ -7,12 +7,39 @@ import { NewsroomDashboard } from '../../components/newsroom/NewsroomDashboard';
 
 export default function NewsroomPage() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { currentUser, authLoading } = useAuth();
+  const section = location.pathname.split('/').filter(Boolean)[1] || 'painel';
+  const tabMapping: Record<string, 'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus'> = {
+    painel: 'painel',
+    materias: 'materias',
+    artigos: 'materias',
+    editor: 'editor',
+    nova: 'editor',
+    fontes: 'fontes',
+    midia: 'midia',
+    paginas: 'paginas',
+    categorias: 'categorias',
+    menus: 'menus',
+    revisao: 'materias',
+    agenda: 'materias',
+    aprovacao: 'materias',
+  };
+  const statusFilterMapping: Record<string, string> = {
+    revisao: 'EM REVISÃO',
+    agenda: 'AGENDADA',
+    aprovacao: 'APROVADA',
+  };
+  const initialStatusFilter = statusFilterMapping[section] || 'TODAS';
+  const initialTab = tabMapping[section] || 'painel';
   const {
-    articles, sources, pages, categories, authors, subscriptionPlans,
-    updateArticles, updateSources, savePage, deletePage,
+    articles, pages, categories,
+    updateArticles, savePage, deletePage,
     saveCategory, saveMenuConfig,
   } = useData();
+
+  // Unknown editorial paths must not silently open the dashboard.
+  if (section && !tabMapping[section]) return <Navigate to="/404" replace />;
 
   // Handle auth loading
   if (authLoading) {
@@ -37,14 +64,17 @@ export default function NewsroomPage() {
   return (
     <div className="min-h-screen bg-[#F7F8FA] flex flex-col font-sans antialiased text-[#17202A]">
       <NewsroomDashboard
+        initialTab={initialTab}
+        initialStatusFilter={initialStatusFilter}
+        onTabChange={(tab) => navigate(tab === 'painel' ? '/redacao' : `/redacao/${tab}`)}
         articles={articles}
-        sources={sources}
-        onUpdateSources={updateSources}
         currentUser={currentUser}
         onUpdateArticles={updateArticles}
+        onPreviewArticle={(article) => navigate(`/noticia/${encodeURIComponent(String(article.slug || article.id))}?preview=1`)}
         pages={pages}
         onSavePage={savePage}
         onDeletePage={deletePage}
+        onPreviewPage={(slug) => navigate(`/${slug.split('/').filter(Boolean).join('/')}?preview=1`)}
         categories={categories}
         onSaveCategory={saveCategory}
         onSaveMenuConfig={saveMenuConfig}

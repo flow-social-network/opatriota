@@ -66,13 +66,13 @@ export const InstitutionalPageView: React.FC<InstitutionalPageViewProps> = ({
           <div className="flex items-center gap-3 text-xs text-[#5D6673]">
             <span className="flex items-center gap-1">
               <Calendar className="w-3.5 h-3.5 text-[#0B2345]" />
-              Atualizado em: <strong className="text-[#0B2345]">{page.updatedAt}</strong>
+              {page.updatedAt && <>Atualizado em: <strong className="text-[#0B2345]">{page.updatedAt}</strong></>}
             </span>
             <span className="hidden sm:inline">•</span>
             <button
               onClick={handlePrint}
               className="hidden sm:flex items-center gap-1 hover:text-[#0B2345] transition cursor-pointer"
-              title="Imprimir documento oficial"
+              title="Imprimir página"
             >
               <Printer className="w-3.5 h-3.5" />
               <span>Imprimir</span>
