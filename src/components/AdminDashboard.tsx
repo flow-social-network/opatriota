@@ -9,17 +9,14 @@ import { PushNotificationManager } from './admin/PushNotificationManager';
 import { AdminOverviewTab } from './admin/AdminOverviewTab';
 import { AdminQueueTab } from './admin/AdminQueueTab';
 import { AdminDedupTab } from './admin/AdminDedupTab';
-import { AdminExportTab } from './admin/AdminExportTab';
 import { UsersPage } from '../pages/admin/UsersPage';
 import { PermissionsPage } from '../pages/admin/PermissionsPage';
 import { DEFAULT_WEBPUSH_CONFIG } from '../services/siteConfigService';
-import JSZip from 'jszip';
 import { 
   SlidersHorizontal, 
   Rss, 
   Layers, 
   GitPullRequest, 
-  Download, 
   CheckCircle2, 
   RefreshCw, 
   ArrowLeft,
@@ -31,7 +28,7 @@ import {
   Shield
 } from 'lucide-react';
 
-type AdminTab = 'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes';
+type AdminTab = 'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'usuarios' | 'permissoes';
 
 interface AdminDashboardProps {
   initialTab?: AdminTab;
@@ -84,10 +81,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   // Status filter for editorial queue
   const [queueFilter, setQueueFilter] = useState<string>('TODAS');
 
-  // One-click ZIP generation state
-  const [isZipping, setIsZipping] = useState(false);
-  const [zipSuccess, setZipSuccess] = useState<string | null>(null);
-  const [zipError, setZipError] = useState<string | null>(null);
 
   // The backend performs the actual RSS fetch and persists source/queue updates.
   const handleSyncAll = async () => {
@@ -202,61 +195,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         reason: 'Camada 5: Nenhuma correspondência prévia detectada. Pauta inédita.',
         score: maxSim.toFixed(1)
       });
-    }
-  };
-
-  // ZIP Downloader for real WordPress installation
-  const handleDownloadZip = async (type: 'theme' | 'plugin' | 'both') => {
-    setIsZipping(true);
-    setZipSuccess(null);
-    setZipError(null);
-
-    try {
-      const zip = new JSZip();
-
-      if (type === 'theme' || type === 'both') {
-        const themeFolder = zip.folder('o-patriota');
-        themeFolder?.file('style.css', `/* Theme Name: O Patriota\nTheme URI: https://www.opatriota.sbs\nAuthor: Redação O Patriota\nVersion: 1.0.0\nText Domain: o-patriota */\n:root { --color-primary: #0B2345; --color-accent: #FFCC29; }`);
-        themeFolder?.file('functions.php', `<?php\ndefine('O_PATRIOTA_VERSION', '1.0.0');\nrequire_once __DIR__ . '/inc/setup.php';\nrequire_once __DIR__ . '/inc/assets.php';`);
-        themeFolder?.file('theme.json', JSON.stringify({ version: 3, settings: { color: { palette: [{ slug: 'primary', color: '#0B2345', name: 'Azul Marinho' }] } } }, null, 2));
-        
-        const templates = themeFolder?.folder('templates');
-        templates?.file('front-page.html', `<!-- wp:template-part {"slug":"header"} /-->\n<!-- wp:pattern {"slug":"o-patriota/hero-news"} /-->\n<!-- wp:template-part {"slug":"footer"} /-->`);
-        templates?.file('single.html', `<!-- wp:template-part {"slug":"header"} /-->\n<!-- wp:post-title /-->\n<!-- wp:post-content /-->\n<!-- wp:template-part {"slug":"footer"} /-->`);
-        templates?.file('page-minha-conta.html', `<!-- wp:template-part {"slug":"header"} /-->\n<!-- wp:post-title /-->\n<!-- wp:post-content /-->\n<!-- wp:template-part {"slug":"footer"} /-->`);
-        templates?.file('page-redacao.html', `<!-- wp:template-part {"slug":"header"} /-->\n<!-- wp:post-title /-->\n<!-- wp:post-content /-->\n<!-- wp:template-part {"slug":"footer"} /-->`);
-
-        const parts = themeFolder?.folder('parts');
-        parts?.file('header.html', `<header class="site-header"><h1>O PATRIOTA</h1></header>`);
-        parts?.file('footer.html', `<footer class="site-footer"><p>© 2026 O Patriota</p></footer>`);
-      }
-
-      if (type === 'plugin' || type === 'both') {
-        const pluginFolder = zip.folder('o-patriota-editorial');
-        pluginFolder?.file('o-patriota-editorial.php', `<?php\n/**\n * Plugin Name: O Patriota Editorial\n * Description: Sistema editorial para O Patriota\n * Version: 1.0.0\n */\nrequire_once __DIR__ . '/includes/class-plugin.php';`);
-        const includes = pluginFolder?.folder('includes');
-        includes?.file('class-plugin.php', `<?php class O_Patriota_Plugin { public function run() {} }`);
-        includes?.file('class-capabilities.php', `<?php class O_Patriota_Capabilities { public static function add_capabilities() {} }`);
-        includes?.file('class-content-restriction.php', `<?php class O_Patriota_Content_Restriction { public static function init() {} }`);
-        includes?.file('class-subscriber-portal.php', `<?php class O_Patriota_Subscriber_Portal { public static function init() {} }`);
-        includes?.file('class-newsroom-workflow.php', `<?php class O_Patriota_Newsroom_Workflow { public static function init() {} }`);
-        includes?.file('class-source-manager.php', `<?php class O_Patriota_Source_Manager {}`);
-        includes?.file('class-deduplication.php', `<?php class O_Patriota_Deduplication {}`);
-      }
-
-      const content = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(content);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = type === 'theme' ? 'o-patriota-theme.zip' : type === 'plugin' ? 'o-patriota-editorial-plugin.zip' : 'o-patriota-wordpress-suite.zip';
-      link.click();
-      URL.revokeObjectURL(url);
-
-      setIsZipping(false);
-      setZipSuccess(`Arquivo ${link.download} gerado e baixado com sucesso! Pronto para instalar no WordPress.`);
-    } catch (err) {
-      setIsZipping(false);
-      setZipError('Erro ao empacotar arquivo ZIP.');
     }
   };
 
@@ -410,15 +348,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <span>Permissões (RBAC)</span>
           </button>
 
-          <button
-            onClick={() => handleTabChange('download')}
-            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'download' ? 'bg-white text-[#16803C] border-t-2 border-[#16803C] shadow-xs' : 'text-[#16803C] hover:bg-white/50'
-            }`}
-          >
-            <Download className="w-4 h-4" />
-            <span>Baixar ZIP para WordPress</span>
-          </button>
+
         </div>
 
         {/* TAB 1: PAINEL GERAL */}
@@ -517,16 +447,6 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
               setSyncMessage(msg);
               setTimeout(() => setSyncMessage(null), 4000);
             }}
-          />
-        )}
-
-        {/* TAB 9: DOWNLOAD ZIP */}
-        {activeTab === 'download' && (
-          <AdminExportTab
-            isZipping={isZipping}
-            zipSuccess={zipSuccess}
-            zipError={zipError}
-            onDownloadZip={handleDownloadZip}
           />
         )}
 
