@@ -102,6 +102,14 @@
   position: static;
 }
 
+@media (max-width: 1023px) {
+  header button[aria-label="Buscar Notícias"] {
+    min-height: 28px !important;
+    max-height: 28px !important;
+    height: 28px !important;
+  }
+}
+
 .market-ticker {
   background: var(--color-primary-dark);
   color: #f7f8fa;

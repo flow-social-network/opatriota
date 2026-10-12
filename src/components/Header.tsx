@@ -620,16 +620,16 @@ export const Header: React.FC<HeaderProps> = ({
   <button
   onClick={() => setMobileMenuOpen(true)}
   aria-label="Buscar Notícias"
-  className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
+  className="flex !size-7 !h-7 !max-h-7 shrink-0 self-center items-center justify-center p-0 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
   >
-  <Search className="w-5 h-5" />
+  <Search className="w-4 h-4" />
   </button>
   
   {currentUser && (
   <button
   onClick={() => onOpenSubscriberModal?.('notificacoes')}
   aria-label="Notificações"
-  className="relative p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
+  className="relative shrink-0 p-1 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
   >
   <Bell className="w-5 h-5" />
   <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#E11D48] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
@@ -639,8 +639,8 @@ export const Header: React.FC<HeaderProps> = ({
   )}
   
   {currentUser ? (
-                  <button onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-2 text-[#0B2345] font-bold text-[12px] cursor-pointer" aria-label="Menu do usuário" aria-expanded={userDropdownOpen}>
-                    <img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="w-9 h-9 rounded-full object-cover border-2 border-[#0B2345]" />
+                  <button onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex min-w-0 shrink items-center gap-1 text-[#0B2345] font-bold text-[11px] cursor-pointer" aria-label="Menu do usuário" aria-expanded={userDropdownOpen}>
+                    <img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="size-7 rounded-full object-cover border-2 border-[#0B2345]" />
                     <span className="max-w-[110px] truncate">{currentUser.name}</span>
                     <span className="text-[#0B2345]">⌄</span>
                   </button>
