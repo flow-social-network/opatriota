@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { HeroSection } from '../../components/HeroSection';
+import { FeaturedVideoSpotlight } from '../../components/FeaturedVideoSpotlight';
 import { EditorialGrid } from '../../components/EditorialGrid';
 import { RegionalCoverageRS } from '../../components/RegionalCoverageRS';
 import { NationalNewsSection } from '../../components/NationalNewsSection';
@@ -16,6 +17,10 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   const handleSelectArticle = (article: Article) => navigate(`/noticia/${article.slug}`);
+
+  const videoArticle = articles.find(
+    (a) => a.slug === 'protestar-e-direito-vandalismo-nao' || a.id === 'art-video-protestar-direito'
+  );
 
   // Facebook posts to display on home page
   const facebookPosts = [
@@ -71,6 +76,7 @@ export default function HomePage() {
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <HeroSection articles={articles} onSelectArticle={handleSelectArticle} />
+      <FeaturedVideoSpotlight article={videoArticle} onSelectArticle={handleSelectArticle} />
       <EditorialGrid articles={articles} onSelectArticle={handleSelectArticle} />
       <RegionalCoverageRS
         articles={articles}

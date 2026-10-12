@@ -325,6 +325,186 @@ export const INITIAL_MEDIA_ITEMS: MediaItem[] = [
 
 export const INITIAL_ARTICLES: Article[] = [
   {
+    id: 'art-video-protestar-direito',
+    slug: 'protestar-e-direito-vandalismo-nao',
+    title: 'PROTESTAR É DIREITO, VANDALISMO NÃO!',
+    subtitle: 'A liberdade de manifestação é um direito fundamental. Mas destruir o patrimônio público não pode ser tratado como algo normal. Exigimos transparência, apuração e o mesmo critério para todos.',
+    kicker: 'EDITORIAL EM VÍDEO',
+    category: 'politica',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'alta',
+    videoEmbedUrl: 'https://www.youtube.com/embed/IACLb9V3d6U',
+    videoIframeHtml: '<iframe width="918" height="516" src="https://www.youtube.com/embed/IACLb9V3d6U" title="PROTESTAR É DIREITO, VANDALISMO NÃO!" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    content: `🇧🇷 A liberdade de manifestação é um direito fundamental. Mas destruir o patrimônio público não pode ser tratado como algo normal.
+
+Após o ato pró-Lula na Avenida Paulista, a Polícia Militar relatou tumulto, pichações e depredação durante a dispersão dos manifestantes. O Metrô, por sua vez, afirmou não ter registros internos de danos nas estações da região.
+
+Diante das versões divergentes, cobramos transparência, investigação e esclarecimentos. Se houve danos, os responsáveis devem ser identificados e responder por seus atos, conforme a lei.
+
+⚖️ Nossa posição é clara: responsabilidade individual, provas e o mesmo critério para todos os campos políticos.
+
+💬 Você concorda que o patrimônio público deve ser respeitado independentemente de quem organiza a manifestação? Deixe sua opinião nos comentários.
+
+📰 O PATRIOTA — Informação com Liberdade, por um Brasil mais forte!
+
+#OPatriota #Editorial #LiberdadeDeManifestação #Vandalismo #PatrimônioPúblico #PolíticaBrasileira #Justiça #Brasil`,
+    author: 'Redação O Patriota',
+    authorId: 'usr-4',
+    authorRole: 'Editorial & Análise Multimídia',
+    publishedAt: '12 de outubro de 2026 às 10:00',
+    updatedAt: '12 de outubro de 2026 às 10:15',
+    readTimeMinutes: 2,
+    imageUrl: 'https://img.youtube.com/vi/IACLb9V3d6U/hqdefault.jpg',
+    imageCaption: 'PROTESTAR É DIREITO, VANDALISMO NÃO! — Assista ao vídeo editorial exclusivo de O Patriota Brasil.',
+    imageCredits: 'O Patriota Brasil / YouTube Oficial',
+    sourceName: 'Apuração Editorial / PM-SP e Metrô',
+    sourceUrl: 'https://www.youtube.com/watch?v=IACLb9V3d6U',
+    sourcesConsulted: ['Relatório da Polícia Militar do Estado de São Paulo', 'Nota oficial da Companhia do Metropolitano de SP', 'Registro audiovisual exclusivo O Patriota'],
+    tags: ['Editorial', 'Liberdade de Manifestação', 'Vandalismo', 'Patrimônio Público', 'Política Brasileira', 'Justiça', 'Brasil'],
+    auditLog: [
+      {
+        id: 'aud-video-1',
+        timestamp: '12/10/2026 09:30',
+        userName: 'Thiago Vasconcellos',
+        userRole: 'jornalista',
+        action: 'Criação do editorial multimídia com vídeo'
+      },
+      {
+        id: 'aud-video-2',
+        timestamp: '12/10/2026 09:55',
+        userName: 'Dr. Alberto Gonçalves',
+        userRole: 'editor_chefe',
+        action: 'Aprovação e publicação em destaque no portal',
+        previousStatus: 'EM REVISÃO',
+        newStatus: 'PUBLICADA',
+        notes: 'Destaque prioritário na homepage e área de vídeo.'
+      }
+    ]
+  },
+  {
+    id: 'art-policia-metro-divergem-paulista',
+    slug: 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista',
+    title: 'Polícia e Metrô divergem sobre danos após ato pró-Lula na Avenida Paulista',
+    subtitle: 'A Secretaria da Segurança Pública afirma que a PM registrou tumulto, pichações e depredação durante a dispersão; o Metrô diz não ter registros internos de danos nas estações da região.',
+    kicker: 'ELEIÇÕES 2026 & SEGURANÇA',
+    category: 'politica',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'alta',
+    content: `SÃO PAULO, 12 de outubro de 2026 — Um ato da campanha do presidente Luiz Inácio Lula da Silva (PT), candidato à reeleição, terminou no domingo (11) na Avenida Paulista com versões diferentes sobre o que ocorreu na dispersão. A Polícia Militar relatou tumulto, pichações e depredação. O Metrô disse que, até o início da noite, não tinha registros internos de vandalismo ou danos nas estações da região.
+
+A divergência não havia sido esclarecida nas informações divulgadas até a publicação desta reportagem. Ela surge a duas semanas do segundo turno, marcado para 25 de outubro, em que Lula enfrenta Flávio Bolsonaro (PL), e em um ambiente polarizado em que episódios assim costumam ser rapidamente usados por ambos os lados.
+
+Em nota enviada por volta das 19h, a Secretaria da Segurança Pública informou que as ocorrências surgiram “durante a dispersão dos manifestantes”. Segundo a PM, os acessos às estações Trianon-Masp (Linha 2-Verde) e Paulista (Linha 4-Amarela) foram bloqueados por ocorrências de depredação e tumulto. Vídeos mostram pessoas, algumas com o rosto coberto, sobre a cobertura de vidro de uma entrada da Trianon-Masp. Há também uma pichação com a frase “Viva a Revolução”, sem indicação de quando foi feita ou por quem.
+
+O Metrô deu outra explicação para o fechamento. A companhia afirmou ter acionado o plano de controle de multidão por causa da grande concentração de pessoas e fechado o acesso à Trianon-Masp até as 16h30. Disse ainda não ter registros internos de danos nas estações da Paulista “no momento”. A ausência de registros até aquele horário não equivale, por si só, a provar que nenhum dano ocorreu.
+
+O ato reuniu movimentos sociais, organizações estudantis e outros grupos. O PT diz ter levado 1 milhão de pessoas à avenida, número não verificado de forma independente. A Folha de S.Paulo informou que houve mobilização em 76 municípios. As fontes consultadas não indicam depredações em escala nacional.
+
+### Perguntas sem resposta
+Até a publicação, não estava claro:
+• quais estruturas foram de fato danificadas, e em que extensão;
+• se há boletins de ocorrência, imagens de câmeras de segurança ou ordens de manutenção que confirmem os danos;
+• se algum responsável foi identificado ou detido;
+• quem fez as pichações e quando;
+• qual seria o custo de eventuais reparos, e quem o arcaria.
+
+As informações divulgadas até agora não permitem atribuir os danos ao conjunto dos participantes, aos organizadores, a partidos ou a integrantes do governo. A presença de lideranças políticas no ato não indica, por si só, participação ou incentivo a atos de vandalismo.
+
+### Posicionamento das lideranças
+Até a publicação desta reportagem, não havia manifestação do PT, dos organizadores ou do Palácio do Planalto sobre os relatos da PM nas fontes consultadas. [Se houver confirmação: “A reportagem procurou a campanha de Lula e aguarda retorno.”]
+
+Esta reportagem será atualizada se novos registros oficiais ou imagens verificadas forem divulgados. Com informações de UOL/Agência Estado, CNN Brasil, Agência Brasil, Folha de S.Paulo e ISTOÉ.
+
+### Dois pontos em que a revisão diverge das fontes
+Quais estações foram fechadas. A revisão diz que a PM atribuiu o fechamento de Consolação e Trianon-Masp às ocorrências. Nas matérias que encontrei, a PM cita Trianon-Masp e Paulista (Linha 4), e o Estadão/O Liberal diz que Consolação e Brigadeiro ficaram abertas. Segui as minhas fontes.
+
+---
+
+### LEIA A OPINIÃO
+**Editorial do O PATRIOTA**
+[Protesto é direito; depredação é crime, seja de quem for →](/noticia/protesto-e-direito-depredacao-e-crime)`,
+    author: 'Equipe de Apuração O Patriota',
+    authorId: 'usr-4',
+    authorRole: 'Cobertura Especial Eleições 2026',
+    publishedAt: '12 de outubro de 2026 às 11:20',
+    updatedAt: '12 de outubro de 2026 às 11:45',
+    readTimeMinutes: 4,
+    imageUrl: 'https://scontent.fpoa13-1.fna.fbcdn.net/v/t39.30808-6/844461567_122099510319508218_8962011006668968197_n.jpg?stp=dst-jpg_tt6&cstp=mx1084x714&ctp=p180x540&_nc_cat=105&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=127cfc&_nc_ohc=hDk0EMtW1w8Q7kNvwFC6Gmx&_nc_oc=AdqonzhRXaH0YEa_3rh9RgNOglth0gqj4oy_K84Za5Zq4v-y0RRjDXxEzruuj_wn8Y7QS8_6MQh0IvbX5uLI8elu&_nc_zt=23&_nc_ht=scontent.fpoa13-1.fna&_nc_gid=4gd88Wwt0riEFMkkB1x-Og&_nc_ss=7b2a8&oh=00_AQND8s6qsaTfjM1AClRbjITi00yqbfKZw8otE2Uxys0_7Q&oe=6AD2CE25',
+    imageCaption: 'Ato na Avenida Paulista e dispersão geram divergência entre relatos da PM e da administração do Metrô.',
+    imageCredits: 'Redes Sociais / O Patriota',
+    sourceName: 'SSP-SP, Metrô-SP, UOL/Agência Estado, CNN Brasil, Folha de S.Paulo',
+    sourceUrl: 'https://www.ssp.sp.gov.br',
+    sourcesConsulted: ['Secretaria de Segurança Pública de SP (SSP)', 'Companhia do Metropolitano de São Paulo (Metrô)', 'UOL / Agência Estado', 'CNN Brasil', 'Folha de S.Paulo', 'ISTOÉ'],
+    tags: ['Avenida Paulista', 'Polícia Militar', 'Metrô SP', 'Eleições 2026', 'Manifestações', 'Segurança Pública'],
+    auditLog: [
+      {
+        id: 'aud-divergem-1',
+        timestamp: '12/10/2026 11:00',
+        userName: 'Thiago Vasconcellos',
+        userRole: 'jornalista',
+        action: 'Redação da matéria apurando divergência de dados entre SSP e Metrô'
+      },
+      {
+        id: 'aud-divergem-2',
+        timestamp: '12/10/2026 11:20',
+        userName: 'Dr. Alberto Gonçalves',
+        userRole: 'editor_chefe',
+        action: 'Publicação com checagem factual e confronto de fontes',
+        previousStatus: 'EM REVISÃO',
+        newStatus: 'PUBLICADA',
+        notes: 'Matéria de interesse público com direito de resposta e fontes oficiais.'
+      }
+    ]
+  },
+  {
+    id: 'art-opiniao-protesto-direito-depredacao-crime',
+    slug: 'protesto-e-direito-depredacao-e-crime',
+    title: 'OPINIÃO | Editorial do O PATRIOTA: Protesto é direito; depredação é crime, seja de quem for',
+    subtitle: 'Manifestação pacífica é um direito constitucional fundamental; depredação do patrimônio público é crime inaceitável. Apuração técnica, rigorosa e a mesma regra para todos os lados.',
+    kicker: 'EDITORIAL O PATRIOTA',
+    category: 'opiniao',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'alta',
+    content: `O ato de domingo na Avenida Paulista terminou com versões incompletas e divergentes, mas uma verdade precisa ser reafirmada de forma categórica e inequívoca: manifestação popular pacífica é um direito constitucional inalienável; depredação do patrimônio público, pichação e violência são crimes, independentemente de quem os cometa ou de qual bandeira empunhe.
+
+A Constituição Cidadã de 1988 assegura no artigo 5º a liberdade de reunião pacífica e a livre manifestação do pensamento. Esse é um pilar da democracia. Contudo, a mesma ordem constitucional estabelece com clareza os limites da legalidade. Destruir acessos de estações de metrô que servem a milhões de trabalhadores que dependem do transporte diariamente não é protesto — é vandalismo inaceitável.
+
+Diante do conflito de informações entre a Secretaria da Segurança Pública e a administração do Metrô de São Paulo, O PATRIOTA exige apuração técnica, rigorosa e transparente. As câmeras de monitoramento, laudos periciais e ordens de serviço devem ser disponibilizados publicamente para esclarecer a verdade dos fatos. Se houve crime e dano, os responsáveis devem ser identificados e punidos na forma da lei, com ampla defesa e devido processo legal.
+
+O Brasil não pode normalizar a relativização da ordem pública ao sabor de conveniências eleitorais. A lei deve ser aplicada com rigor e com a mesma régua moral e jurídica a qualquer manifestação, seja da esquerda, seja da direita. Defender a lei e o patrimônio do povo brasileiro é o nosso compromisso inegociável.
+
+---
+
+### Reportagem Relacionada
+**Apuração dos Fatos**
+[← Polícia e Metrô divergem sobre danos após ato pró-Lula na Avenida Paulista](/noticia/policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista)`,
+    author: 'Conselho Editorial O PATRIOTA',
+    authorId: 'usr-1',
+    authorRole: 'Editorial Institucional',
+    publishedAt: '12 de outubro de 2026 às 12:00',
+    updatedAt: '12 de outubro de 2026 às 12:15',
+    readTimeMinutes: 3,
+    imageUrl: 'https://scontent.fpoa13-1.fna.fbcdn.net/v/t39.30808-6/844461567_122099510319508218_8962011006668968197_n.jpg?stp=dst-jpg_tt6&cstp=mx1084x714&ctp=p180x540&_nc_cat=105&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=127cfc&_nc_ohc=hDk0EMtW1w8Q7kNvwFC6Gmx&_nc_oc=AdqonzhRXaH0YEa_3rh9RgNOglth0gqj4oy_K84Za5Zq4v-y0RRjDXxEzruuj_wn8Y7QS8_6MQh0IvbX5uLI8elu&_nc_zt=23&_nc_ht=scontent.fpoa13-1.fna&_nc_gid=4gd88Wwt0riEFMkkB1x-Og&_nc_ss=7b2a8&oh=00_AQND8s6qsaTfjM1AClRbjITi00yqbfKZw8otE2Uxys0_7Q&oe=6AD2CE25',
+    imageCaption: 'Ato na Avenida Paulista: O PATRIOTA defende apuração transparente e igualdade perante a lei.',
+    imageCredits: 'Redes Sociais / O Patriota',
+    sourceName: 'Conselho Editorial O PATRIOTA',
+    sourceUrl: 'https://www.opatriotabrasil.com.br/editorial',
+    sourcesConsulted: ['Constituição da República Federativa do Brasil de 1988', 'Código Penal Brasileiro', 'Relatório Técnico SSP-SP', 'Companhia do Metropolitano de SP'],
+    tags: ['Opinião', 'Editorial', 'Avenida Paulista', 'Constituição', 'Ordem Pública', 'Segurança Pública'],
+    auditLog: [
+      {
+        id: 'aud-opiniao-1',
+        timestamp: '12/10/2026 12:00',
+        userName: 'Dr. Alberto Gonçalves',
+        userRole: 'editor_chefe',
+        action: 'Publicação do editorial institucional sobre os atos da Paulista'
+      }
+    ]
+  },
+  {
     id: 'art-1',
     slug: 'congresso-avanca-em-propostas-para-gerar-empregos-e-reduzir-o-custo-do-trabalho',
     title: 'Congresso avança em propostas para gerar empregos e reduzir o custo do trabalho',

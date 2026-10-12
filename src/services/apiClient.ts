@@ -19,7 +19,7 @@ export class ApiError extends Error {
 type TokenProvider = () => Promise<string | null>;
 let tokenProvider: TokenProvider = async () => null;
 
-const configuredBaseUrl = String(import.meta.env.VITE_API_BASE_URL || '').trim();
+const configuredBaseUrl = String((typeof import.meta !== 'undefined' && import.meta.env?.VITE_API_BASE_URL) || '').trim();
 // A API vive no mesmo domínio em desenvolvimento e na Vercel; o proxy do Vite
 // encaminha `/api` para o servidor local sem exigir uma variável pública.
 export const API_BASE_URL = (configuredBaseUrl || '/api').replace(/\/+$/, '');

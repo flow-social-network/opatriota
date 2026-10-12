@@ -6,12 +6,33 @@ import { useData } from '../../app/contexts/DataContext';
 import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 import type { CategorySlug } from '../../types';
 
-export default function CategoryPage() {
+export default function CategoryPage({ defaultCategory }: { defaultCategory?: string }) {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { articles, categories } = useData();
 
-  const category = categories.find(c => c.slug === slug);
+  const activeSlug = slug || defaultCategory || 'todos';
+  let category = categories.find(c => c.slug === activeSlug);
+
+  if (!category && activeSlug && activeSlug !== 'todos') {
+    const formattedTitle = activeSlug
+      .split('-')
+      .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+      .join(' ');
+
+    category = {
+      id: `cat-dynamic-${activeSlug}`,
+      slug: activeSlug as CategorySlug,
+      name: formattedTitle,
+      description: `Cobertura completa e notícias atualizadas sobre ${formattedTitle} em O Patriota.`,
+      introText: `Acompanhe as reportagens, análises e acontecimentos mais recentes sobre ${formattedTitle}.`,
+      bannerImage: '/images/hero_congresso.jpg',
+      seoTitle: `${formattedTitle} — Notícias e Cobertura | O Patriota`,
+      seoDescription: `Acompanhe notícias sobre ${formattedTitle} com apuração factual e fontes oficiais.`,
+      active: true,
+      order: 99
+    };
+  }
 
   useSeoMetadata({
     title: category ? `Notícias de ${category.name}` : undefined,

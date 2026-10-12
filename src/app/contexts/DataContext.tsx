@@ -129,7 +129,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
     setDataLoading(true);
     void Promise.all([
       load<SubscriptionPlan[]>('/plans', setSubscriptionPlans),
-      load<Article[]>('/articles', setArticles),
+      load<Article[]>('/articles', (apiArticles) => {
+        setArticles(() => {
+          if (!apiArticles || !apiArticles.length) return INITIAL_ARTICLES;
+          const apiMap = new Map(apiArticles.map(a => [a.id, a]));
+          const merged = INITIAL_ARTICLES.map(initial => apiMap.get(initial.id) || initial);
+          for (const apiArt of apiArticles) {
+            if (!INITIAL_ARTICLES.some(init => init.id === apiArt.id)) {
+              merged.push(apiArt);
+            }
+          }
+          return merged;
+        });
+      }),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
       load<RssSource[]>('/editorial/sources', setSources, true),
       load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),

@@ -41,14 +41,42 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
   const [searchInternal, setSearchInternal] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
-  // Filter published articles for this category
-  const categoryArticles = articles.filter(
-    (a) => a.category === category.slug && a.editorialStatus === 'PUBLICADA'
-  );
+  // Filter published articles for this category or matching subcategory/tags
+  const categoryArticles = articles.filter((a) => {
+    if (a.editorialStatus && a.editorialStatus !== 'PUBLICADA') return false;
+    if (a.category === category.slug) return true;
+
+    const slugNorm = category.slug.toLowerCase().replace(/-/g, ' ');
+    const nameNorm = category.name.toLowerCase();
+
+    const tagMatches = a.tags?.some(t => {
+      const tn = t.toLowerCase();
+      return tn.includes(slugNorm) || slugNorm.includes(tn) || tn.includes(nameNorm) || nameNorm.includes(tn);
+    });
+    if (tagMatches) return true;
+
+    const kickerNorm = (a.kicker || '').toLowerCase();
+    if (kickerNorm.includes(slugNorm) || slugNorm.includes(kickerNorm)) return true;
+
+    // Parent/sub editorial relationships
+    if (['politica-nacional', 'governo-federal', 'congresso-nacional', 'justica', 'seguranca-publica', 'economia-nacional'].includes(category.slug) && (a.category === 'brasil' || a.category === 'politica')) return true;
+    if (['politica-estadual', 'seguranca-rs', 'policia-civil', 'brigada-militar', 'bombeiros', 'defesa-civil', 'municipios-rs', 'rio-grande-do-sul'].includes(category.slug) && (a.category === 'brasil' || a.tags?.includes('Rio Grande do Sul') || a.tags?.includes('Porto Alegre') || a.title.toLowerCase().includes('rs') || a.title.toLowerCase().includes('porto alegre') || a.title.toLowerCase().includes('guaíba'))) return true;
+    if (['governo', 'congresso', 'partidos-politicos', 'eleicoes', 'projetos-de-lei', 'decisoes-politicas'].includes(category.slug) && a.category === 'politica') return true;
+    if (['vandalismo', 'criminalidade', 'operacoes-policiais', 'investigacoes', 'justica-criminal', 'decisoes-judiciais'].includes(category.slug) && (a.category === 'seguranca' || a.category === 'politica')) return true;
+    if (['economia-brasileira', 'emprego', 'industria-e-comercio', 'agronegocio', 'financas-publicas', 'indicadores-economicos'].includes(category.slug) && a.category === 'economia') return true;
+    if (['relacoes-internacionais', 'america-latina', 'conflitos-internacionais', 'diplomacia'].includes(category.slug) && a.category === 'mundo') return true;
+
+    return false;
+  });
+
+  // Effective articles: ensure no section is empty
+  const effectiveArticles = categoryArticles.length > 0 
+    ? categoryArticles 
+    : articles.filter(a => a.editorialStatus === 'PUBLICADA').slice(0, 6);
 
   // If there are articles, separate the featured headline and the rest
-  const featuredArticle = categoryArticles.length > 0 ? categoryArticles[0] : null;
-  const remainingArticles = categoryArticles.length > 1 ? categoryArticles.slice(1) : [];
+  const featuredArticle = effectiveArticles.length > 0 ? effectiveArticles[0] : null;
+  const remainingArticles = effectiveArticles.length > 1 ? effectiveArticles.slice(1) : [];
 
   // Pagination calculation
   const totalPages = Math.ceil(remainingArticles.length / ITEMS_PER_PAGE) || 1;

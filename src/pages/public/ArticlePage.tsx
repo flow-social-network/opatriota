@@ -12,7 +12,20 @@ export default function ArticlePage() {
   const { articles, categories, toggleCategory } = useArticleNavigation();
   const { currentUser, toggleBookmark } = useAuth();
 
-  const article = articles.find(a => a.slug === slug || a.id === slug);
+  const isOldEnergySlug = slug === 'brasil-lidera-em-energia-renovavel-na-america-latina';
+  const targetSlug = isOldEnergySlug
+    ? 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista'
+    : slug;
+
+  const article = isOldEnergySlug
+    ? (articles.find(a => a.slug === 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista' || a.id === 'art-policia-metro-divergem-paulista' || a.id === 'art-4') || articles[0])
+    : (articles.find(a => a.slug === targetSlug || a.id === targetSlug || a.slug === slug || a.id === slug));
+
+  React.useEffect(() => {
+    if (isOldEnergySlug && article && article.slug !== 'brasil-lidera-em-energia-renovavel-na-america-latina') {
+      navigate(`/noticia/${article.slug}`, { replace: true });
+    }
+  }, [isOldEnergySlug, article, navigate]);
 
   useSeoMetadata({
     title: article?.seo?.metaTitle || article?.title,

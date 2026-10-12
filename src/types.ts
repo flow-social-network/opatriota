@@ -13,7 +13,8 @@ export type CategorySlug =
   | 'checagem'
   | 'receita'
   | 'videos'
-  | 'podcast';
+  | 'podcast'
+  | (string & {});
 
 export type FactVerdict = 
   | 'VERDADEIRO'
@@ -105,6 +106,8 @@ export interface Article {
   factClaim?: string;
   factDocuments?: string[];
   priority?: 'alta' | 'media' | 'normal';
+  videoEmbedUrl?: string;
+  videoIframeHtml?: string;
 }
 
 export interface FactCheckItem {

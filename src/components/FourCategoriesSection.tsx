@@ -108,17 +108,17 @@ export const FourCategoriesSection: React.FC<FourCategoriesSectionProps> = ({
           slug: 'congresso-avanca-em-propostas-para-gerar-empregos-e-reduzir-o-custo-do-trabalho',
         },
         {
-          title: 'Câmara aprova marco de energia renovável',
-          date: '8 de outubro de 2026',
-          imageUrl: '/images/news_infraestrutura.jpg',
-          slug: 'art-rs-1',
+          title: 'Polícia e Metrô divergem sobre dispersão na Paulista',
+          date: '12 de outubro de 2026',
+          imageUrl: 'https://scontent.fpoa13-1.fna.fbcdn.net/v/t39.30808-6/844461567_122099510319508218_8962011006668968197_n.jpg?stp=dst-jpg_tt6&cstp=mx1084x714&ctp=p180x540&_nc_cat=105&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=127cfc&_nc_ohc=hDk0EMtW1w8Q7kNvwFC6Gmx&_nc_oc=AdqonzhRXaH0YEa_3rh9RgNOglth0gqj4oy_K84Za5Zq4v-y0RRjDXxEzruuj_wn8Y7QS8_6MQh0IvbX5uLI8elu&_nc_zt=23&_nc_ht=scontent.fpoa13-1.fna&_nc_gid=4gd88Wwt0riEFMkkB1x-Og&_nc_ss=7b2a8&oh=00_AQND8s6qsaTfjM1AClRbjITi00yqbfKZw8otE2Uxys0_7Q&oe=6AD2CE25',
+          slug: 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista',
         },
       ],
     },
   ];
 
   const handleItemClick = (slug: string) => {
-    const article = articles.find((a) => a.slug === slug) || articles[0];
+    const article = articles.find((a) => a.slug === slug || a.id === slug) || articles[0];
     if (article) onSelectArticle(article);
   };
 

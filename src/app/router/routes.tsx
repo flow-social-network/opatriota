@@ -153,6 +153,12 @@ export const router = createBrowserRouter([
       { path: '/verificacao', element: <FactCheckPage /> },
       { path: '/checagem', element: <FactCheckPage /> },
 
+      // Rotas de Opinião & Editorial
+      { path: '/opiniao', element: <Navigate to="/categoria/opiniao" replace /> },
+      { path: '/opiniao/:slug', element: <ArticlePage /> },
+      { path: '/editorial', element: <Navigate to="/categoria/opiniao" replace /> },
+      { path: '/editorial/:slug', element: <ArticlePage /> },
+
       // Área do assinante
       { path: '/minha-conta', element: <ClientPage /> },
       { path: '/minha-conta/:subpage', element: <ClientPage /> },

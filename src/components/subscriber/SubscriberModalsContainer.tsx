@@ -410,12 +410,12 @@ export const SubscriberModalsContainer: React.FC<SubscriberModalsContainerProps>
               {[
                 {
                   id: 'fav-1',
-                  title: 'Brasil avança com projeto de energia renovável na América Latina',
-                  category: 'BRASIL',
-                  badgeColor: 'bg-[#16803C]',
-                  date: '8 de outubro de 2026',
-                  image: '/images/hero_congresso.jpg',
-                  slug: 'art-2'
+                  title: 'Polícia e Metrô divergem sobre danos após ato pró-Lula na Avenida Paulista',
+                  category: 'POLÍTICA',
+                  badgeColor: 'bg-[#EA580C]',
+                  date: '12 de outubro de 2026',
+                  image: '/images/policia_metro_paulista.jpg',
+                  slug: 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista'
                 },
                 {
                   id: 'fav-2',

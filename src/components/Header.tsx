@@ -116,6 +116,26 @@ export const Header: React.FC<HeaderProps> = ({
   const [pushStatus, setPushStatus] = useState<string>('default');
   const [pushLoading, setPushLoading] = useState(false);
 
+  // States for navbar dropdown menus and mobile accordion
+  const [activeDropdownSlug, setActiveDropdownSlug] = useState<string | null>(null);
+  const [expandedMobileCats, setExpandedMobileCats] = useState<Record<string, boolean>>({});
+  const dropdownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const handleMouseEnterNav = (slug: string) => {
+    if (dropdownTimerRef.current) clearTimeout(dropdownTimerRef.current);
+    setActiveDropdownSlug(slug);
+  };
+
+  const handleMouseLeaveNav = () => {
+    dropdownTimerRef.current = setTimeout(() => {
+      setActiveDropdownSlug(null);
+    }, 180);
+  };
+
+  const toggleMobileCategory = (slug: string) => {
+    setExpandedMobileCats(prev => ({ ...prev, [slug]: !prev[slug] }));
+  };
+
   useEffect(() => {
     setPushStatus(getPushPermissionStatus());
   }, []);
@@ -126,6 +146,7 @@ export const Header: React.FC<HeaderProps> = ({
       if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserDropdownOpen(false);
       }
+      setActiveDropdownSlug(null);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -168,20 +189,122 @@ export const Header: React.FC<HeaderProps> = ({
     setIsWeatherModalOpen(true);
   };
 
-  // Nav categories matching Image 3 and Image 1
-  const navItems: { label: string; slug: CategorySlug }[] = [
+  // Nav categories with subcategory dropdowns matching Editorial Coverage Brief
+  interface SubcategoryItem {
+    label: string;
+    slug: string;
+  }
+
+  interface NavItemDef {
+    label: string;
+    slug: CategorySlug;
+    subcategories?: SubcategoryItem[];
+  }
+
+  const navItems: NavItemDef[] = [
     { label: 'INÍCIO', slug: 'todos' },
-    { label: 'POLÍTICA', slug: 'politica' },
-    { label: 'BRASIL', slug: 'brasil' },
-    { label: 'ECONOMIA', slug: 'economia' },
-    { label: 'SEGURANÇA', slug: 'seguranca' },
-    { label: 'SAÚDE', slug: 'saude' },
-    { label: 'OPINIÃO', slug: 'opiniao' },
+    {
+      label: 'BRASIL',
+      slug: 'brasil',
+      subcategories: [
+        { label: 'Todas de Brasil', slug: 'brasil' },
+        { label: 'Política Nacional', slug: 'politica-nacional' },
+        { label: 'Governo Federal', slug: 'governo-federal' },
+        { label: 'Congresso Nacional', slug: 'congresso-nacional' },
+        { label: 'Justiça e STF', slug: 'justica' },
+        { label: 'Segurança Pública', slug: 'seguranca-publica' },
+        { label: 'Economia Nacional', slug: 'economia-nacional' },
+      ]
+    },
+    {
+      label: 'RIO GRANDE DO SUL',
+      slug: 'rio-grande-do-sul' as CategorySlug,
+      subcategories: [
+        { label: 'Todas do RS', slug: 'rio-grande-do-sul' },
+        { label: 'Política Estadual', slug: 'politica-estadual' },
+        { label: 'Segurança Pública RS', slug: 'seguranca-rs' },
+        { label: 'Polícia Civil', slug: 'policia-civil' },
+        { label: 'Brigada Militar', slug: 'brigada-militar' },
+        { label: 'Corpo de Bombeiros', slug: 'bombeiros' },
+        { label: 'Defesa Civil RS', slug: 'defesa-civil' },
+        { label: 'Municípios e Regiões', slug: 'municipios-rs' },
+      ]
+    },
+    {
+      label: 'POLÍTICA',
+      slug: 'politica',
+      subcategories: [
+        { label: 'Todas de Política', slug: 'politica' },
+        { label: 'Governo', slug: 'governo' },
+        { label: 'Congresso', slug: 'congresso' },
+        { label: 'Partidos Políticos', slug: 'partidos-politicos' },
+        { label: 'Eleições 2026', slug: 'eleicoes' },
+        { label: 'Projetos de Lei', slug: 'projetos-de-lei' },
+        { label: 'Decisões Políticas', slug: 'decisoes-politicas' },
+      ]
+    },
+    {
+      label: 'SEGURANÇA E JUSTIÇA',
+      slug: 'seguranca',
+      subcategories: [
+        { label: 'Todas de Segurança', slug: 'seguranca' },
+        { label: 'Vandalismo e Ordem', slug: 'vandalismo' },
+        { label: 'Combate ao Crime', slug: 'criminalidade' },
+        { label: 'Operações Policiais', slug: 'operacoes-policiais' },
+        { label: 'Investigações', slug: 'investigacoes' },
+        { label: 'Justiça Criminal', slug: 'justica-criminal' },
+        { label: 'Decisões Judiciais', slug: 'decisoes-judiciais' },
+      ]
+    },
+    {
+      label: 'ECONOMIA',
+      slug: 'economia',
+      subcategories: [
+        { label: 'Todas de Economia', slug: 'economia' },
+        { label: 'Economia Brasileira', slug: 'economia-brasileira' },
+        { label: 'Emprego e Renda', slug: 'emprego' },
+        { label: 'Indústria e Comércio', slug: 'industria-e-comercio' },
+        { label: 'Agronegócio', slug: 'agronegocio' },
+        { label: 'Finanças Públicas', slug: 'financas-publicas' },
+        { label: 'Indicadores Econômicos', slug: 'indicadores-economicos' },
+      ]
+    },
+    {
+      label: 'BRASIL E MUNDO',
+      slug: 'mundo',
+      subcategories: [
+        { label: 'Todas de Mundo', slug: 'mundo' },
+        { label: 'Relações Internacionais', slug: 'relacoes-internacionais' },
+        { label: 'América Latina', slug: 'america-latina' },
+        { label: 'Conflitos Internacionais', slug: 'conflitos-internacionais' },
+        { label: 'Diplomacia & Itamaraty', slug: 'diplomacia' },
+      ]
+    },
+    {
+      label: 'OPINIÃO',
+      slug: 'opiniao',
+      subcategories: [
+        { label: 'Todas as Colunas e Opinião', slug: 'opiniao' },
+        { label: 'Editorial O Patriota', slug: 'opiniao' },
+        { label: 'Colunistas', slug: 'opiniao' },
+      ]
+    },
     { label: 'CHECAGEM', slug: 'checagem' },
-    { label: 'TECNOLOGIA', slug: 'tecnologia' },
-    { label: 'MUNDO', slug: 'mundo' },
-    { label: 'CULTURA', slug: 'cultura' },
-    { label: 'ESPORTES', slug: 'esportes' },
+    {
+      label: 'MAIS',
+      slug: 'todos',
+      subcategories: [
+        { label: 'Tecnologia', slug: 'tecnologia' },
+        { label: 'Saúde', slug: 'saude' },
+        { label: 'Educação', slug: 'educacao' },
+        { label: 'Meio Ambiente', slug: 'meio-ambiente' },
+        { label: 'Infraestrutura', slug: 'infraestrutura' },
+        { label: 'Cultura', slug: 'cultura' },
+        { label: 'Entretenimento', slug: 'entretenimento' },
+        { label: 'Receitas', slug: 'receita' },
+        { label: 'Esportes', slug: 'esportes' },
+      ]
+    }
   ];
 
   // Additional mobile categories
@@ -300,22 +423,111 @@ export const Header: React.FC<HeaderProps> = ({
   const displayName = currentUser?.name || '';
   const displayAvatar = currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80';
 
-  // Lista de itens do menu mobile com fidelidade total à captura de tela de referência
+  // Lista de itens do menu mobile com suporte a subcategorias
   const mobileDrawerMenuItems: {
     slug: CategorySlug;
     label: string;
     icon: React.ReactNode;
+    subcategories?: SubcategoryItem[];
   }[] = [
     { slug: 'todos', label: 'Início', icon: <Home className="w-4 h-4 shrink-0" /> },
-    { slug: 'politica', label: 'Política', icon: <Landmark className="w-4 h-4 shrink-0" /> },
-    { slug: 'brasil', label: 'Brasil', icon: <MapPin className="w-4 h-4 shrink-0" /> },
-    { slug: 'economia', label: 'Economia', icon: <BarChart3 className="w-4 h-4 shrink-0" /> },
-    { slug: 'seguranca', label: 'Segurança', icon: <Shield className="w-4 h-4 shrink-0" /> },
-    { slug: 'saude', label: 'Saúde', icon: <HeartPulse className="w-4 h-4 shrink-0" /> },
-    { slug: 'opiniao', label: 'Opinião', icon: <MessageSquare className="w-4 h-4 shrink-0" /> },
+    {
+      slug: 'brasil',
+      label: 'Brasil',
+      icon: <MapPin className="w-4 h-4 shrink-0" />,
+      subcategories: [
+        { label: 'Todas de Brasil', slug: 'brasil' },
+        { label: 'Política Nacional', slug: 'politica-nacional' },
+        { label: 'Governo Federal', slug: 'governo-federal' },
+        { label: 'Congresso Nacional', slug: 'congresso-nacional' },
+        { label: 'Justiça e STF', slug: 'justica' },
+        { label: 'Segurança Pública', slug: 'seguranca-publica' },
+        { label: 'Economia Nacional', slug: 'economia-nacional' },
+      ]
+    },
+    {
+      slug: 'rio-grande-do-sul' as CategorySlug,
+      label: 'Rio Grande do Sul',
+      icon: <MapPin className="w-4 h-4 shrink-0" />,
+      subcategories: [
+        { label: 'Todas do RS', slug: 'rio-grande-do-sul' },
+        { label: 'Política Estadual', slug: 'politica-estadual' },
+        { label: 'Segurança Pública RS', slug: 'seguranca-rs' },
+        { label: 'Polícia Civil', slug: 'policia-civil' },
+        { label: 'Brigada Militar', slug: 'brigada-militar' },
+        { label: 'Corpo de Bombeiros', slug: 'bombeiros' },
+        { label: 'Defesa Civil RS', slug: 'defesa-civil' },
+        { label: 'Municípios e Regiões', slug: 'municipios-rs' },
+      ]
+    },
+    {
+      slug: 'politica',
+      label: 'Política',
+      icon: <Landmark className="w-4 h-4 shrink-0" />,
+      subcategories: [
+        { label: 'Todas de Política', slug: 'politica' },
+        { label: 'Governo', slug: 'governo' },
+        { label: 'Congresso', slug: 'congresso' },
+        { label: 'Partidos Políticos', slug: 'partidos-politicos' },
+        { label: 'Eleições 2026', slug: 'eleicoes' },
+        { label: 'Projetos de Lei', slug: 'projetos-de-lei' },
+        { label: 'Decisões Políticas', slug: 'decisoes-politicas' },
+      ]
+    },
+    {
+      slug: 'seguranca',
+      label: 'Segurança e Justiça',
+      icon: <Shield className="w-4 h-4 shrink-0" />,
+      subcategories: [
+        { label: 'Todas de Segurança', slug: 'seguranca' },
+        { label: 'Vandalismo e Ordem', slug: 'vandalismo' },
+        { label: 'Combate ao Crime', slug: 'criminalidade' },
+        { label: 'Operações Policiais', slug: 'operacoes-policiais' },
+        { label: 'Investigações', slug: 'investigacoes' },
+        { label: 'Justiça Criminal', slug: 'justica-criminal' },
+        { label: 'Decisões Judiciais', slug: 'decisoes-judiciais' },
+      ]
+    },
+    {
+      slug: 'economia',
+      label: 'Economia',
+      icon: <BarChart3 className="w-4 h-4 shrink-0" />,
+      subcategories: [
+        { label: 'Todas de Economia', slug: 'economia' },
+        { label: 'Economia Brasileira', slug: 'economia-brasileira' },
+        { label: 'Emprego e Renda', slug: 'emprego' },
+        { label: 'Indústria e Comércio', slug: 'industria-e-comercio' },
+        { label: 'Agronegócio', slug: 'agronegocio' },
+        { label: 'Finanças Públicas', slug: 'financas-publicas' },
+        { label: 'Indicadores Econômicos', slug: 'indicadores-economicos' },
+      ]
+    },
+    {
+      slug: 'mundo',
+      label: 'Brasil e Mundo',
+      icon: <Globe className="w-4 h-4 shrink-0" />,
+      subcategories: [
+        { label: 'Todas de Mundo', slug: 'mundo' },
+        { label: 'Notícias Nacionais', slug: 'brasil' },
+        { label: 'Relações Internacionais', slug: 'relacoes-internacionais' },
+        { label: 'América Latina', slug: 'america-latina' },
+        { label: 'Conflitos Internacionais', slug: 'conflitos-internacionais' },
+        { label: 'Diplomacia & Itamaraty', slug: 'diplomacia' },
+      ]
+    },
+    {
+      slug: 'opiniao',
+      label: 'Opinião',
+      icon: <MessageSquare className="w-4 h-4 shrink-0" />,
+      subcategories: [
+        { label: 'Todas as Colunas e Opinião', slug: 'opiniao' },
+        { label: 'Editorial O Patriota', slug: 'opiniao' },
+        { label: 'Colunistas', slug: 'opiniao' },
+      ]
+    },
     { slug: 'checagem', label: 'Checagem', icon: <CheckCircle2 className="w-4 h-4 shrink-0" /> },
+    { slug: 'saude', label: 'Saúde', icon: <HeartPulse className="w-4 h-4 shrink-0" /> },
     { slug: 'tecnologia', label: 'Tecnologia', icon: <Cpu className="w-4 h-4 shrink-0" /> },
-    { slug: 'mundo', label: 'Mundo', icon: <Globe className="w-4 h-4 shrink-0" /> },
     { slug: 'cultura', label: 'Cultura', icon: <Palette className="w-4 h-4 shrink-0" /> },
     { slug: 'esportes', label: 'Esportes', icon: <Trophy className="w-4 h-4 shrink-0" /> },
     { slug: 'videos', label: 'Vídeos', icon: <PlayCircle className="w-4 h-4 shrink-0" /> },
@@ -804,25 +1016,74 @@ export const Header: React.FC<HeaderProps> = ({
           <nav className="bg-[#061A35] text-white shadow-md">
             <div className="w-full mx-auto px-9 flex items-center justify-between min-h-[80px]">
               
-              {/* Navigation Items (Sem botão desalinhado na esquerda) */}
-              <div className="flex-1 min-w-0 overflow-x-auto scrollbar-none flex items-center space-x-0.5 pr-2">
+              {/* Navigation Items with Dropdowns */}
+              <div className="flex-1 min-w-0 flex items-center space-x-0.5 pr-2 overflow-visible">
                 {navItems.map((item) => {
                   const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
+                  const hasSubcategories = Boolean(item.subcategories && item.subcategories.length > 0);
+                  const isDropdownOpen = activeDropdownSlug === item.label;
+
                   return (
-                    <button
-                      key={item.slug}
-                      onClick={() => onSelectCategory(item.slug)}
-                      className={`px-2.5 py-3 text-[13px] leading-[1.2] font-semibold tracking-wide uppercase transition-colors whitespace-nowrap cursor-pointer relative ${
-                        isActive
-                          ? 'text-[#FFCC29]'
-                          : 'text-white/90 hover:text-white hover:bg-white/5'
-                      }`}
+                    <div
+                      key={item.label}
+                      className="relative"
+                      onMouseEnter={() => hasSubcategories && handleMouseEnterNav(item.label)}
+                      onMouseLeave={handleMouseLeaveNav}
                     >
-                      <span>{item.label}</span>
-                      {isActive && (
-                        <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FFCC29]" />
+                      <button
+                        onClick={() => {
+                          setActiveDropdownSlug(null);
+                          onSelectCategory(item.slug);
+                        }}
+                        className={`px-2.5 py-3 text-[13px] leading-[1.2] font-semibold tracking-wide uppercase transition-colors whitespace-nowrap cursor-pointer relative flex items-center gap-1 ${
+                          isActive
+                            ? 'text-[#FFCC29]'
+                            : 'text-white/90 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        <span>{item.label}</span>
+                        {hasSubcategories && (
+                          <ChevronDown
+                            className={`w-3 h-3 transition-transform duration-150 ${
+                              isDropdownOpen ? 'rotate-180 text-[#FFCC29]' : 'opacity-60'
+                            }`}
+                          />
+                        )}
+                        {isActive && (
+                          <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#FFCC29]" />
+                        )}
+                      </button>
+
+                      {hasSubcategories && isDropdownOpen && (
+                        <div
+                          className="absolute top-full left-0 mt-0 w-60 bg-white rounded-b-lg shadow-2xl border border-slate-200 py-1.5 z-50 animate-in fade-in slide-in-from-top-1 duration-150 text-left"
+                          role="menu"
+                          aria-label={`Subcategorias de ${item.label}`}
+                        >
+                          <div className="px-3.5 py-1.5 border-b border-slate-100 bg-[#F8FAFC]">
+                            <span className="text-[10px] font-black uppercase text-[#0B2345] tracking-wider block">
+                              {item.label} — SEÇÕES
+                            </span>
+                          </div>
+                          <div className="py-1 max-h-72 overflow-y-auto">
+                            {item.subcategories!.map((sub) => (
+                              <button
+                                key={sub.slug}
+                                onClick={() => {
+                                  setActiveDropdownSlug(null);
+                                  onSelectCategory(sub.slug as CategorySlug);
+                                }}
+                                className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#1E293B] hover:text-[#0B5FFF] hover:bg-[#F1F5F9] transition flex items-center justify-between group cursor-pointer"
+                                role="menuitem"
+                              >
+                                <span>{sub.label}</span>
+                                <ChevronRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 text-[#0B5FFF] transition-opacity shrink-0" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -919,27 +1180,64 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="px-2 py-1.5 space-y-0.5">
                   {mobileDrawerMenuItems.map((item) => {
                     const isActive = currentCategory === item.slug;
+                    const hasSubcategories = Boolean(item.subcategories && item.subcategories.length > 0);
+                    const isExpanded = Boolean(expandedMobileCats[item.label]);
+
                     return (
-                      <button
-                        key={item.slug}
-                        onClick={() => {
-                          onSelectCategory(item.slug);
-                          setMobileMenuOpen(false);
-                        }}
-                        className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
-                          isActive
-                            ? 'bg-[#EEF4FF] text-[#2563EB]'
-                            : 'text-[#0F172A] hover:bg-slate-50'
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <span className={isActive ? 'text-[#2563EB]' : 'text-[#0F172A]'}>
-                            {item.icon}
-                          </span>
-                          <span>{item.label}</span>
+                      <div key={item.label} className="flex flex-col">
+                        <div className="flex items-center justify-between">
+                          <button
+                            onClick={() => {
+                              onSelectCategory(item.slug);
+                              setMobileMenuOpen(false);
+                            }}
+                            className={`flex-1 flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer ${
+                              isActive
+                                ? 'bg-[#EEF4FF] text-[#2563EB]'
+                                : 'text-[#0F172A] hover:bg-slate-50'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={isActive ? 'text-[#2563EB]' : 'text-[#0F172A]'}>
+                                {item.icon}
+                              </span>
+                              <span>{item.label}</span>
+                            </div>
+                          </button>
+
+                          {hasSubcategories && (
+                            <button
+                              onClick={() => toggleMobileCategory(item.label)}
+                              aria-label={`Expandir subcategorias de ${item.label}`}
+                              className="p-2.5 text-slate-400 hover:text-[#0B2345] cursor-pointer"
+                            >
+                              <ChevronDown
+                                className={`w-4 h-4 transition-transform duration-200 ${
+                                  isExpanded ? 'rotate-180 text-[#0B2345]' : ''
+                                }`}
+                              />
+                            </button>
+                          )}
                         </div>
-                        <ChevronRight className={`w-4 h-4 ${isActive ? 'text-[#2563EB]' : 'text-[#94A3B8]'}`} />
-                      </button>
+
+                        {hasSubcategories && isExpanded && (
+                          <div className="pl-9 pr-2 py-1 space-y-0.5 bg-slate-50/70 border-l-2 border-[#0B2345] ml-4 my-0.5 rounded-r">
+                            {item.subcategories!.map((sub) => (
+                              <button
+                                key={sub.slug}
+                                onClick={() => {
+                                  onSelectCategory(sub.slug as CategorySlug);
+                                  setMobileMenuOpen(false);
+                                }}
+                                className="w-full text-left py-1.5 px-2 text-xs text-[#334155] hover:text-[#0B5FFF] font-medium flex items-center justify-between cursor-pointer"
+                              >
+                                <span>{sub.label}</span>
+                                <ChevronRight className="w-3 h-3 text-slate-400" />
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     );
                   })}
                 </div>

@@ -24,6 +24,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   onNavigateCategory,
 }) => {
   const [activeSlide, setActiveSlide] = useState(0);
+  const [isPlayingFeaturedVideo, setIsPlayingFeaturedVideo] = useState(false);
 
   // Lead political and featured articles for carousel
   const carouselArticles = articles.filter(
@@ -34,22 +35,25 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
 
   // Real-time breaking news items
   const breakingNews = [
+    { time: '11:20', title: 'Polícia e Metrô divergem sobre danos após ato pró-Lula na Paulista', slug: 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista' },
+    { time: '12:00', title: 'Editorial O Patriota: Protesto é direito; depredação é crime, seja de quem for', slug: 'protesto-e-direito-depredacao-e-crime' },
+    { time: '10:00', title: 'Editorial em Vídeo: Protestar é direito, vandalismo não! Veja a apuração', slug: 'protestar-e-direito-vandalismo-nao' },
     { time: '14:32', title: 'Congresso analisa pacote para reduzir custo do trabalho e gerar empregos', slug: 'congresso-avanca-em-propostas-para-gerar-empregos-e-reduzir-o-custo-do-trabalho' },
-    { time: '13:15', title: 'Flávio Bolsonaro participa de encontro com lideranças no Rio Grande do Sul', slug: 'art-rs-1' },
+    { time: '13:15', title: 'Governo do RS e Porto Alegre aceleram obras de proteção contra cheias', slug: 'governo-do-rs-e-porto-alegre-aceleram-obras-de-diques-e-protecao-contra-cheias' },
     { time: '12:48', title: 'Dólar fecha em queda e bolsa tem alta com expectativa de reformas', slug: 'mercado-reage-positivamente-a-novas-medidas-economicas' },
     { time: '11:05', title: 'STF retoma julgamentos de temas econômicos relevantes', slug: 'congresso-avanca-em-propostas-para-gerar-empregos-e-reduzir-o-custo-do-trabalho' },
-    { time: '10:44', title: 'Ministério da Saúde amplia atendimento no SUS em regiões Norte e Nordeste', slug: 'art-4' },
-    { time: '09:21', title: 'Câmara aprova marco de energia renovável', slug: 'art-2' },
   ];
 
   // Featured videos list matching reference design
   const featuredVideo = {
-    title: 'Flávio Bolsonaro fala sobre segurança e desenvolvimento no Sul',
-    duration: '4:15',
+    title: 'PROTESTAR É DIREITO, VANDALISMO NÃO!',
+    duration: 'Editorial Oficial',
     channel: 'O Patriota Brasil',
-    views: '12 mil visualizações',
-    timeAgo: '2 dias atrás',
-    thumbnail: '/images/hero_congresso.jpg',
+    views: 'Em Destaque',
+    timeAgo: 'Hoje',
+    thumbnail: 'https://img.youtube.com/vi/IACLb9V3d6U/hqdefault.jpg',
+    embedUrl: 'https://www.youtube.com/embed/IACLb9V3d6U',
+    slug: 'protestar-e-direito-vandalismo-nao',
   };
 
   const sideVideos = [
@@ -254,30 +258,68 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               </div>
 
               {/* Main Video Box */}
-              <div className="relative aspect-[16/9] w-full rounded overflow-hidden bg-black mb-3 group cursor-pointer border border-[#D9DEE7]">
-                <ArticleImage
-                  src={featuredVideo.thumbnail}
-                  alt={featuredVideo.title}
-                  className="w-full h-full object-cover opacity-85 group-hover:opacity-95 group-hover:scale-105 transition-all duration-500"
-                />
-                {/* Play Button Overlay */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-11 h-11 rounded-full bg-black/60 group-hover:bg-[#DC2626] text-white flex items-center justify-center transition-all shadow-md group-hover:scale-110">
-                    <Play className="w-5 h-5 fill-white ml-0.5" />
+              <div className="relative aspect-[16/9] w-full rounded overflow-hidden bg-black mb-3 border border-[#D9DEE7] shadow-xs">
+                {isPlayingFeaturedVideo ? (
+                  <iframe
+                    src={`${featuredVideo.embedUrl}?autoplay=1`}
+                    title={featuredVideo.title}
+                    className="w-full h-full"
+                    frameBorder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
+                  />
+                ) : (
+                  <div
+                    onClick={() => setIsPlayingFeaturedVideo(true)}
+                    className="relative w-full h-full group cursor-pointer"
+                  >
+                    <ArticleImage
+                      src={featuredVideo.thumbnail}
+                      alt={featuredVideo.title}
+                      className="w-full h-full object-cover opacity-90 group-hover:opacity-95 group-hover:scale-105 transition-all duration-500"
+                    />
+                    {/* Play Button Overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 group-hover:bg-black/10 transition-colors">
+                      <div className="w-12 h-12 rounded-full bg-[#DC2626] text-white flex items-center justify-center transition-all shadow-lg group-hover:scale-110">
+                        <Play className="w-6 h-6 fill-white ml-0.5" />
+                      </div>
+                    </div>
+                    {/* Duration Badge */}
+                    <span className="absolute bottom-2 right-2 bg-black/85 text-white text-[10px] font-bold px-2 py-0.5 rounded">
+                      {featuredVideo.duration}
+                    </span>
+                    <span className="absolute top-2 left-2 bg-[#DC2626] text-white text-[9px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                      VÍDEO EM DESTAQUE
+                    </span>
                   </div>
-                </div>
-                {/* Duration Badge */}
-                <span className="absolute bottom-2 right-2 bg-black/80 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">
-                  {featuredVideo.duration}
-                </span>
+                )}
               </div>
 
-              <h3 className="font-serif text-xs font-bold text-[#0B2345] leading-snug mb-1 hover:text-[#0B5FFF] transition-colors cursor-pointer line-clamp-2">
-                {featuredVideo.title}
-              </h3>
-              <p className="text-[10px] text-[#5D6673] mb-3">
-                {featuredVideo.channel} • {featuredVideo.views} • {featuredVideo.timeAgo}
-              </p>
+              <div className="flex items-start justify-between gap-2 mb-1">
+                <h3
+                  onClick={() => {
+                    const videoArticle = articles.find(a => a.slug === featuredVideo.slug);
+                    if (videoArticle) onSelectArticle(videoArticle);
+                  }}
+                  className="font-serif text-xs font-bold text-[#0B2345] leading-snug hover:text-[#0B5FFF] transition-colors cursor-pointer line-clamp-2"
+                >
+                  {featuredVideo.title}
+                </h3>
+              </div>
+
+              <div className="flex items-center justify-between text-[10px] text-[#5D6673] mb-2.5">
+                <span>{featuredVideo.channel} • {featuredVideo.timeAgo}</span>
+                <button
+                  onClick={() => {
+                    const videoArticle = articles.find(a => a.slug === featuredVideo.slug);
+                    if (videoArticle) onSelectArticle(videoArticle);
+                  }}
+                  className="text-[#0B5FFF] font-bold hover:underline cursor-pointer"
+                >
+                  Ler matéria →
+                </button>
+              </div>
 
               {/* Secondary Video Thumbnails */}
               <div className="space-y-2.5 pt-2 border-t border-[#F1F3F5]">

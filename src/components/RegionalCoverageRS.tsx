@@ -36,23 +36,23 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
 
   const referenceSecondaryArticles: Article[] = [
     {
-      id: 'sec-regional-1',
-      slug: 'brasil-lidera-em-energia-renovavel-na-america-latina',
-      title: 'Brasil lidera em energia renovável na América Latina',
-      subtitle: 'Fontes eólica e solar batem recordes históricos de geração e atraem investimentos globais.',
-      kicker: 'ECONOMIA',
-      category: 'economia',
+      id: 'art-policia-metro-divergem-paulista',
+      slug: 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista',
+      title: 'Polícia e Metrô divergem sobre danos após ato pró-Lula na Avenida Paulista',
+      subtitle: 'A Secretaria da Segurança Pública afirma que a PM registrou tumulto, pichações e depredação durante a dispersão; o Metrô diz não ter registros internos de danos nas estações da região.',
+      kicker: 'ELEIÇÕES 2026 & SEGURANÇA',
+      category: 'politica',
       accessLevel: 'aberto',
       editorialStatus: 'PUBLICADA',
-      content: 'O Brasil consolidou sua liderança continental na matriz de energia limpa com novos parques solares e eólicos.',
-      author: 'Equipe de Economia',
-      authorRole: 'Analista Econômico',
-      sourceName: 'Ministério de Minas e Energia',
-      imageCaption: 'Parque de turbinas eólicas e energia renovável no Brasil.',
-      publishedAt: 'Há 4 horas',
-      readTimeMinutes: 3,
-      imageUrl: '/images/news_infraestrutura.jpg',
-      tags: ['Energia', 'Economia', 'Sustentabilidade']
+      content: 'Um ato da campanha do presidente Luiz Inácio Lula da Silva (PT), candidato à reeleição, terminou no domingo (11) na Avenida Paulista com versões diferentes sobre o que ocorreu na dispersão.',
+      author: 'Redação O Patriota',
+      authorRole: 'Reportagem Especial',
+      sourceName: 'SSP-SP e Companhia do Metrô',
+      imageCaption: 'Ato na Avenida Paulista e dispersão com relatos divergentes.',
+      publishedAt: 'Há 2 horas',
+      readTimeMinutes: 4,
+      imageUrl: '/images/policia_metro_paulista.jpg',
+      tags: ['Avenida Paulista', 'Polícia Militar', 'Metrô SP', 'Eleições 2026', 'Segurança']
     },
     {
       id: 'sec-regional-2',
@@ -95,8 +95,8 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
   ];
 
   // Identifica artigos reais do banco ou utiliza os dados fiéis à imagem de referência
-  const mainLead = articles.find(a => a.category === 'politica') || referenceLeadArticle;
-  const secondary1 = articles.find(a => a.category === 'economia') || referenceSecondaryArticles[0];
+  const mainLead = articles.find(a => a.category === 'politica' && a.id !== 'art-policia-metro-divergem-paulista') || referenceLeadArticle;
+  const secondary1 = articles.find(a => a.id === 'art-policia-metro-divergem-paulista' || a.slug === 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista') || referenceSecondaryArticles[0];
   const secondary2 = articles.find(a => a.category === 'seguranca') || referenceSecondaryArticles[1];
   const secondary3 = articles.find(a => a.category === 'mundo') || referenceSecondaryArticles[2];
 
@@ -165,6 +165,8 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
             const getKickerColor = (kicker?: string) => {
               if (kicker?.includes('ECONOMIA')) return 'text-[#16803C]';
               if (kicker?.includes('SEGURANÇA')) return 'text-[#EA580C]';
+              if (kicker?.includes('ELEIÇÕES')) return 'text-[#DC2626]';
+              if (kicker?.includes('POLÍTICA')) return 'text-[#0284C7]';
               if (kicker?.includes('MUNDO')) return 'text-[#0284C7]';
               return 'text-[#16803C]';
             };

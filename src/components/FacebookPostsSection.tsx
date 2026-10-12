@@ -31,6 +31,17 @@ export const FacebookPostsSection: React.FC<FacebookPostsSectionProps> = ({ post
   // High-fidelity feed matching reference design and real URLs
   const facebookFeed: FacebookPostData[] = [
     {
+      id: 'fb-paulista',
+      authorName: 'O Patriota Brasil',
+      timeAgo: 'há 1 hora',
+      text: 'Polícia e Metrô divergem sobre danos após ato pró-Lula na Avenida Paulista. PM registrou tumulto e depredação na dispersão; Metrô diz não ter registros de danos.',
+      imageUrl: 'https://scontent.fpoa13-1.fna.fbcdn.net/v/t39.30808-6/844461567_122099510319508218_8962011006668968197_n.jpg?stp=dst-jpg_tt6&cstp=mx1084x714&ctp=p180x540&_nc_cat=105&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=127cfc&_nc_ohc=hDk0EMtW1w8Q7kNvwFC6Gmx&_nc_oc=AdqonzhRXaH0YEa_3rh9RgNOglth0gqj4oy_K84Za5Zq4v-y0RRjDXxEzruuj_wn8Y7QS8_6MQh0IvbX5uLI8elu&_nc_zt=23&_nc_ht=scontent.fpoa13-1.fna&_nc_gid=4gd88Wwt0riEFMkkB1x-Og&_nc_ss=7b2a8&oh=00_AQND8s6qsaTfjM1AClRbjITi00yqbfKZw8otE2Uxys0_7Q&oe=6AD2CE25',
+      likes: '2,4 mil',
+      comments: '580',
+      shares: '240',
+      postUrl: '/noticia/policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista',
+    },
+    {
       id: 'fb-1',
       authorName: 'O Patriota Brasil',
       timeAgo: 'há 2 horas',
@@ -166,7 +177,13 @@ export const FacebookPostsSection: React.FC<FacebookPostsSectionProps> = ({ post
           {facebookFeed.map((post, idx) => (
             <article 
               key={post.id}
-              onClick={() => window.open(post.postUrl, '_blank', 'noopener,noreferrer')}
+              onClick={() => {
+                if (post.postUrl.startsWith('/')) {
+                  window.location.href = post.postUrl;
+                } else {
+                  window.open(post.postUrl, '_blank', 'noopener,noreferrer');
+                }
+              }}
               className="bg-white border border-[#D9DEE7] rounded-lg overflow-hidden flex flex-col justify-between hover:shadow-md hover:border-[#1877F2] transition-all duration-300 group cursor-pointer"
             >
               <div>
