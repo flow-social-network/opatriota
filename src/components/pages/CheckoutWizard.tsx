@@ -63,7 +63,7 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
         setNotice('Entre ou crie uma conta para associar a assinatura e o histórico de pagamentos ao seu usuário.');
         return;
       }
-      if (!(currentUser.name || billingName).trim()) {
+      if (!isFree && !(currentUser.name || billingName).trim()) {
         setNotice('Informe o nome para faturamento antes de continuar.');
         return;
       }
