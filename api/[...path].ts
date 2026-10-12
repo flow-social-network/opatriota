@@ -100,6 +100,11 @@ function routeName(url: string): string {
 function cleanObject(value: unknown): Record<string, any> {
   return value && typeof value === 'object' && !Array.isArray(value) ? value as Record<string, any> : {};
 }
+
+function slugify(value: string): string {
+  return value.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 180);
+}
 async function getIdentity(req: Req): Promise<{ uid: string; email: string; role: string } | null> {
   const raw = req.headers.authorization;
   const header = Array.isArray(raw) ? raw[0] : raw || '';
@@ -802,7 +807,7 @@ export default async function handler(req: Req, res: Res) {
 
       const body = cleanObject(req.body || await readBody(req));
       const authorFields = new Set([
-        'title', 'subtitle', 'kicker', 'category', 'subcategory', 'tags', 'content',
+        'title', 'slug', 'subtitle', 'kicker', 'category', 'subcategory', 'tags', 'content',
         'imageUrl', 'imageCaption', 'imageCredits', 'sourceName', 'sourceUrl',
         'sourcesConsulted', 'seo', 'videoEmbedUrl', 'isFactCheck', 'factVerdict',
         'factClaim', 'factDocuments', 'originalUrl', 'originalPublishedAt',
@@ -822,11 +827,18 @@ export default async function handler(req: Req, res: Res) {
         const id = String(body.id || newId()).trim().slice(0, 160);
         if (!id) return json(res, 400, { error: 'INVALID_ARTICLE_ID' });
         if (await documentGet('articles', id)) return json(res, 409, { error: 'RESOURCE_CONFLICT', message: 'Já existe uma matéria com este identificador.' });
+        const slug = slugify(String(editable.slug || title));
+        if (!slug) return json(res, 400, { error: 'INVALID_ARTICLE_SLUG', message: 'Informe um título que gere um slug válido.' });
+        const existingSlugs = await documentList('articles');
+        if (existingSlugs.some((article) => String(article.slug || '').toLowerCase() === slug.toLowerCase())) {
+          return json(res, 409, { error: 'ARTICLE_SLUG_CONFLICT', message: 'Já existe uma matéria com este endereço.' });
+        }
         const requestedPublication = isEditor && String(editable.editorialStatus || '').toUpperCase() === 'PUBLICADA';
         const requestedAccess = String(editable.accessLevel || 'aberto');
         const record = {
           ...editable,
           id,
+          slug,
           title,
           content: articleContent,
           createdBy: user.uid,
@@ -854,9 +866,18 @@ export default async function handler(req: Req, res: Res) {
         ...existing,
         ...editable,
         id: String(existing.id || resource.id),
+        slug: slugify(String(editable.slug || existing.slug || editable.title || existing.title || '')),
         createdBy: String(existing.createdBy || user.uid),
         updatedAt: new Date().toISOString(),
       };
+      if (!next.slug) return json(res, 400, { error: 'INVALID_ARTICLE_SLUG' });
+      const existingSlugs = await documentList('articles');
+      if (existingSlugs.some((article) =>
+        String(article.id || '') !== String(existing.id || resource.id) &&
+        String(article.slug || '').toLowerCase() === String(next.slug).toLowerCase()
+      )) {
+        return json(res, 409, { error: 'ARTICLE_SLUG_CONFLICT', message: 'Já existe uma matéria com este endereço.' });
+      }
       if (!isEditor) {
         next.editorialStatus = 'EM REVISÃO';
         next.status = 'rascunho';
