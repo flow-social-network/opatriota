@@ -601,9 +601,7 @@ export const Header: React.FC<HeaderProps> = ({
                 className="relative p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
               >
                 <Bell className="w-5 h-5" />
-                <span className="absolute top-0.5 right-0.5 w-3.5 h-3.5 bg-[#E11D48] text-white text-[8px] font-black rounded-full flex items-center justify-center shadow-xs">
-                  5
-                </span>
+                
               </button>
 
               <button
@@ -649,25 +647,11 @@ export const Header: React.FC<HeaderProps> = ({
             >
               <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
               <span>Taquara (RS)</span>
-              <span>24°C</span>
-              <span className="bg-[#10B981] text-white text-[9px] font-black px-1.5 py-0.2 rounded uppercase">
-                INMET
-              </span>
+              <span className="text-[#64748B] font-medium">Consultar previsão</span>
             </button>
           </div>
 
-          {/* Markets Bar no Mobile */}
-          <div className="bg-white px-3 py-1.5 border-b border-[#E2E8F0] flex items-center text-[11px] font-medium text-[#0F172A]">
-            <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#16803C] shrink-0 mr-3">
-              <span className="w-2 h-2 rounded-full bg-[#16803C] animate-pulse" />
-              <span>MERCADOS AO VIVO</span>
-            </div>
-            <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none text-slate-700">
-              <span>Dólar</span>
-              <span className="font-bold">R$ 5,45</span>
-              <span className="text-[#16803C] font-bold">▲ +0,32%</span>
-            </div>
-          </div>
+          <BreakingNewsTicker enabled />
         </div>
 
 
@@ -696,11 +680,7 @@ export const Header: React.FC<HeaderProps> = ({
                 >
                   <Sun className="w-3.5 h-3.5 text-[#EAB308] fill-[#EAB308]" />
                   <span className="font-bold">Taquara (RS)</span>
-                  <span className="font-bold">24°C</span>
-                  <span className="text-[#64748B] text-[10px]">Céu limpo</span>
-                  <span className="bg-[#10B981] hover:bg-[#059669] text-white text-[8px] font-black px-1 py-0.5 rounded uppercase">
-                    INMET
-                  </span>
+                  <span className="text-[#64748B] text-[10px]">Previsão não verificada</span>
                 </button>
               </div>
 
@@ -755,7 +735,7 @@ export const Header: React.FC<HeaderProps> = ({
                   aria-label="Abrir notificações"
                 >
                   <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#EF2222] text-white text-[9px] font-black flex items-center justify-center">3</span>
+                  
                 </button>
                 {currentUser ? (
                   <button onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-2 text-[#0B2345] font-bold text-[12px] cursor-pointer" aria-label="Menu do usuário" aria-expanded={userDropdownOpen}>
@@ -775,54 +755,7 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
           </div>
 
-          {/* TIER 2: BARRA DE MERCADOS AO VIVO (Fundo Azul-marinho profundo #081628) */}
-          <div className="bg-[#061A35] text-white px-5 py-3 text-[13px] font-medium border-b border-[#0d223a]">
-            <div className="w-full mx-auto flex items-center justify-between gap-5">
-              <div className="flex items-center gap-3 overflow-x-auto scrollbar-none whitespace-nowrap">
-                {/* Ponto verde pulsante + MERCADOS AO VIVO */}
-                <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#22C55E] shrink-0">
-                  <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
-                  <span>MERCADOS AO VIVO</span>
-                </div>
-
-                <span className="text-white/20">|</span>
-
-                {/* Indicadores Econômicos */}
-                <div className="flex items-center gap-4 text-white/90">
-                  <div className="flex items-center gap-1">
-                    <span className="text-white/60">Dólar</span>
-                    <span className="font-bold text-white">R$ 5,45</span>
-                    <span className="text-[#22C55E] font-bold">▲ +0,32%</span>
-                  </div>
-
-                  <span className="text-white/20">|</span>
-
-                  <div className="flex items-center gap-1">
-                    <span className="text-white/60">Euro</span>
-                    <span className="font-bold text-white">R$ 5,89</span>
-                    <span className="text-[#EF4444] font-bold">▼ -0,14%</span>
-                  </div>
-
-                  <span className="text-white/20">|</span>
-
-                  <div className="flex items-center gap-1">
-                    <span className="text-white/60">Ibovespa</span>
-                    <span className="font-bold text-white">145.320</span>
-                    <span className="text-[#22C55E] font-bold">▲ +0,68%</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Mais Cotações */}
-              <button 
-                onClick={() => onSelectCategory('economia')}
-                className="text-white/70 hover:text-white flex items-center gap-1 text-[11px] shrink-0 transition cursor-pointer"
-              >
-                <span>Mais cotações</span>
-                <span>→</span>
-              </button>
-            </div>
-          </div>
+          <BreakingNewsTicker enabled />
 
           {/* TIER 3: BARRA BRANCA COM LOGOTIPO CENTRALIZADO E CONTROLES DE NOTIFICAÇÃO/USUÁRIO */}
           <div className="bg-white py-7 px-9 border-b border-[#E2E8F0]">
