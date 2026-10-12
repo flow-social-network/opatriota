@@ -141,7 +141,7 @@ export function NotFound() {
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <NotFoundPageView
         categories={categories.filter((category) => category.active !== false)}
-        recentArticles={publicArticles.slice(0, 4)
+        recentArticles={publicArticles.slice(0, 4)}
         onNavigateHome={() => navigate('/')}
         onSelectCategory={(cat) => navigate(cat === 'todos' ? '/' : `/categoria/${cat}`)}
         onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
