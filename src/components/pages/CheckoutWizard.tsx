@@ -98,8 +98,8 @@ export const CheckoutWizard: React.FC<CheckoutWizardProps> = ({
           planId,
           cycle,
           paymentMethod,
-          name: currentUser?.name || name.trim(),
-          email: currentUser?.email || email.trim(),
+          name: currentUser.name,
+          email: currentUser.email,
         }),
       });
       const result = await response.json();
