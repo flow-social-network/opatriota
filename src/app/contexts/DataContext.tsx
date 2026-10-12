@@ -127,13 +127,13 @@ export function DataProvider({ children }: { children: ReactNode }) {
       load<Article[]>('/articles', (items) => {
         setArticles(Array.isArray(items) ? items : []);
         setDataError(null);
-      }),
+      }, true),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
       load<RssSource[]>('/editorial/sources', setSources, true),
       load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),
-      load<InstitutionalPage[]>('/pages', setPages),
-      load<CategoryDetail[]>('/categories', setCategories),
-      load<AuthorDetail[]>('/authors', setAuthors),
+      load<InstitutionalPage[]>('/pages', setPages, true),
+      load<CategoryDetail[]>('/categories', setCategories, true),
+      load<AuthorDetail[]>('/authors', setAuthors, true),
       load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),
     ]).finally(() => { if (active) setDataLoading(false); });
     return () => { active = false; };
