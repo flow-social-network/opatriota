@@ -71,8 +71,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       if (item.id === id) {
         return {
           ...item,
-          editorialStatus: newStatus,
-          assignedTo: newStatus === 'EM REDAÇÃO' ? 'Repórter Designado' : item.assignedTo
+          editorialStatus: newStatus
         };
       }
       return item;
