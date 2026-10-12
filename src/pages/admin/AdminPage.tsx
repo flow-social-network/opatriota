@@ -38,7 +38,7 @@ export default function AdminPage() {
   }
 
   // Map sub-route parameter to tab
-  const tabMapping: Record<string, string> = {
+  const tabMapping: Record<string, 'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes'> = {
     painel: 'painel',
     dashboard: 'painel',
     users: 'usuarios',
