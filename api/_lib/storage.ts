@@ -76,10 +76,37 @@ async function getMysqlPool(): Promise<MysqlPool> {
   return mysqlPool;
 }
 
+function getPostgresConnectionUrls(): string[] {
+  return [
+    process.env.DATABASE_URL,
+    process.env.POSTGRES_URL,
+    process.env.POSTGRES_PRISMA_URL,
+    process.env.POSTGRES_URL_NON_POOLING,
+  ].filter((value, index, urls): value is string => Boolean(value) && urls.indexOf(value) === index);
+}
+
 async function getPostgresPool(): Promise<PostgresPool> {
-  if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is required when DATABASE_PROVIDER=postgres');
+  const connectionUrls = getPostgresConnectionUrls();
+  if (!connectionUrls.length) throw new Error('DATABASE_URL or POSTGRES_URL is required when DATABASE_PROVIDER=postgres');
   if (!postgresPool) {
-    postgresPool = import('pg').then(({ Pool }) => new Pool({ connectionString: process.env.DATABASE_URL })).catch((error) => {
+    postgresPool = (async () => {
+      const { Pool } = await import('pg');
+      let lastError: unknown;
+
+      for (const connectionString of connectionUrls) {
+        const candidate = new Pool({ connectionString, max: Number(process.env.POSTGRES_POOL_MAX || 10) });
+        try {
+          const client = await candidate.connect();
+          client.release();
+          return candidate;
+        } catch (error) {
+          lastError = error;
+          await candidate.end().catch(() => undefined);
+        }
+      }
+
+      throw lastError instanceof Error ? lastError : new Error('Nenhuma conexão PostgreSQL disponível');
+    })().catch((error) => {
       postgresPool = undefined;
       throw error;
     });
