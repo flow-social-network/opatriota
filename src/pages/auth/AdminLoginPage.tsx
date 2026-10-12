@@ -9,7 +9,7 @@ import {
   Lock, 
   Eye, 
   EyeOff, 
-  LogIn, 
+  LogIn,
   AlertCircle, 
   ShieldAlert
 } from 'lucide-react';

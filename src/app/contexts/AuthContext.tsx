@@ -37,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { showToast } = useToast();
 
   useEffect(() => {
+    let mounted = true;
     const unsubscribe = observeAuth((user) => {
       if (user) {
         setCurrentUser(user);
@@ -53,7 +54,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       }
     });
-    return unsubscribe;
+
+    // A sessão da Administração/Redação é HttpOnly e não é observável pelo Firebase.
+    // Recuperá-la aqui evita pedir login novamente após recarregar um painel.
+    void api.get<{ user: UserSession }>('/editorial/auth/me', { auth: false })
+      .then(({ user }) => {
+        if (mounted && user) setCurrentUser(user);
+      })
+      .catch(() => undefined);
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
 
   const loginWithGoogle = useCallback(async () => {

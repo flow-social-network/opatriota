@@ -108,6 +108,13 @@ export default async function handler(req: Req, res: Res) {
       res.setHeader('Set-Cookie', sessionCookie(result.token));
       return json(res, 200, { user: editorialUserToSession(result.user) });
     }
+    if (path === 'editorial/auth/me' && method === 'GET') {
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = readSessionCookie(cookie);
+      const user = token ? await getEditorialIdentity(token) : null;
+      if (!user) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Sessão editorial ausente ou expirada.' });
+      return json(res, 200, { user: editorialUserToSession(user) });
+    }
     if (path === 'editorial/auth/logout' && method === 'POST') {
       const raw = req.headers.authorization;
       const header = Array.isArray(raw) ? raw[0] : raw || '';
