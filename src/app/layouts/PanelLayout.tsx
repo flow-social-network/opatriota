@@ -26,13 +26,15 @@ export function PanelLayout({
   const navigate = useNavigate();
   const location = useLocation();
   const adminModulePaths = new Set([
-    '/admin/dashboard', '/admin/articles', '/admin/materias',
+    '/admin', '/admin/dashboard', '/admin/articles', '/admin/materias',
     '/admin/categories', '/admin/categorias', '/admin/journalists', '/admin/autores',
     '/admin/sources', '/admin/fontes', '/admin/users', '/admin/usuarios',
     '/admin/permissions', '/admin/permissoes',
+    '/admin/fila', '/admin/dedup', '/admin/identidade', '/admin/redes', '/admin/publicidade', '/admin/push',
   ]);
   const showAdminModuleNavigation = adminModulePaths.has(location.pathname);
   const adminModuleLinks = [
+    { to: '/admin', label: 'Painel' },
     { to: '/admin/dashboard', label: 'Visão geral' },
     { to: '/admin/articles', label: 'Matérias' },
     { to: '/admin/categories', label: 'Editorias' },
@@ -40,6 +42,12 @@ export function PanelLayout({
     { to: '/admin/sources', label: 'Fontes RSS' },
     { to: '/admin/users', label: 'Usuários' },
     { to: '/admin/permissions', label: 'Permissões' },
+    { to: '/admin/fila', label: 'Fila editorial' },
+    { to: '/admin/dedup', label: 'Deduplicação' },
+    { to: '/admin/identidade', label: 'Identidade' },
+    { to: '/admin/redes', label: 'Redes sociais' },
+    { to: '/admin/publicidade', label: 'Publicidade' },
+    { to: '/admin/push', label: 'Notificações' },
   ];
 
   if (authLoading) {
