@@ -101,8 +101,7 @@ export const SocialMediaManager: React.FC<SocialMediaManagerProps> = ({
 
   const handleSave = () => {
     onSaveSocialNetworks(items);
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 3500);
+    // O serviço do painel apresenta o resultado após a resposta do backend.
   };
 
   const handleResetDefaults = () => {
