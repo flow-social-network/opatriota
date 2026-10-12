@@ -11,7 +11,7 @@ interface RegionalCoverageRSProps {
 
 const isRioGrandeDoSulCoverage = (article: Article) => {
   const tags = (article.tags || []).join(' ').toLowerCase();
-  const text = `${article.kicker || ''} ${article.subtitle || ''} ${tags}`.toLowerCase();
+  const text = `${article.title || ''} ${article.kicker || ''} ${article.subtitle || ''} ${tags}`.toLowerCase();
   return article.category === 'regional' ||
     /rio grande do sul|porto alegre|ga[uú]ch[oa]|\brs\b|vale do sinos|serra ga[uú]cha/.test(text);
 };
