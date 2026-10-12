@@ -37,3 +37,13 @@ test('user-role changes cannot be submitted without administrator identity', asy
   assert.equal(res.statusCode, 401);
   assert.match(res.body, /UNAUTHENTICATED/);
 });
+
+test('RSS synchronization requires editor or administrator identity', async () => {
+  const req = { method: 'POST', url: '/api/editorial/sources/sync', headers: {}, body: {} };
+  const res = responseRecorder();
+
+  await apiHandler(req as any, res as any);
+
+  assert.equal(res.statusCode, 401);
+  assert.match(res.body, /UNAUTHENTICATED/);
+});
