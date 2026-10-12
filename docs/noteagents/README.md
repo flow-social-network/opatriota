@@ -20,6 +20,7 @@ Permitir que uma pessoa descreva uma aplicação em linguagem natural, envie ima
 - [Registro de importações](./imports/README.md)
 - [MCP, LSP e Playwright](./08-MCP-LSP-PLAYWRIGHT.md)
 - [Catálogo de ferramentas](./09-CATALOGO-FERRAMENTAS.md)
+- [Camadas de desenvolvimento](./10-CAMADAS-DESENVOLVIMENTO.md)
 
 ## Princípios
 

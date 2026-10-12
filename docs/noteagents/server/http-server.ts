@@ -11,6 +11,10 @@ import { NotebookLmAdapter } from '../adapters/notebooklm'
 import { databaseHealth } from './postgres'
 import { getOrCreateLocalProject, listProjects, saveMessage, saveRun } from './repository'
 import { publicLocalConfig, saveLocalConfig } from './config'
+import { terminalSandbox } from '../adapters/terminal-sandbox'
+import { applyEditorChange, previewEditorChange, readEditorFile } from './editor'
+import { previewManager } from './preview'
+import { exchangeGithubCode, githubAuthorizationUrl } from './github-oauth'
 
 const runtime = new AgentRuntime(); createAgents().forEach(runtime.registerAgent.bind(runtime)); createBuiltinTools().forEach(runtime.registerTool.bind(runtime))
 let project: Project | undefined
@@ -33,6 +37,15 @@ export const server = createServer(async (req, res) => {
     if (req.url === '/api/models' && req.method === 'GET') { const { NVIDIA_FREE_MODELS } = await import('../integrations/nvidia'); return json(res, 200, { provider: 'NVIDIA NIM', models: NVIDIA_FREE_MODELS }) }
     if (req.url === '/api/config' && req.method === 'GET') return json(res, 200, await publicLocalConfig())
     if (req.url === '/api/config' && req.method === 'POST') { const input = await body(req); return json(res, 200, await saveLocalConfig({ model: typeof input.model === 'string' ? input.model : undefined, endpoint: typeof input.endpoint === 'string' ? input.endpoint : undefined, apiKey: typeof input.apiKey === 'string' && input.apiKey.trim() ? input.apiKey.trim() : undefined })) }
+    if (req.url === '/api/editor/read' && req.method === 'POST') { const input = await body(req); return json(res, 200, await readEditorFile(String(input.file))) }
+    if (req.url === '/api/editor/diff' && req.method === 'POST') { const input = await body(req); return json(res, 200, { diff: await previewEditorChange(String(input.file), String(input.content ?? '')) }) }
+    if (req.url === '/api/editor/apply' && req.method === 'POST') { const input = await body(req); if (!(await approve('editor-write'))) return json(res, 403, { error: 'APPROVAL_REQUIRED' }); return json(res, 200, await applyEditorChange(String(input.file), String(input.content ?? ''), typeof input.expectedContent === 'string' ? input.expectedContent : undefined)) }
+    if (req.url === '/api/terminal/run' && req.method === 'POST') { const input = await body(req); if (!(await approve('terminal-execution'))) return json(res, 403, { error: 'APPROVAL_REQUIRED' }); return json(res, 200, await terminalSandbox.run(String(input.command ?? ''), { cwd: typeof input.cwd === 'string' ? input.cwd : '.', timeoutMs: typeof input.timeoutMs === 'number' ? input.timeoutMs : undefined })) }
+    if (req.url === '/api/preview/start' && req.method === 'POST') { const input = await body(req); return json(res, 200, previewManager.start(typeof input.command === 'string' ? input.command : undefined, typeof input.port === 'number' ? input.port : 3000)) }
+    if (req.url === '/api/preview/status' && req.method === 'GET') return json(res, 200, previewManager.status())
+    if (req.url === '/api/preview/stop' && req.method === 'POST') return json(res, 200, previewManager.stop())
+    if (req.url === '/api/github/oauth/start' && req.method === 'GET') return json(res, 200, githubAuthorizationUrl(String(process.env.GITHUB_REDIRECT_URI ?? 'http://127.0.0.1:8787/api/github/oauth/callback')))
+    if (req.url?.startsWith('/api/github/oauth/callback') && req.method === 'GET') { const query = new URL(req.url, 'http://127.0.0.1').searchParams; await exchangeGithubCode(String(query.get('code') ?? ''), String(query.get('state') ?? '')); return json(res, 200, { connected: true }) }
     if (req.url === '/api/runs' && req.method === 'GET') return json(res, 200, runtime.listRuns(currentProject.id))
     if (req.url === '/api/runs' && req.method === 'POST') { const input = await body(req); const run = await runtime.execute(String(input.agent || 'orchestrator'), String(input.prompt || ''), actor, currentProject, approve); await saveRun(run); return json(res, 201, run) }
     if (req.url === '/api/chat' && req.method === 'POST') {

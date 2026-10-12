@@ -25,8 +25,10 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/diff": "^8.0.0",
     "@vitejs/plugin-react": "^6.1.1",
     "better-auth": "^1.7.7",
+    "diff": "^9.0.0",
     "drizzle-orm": "^0.45.4",
     "firebase": "^13.0.0",
     "jszip": "^3.10.2",
