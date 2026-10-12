@@ -1,0 +1,3 @@
+'use client'
+import { MessageSquare, Send } from 'lucide-react'
+export default function ChatPage() { return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Chat com IA</p><h1>Chat com IA</h1><p>Converse com o contexto conectado ao seu workspace.</p></header><section className="module-card chat-module"><div className="module-empty"><MessageSquare size={28}/><strong>Nenhuma conversa iniciada</strong><span>Conecte fontes ou projetos para habilitar o contexto do chat.</span></div><div className="chat-composer"><input aria-label="Mensagem" placeholder="Pergunte sobre seu workspace"/><button aria-label="Enviar"><Send size={16}/></button></div></section></div>}

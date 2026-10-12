@@ -1,0 +1,17 @@
+{
+  "name": "noteagents-browser-runner",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' --max-warnings=0"
+  },
+  "dependencies": {
+    "puppeteer": "^21.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "eslint": "^8.57.0"
+  }
+}

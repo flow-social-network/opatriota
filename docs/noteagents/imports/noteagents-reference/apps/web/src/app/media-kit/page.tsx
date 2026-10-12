@@ -1,0 +1,10 @@
+import Link from 'next/link';
+import { ArrowLeft, Download, ExternalLink } from 'lucide-react';
+import { Footer } from '~/src/components/layout/Footer';
+
+const mediaKitUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-NWqOT87rlGZatGQeUZAayK3qftwlAT.png';
+const iconUrl = 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/icone-RxzatGh5zLyRqc6WE6I32LuIblr1nd.png';
+
+export default function MediaKitPage() {
+  return <main className="public-page media-kit-page"><header className="public-page-header"><Link href="/" className="public-back"><ArrowLeft size={15} /> Voltar para a Home</Link><span className="public-badge">Identidade oficial</span></header><section className="public-hero media-kit-hero"><p className="public-eyebrow">NoteAgents</p><h1>Media Kit da marca.</h1><p>Use os logotipos, ícones, cores e elementos visuais oficiais do NoteAgents em apresentações, artigos, integrações e materiais da comunidade.</p><div className="public-actions"><a className="primary-button" href={mediaKitUrl} target="_blank" rel="noreferrer"><Download size={16} /> Abrir media kit</a><a className="secondary-button" href="https://github.com/flow-social-network/clonar-repositorio-github" target="_blank" rel="noreferrer">Repositório <ExternalLink size={15} /></a></div></section><section className="media-kit-grid"><article className="media-kit-card media-kit-preview"><div className="media-kit-card-copy"><span>Kit completo</span><h2>Logo, ícones e sistema visual</h2><p>Uma visão consolidada das variações aprovadas para fundos claros e escuros.</p></div><img src={mediaKitUrl} alt="Media kit oficial do NoteAgents com logotipos, ícones, banners e paleta de cores" /></article><article className="media-kit-card media-kit-icon-card"><div className="media-kit-card-copy"><span>Ícone principal</span><h2>O símbolo do NoteAgents</h2><p>Use o ícone em avatares, aplicativos, atalhos e espaços compactos.</p></div><div className="media-kit-icon-wrap"><img src={iconUrl} alt="Ícone oficial azul do NoteAgents" /></div></article></section><Footer /></main>;
+}

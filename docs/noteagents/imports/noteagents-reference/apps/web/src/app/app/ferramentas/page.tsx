@@ -1,0 +1,2 @@
+import { Wrench } from 'lucide-react'
+export default function FerramentasPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Ferramentas</p><h1>Ferramentas</h1><p>Veja ferramentas habilitadas para os agentes.</p></header><section className="module-card"><Wrench size={28}/><h2>Nenhuma ferramenta habilitada</h2><p>Ferramentas adicionais aparecerão conforme suas integrações.</p></section></div>}

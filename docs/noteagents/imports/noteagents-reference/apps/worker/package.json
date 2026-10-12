@@ -1,0 +1,21 @@
+{
+  "name": "noteagents-worker",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' --max-warnings=0"
+  },
+  "dependencies": {
+    "bull": "^4.16.1",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/bull": "^4.3.0",
+    "@types/pg": "^8.11.6",
+    "typescript": "^5.5.0",
+    "eslint": "^8.57.0"
+  }
+}

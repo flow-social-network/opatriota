@@ -15,22 +15,36 @@
     "lint": "tsc --noEmit",
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:header",
-    "test:header": "node --import tsx scripts/test-header-contract.ts"
+    "test:header": "node --import tsx scripts/test-header-contract.ts",
+    "noteagents:server": "node --env-file-if-exists=docs/noteagents/.env.local --import tsx docs/noteagents/server/http-server.ts",
+    "noteagents:web": "vite --config docs/noteagents/vite.config.ts",
+    "noteagents:mcp": "node --import tsx docs/noteagents/mcp/server.ts",
+    "noteagents:mcp:http": "NOTEAGENTS_MCP_MODE=http node --import tsx docs/noteagents/mcp/http-server.ts",
+    "noteagents:install-browser": "playwright install chromium"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "@tailwindcss/vite": "^4.3.3",
+    "@types/diff": "^8.0.0",
     "@vitejs/plugin-react": "^6.1.1",
     "better-auth": "^1.7.7",
+    "diff": "^9.0.0",
     "drizzle-orm": "^0.45.4",
     "firebase": "^13.0.0",
     "jszip": "^3.10.2",
     "lucide-react": "^0.546.0",
     "mysql2": "^3.24.5",
     "pg": "^8.23.1",
+    "playwright": "^1.64.0",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-router-dom": "^7.18.4",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "vscode-languageserver": "^10.1.2",
+    "vscode-languageserver-textdocument": "^1.0.15",
+    "vscode-languageserver-types": "^3.18.4",
+    "vscode-uri": "^3.2.0",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/jszip": "^3.4.1",

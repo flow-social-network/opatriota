@@ -1,0 +1,2 @@
+import { ShieldCheck } from 'lucide-react'
+export default function AuditoriasPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Auditorias</p><h1>Auditorias</h1><p>Consulte eventos, ações e trilhas de auditoria.</p></header><section className="module-card"><ShieldCheck size={28}/><h2>Nenhuma auditoria disponível</h2><p>As atividades auditáveis aparecerão aqui quando houver dados reais.</p></section></div>}

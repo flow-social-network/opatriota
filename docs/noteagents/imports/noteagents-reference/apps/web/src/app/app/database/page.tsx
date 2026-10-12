@@ -1,0 +1,2 @@
+import { Database } from 'lucide-react'
+export default function DatabasePage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Banco de dados</p><h1>Banco de dados</h1><p>Conexões, schemas e estado do banco.</p></header><section className="module-card"><Database size={28}/><h2>Nenhum banco conectado</h2><p>Conecte uma fonte de dados para visualizar informações permitidas.</p><a className="panel-action-button" href="/app/integracoes">Configurar conexão</a></section></div>}

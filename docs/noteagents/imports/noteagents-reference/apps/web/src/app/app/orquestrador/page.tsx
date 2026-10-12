@@ -1,0 +1,2 @@
+import { Workflow } from 'lucide-react'
+export default function OrquestradorPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Orquestrador</p><h1>Orquestrador</h1><p>Coordene fluxos e processos de engenharia.</p></header><section className="module-card"><Workflow size={28}/><h2>Nenhum fluxo ativo</h2><p>Os fluxos aparecerão quando houver uma execução configurada.</p></section></div>}

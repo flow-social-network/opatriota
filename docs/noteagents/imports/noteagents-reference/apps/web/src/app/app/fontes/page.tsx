@@ -1,0 +1,2 @@
+import { FileText } from 'lucide-react'
+export default function FontesPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Fontes</p><h1>Fontes</h1><p>Documentos e referências sincronizados.</p></header><section className="module-card"><FileText size={28}/><h2>Nenhuma fonte conectada</h2><p>Adicione uma fonte para enriquecer o contexto dos agentes.</p><button className="panel-action-button">Adicionar fonte</button></section></div>}

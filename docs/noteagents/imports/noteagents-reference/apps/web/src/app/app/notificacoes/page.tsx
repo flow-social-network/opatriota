@@ -1,0 +1,2 @@
+import { Bell } from 'lucide-react'
+export default function NotificacoesPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Notificações</p><h1>Notificações</h1><p>Acompanhe alertas e atualizações do workspace.</p></header><section className="module-card"><Bell size={28}/><h2>Você está em dia</h2><p>Nenhuma notificação nova foi encontrada.</p></section></div>}

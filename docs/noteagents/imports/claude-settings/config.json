@@ -1,0 +1,4 @@
+{
+  "primaryApiKey": "",
+  "note": "Configure credenciais somente em .env.local; nunca comite chaves."
+}

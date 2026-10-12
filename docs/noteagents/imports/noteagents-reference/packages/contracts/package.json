@@ -1,0 +1,16 @@
+{
+  "name": "@noteagents/contracts",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "dependencies": {
+    "@noteagents/types": "workspace:*",
+    "zod": "^3.23.8"
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.json",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' --max-warnings=0"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "name": "noteagents-api",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "start": "node dist/main.js",
+    "dev": "tsx src/main.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint 'src/**/*.ts' --max-warnings=0"
+  },
+  "dependencies": {
+    "@noteagents/contracts": "workspace:*",
+    "express": "^4.19.2",
+    "zod": "^3.23.8",
+    "pg": "^8.11.3"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/pg": "^8.11.6",
+    "typescript": "^5.5.0",
+    "eslint": "^8.57.0",
+    "tsx": "^4.19.0"
+  }
+}
