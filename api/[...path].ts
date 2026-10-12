@@ -239,10 +239,25 @@ export default async function handler(req: Req, res: Res) {
       ]);
       if (!profile && !currentRole) return json(res, 404, { error: 'USER_NOT_FOUND', message: 'Usuário não encontrado no cadastro do portal.' });
       const updatedAt = new Date().toISOString();
+      const auditId = newId();
+      await documentWrite('auditLogs', auditId, {
+        id: auditId,
+        action: 'USER_ROLE_CHANGE_REQUESTED',
+        actorUid: identity!.uid,
+        targetUid: uid,
+        previousRole: String(currentRole?.role || 'leitor_gratuito'),
+        nextRole,
+        status: 'requested',
+        createdAt: updatedAt,
+      }, false);
       await documentWrite('userRoles', uid, {
         role: nextRole,
         updatedAt,
         updatedBy: identity!.uid,
+      });
+      await documentWrite('auditLogs', auditId, {
+        status: 'applied',
+        completedAt: new Date().toISOString(),
       });
       return json(res, 200, {
         id: uid,
