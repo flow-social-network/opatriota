@@ -626,7 +626,7 @@ export const Header: React.FC<HeaderProps> = ({
               const isActive = (item.slug === 'todos' && currentCategory === 'todos') || currentCategory === item.slug;
               return (
                 <button
-                  key={item.slug}
+                  key={`${item.label}-${item.slug}`}
                   onClick={() => onSelectCategory(item.slug)}
                   className={`px-3 py-1 rounded text-[11px] font-black tracking-wider uppercase whitespace-nowrap transition cursor-pointer ${
                     isActive
