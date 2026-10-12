@@ -10,6 +10,7 @@ import { KnowledgeVault } from '../adapters/knowledge-vault'
 import { NotebookLmAdapter } from '../adapters/notebooklm'
 import { databaseHealth } from './postgres'
 import { getOrCreateLocalProject, listProjects, saveMessage, saveRun } from './repository'
+import { publicLocalConfig, saveLocalConfig } from './config'
 
 const runtime = new AgentRuntime(); createAgents().forEach(runtime.registerAgent.bind(runtime)); createBuiltinTools().forEach(runtime.registerTool.bind(runtime))
 let project: Project | undefined
@@ -30,6 +31,8 @@ export const server = createServer(async (req, res) => {
     if (req.url === '/api/knowledge' && req.method === 'GET') return json(res, 200, await new KnowledgeVault().list())
     if (req.url === '/api/notebooklm/health' && req.method === 'GET') return json(res, 200, await new NotebookLmAdapter().health())
     if (req.url === '/api/models' && req.method === 'GET') { const { NVIDIA_FREE_MODELS } = await import('../integrations/nvidia'); return json(res, 200, { provider: 'NVIDIA NIM', models: NVIDIA_FREE_MODELS }) }
+    if (req.url === '/api/config' && req.method === 'GET') return json(res, 200, await publicLocalConfig())
+    if (req.url === '/api/config' && req.method === 'POST') { const input = await body(req); return json(res, 200, await saveLocalConfig({ model: typeof input.model === 'string' ? input.model : undefined, endpoint: typeof input.endpoint === 'string' ? input.endpoint : undefined, apiKey: typeof input.apiKey === 'string' && input.apiKey.trim() ? input.apiKey.trim() : undefined })) }
     if (req.url === '/api/runs' && req.method === 'GET') return json(res, 200, runtime.listRuns(currentProject.id))
     if (req.url === '/api/runs' && req.method === 'POST') { const input = await body(req); const run = await runtime.execute(String(input.agent || 'orchestrator'), String(input.prompt || ''), actor, currentProject, approve); await saveRun(run); return json(res, 201, run) }
     if (req.url === '/api/chat' && req.method === 'POST') {
