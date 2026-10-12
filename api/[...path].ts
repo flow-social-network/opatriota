@@ -140,6 +140,47 @@ export default async function handler(req: Req, res: Res) {
       throw new Error('Invalid Firebase ID token');
     });
 
+    if (path === 'analytics/events' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const allowedTypes = new Set(['page_view', 'session_start', 'auth_login', 'signup_completed', 'subscription_started', 'unauthorized_access']);
+      const eventType = String(body.eventType || '');
+      const pagePath = String(body.pagePath || '').trim();
+      const sessionKey = String(body.sessionKey || '').trim();
+      if (!allowedTypes.has(eventType) || !pagePath || pagePath.length > 2048 || !sessionKey || sessionKey.length > 160) {
+        return json(res, 400, { error: 'INVALID_ANALYTICS_EVENT', message: 'Evento de audiência inválido.' });
+      }
+      const deduplicationKey = String(body.deduplicationKey || `${eventType}:${sessionKey}:${pagePath}`).slice(0, 300);
+      const existing = await documentGet('portalEventDedup', deduplicationKey);
+      if (existing) return json(res, 202, { accepted: true, deduplicated: true });
+      await documentWrite('portalEventDedup', deduplicationKey, { createdAt: new Date().toISOString() }, false);
+      const userAgent = String(req.headers['user-agent'] || '');
+      const forwardedFor = String(req.headers['x-forwarded-for'] || '').split(',')[0].trim();
+      const eventId = newId();
+      await documentWrite('portalEvents', eventId, {
+        id: eventId, eventType, occurredAt: new Date().toISOString(), sessionKey,
+        visitorKind: identity?.role === 'administrador' ? 'admin' : identity ? 'authenticated' : 'anonymous',
+        userId: identity?.uid || null, pagePath, pageTitle: String(body.pageTitle || '').slice(0, 300),
+        category: String(body.category || '').slice(0, 120), articleId: String(body.articleId || '').slice(0, 160),
+        referrerHost: String(body.referrerHost || '').slice(0, 255), campaignSource: String(body.campaignSource || '').slice(0, 120),
+        deviceType: ['desktop', 'mobile', 'tablet', 'unknown'].includes(String(body.deviceType)) ? String(body.deviceType) : 'unknown',
+        userAgentHash: createHash('sha256').update(userAgent).digest('hex'),
+        ipHash: forwardedFor ? createHash('sha256').update(forwardedFor).digest('hex') : null,
+        metadata: cleanObject(body.metadata),
+      }, false);
+      return json(res, 202, { accepted: true, deduplicated: false });
+    }
+
+    if (path === 'analytics/summary' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const since = Date.now() - 30 * 24 * 60 * 60 * 1000;
+      const events = (await documentList('portalEvents')).filter(event => Date.parse(String(event.occurredAt || '')) >= since);
+      const pageViews = events.filter(event => event.eventType === 'page_view');
+      const uniqueSessions = new Set(pageViews.map(event => event.sessionKey)).size;
+      const byPath = new Map<string, number>();
+      pageViews.forEach(event => byPath.set(event.pagePath, (byPath.get(event.pagePath) || 0) + 1));
+      return json(res, 200, { periodDays: 30, totals: { events: events.length, pageViews: pageViews.length, uniqueSessions }, topPages: [...byPath.entries()].sort((a, b) => b[1] - a[1]).slice(0, 20).map(([pagePath, views]) => ({ pagePath, views })) });
+    }
+
     if (path === 'me' && method === 'PATCH') {
       if (!identity) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Entre na sua conta.' });
       const body = cleanObject(await readBody(req));

@@ -9,6 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { useToast } from '../contexts/ToastContext';
 import type { CategorySlug } from '../../types';
+import { trackPortalEvent } from '../../services/analyticsService';
 
 /**
  * Layout principal do portal público.
@@ -22,6 +23,10 @@ export function PublicLayout() {
   const location = useLocation();
   const [supportOpen, setSupportOpen] = useState(false);
   const [subscriberModal, setSubscriberModal] = useState<SubscriberModalType>(null);
+
+  React.useEffect(() => {
+    void trackPortalEvent('page_view', location.pathname, { campaignSource: new URLSearchParams(location.search).get('utm_source') || '' });
+  }, [location.pathname, location.search]);
 
   const handleSelectCategory = (cat: CategorySlug | string) => {
     if (cat === 'checagem') navigate('/verificacao');

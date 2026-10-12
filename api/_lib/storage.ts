@@ -39,9 +39,11 @@ function saveLocalStore(store: Record<string, Record<string, any>>): void {
 }
 
 export function getDatabaseProvider(): DatabaseProvider {
-  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) return 'firestore';
   const databaseUrl = process.env.DATABASE_URL || '';
+  // Neon/Postgres is the source of truth when configured. Firebase is retained
+  // only for deployments that explicitly do not provide a relational database.
   if (databaseUrl.startsWith('postgres://') || databaseUrl.startsWith('postgresql://')) return 'postgres';
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) return 'firestore';
   if (databaseUrl.startsWith('mysql://') || databaseUrl.startsWith('mysql2://')) return 'mysql';
   return 'local_disk';
 }

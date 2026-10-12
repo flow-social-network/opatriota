@@ -51,6 +51,15 @@ Todos devem validar sessão e papel no backend. Não foi executada migração de
 - Teste automatizado configurado no projeto: inexistente; `pnpm test` apenas retorna “No tests configured yet”, portanto não é evidência de cobertura.
 - Persistência real no Neon: BLOQUEADO nesta etapa por ausência de credencial/conta de teste autorizada para criar e limpar registros com segurança.
 
+## Analytics técnico de audiência
+
+- Criadas no Neon as tabelas `public.portal_events` e `public.portal_event_dedup`, com índices por data, tipo, página e sessão.
+- Adicionado `POST /analytics/events` com validação de evento, hash de user-agent/IP, deduplicação e resposta `202` sem bloquear a navegação pública.
+- Adicionado `GET /analytics/summary`, protegido para administradores, com totais de 30 dias e páginas mais acessadas.
+- O `PublicLayout` registra `page_view` real por rota; falha de analytics não interrompe o portal.
+- Evidência executada: POST retornou `202 accepted`; repetição retornou `deduplicated: true`; leitura explícita no Neon confirmou os documentos em `portalEvents` e `portalEventDedup`.
+- Corrigido o provider: quando `DATABASE_URL` PostgreSQL existe, Neon/Postgres é priorizado antes do fallback Firebase.
+
 ## Pendências
 
 1. Executar teste de integração isolado: criar, reler, atualizar, reler após reload e testar falha de autorização.
