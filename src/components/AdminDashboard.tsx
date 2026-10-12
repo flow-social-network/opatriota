@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { EditorialQueueItem, EditorialStatus, PortalSettings } from '../types';
+import { EditorialQueueItem, EditorialStatus, PortalSettings, RssSource } from '../types';
 import { IdentityManager } from './admin/IdentityManager';
 import { SocialMediaManager } from './admin/SocialMediaManager';
 import { AdsManager } from './admin/AdsManager';
@@ -29,6 +29,8 @@ type AdminTab = 'painel' | 'fila' | 'dedup' | 'identidade' | 'redes' | 'publicid
 
 interface AdminDashboardProps {
   initialTab?: AdminTab;
+  sources: RssSource[];
+  onNavigateToSources: () => void;
   onTabChange?: (tab: AdminTab) => void;
   queueItems: EditorialQueueItem[];
   onBack: () => void;
@@ -39,6 +41,8 @@ interface AdminDashboardProps {
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   initialTab = 'painel',
+  sources,
+  onNavigateToSources,
   onTabChange,
   queueItems,
   onBack,
@@ -155,17 +159,12 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
         </div>
 
         <div className="flex items-center gap-3 text-xs">
-          <span className="text-emerald-400 flex items-center gap-1">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span>Esteira Ativa (50-100 matérias/dia)</span>
-          </span>
           <button
-            onClick={handleSyncAll}
-            disabled={isSyncing}
-            className="flex items-center gap-1.5 bg-[#16803C] hover:bg-[#22A447] text-white font-bold px-3 py-1.5 rounded transition cursor-pointer disabled:opacity-50"
+            type="button"
+            onClick={onNavigateToSources}
+            className="flex items-center gap-1.5 bg-[#16803C] hover:bg-[#22A447] text-white font-bold px-3 py-1.5 rounded transition"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-            <span>{isSyncing ? 'Sincronizando...' : 'SINCRONIZAR FONTES AGORA'}</span>
+            <span>GERENCIAR FONTES RSS</span>
           </button>
         </div>
       </div>
