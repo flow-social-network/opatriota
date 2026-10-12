@@ -674,7 +674,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-2.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-[18px] h-[18px] text-white" /></button>
                 </form>
                 <div className="flex items-center gap-2 shrink-0" aria-label="Redes sociais oficiais">
-                  {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex items-center justify-center size-8 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-[18px]`}>{soc.icon}</a>)}
+                  {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex items-center justify-center size-7 sm:size-8 shrink-0 overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-4`}>{soc.icon}</a>)}
                 </div>
               </div>
             </div>
@@ -1282,7 +1282,7 @@ export const Header: React.FC<HeaderProps> = ({
                       aria-label={soc.name}
                       title={soc.name}
                       style={{ borderRadius: '9999px' }}
-                      className={`w-8 h-8 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 active:scale-95 transition-transform overflow-hidden`}
+                      className={`size-7 sm:size-8 rounded-full aspect-square shrink-0 ${soc.bgColor} flex items-center justify-center shadow-xs hover:scale-110 active:scale-95 transition-transform overflow-hidden [&>svg]:size-4`}
                     >
                       {soc.icon}
                     </a>
