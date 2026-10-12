@@ -111,7 +111,11 @@ export async function provisionEditorialAdmin(password: string) {
 }
 
 export function sessionCookie(token: string) {
-  return `opatriota_editorial_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=43200`;
+  const isProduction = process.env.NODE_ENV === 'production';
+  const domain = isProduction ? '; Domain=.opatriota.sbs' : '';
+  const sameSite = isProduction ? 'None' : 'Lax';
+  const secure = isProduction ? '; Secure' : '';
+  return `opatriota_editorial_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=${sameSite}${domain}${secure}; Max-Age=43200`;
 }
 
 export function readSessionCookie(cookieHeader: string | undefined) {

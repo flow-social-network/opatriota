@@ -121,7 +121,11 @@ export default async function handler(req: Req, res: Res) {
       const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
       const token = header.startsWith('Bearer ') ? header.slice(7).trim() : readSessionCookie(cookie);
       if (token) await revokeEditorialSession(token);
-      res.setHeader('Set-Cookie', 'opatriota_editorial_session=; Path=/; HttpOnly; SameSite=Lax; Secure; Max-Age=0');
+      const isProduction = process.env.NODE_ENV === 'production';
+      const domain = isProduction ? '; Domain=.opatriota.sbs' : '';
+      const sameSite = isProduction ? 'None' : 'Lax';
+      const secure = isProduction ? '; Secure' : '';
+      res.setHeader('Set-Cookie', `opatriota_editorial_session=; Path=/; HttpOnly; SameSite=${sameSite}${domain}${secure}; Max-Age=0`);
       return json(res, 200, { success: true });
     }
     if (path === 'plans' && method === 'GET') return json(res, 200, [
