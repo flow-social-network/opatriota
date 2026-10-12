@@ -1,0 +1,8 @@
+{
+  "name": "@noteagents/agents",
+  "version": "1.0.0",
+  "description": "NoteAgents agents definitions loader and validator",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true
+}

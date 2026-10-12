@@ -1,13 +1,27 @@
 # Importações do NoteAgents
 
-Este diretório contém adaptadores e conhecimento importados dos seis arquivos fornecidos pelo usuário.
+Os diretórios desta pasta são referências e módulos selecionados, não dependências cegamente executadas.
 
-## Componentes
-- `everything-claude-code`: agentes, skills, comandos, regras, hooks e scripts de workflow.
-- `claude-settings`: agentes e skills complementares, sem segredos.
-- `obsidian-mind`: memória baseada em vault, hooks e agentes de conhecimento.
-- `notebooklm-mcp`: código-fonte de referência para um conector MCP local do NotebookLM.
-- `agentsys`: metadados de agentes e skills de orquestração.
-- `awesome-claude-skills`: catálogo de skills para descoberta.
+## Fontes
 
-O runtime do NoteAgents não executa esses arquivos automaticamente. O registro seguro em `../registry.ts` faz a descoberta, valida permissões e exige aprovação antes de executar scripts ou ferramentas importadas. Revise as licenças MIT e as advertências de cada projeto antes de redistribuir.
+- `everything-claude-code`: agentes, skills, comandos, regras, hooks e scripts.
+- `claude-settings`: configurações e capacidades compatíveis, sem chaves.
+- `awesome-claude-skills`: catálogo de skills.
+- `agentsys`: metadados de orquestração.
+- `notebooklm-mcp`: fonte do conector MCP do NotebookLM.
+- `obsidian-mind`: padrões de memória e vault.
+- `awesome-claude-code`: catálogo e utilitários de auditoria/curadoria.
+- `noteagents-reference`: referência de runtime, agentes, CLI, auditoria, cache, locks e evidências.
+
+## Integração
+
+O runtime principal usa `../registry.ts` para descobrir capacidades. O registro apenas lista arquivos e exige aprovação para comandos, MCPs e operações de risco. Nenhum arquivo importado recebe acesso automático a segredos, produção ou fora do workspace.
+
+Use `GET /api/capabilities` para conferir o inventário. Consulte `../07-UTILITARIOS-INTEGRADOS.md` para os padrões adotados.
+
+## Segurança e manutenção
+
+- Não copie `.env`, tokens, `node_modules` ou diretórios de build.
+- Mantenha licenças e avisos dos projetos de origem.
+- Atualize referências manualmente após revisar mudanças.
+- Execute auditoria, type-check e testes antes de ativar uma capacidade.

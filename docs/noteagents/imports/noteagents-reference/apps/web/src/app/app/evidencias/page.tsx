@@ -1,0 +1,2 @@
+import { FileCheck } from 'lucide-react'
+export default function EvidenciasPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Evidências</p><h1>Evidências</h1><p>Consulte artefatos, resultados e validações.</p></header><section className="module-card"><FileCheck size={28}/><h2>Nenhuma evidência produzida</h2><p>Os artefatos do sistema aparecerão aqui após as execuções.</p></section></div>}

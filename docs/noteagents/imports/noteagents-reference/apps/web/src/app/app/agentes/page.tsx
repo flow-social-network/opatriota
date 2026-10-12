@@ -1,0 +1,2 @@
+import { Bot } from 'lucide-react'
+export default function AgentesPage() { return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Agentes</p><h1>Agentes</h1><p>Configure agentes de engenharia e suas permissões.</p></header><section className="module-card"><Bot size={28}/><h2>Nenhum agente configurado</h2><p>Os agentes aparecerão quando o runtime estiver conectado.</p><button className="panel-action-button">Configurar agente</button></section></div>}

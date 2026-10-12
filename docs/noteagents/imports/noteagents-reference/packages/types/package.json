@@ -1,0 +1,9 @@
+{
+  "name": "@noteagents/types",
+  "version": "1.0.0",
+  "description": "NoteAgents core type definitions",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "private": true,
+  "workspaces": []
+}

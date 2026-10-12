@@ -1,0 +1,2 @@
+import { Brain } from 'lucide-react'
+export default function MemoriaPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Memória</p><h1>Memória</h1><p>Gerencie o contexto persistente dos agentes.</p></header><section className="module-card"><Brain size={28}/><h2>Nenhum contexto armazenado</h2><p>A memória do workspace será exibida aqui após a primeira execução.</p></section></div>}

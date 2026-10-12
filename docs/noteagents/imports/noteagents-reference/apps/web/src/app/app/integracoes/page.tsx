@@ -1,0 +1,2 @@
+import { Plug } from 'lucide-react'
+export default function IntegracoesPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Integrações</p><h1>Integrações</h1><p>Gerencie conexões com serviços do workspace.</p></header><section className="module-card"><Plug size={28}/><h2>Nenhuma integração configurada</h2><p>As conexões disponíveis serão exibidas após a configuração.</p><button className="panel-action-button">Adicionar integração</button></section></div>}

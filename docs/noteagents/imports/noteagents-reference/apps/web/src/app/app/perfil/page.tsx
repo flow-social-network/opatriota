@@ -1,0 +1,2 @@
+import { UserRound } from 'lucide-react'
+export default function PerfilPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Perfil</p><h1>Perfil</h1><p>Gerencie seus dados e preferências pessoais.</p></header><section className="module-card"><UserRound size={28}/><h2>Perfil autenticado</h2><p>Os dados do seu perfil serão exibidos aqui.</p></section></div>}

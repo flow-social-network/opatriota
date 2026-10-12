@@ -1,0 +1,2 @@
+import { Settings } from 'lucide-react'
+export default function ConfiguracoesPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Configurações</p><h1>Configurações</h1><p>Preferências do painel e da aplicação.</p></header><section className="module-card"><Settings size={28}/><h2>Configurações do workspace</h2><p>Nenhuma configuração adicional disponível.</p></section></div>}

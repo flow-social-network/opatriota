@@ -16,6 +16,8 @@ Permitir que uma pessoa descreva uma aplicação em linguagem natural, envie ima
 - [PostgreSQL local](./06-BANCO-POSTGRESQL-LOCAL.md)
 - [Prompt do instalador de banco](./PROMPT-INSTALADOR-BANCO.md)
 - [Schema PostgreSQL](./database/schema.sql)
+- [Utilitários integrados](./07-UTILITARIOS-INTEGRADOS.md)
+- [Registro de importações](./imports/README.md)
 
 ## Princípios
 

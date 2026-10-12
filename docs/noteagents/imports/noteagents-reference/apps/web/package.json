@@ -1,0 +1,39 @@
+{
+  "name": "noteagents-web",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "node --env-file-if-exists=/vercel/share/.env.project ./node_modules/next/dist/bin/next dev",
+    "build": "pnpm --filter @noteagents/contracts build && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ai-sdk/react": "^4.0.130",
+    "@noteagents/contracts": "workspace:*",
+    "ai": "^7.0.127",
+    "better-auth": "1.7.7",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "drizzle-orm": "^0.45.3",
+    "firebase": "^12.19.0",
+    "lucide-react": "^0.453.0",
+    "next": "14.2.33",
+    "pg": "^8.23.1",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.2",
+    "@types/pg": "^8.11.6",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "eslint": "^8.57.0",
+    "postcss": "^8.4.38",
+    "tailwindcss": "^3.4.4",
+    "typescript": "^5.5.0",
+    "vitest": "^2.0.5"
+  }
+}

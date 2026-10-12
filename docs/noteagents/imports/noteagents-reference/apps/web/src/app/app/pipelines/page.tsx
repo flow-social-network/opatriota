@@ -1,0 +1,2 @@
+import { Network } from 'lucide-react'
+export default function PipelinesPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Pipelines</p><h1>Pipelines</h1><p>Acompanhe fluxos de execução e resultados.</p></header><section className="module-card"><Network size={28}/><h2>Nenhum pipeline executado</h2><p>Os fluxos reais serão listados após a configuração do runtime.</p></section></div>}

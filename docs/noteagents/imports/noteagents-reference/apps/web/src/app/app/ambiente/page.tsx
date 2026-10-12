@@ -1,0 +1,2 @@
+import { Terminal } from 'lucide-react'
+export default function AmbientePage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / Ambiente</p><h1>Ambiente</h1><p>Runtime, serviços e configurações do ambiente.</p></header><section className="module-card"><Terminal size={28}/><h2>Informações protegidas</h2><p>Os dados do ambiente serão exibidos conforme suas permissões.</p></section></div>}
