@@ -13,6 +13,7 @@ type Res = ServerResponse & { statusCode: number; setHeader(name: string, value:
 const STAFF = new Set(['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador']);
 const EDITORS = new Set(['editor', 'editor_chefe', 'administrador']);
 const ADMINS = new Set(['administrador']);
+const CONTENT_MANAGERS = ADMINS;
 
 function routeName(url: string): string {
   const pathname = new URL(url, 'https://api.local').pathname;
@@ -210,7 +211,7 @@ export default async function handler(req: Req, res: Res) {
       const body = cleanObject(await readBody(req));
       const token = String(body.token || '');
       if (token.length < 20 || token.length > 4096) {
-        return json(res, 400, { error: 'INVALID_PUSH_TOKEN', message: 'A inscrição de notificações é inválida.' });
+        return json(res, 400, { error: 'INVALID_PUSH_TOKEN', message: 'A inscrição de notifica��ões é inválida.' });
       }
       const id = createHash('sha256').update(token).digest('hex');
       const existing = await documentGet('pushSubscriptions', id);
@@ -562,7 +563,7 @@ export default async function handler(req: Req, res: Res) {
     const resource = collectionFor(path);
     if (!resource) return json(res, 404, { error: 'NOT_FOUND', message: 'Rota da API não encontrada.' });
     const isEditorial = resource.collection.startsWith('editorial');
-    const required = isEditorial ? STAFF : resource.collection === 'articles' ? STAFF : resource.collection === 'pages' || resource.collection === 'categories' ? EDITORS : ADMINS;
+    const required = isEditorial ? STAFF : resource.collection === 'articles' ? CONTENT_MANAGERS : resource.collection === 'pages' || resource.collection === 'categories' ? CONTENT_MANAGERS : ADMINS;
 
     if (method === 'GET' && !resource.id) {
       if (isEditorial && !requireRole(identity, STAFF, res)) return;

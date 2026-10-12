@@ -118,6 +118,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     summary?: string;
   } | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const canManageContent = currentUser.role === 'administrador';
 
   // Media Library state
   const [mediaList, setMediaList] = useState<MediaItem[]>([]);
@@ -141,6 +142,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
   // Open editor for an article
   const handleOpenEdit = (art: Article) => {
+    if (!canManageContent) {
+      showFeedback('A Redação está em modo técnico. O conteúdo é administrado pelo painel administrativo.', 'error');
+      return;
+    }
     setEditingArticle(art);
     setIsCreatingNew(false);
     setFormTitle(art.title);
@@ -162,6 +167,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
   // Open editor for brand new article
   const handleOpenCreate = () => {
+    if (!canManageContent) {
+      showFeedback('A Redação está em modo técnico. O conteúdo é administrado pelo painel administrativo.', 'error');
+      return;
+    }
     setEditingArticle(null);
     setIsCreatingNew(true);
     setFormTitle('');
@@ -184,6 +193,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   // Save as Draft (Rascunho)
   const handleSaveDraft = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canManageContent) {
+      showFeedback('Somente o administrador pode alterar matérias.', 'error');
+      return;
+    }
     if (!formTitle.trim()) {
       showFeedback('Informe pelo menos o título da matéria.', 'error');
       return;
@@ -270,6 +283,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
   // Submit to Review (EM REVISÃO)
   const handleSubmitToReview = () => {
+    if (!canManageContent) {
+      showFeedback('Somente o administrador pode enviar matérias para revisão.', 'error');
+      return;
+    }
     if (!editingArticle) return;
 
     // Checagem de fontes da matéria: se for sustentada exclusivamente por veículos da Globo, rejeita
@@ -317,6 +334,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
   // Approve Article (STRICT RULE: Journalist cannot approve their own story!)
   const handleApprove = (art: Article) => {
+    if (!canManageContent) {
+      showFeedback('A aprovação de conteúdo é exclusiva do painel administrativo.', 'error');
+      return;
+    }
     // 1. Strict Self-approval check
     if (art.authorId === currentUser.id && currentUser.role !== 'administrador') {
       showFeedback('VIOLAÇÃO DE POLÍTICA EDITORIAL: O próprio autor da matéria não pode aprová-la. A aprovação exige a validação de um Revisor ou Editor independente.', 'error');
@@ -416,7 +437,11 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 
   // Publish / Schedule Article
   const handlePublish = (art: Article) => {
-    const canPublishRoles: UserRole[] = ['editor', 'editor_chefe', 'administrador'];
+    if (!canManageContent) {
+      showFeedback('A publicação é exclusiva do painel administrativo.', 'error');
+      return;
+    }
+    const canPublishRoles: UserRole[] = ['administrador'];
     if (!canPublishRoles.includes(currentUser.role)) {
       showFeedback('Apenas Editores e Administradores possuem autorização para publicar no portal.', 'error');
       return;
@@ -528,7 +553,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const active = activeTab === item.id;
-                return <button key={item.id} onClick={() => { setActiveTab(item.id as any); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'}`}><Icon className="size-4" />{item.label}</button>;
+                return <button key={item.id} disabled={item.id === 'editor' && !canManageContent} onClick={() => { setActiveTab(item.id as any); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'} ${item.id === 'editor' && !canManageContent ? 'cursor-not-allowed opacity-50' : ''}`}><Icon className="size-4" />{item.label}</button>;
               })}
             </div>
             <p className="px-3 pt-6 pb-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Administração</p>
@@ -539,10 +564,11 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         <main className="min-w-0 flex-1 lg:ml-56">
           <header className="fixed inset-x-0 top-0 z-30 h-[74px] border-b border-[#c7d9ea] bg-white/95 px-4 backdrop-blur md:px-7 lg:left-56 flex items-center justify-between gap-4">
             <div><p className="text-[11px] font-bold text-[#8195a8]">O PATRIOTA / REDAÇÃO</p><h1 className="text-lg font-black text-[#153d61]">{activeTab === 'painel' ? 'Painel Principal' : navigation.find((item) => item.id === activeTab)?.label || 'Redação'}</h1></div>
-            <div className="flex items-center gap-3"><label className="hidden md:flex h-9 w-72 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center gap-2 px-3 text-xs text-[#8aa0b2]"><Search className="size-4 shrink-0 text-[#0875bd]" aria-hidden="true" /><input aria-label="Buscar na redação" placeholder="Buscar matérias, pautas, autores..." className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8aa0b2]" /></label><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova matéria</button><div className="hidden sm:block text-right"><div className="text-xs font-bold text-[#153d61]">{currentUser.name}</div><div className="text-[10px] text-[#7b91a4]">{currentUser.role.replace('_', ' ')}</div></div><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
+            <div className="flex items-center gap-3"><label className="hidden md:flex h-9 w-72 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center gap-2 px-3 text-xs text-[#8aa0b2]"><Search className="size-4 shrink-0 text-[#0875bd]" aria-hidden="true" /><input aria-label="Buscar na redação" placeholder="Buscar matérias, pautas, autores..." className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8aa0b2]" /></label><button onClick={handleOpenCreate} disabled={!canManageContent} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa] disabled:cursor-not-allowed disabled:opacity-50"><Plus className="size-4" /> Nova matéria</button><div className="hidden sm:block text-right"><div className="text-xs font-bold text-[#153d61]">{currentUser.name}</div><div className="text-[10px] text-[#7b91a4]">{currentUser.role.replace('_', ' ')}</div></div><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
           </header>
-          {feedbackMsg && <div className={`mt-[74px] px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'}`}><AlertTriangle className="size-4" /><span>{feedbackMsg.text}</span></div>}
-          <div className="mx-auto max-w-[1440px] px-4 pb-5 pt-[94px] md:px-7">
+          {!canManageContent && <div className="mt-[74px] border-b border-[#f0c36d] bg-[#fff7e6] px-6 py-2 text-xs font-semibold text-[#8a5a00]">Modo técnico: consulta e manutenção da redação. Conteúdo, aprovação e publicação são administrados no painel administrativo.</div>}
+          {feedbackMsg && <div className={`${canManageContent ? 'mt-[74px]' : ''} px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'}`}><AlertTriangle className="size-4" /><span>{feedbackMsg.text}</span></div>}
+          <div className={`mx-auto max-w-[1440px] px-4 pb-5 md:px-7 ${canManageContent ? 'pt-[94px]' : 'pt-[86px]'}`}>
 
         {/* TAB 1: PAINEL GERAL & MÉTRICAS */}
         {activeTab === 'painel' && (
