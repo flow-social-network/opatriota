@@ -32,7 +32,13 @@ export function subscriptionExpiry(startValue: unknown, cycle: unknown): number 
   const date = new Date(String(startValue || ''));
   if (!Number.isFinite(date.getTime())) return null;
   if (cycle === 'annual') {
+    const month = date.getUTCMonth();
+    const day = date.getUTCDate();
+    date.setUTCDate(1);
     date.setUTCFullYear(date.getUTCFullYear() + 1);
+    date.setUTCMonth(month);
+    const lastDay = new Date(Date.UTC(date.getUTCFullYear(), month + 1, 0)).getUTCDate();
+    date.setUTCDate(Math.min(day, lastDay));
   } else {
     const day = date.getUTCDate();
     date.setUTCDate(1);
