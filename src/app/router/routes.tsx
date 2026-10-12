@@ -42,6 +42,13 @@ const AccessDeniedPage = lazy(() => import('../../pages/auth/AccessDeniedPage'))
 const AdminPage = lazy(() => import('../../pages/admin/AdminPage'));
 const NewsroomPage = lazy(() => import('../../pages/editorial/NewsroomPage'));
 const ClientPage = lazy(() => import('../../pages/client/ClientPage'));
+const AdminOverviewPage = lazy(() => import('../../pages/admin/DashboardPage').then((module) => ({ default: module.DashboardPage })));
+const AdminArticlesPage = lazy(() => import('../../pages/admin/ArticlesPage').then((module) => ({ default: module.ArticlesPage })));
+const AdminCategoriesPage = lazy(() => import('../../pages/admin/CategoriesPage').then((module) => ({ default: module.CategoriesPage })));
+const AdminJournalistsPage = lazy(() => import('../../pages/admin/JournalistsPage').then((module) => ({ default: module.JournalistsPage })));
+const AdminSourcesPage = lazy(() => import('../../pages/admin/SourcesPage').then((module) => ({ default: module.SourcesPage })));
+const AdminUsersPage = lazy(() => import('../../pages/admin/UsersPage').then((module) => ({ default: module.UsersPage })));
+const AdminPermissionsPage = lazy(() => import('../../pages/admin/PermissionsPage').then((module) => ({ default: module.PermissionsPage })));
 
 function AuthFallback() {
   return (
@@ -116,6 +123,19 @@ export const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <LazyPanel><AdminPage /></LazyPanel> },
+      { path: 'dashboard', element: <LazyPanel><AdminOverviewPage /></LazyPanel> },
+      { path: 'articles', element: <LazyPanel><AdminArticlesPage /></LazyPanel> },
+      { path: 'materias', element: <LazyPanel><AdminArticlesPage /></LazyPanel> },
+      { path: 'categories', element: <LazyPanel><AdminCategoriesPage /></LazyPanel> },
+      { path: 'categorias', element: <LazyPanel><AdminCategoriesPage /></LazyPanel> },
+      { path: 'journalists', element: <LazyPanel><AdminJournalistsPage /></LazyPanel> },
+      { path: 'autores', element: <LazyPanel><AdminJournalistsPage /></LazyPanel> },
+      { path: 'sources', element: <LazyPanel><AdminSourcesPage /></LazyPanel> },
+      { path: 'fontes', element: <LazyPanel><AdminSourcesPage /></LazyPanel> },
+      { path: 'users', element: <LazyPanel><AdminUsersPage /></LazyPanel> },
+      { path: 'usuarios', element: <LazyPanel><AdminUsersPage /></LazyPanel> },
+      { path: 'permissions', element: <LazyPanel><AdminPermissionsPage /></LazyPanel> },
+      { path: 'permissoes', element: <LazyPanel><AdminPermissionsPage /></LazyPanel> },
       { path: ':section', element: <LazyPanel><AdminPage /></LazyPanel> },
       { path: '*', element: <Navigate to="/admin" replace /> },
     ],
