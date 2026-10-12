@@ -13,14 +13,12 @@ import { useData } from '../../app/contexts/DataContext';
 import type { Article } from '../../types';
 
 export default function HomePage() {
-  const { articles, factChecks, authors, portalSettings, dataLoading } = useData();
+  const { articles, factChecks, authors, portalSettings, dataLoading, dataError } = useData();
   const navigate = useNavigate();
 
   const handleSelectArticle = (article: Article) => navigate(`/noticia/${article.slug}`);
 
-  const videoArticle = articles.find(
-    (a) => a.slug === 'protestar-e-direito-vandalismo-nao' || a.id === 'art-video-protestar-direito'
-  );
+  const videoArticle = articles.find((article) => Boolean(article.videoEmbedUrl));
 
   // Facebook posts to display on home page
   const facebookPosts = [
@@ -75,13 +73,23 @@ export default function HomePage() {
 
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
+      {dataError && (
+        <div className="mb-6 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950" role="alert">
+          <strong className="block">Não foi possível carregar as matérias da API.</strong>
+          <span>
+            {dataError === 'API_NOT_CONFIGURED'
+              ? 'A API não está configurada neste ambiente. O portal não exibirá conteúdo de demonstração.'
+              : 'A conexão falhou. O portal está a ocultar conteúdo não confirmado em vez de apresentar dados fictícios.'}
+          </span>
+        </div>
+      )}
       <HeroSection articles={articles} onSelectArticle={handleSelectArticle} />
       <FeaturedVideoSpotlight article={videoArticle} onSelectArticle={handleSelectArticle} />
       <EditorialGrid articles={articles} onSelectArticle={handleSelectArticle} />
       <RegionalCoverageRS
         articles={articles}
         onSelectArticle={handleSelectArticle}
-        onSelectCategory={(cat) => navigate(`/categoria/${cat}`)}
+        onSelectCategory={(cat) => navigate(cat === 'todos' ? '/' : `/categoria/${cat}`)}
       />
       <NationalNewsSection
         articles={articles}
