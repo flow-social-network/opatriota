@@ -13,7 +13,10 @@
     "README.md",
     "REMEDIATION_RUNBOOK.md",
     "SECURITY_AUTH.md",
-    "TRACEABILITY.md"
+    "TRACEABILITY.md",
+    "AI_HANDOFF.md",
+    "API_CONTRACTS.md",
+    "OPERATIONS_CHECKLIST.md"
   ],
   "scope": "documentação técnica inicial baseada em evidências acessíveis",
   "tests_executed": false,
