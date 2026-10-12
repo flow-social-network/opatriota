@@ -202,12 +202,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const saveCategory = useCallback(async (category: CategoryDetail) => {
     try {
-      const exists = categories.some(c => c.id === category.id || c.slug === category.slug);
-      const persisted = exists
-        ? await api.patch<CategoryDetail>(`/categories/${encodeURIComponent(category.id)}`, category)
+      const existing = categories.find((item) => item.id === category.id || item.slug === category.slug);
+      const persisted = existing
+        ? await api.patch<CategoryDetail>(`/categories/${encodeURIComponent(existing.id)}`, { ...category, id: existing.id })
         : await api.post<CategoryDetail>('/categories', category);
-      setCategories(current => exists
-        ? current.map(c => c.id === persisted.id ? persisted : c)
+      setCategories((current) => existing
+        ? current.map((item) => item.id === existing.id ? persisted : item)
         : [...current, persisted]);
       showToast(`Editoria "${persisted.name}" salva no servidor.`);
     } catch (error) {
