@@ -5,7 +5,7 @@ import {
 } from './_lib/billing';
 import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
 import { handleCors } from './_lib/cors';
-import { authenticateEditorialUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
+import { authenticateEditorialUser, authenticatePublicUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, registerPublicUser, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
 
 type Req = IncomingMessage & { method?: string; headers: Record<string, string | string[] | undefined>; body?: unknown };
 type Res = ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void };
@@ -103,6 +103,39 @@ export default async function handler(req: Req, res: Res) {
       throw new Error('Invalid Firebase ID token');
     });
     if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
+
+    if (path === 'auth/register' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const name = String(body.name || '').trim();
+      const email = String(body.email || '').trim().toLowerCase();
+      const password = String(body.password || '');
+      if (name.length < 2 || !validEmail(email) || password.length < 8) return json(res, 400, { error: 'INVALID_CREDENTIALS', message: 'Informe nome, e-mail válido e senha com pelo menos 8 caracteres.' });
+      const result = await registerPublicUser(name, email, password);
+      if (!result) return json(res, 409, { error: 'EMAIL_IN_USE', message: 'Não foi possível criar a conta com este e-mail.' });
+      res.setHeader('Set-Cookie', sessionCookie(result.token));
+      return json(res, 201, { user: editorialUserToSession(result.user) });
+    }
+    if (path === 'auth/login' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const result = await authenticatePublicUser(String(body.email || ''), String(body.password || ''));
+      if (!result) return json(res, 401, { error: 'INVALID_CREDENTIALS', message: 'E-mail ou senha inválidos.' });
+      res.setHeader('Set-Cookie', sessionCookie(result.token));
+      return json(res, 200, { user: editorialUserToSession(result.user) });
+    }
+    if (path === 'auth/me' && method === 'GET') {
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = readSessionCookie(cookie);
+      const user = token ? await getEditorialIdentity(token) : null;
+      if (!user) return json(res, 401, { error: 'UNAUTHENTICATED', message: 'Sessão ausente.' });
+      return json(res, 200, { user: editorialUserToSession(user) });
+    }
+    if (path === 'auth/logout' && method === 'POST') {
+      const cookie = Array.isArray(req.headers.cookie) ? req.headers.cookie[0] : req.headers.cookie;
+      const token = readSessionCookie(cookie);
+      if (token) await revokeEditorialSession(token);
+      res.setHeader('Set-Cookie', 'opatriota_editorial_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
+      return json(res, 200, { success: true });
+    }
 
     if (path === 'advertising/inquiries' && method === 'POST') {
       const body = cleanObject(await readBody(req));

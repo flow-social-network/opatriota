@@ -76,6 +76,28 @@ export async function ensureAuthSchema() {
   )`);
 }
 
+export async function registerPublicUser(name: string, email: string, password: string) {
+  await ensureAuthSchema();
+  const normalizedEmail = email.trim().toLowerCase();
+  const existing = await getPool().query('SELECT id FROM editorial_users WHERE lower(email) = lower($1) LIMIT 1', [normalizedEmail]);
+  if (existing.rows[0]) return null;
+  const id = `reader-${randomBytes(12).toString('hex')}`;
+  const hash = hashPassword(password);
+  await getPool().query('INSERT INTO editorial_users (id, email, name, password_hash, role) VALUES ($1, $2, $3, $4, $5)', [id, normalizedEmail, name.trim().slice(0, 120), hash, 'leitor_gratuito']);
+  return authenticatePublicUser(normalizedEmail, password);
+}
+
+export async function authenticatePublicUser(email: string, password: string) {
+  await ensureAuthSchema();
+  const result = await getPool().query('SELECT id, email, name, password_hash, role FROM editorial_users WHERE lower(email) = lower($1) AND active = TRUE LIMIT 1', [email.trim().toLowerCase()]);
+  const user = result.rows[0];
+  if (!user || !verifyPassword(password, user.password_hash)) return null;
+  const rawToken = randomBytes(32).toString('base64url');
+  const tokenHash = scryptSync(rawToken, 'opatriota-session', 32).toString('hex');
+  await getPool().query('INSERT INTO editorial_sessions (token_hash, user_id, expires_at) VALUES ($1, $2, NOW() + INTERVAL \'30 days\')', [tokenHash, user.id]);
+  return { token: rawToken, user: { id: user.id, email: user.email, name: user.name, role: user.role } };
+}
+
 export async function authenticateEditorialUser(email: string, password: string) {
   await ensureAuthSchema();
   const result = await getPool().query('SELECT id, email, name, password_hash, role FROM editorial_users WHERE lower(email) = lower($1) AND active = TRUE LIMIT 1', [email.trim()]);
