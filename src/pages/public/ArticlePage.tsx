@@ -11,6 +11,7 @@ export default function ArticlePage() {
   const navigate = useNavigate();
   const { articles, categories, toggleCategory } = useArticleNavigation();
   const { currentUser, toggleBookmark } = useAuth();
+  const { dataLoading, dataErrors } = useData();
 
   const article = articles.find((item) => item.slug === slug || item.id === slug);
   const isPremiumLocked = Boolean((article as any)?.premiumLocked);
@@ -30,6 +31,20 @@ export default function ArticlePage() {
       tags: article.tags,
     } : undefined,
   });
+
+  if (!article && dataLoading) {
+    return <main className="mx-auto max-w-4xl px-4 py-16" role="status">Carregando matéria…</main>;
+  }
+
+  if (!article && dataErrors['/articles']) {
+    return (
+      <main className="mx-auto max-w-4xl px-4 py-16" role="alert">
+        <h1 className="text-xl font-bold text-slate-900">Não foi possível carregar a matéria</h1>
+        <p className="mt-2 text-sm text-slate-600">{dataErrors['/articles']}</p>
+        <button type="button" onClick={() => window.location.reload()} className="mt-4 rounded-lg bg-[#0B2345] px-4 py-2 text-sm font-semibold text-white">Tentar novamente</button>
+      </main>
+    );
+  }
 
   if (!article) {
     return (
