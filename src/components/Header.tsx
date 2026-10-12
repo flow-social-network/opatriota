@@ -589,7 +589,7 @@ export const Header: React.FC<HeaderProps> = ({
               aria-controls="mobile-site-menu"
               className="p-1.5 text-[#0B2345] hover:bg-slate-100 rounded-md transition cursor-pointer"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="size-5" />
             </button>
 
             {/* Centered Logo (Vector with brush arc) */}
@@ -790,7 +790,7 @@ export const Header: React.FC<HeaderProps> = ({
                     title="5 novas notificações não lidas"
                     aria-label="Abrir Notificações"
                   >
-                    <Bell className="w-5 h-5" />
+<Bell className="size-4" />
                     <span className="absolute top-0.5 right-0.5 w-4 h-4 bg-[#E11D48] text-white text-[9px] font-black rounded-full flex items-center justify-center shadow-xs">
                       5
                     </span>
@@ -1072,8 +1072,6 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="mb-3 flex items-center justify-center gap-2 text-[9px] text-white/80">
                   <span>{formattedFullDate}</span><span className="text-white/40">|</span><span>Brasília (DF) · 30°C · Céu limpo</span>
                 </div>
-                {!currentUser && <button type="button" onClick={() => { window.location.assign('/login'); setMobileMenuOpen(false); }} className="mb-3 w-full rounded-lg border border-white/25 py-2 text-xs font-bold text-white">Entrar na conta</button>}
-
                 {/* Campo de Busca Integrado no Topo */}
                 <form 
                   onSubmit={(e) => { 
@@ -1084,7 +1082,7 @@ export const Header: React.FC<HeaderProps> = ({
                   className="relative flex items-center"
                 >
                   <div className="absolute left-3 text-white/60 pointer-events-none">
-                    <Search className="w-4 h-4" />
+<Search className="size-3.5" />
                   </div>
                   <input
                     type="text"
@@ -1168,8 +1166,8 @@ export const Header: React.FC<HeaderProps> = ({
                   })}
                 </div>
 
-                {/* 2. Seções Rápidas: Últimas Notícias, Mais Lidas, Meus Favoritos */}
-                <div className="px-2 py-1.5 space-y-0.5">
+                {/* 2. Seções rápidas disponíveis apenas para usuários autenticados */}
+                {currentUser && <div className="px-2 py-1.5 space-y-0.5">
                   <button
                     onClick={() => {
                       onSelectCategory('todos');
@@ -1211,7 +1209,7 @@ export const Header: React.FC<HeaderProps> = ({
                     </div>
                     <ChevronRight className="w-4 h-4 text-[#94A3B8]" />
                   </button>
-                </div>
+                </div>}
 
                 {/* 3. Botões de Ação Destacados */}
                 <div className="p-3 space-y-2.5">
