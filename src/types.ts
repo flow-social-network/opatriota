@@ -239,8 +239,8 @@ export interface PaymentRecord {
   date: string;
   amount: number;
   planName: string;
-  status: 'concluido' | 'processando' | 'reembolsado';
-  invoiceNumber: string;
+  status: 'concluido' | 'processando' | 'reembolsado' | 'cancelado' | 'recusado';
+  orderReference: string;
 }
 
 export interface UserSession {
