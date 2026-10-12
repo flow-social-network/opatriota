@@ -44,7 +44,7 @@ interface NewsroomDashboardProps {
   sources: RssSource[];
   onUpdateSources?: (sources: RssSource[]) => void;
   currentUser: UserSession;
-  onUpdateArticles: (articles: Article[]) => void;
+  onUpdateArticles: (articles: Article[]) => void | Promise<void>;
   pages?: InstitutionalPage[];
   onSavePage?: (page: InstitutionalPage) => void;
   onDeletePage?: (pageId: string) => void;
@@ -191,7 +191,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   };
 
   // Save as Draft (Rascunho)
-  const handleSaveDraft = (e: React.FormEvent) => {
+  const handleSaveDraft = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!canManageContent) {
       showFeedback('Somente o administrador pode alterar matérias.', 'error');
@@ -241,7 +241,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
           }
         ]
       };
-      onUpdateArticles([newArt, ...articles]);
+      await onUpdateArticles([newArt, ...articles]);
       setEditingArticle(newArt);
       setIsCreatingNew(false);
       showFeedback('Matéria salva como Rascunho com sucesso!');
@@ -276,13 +276,13 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         }
         return a;
       });
-      onUpdateArticles(updated);
+      await onUpdateArticles(updated);
       showFeedback('Alterações salvas no rascunho com sucesso!');
     }
   };
 
   // Submit to Review (EM REVISÃO)
-  const handleSubmitToReview = () => {
+  const handleSubmitToReview = async () => {
     if (!canManageContent) {
       showFeedback('Somente o administrador pode enviar matérias para revisão.', 'error');
       return;
@@ -327,13 +327,13 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
       }
       return a;
     });
-    onUpdateArticles(updated);
+    await onUpdateArticles(updated);
     setEditingArticle({ ...editingArticle, editorialStatus: 'EM REVISÃO' });
     showFeedback('Matéria enviada para a fila de revisão dos Editores!');
   };
 
   // Approve Article (STRICT RULE: Journalist cannot approve their own story!)
-  const handleApprove = (art: Article) => {
+  const handleApprove = async (art: Article) => {
     if (!canManageContent) {
       showFeedback('A aprovação de conteúdo é exclusiva do painel administrativo.', 'error');
       return;
@@ -383,7 +383,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
       }
       return a;
     });
-    onUpdateArticles(updated);
+    await onUpdateArticles(updated);
     if (editingArticle && editingArticle.id === art.id) {
       setEditingArticle({ ...editingArticle, editorialStatus: 'APROVADA' });
     }
@@ -399,7 +399,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   };
 
   // Confirm correction request
-  const handleConfirmCorrection = () => {
+  const handleConfirmCorrection = async () => {
     if (!targetArticleForCorrection) return;
     if (!correctionNotes.trim()) {
       setCorrectionError('É obrigatório informar as orientações de correção para o repórter.');
@@ -430,13 +430,13 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
       }
       return a;
     });
-    onUpdateArticles(updated);
+    await onUpdateArticles(updated);
     setCorrectionModalOpen(false);
     showFeedback('Matéria devolvida para correções com notas anexadas.');
   };
 
   // Publish / Schedule Article
-  const handlePublish = (art: Article) => {
+  const handlePublish = async (art: Article) => {
     if (!canManageContent) {
       showFeedback('A publicação é exclusiva do painel administrativo.', 'error');
       return;
@@ -469,7 +469,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
       }
       return a;
     });
-    onUpdateArticles(updated);
+    await onUpdateArticles(updated);
     if (editingArticle && editingArticle.id === art.id) {
       setEditingArticle({ ...editingArticle, editorialStatus: 'PUBLICADA' });
     }

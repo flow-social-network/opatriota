@@ -212,6 +212,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast('Página excluída no servidor.');
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Falha ao excluir página.');
+      throw error;
     }
   }, [showToast]);
 
@@ -238,12 +239,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
       showToast('Menus gravados no servidor.');
     } catch (error) {
       showToast(error instanceof Error ? error.message : 'Não foi possível gravar os menus.');
+      throw error;
     }
   }, [showToast]);
 
   const savePortalSettingsHandler = useCallback(async (settings: PortalSettings) => {
     const res = await savePortalSettings(settings);
-    if (res.success) setPortalSettingsState(settings);
+    if (!res.success) {
+      showToast(res.message);
+      throw new Error(res.message);
+    }
+    setPortalSettingsState(settings);
     showToast(res.message);
   }, [showToast]);
 
