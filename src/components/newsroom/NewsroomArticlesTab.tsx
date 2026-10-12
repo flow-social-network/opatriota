@@ -11,6 +11,7 @@ interface NewsroomArticlesTabProps {
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   onOpenEdit: (art: Article) => void;
+  onPreviewArticle: (art: Article) => void;
   onPublish: (art: Article) => void;
 }
 
@@ -23,6 +24,7 @@ export const NewsroomArticlesTab: React.FC<NewsroomArticlesTabProps> = ({
   searchQuery,
   setSearchQuery,
   onOpenEdit,
+  onPreviewArticle,
   onPublish
 }) => {
   return (
@@ -132,6 +134,12 @@ export const NewsroomArticlesTab: React.FC<NewsroomArticlesTabProps> = ({
                   </span>
                 </td>
                 <td className="py-3 px-3 text-right space-x-1 whitespace-nowrap">
+                  <button
+                    onClick={() => onPreviewArticle(art)}
+                    className="px-2 py-1 border border-[#D9DEE7] hover:border-[#0B5FFF] rounded font-bold text-[11px] cursor-pointer"
+                  >
+                    Pré-visualizar
+                  </button>
                   <button
                     onClick={() => onOpenEdit(art)}
                     className="px-2 py-1 border border-[#D9DEE7] hover:border-[#0B2345] rounded font-bold text-[11px] cursor-pointer"
