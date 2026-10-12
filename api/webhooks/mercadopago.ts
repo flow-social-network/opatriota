@@ -7,7 +7,13 @@ function addBillingCycle(startValue: string | Date, cycle: unknown): string {
   const start = new Date(startValue);
   if (!Number.isFinite(start.getTime())) throw new Error('INVALID_SUBSCRIPTION_START_DATE');
   if (cycle === 'annual') {
+    const month = start.getUTCMonth();
+    const day = start.getUTCDate();
+    start.setUTCDate(1);
     start.setUTCFullYear(start.getUTCFullYear() + 1);
+    start.setUTCMonth(month);
+    const lastDay = new Date(Date.UTC(start.getUTCFullYear(), month + 1, 0)).getUTCDate();
+    start.setUTCDate(Math.min(day, lastDay));
   } else {
     const day = start.getUTCDate();
     start.setUTCDate(1);
