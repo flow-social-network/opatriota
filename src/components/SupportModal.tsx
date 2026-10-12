@@ -97,6 +97,17 @@ export const SupportModal: React.FC<SupportModalProps> = ({ isOpen, onClose }) =
                   </div>
                 </div>
                 <PixDonationCard compact={true} onSuccess={onClose} />
+                <div className="mt-4 rounded-xl border border-[#DCE6F3] bg-[#F8FAFC] p-3 text-center">
+                  <p className="text-xs leading-5 text-[#526783]">Se a opção de apoio do site não funcionar, você também pode apoiar pelo Apoia.se:</p>
+                  <a
+                    href="https://apoia.se/ojornalopatriota"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-2 inline-flex min-h-10 items-center justify-center rounded-lg bg-[#0B2345] px-4 py-2 text-xs font-extrabold text-white transition hover:bg-[#0B5FFF]"
+                  >
+                    Apoiar pelo Apoia.se
+                  </a>
+                </div>
               </div>
             ) : (
               confirmed ? (
