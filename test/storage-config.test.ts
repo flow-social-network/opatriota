@@ -38,6 +38,8 @@ test('local development may use the seeded file store when no durable DB is conf
   const previousNodeEnv = process.env.NODE_ENV;
   const previousFirebase = process.env.FIREBASE_SERVICE_ACCOUNT_JSON;
   const previousDatabaseUrl = process.env.DATABASE_URL;
+  const previousVercel = process.env.VERCEL;
+  const previousVercelEnv = process.env.VERCEL_ENV;
 
   try {
     process.env.NODE_ENV = 'development';
@@ -53,5 +55,9 @@ test('local development may use the seeded file store when no durable DB is conf
     else process.env.FIREBASE_SERVICE_ACCOUNT_JSON = previousFirebase;
     if (previousDatabaseUrl === undefined) delete process.env.DATABASE_URL;
     else process.env.DATABASE_URL = previousDatabaseUrl;
+    if (previousVercel === undefined) delete process.env.VERCEL;
+    else process.env.VERCEL = previousVercel;
+    if (previousVercelEnv === undefined) delete process.env.VERCEL_ENV;
+    else process.env.VERCEL_ENV = previousVercelEnv;
   }
 });
