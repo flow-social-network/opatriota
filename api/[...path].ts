@@ -54,7 +54,7 @@ export async function paidAccessLevel(
   const expiry = subscription.validUntil
     ? Date.parse(String(subscription.validUntil))
     : subscriptionExpiry(subscription.activatedAt, subscription.billingCycle);
-  if (!Number.isFinite(expiry) || expiry <= Date.now()) return 'none';
+  if (expiry === null || !Number.isFinite(expiry) || expiry <= Date.now()) return 'none';
 
   return String(subscription.planId || '').toLowerCase().includes('premium')
     ? 'premium'
