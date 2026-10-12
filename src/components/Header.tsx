@@ -109,12 +109,37 @@ export const Header: React.FC<HeaderProps> = ({
   useEffect(() => {
     setHeaderSearchQuery(searchQuery);
   }, [searchQuery]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadMarkets = async () => {
+      try {
+        const response = await fetch('https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL', { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error('Fonte financeira indisponível');
+        const data = await response.json() as Record<string, { bid: string; pctChange: string; create_date: string }>;
+        if (cancelled) return;
+        setMarketData({
+          usd: { value: `R$ ${Number(data.USDBRL.bid).toFixed(2).replace('.', ',')}`, variation: `${Number(data.USDBRL.pctChange).toFixed(2).replace('.', ',')}%` },
+          eur: { value: `R$ ${Number(data.EURBRL.bid).toFixed(2).replace('.', ',')}`, variation: `${Number(data.EURBRL.pctChange).toFixed(2).replace('.', ',')}%` },
+          updatedAt: data.USDBRL.create_date,
+          status: 'ready',
+        });
+      } catch {
+        if (!cancelled) setMarketData(current => ({ ...current, status: current.updatedAt ? 'stale' : 'error' }));
+      }
+    };
+    void loadMarkets();
+    const interval = window.setInterval(loadMarkets, 60_000);
+    return () => { cancelled = true; window.clearInterval(interval); };
+  }, []);
+
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const userMenuRef = useRef<HTMLDivElement>(null);
   const [isWeatherModalOpen, setIsWeatherModalOpen] = useState(false);
   const [selectedCapital, setSelectedCapital] = useState<CapitalWeather>(TAQUARA_HEADQUARTERS_WEATHER);
   const [pushStatus, setPushStatus] = useState<string>('default');
   const [pushLoading, setPushLoading] = useState(false);
+  const [marketData, setMarketData] = useState<{ usd?: { value: string; variation: string }; eur?: { value: string; variation: string }; updatedAt?: string; status: 'loading' | 'ready' | 'stale' | 'error' }>({ status: 'loading' });
 
   // States for navbar dropdown menus and mobile accordion
   const [activeDropdownSlug, setActiveDropdownSlug] = useState<string | null>(null);
@@ -543,7 +568,7 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full select-none bg-white font-sans shadow-sm">
+      <header className="w-full select-none font-sans">
         
         {/* ═══════════════════════════════════════════════════════════════════
             1. MOBILE HEADER (Celulares e Telas Menores - Imagem 1)
@@ -664,8 +689,8 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div className="flex items-center gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none text-slate-700">
               <span>Dólar</span>
-              <span className="font-bold">R$ 5,45</span>
-              <span className="text-[#16803C] font-bold">▲ +0,32%</span>
+              <span className="font-bold">{marketData.usd?.value || 'Indisponível'}</span>
+              <span className="text-[#16803C] font-bold">{marketData.usd ? `▲ ${marketData.usd.variation}` : '—'}</span>
             </div>
           </div>
         </div>
@@ -674,10 +699,10 @@ export const Header: React.FC<HeaderProps> = ({
         {/* ═══════════════════════════════════════════════════════════════════
             2. DESKTOP & TABLET HEADER (Fidelidade Absoluta à Imagem de Auditoria)
            ═══════════════════════════════════════════════════════════════════ */}
-        <div className="hidden lg:block">
+        <div className="hidden lg:block pt-10">
           
-          {/* TIER 1: BARRA BRANCA COM DATA, TAQUARA (RS) [INMET], BUSCA, REDES SOCIAIS E ANUNCIE */}
-          <div className="bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
+          {/* TIER 1: BARRA CINZA FIXA — DATA, TAQUARA (RS), INMET, BUSCA E REDES SOCIAIS */}
+          <div className="fixed inset-x-0 top-0 z-40 bg-[#F4F7FB] border-b border-[#DDE5EF] px-5 py-2 text-xs text-[#334155]">
             <div className="w-full mx-auto flex items-center justify-between gap-5">
               
               {/* Lado Esquerdo: Data Completa + Previsão em Taquara (RS) + Selo INMET */}
@@ -783,6 +808,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="flex items-center gap-1.5 font-bold tracking-wider text-[#22C55E] shrink-0">
                   <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
                   <span>MERCADOS AO VIVO</span>
+                  <span className="text-[10px] font-normal tracking-normal text-white/50">{marketData.status === 'loading' ? 'Atualizando...' : marketData.status === 'error' ? 'Fonte indisponível' : `Atualizado ${marketData.updatedAt ? new Date(marketData.updatedAt).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : ''}`}</span>
                 </div>
 
                 <span className="text-white/20">|</span>
@@ -791,24 +817,24 @@ export const Header: React.FC<HeaderProps> = ({
                 <div className="flex items-center gap-4 text-white/90">
                   <div className="flex items-center gap-1">
                     <span className="text-white/60">Dólar</span>
-                    <span className="font-bold text-white">R$ 5,45</span>
-                    <span className="text-[#22C55E] font-bold">▲ +0,32%</span>
+                    <span className="font-bold text-white">{marketData.usd?.value || 'Indisponível'}</span>
+                    <span className="text-[#22C55E] font-bold">{marketData.usd ? `▲ ${marketData.usd.variation}` : '—'}</span>
                   </div>
 
                   <span className="text-white/20">|</span>
 
                   <div className="flex items-center gap-1">
                     <span className="text-white/60">Euro</span>
-                    <span className="font-bold text-white">R$ 5,89</span>
-                    <span className="text-[#EF4444] font-bold">▼ -0,14%</span>
+                    <span className="font-bold text-white">{marketData.eur?.value || 'Indisponível'}</span>
+                    <span className="text-[#EF4444] font-bold">{marketData.eur ? `▼ ${marketData.eur.variation}` : '—'}</span>
                   </div>
 
                   <span className="text-white/20">|</span>
 
                   <div className="flex items-center gap-1">
                     <span className="text-white/60">Ibovespa</span>
-                    <span className="font-bold text-white">145.320</span>
-                    <span className="text-[#22C55E] font-bold">▲ +0,68%</span>
+                    <span className="font-bold text-white">Fonte não disponível</span>
+                    <span className="text-white/50 font-bold">—</span>
                   </div>
                 </div>
               </div>
