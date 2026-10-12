@@ -190,7 +190,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     setFormMetaTitle('');
     setFormMetaDesc('');
     setAiSuggestions(null);
-    setActiveTab('editor');
+    handleTabChange('editor');
   };
 
   // Save as Draft (Rascunho)
@@ -502,7 +502,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
     setFormImageCaption(med.caption || '');
     setFormImageCredits(med.credits || '');
     showFeedback(`Imagem "${med.name}" selecionada como capa!`);
-    setActiveTab('editor');
+    handleTabChange('editor');
   };
 
   // Filtered articles list
