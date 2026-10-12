@@ -67,7 +67,15 @@ export const FactCheckRibbon: React.FC<FactCheckRibbonProps> = ({
           </div>
 
           {/* 2. THREE FACT CHECK CARDS (6 cols on lg) */}
-          <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-3 gap-4 border-b lg:border-b-0 lg:border-r border-[#D9DEE7] pb-6 lg:pb-0 lg:pr-6">
+          <div className="lg:col-span-6 border-b lg:border-b-0 lg:border-r border-[#D9DEE7] pb-6 lg:pb-0 lg:pr-6">
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#0B5FFF]">Apurações recentes</p>
+                <h4 className="mt-0.5 font-serif text-base font-black text-[#0B2345]">O que está circulando por aí</h4>
+              </div>
+              <span className="text-[10px] font-semibold text-[#718096]">Atualizado hoje</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {factChecks.slice(0, 3).map((item) => {
               const isFalse = item.verdict === 'FALSO';
               return (
@@ -102,6 +110,7 @@ export const FactCheckRibbon: React.FC<FactCheckRibbonProps> = ({
                 </article>
               );
             })}
+            </div>
           </div>
 
           {/* 3. RECEBA NOSSA NEWSLETTER (3 cols on lg) */}

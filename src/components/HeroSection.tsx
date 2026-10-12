@@ -147,19 +147,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                   </span>
                 </div>
 
-                {/* Carousel indicator dots */}
-                <div className="flex items-center gap-1.5">
-                  {carouselArticles.map((_, idx) => (
-                    <button
-                      key={idx}
-                      onClick={(e) => { e.stopPropagation(); setActiveSlide(idx); }}
-                      aria-label={`Ir para slide ${idx + 1}`}
-                      className={`h-1.5 rounded-full transition-all cursor-pointer ${
-                        idx === activeSlide ? 'w-5 bg-[#FFCC29]' : 'w-1.5 bg-white/40 hover:bg-white/70'
-                      }`}
-                    />
-                  ))}
-                </div>
               </div>
             </div>
           </div>
