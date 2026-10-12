@@ -106,7 +106,7 @@ export const MenusManager: React.FC<MenusManagerProps> = ({
 
   const handleSave = () => {
     onSaveMenuConfig(config);
-    setSavedSuccess(true);
+    setSavedSuccess(false);
     setTimeout(() => setSavedSuccess(false), 2500);
   };
 
