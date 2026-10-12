@@ -60,15 +60,15 @@ export const WEATHER_METADATA_INFO = {
   liveProvider: 'Open-Meteo API (Modelo Meteorológico Numérico WMO / ECMWF)',
   liveProviderUrl: 'https://open-meteo.com/',
   institutionalReference: 'INMET — Instituto Nacional de Meteorologia (portal.inmet.gov.br)',
-  disclaimer: 'O portal O PATRIOTA disponibiliza previsões meteorológicas das 27 capitais brasileiras para utilidade pública. As condições dinâmicas em tempo real utilizam modelos numéricos abertos (Open-Meteo API), e as estações meteorológicas de referência são baseadas na rede oficial do INMET. O link institucional é fornecido como serviço aos leitores sem implicar endosso governamental ou parceria comercial exclusiva.',
+  disclaimer: 'A consulta meteorológica é feita sob demanda. Valores e previsões só são exibidos após uma resposta válida da Open-Meteo; sem consulta bem-sucedida, os dados numéricos permanecem ocultos. O INMET é indicado como referência institucional pública, sem implicar parceria ou endosso ao jornal.',
   fieldsDocumentation: [
-    { field: 'Temperatura do Ar', unit: '°C', sensor: 'Termômetro de superfície a 2m', freq: 'Horária', provider: 'Open-Meteo API', precision: '±0.1°C' },
-    { field: 'Sensação Térmica', unit: '°C', sensor: 'Temperatura aparente (vento + umidade)', freq: 'Horária', provider: 'Open-Meteo API', precision: '±0.1°C' },
+    { field: 'Temperatura do Ar', unit: '°C', sensor: 'Termômetro de superfície a 2m', freq: 'Disponível conforme consulta à API', provider: 'Open-Meteo API', precision: '±0.1°C' },
+    { field: 'Sensação Térmica', unit: '°C', sensor: 'Temperatura aparente (vento + umidade)', freq: 'Disponível conforme consulta à API', provider: 'Open-Meteo API', precision: '±0.1°C' },
     { field: 'Umidade Relativa', unit: '%', sensor: 'Higrômetro a 2m', freq: 'Horária', provider: 'Open-Meteo API', precision: '±1%' },
     { field: 'Velocidade do Vento', unit: 'km/h', sensor: 'Anemômetro a 10m', freq: 'Horária', provider: 'Open-Meteo API', precision: '±1 km/h' },
     { field: 'Direção do Vento', unit: 'Quadrante (N, NE, E, SE, S, SO, O, NO)', sensor: 'Anemógrafo a 10m', freq: 'Horária', provider: 'Open-Meteo API', precision: '8 quadrantes' },
     { field: 'Pressão Atmosférica', unit: 'hPa', sensor: 'Barômetro ao nível da superfície', freq: 'Horária', provider: 'Open-Meteo API', precision: '±1 hPa' },
-    { field: 'Índice Ultravioleta', unit: 'UV (0-12+)', sensor: 'Radiação solar UV máxima diária', freq: 'Diária', provider: 'Open-Meteo API', precision: 'Escala OMS' },
+    { field: 'Índice Ultravioleta', unit: 'UV (0-12+)', sensor: 'Radiação solar UV máxima diária', freq: 'Disponível conforme consulta à API', provider: 'Open-Meteo API', precision: 'Escala OMS' },
     { field: 'Previsão de 4 Dias', unit: 'Mín/Máx °C e condição', sensor: 'Modelo de previsão numérica', freq: 'Diária (4 dias)', provider: 'Open-Meteo API', precision: '4 dias corridos' },
     { field: 'Estação de Referência', unit: 'Código INMET', sensor: 'Rede de Estações INMET', freq: 'Cadastral', provider: 'INMET (portal.inmet.gov.br)', precision: 'Oficial MAPA' }
   ]
