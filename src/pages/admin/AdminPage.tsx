@@ -39,6 +39,8 @@ export default function AdminPage() {
 
   // Map sub-route parameter to tab
   const tabMapping: Record<string, string> = {
+    painel: 'painel',
+    dashboard: 'painel',
     users: 'usuarios',
     usuarios: 'usuarios',
     permissions: 'permissoes',
@@ -55,6 +57,7 @@ export default function AdminPage() {
     ads: 'publicidade',
     publicidade: 'publicidade',
     push: 'push',
+    download: 'download',
     wordpress: 'download',
   };
 
@@ -71,6 +74,7 @@ export default function AdminPage() {
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}
+      onTabChange={(tab) => navigate(tab === 'painel' ? '/admin' : `/admin/${tab}`)}
     />
   );
 }
