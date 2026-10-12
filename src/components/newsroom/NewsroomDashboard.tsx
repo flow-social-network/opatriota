@@ -16,7 +16,6 @@ import { api } from '../../services/apiClient';
 import { PagesManager } from '../admin/PagesManager';
 import { CategoriesManager } from '../admin/CategoriesManager';
 import { MenusManager } from '../admin/MenusManager';
-import { OfficialSourcesHub } from '../admin/OfficialSourcesHub';
 import { isGloboSource } from '../../utils/editorialPolicy';
 import { 
   FileText, 
@@ -45,8 +44,6 @@ interface NewsroomDashboardProps {
   initialStatusFilter?: string;
   onTabChange?: (tab: NewsroomTab) => void;
   articles: Article[];
-  sources: RssSource[];
-  onUpdateSources?: (sources: RssSource[]) => void;
   currentUser: UserSession;
   onUpdateArticles: (articles: Article[]) => void;
   pages?: InstitutionalPage[];
@@ -65,8 +62,6 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   initialStatusFilter = 'TODAS',
   onTabChange,
   articles,
-  sources,
-  onUpdateSources,
   currentUser,
   onUpdateArticles,
   pages = [],
@@ -645,15 +640,6 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         )}
 
         {/* TAB 4: CENTRAL DE FONTES OFICIAIS */}
-        {activeTab === 'fontes' && (
-          <div className="bg-white p-6 rounded-xl border border-[#D9DEE7] shadow-xs">
-            <OfficialSourcesHub
-              sources={sources}
-              onUpdateSources={onUpdateSources || (() => {})}
-            />
-          </div>
-        )}
-
         {/* TAB 5: BIBLIOTECA DE MÍDIA */}
         {activeTab === 'midia' && (
           <NewsroomMediaTab
