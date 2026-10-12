@@ -54,6 +54,22 @@ export default async function handler(req: IncomingMessage & { method?:string; h
     const approved=payment.status==='approved' && Number(payment.transaction_amount)===Number(order.amount) && payment.currency_id==='BRL';
     const orderStatus=approved?'paid':nextStatus;
     await documentWrite('checkoutOrders',orderId,{status:orderStatus,providerPaymentId:String(payment.id),providerStatus:String(payment.status||''),paymentMethodId:String(payment.payment_method_id||''),updatedAt:new Date().toISOString()});
+
+    // Reembolso/cancelamento só revoga a assinatura se o pagamento notificado
+    // ainda for o pagamento que sustenta a assinatura atual. Isso evita que um
+    // evento atrasado de uma cobrança antiga desative uma renovação posterior.
+    if (order.uid && ['refunded', 'cancelled'].includes(String(payment.status || ''))) {
+      const subscription = await documentGet('subscriptions', String(order.uid));
+      if (subscription && String(subscription.providerPaymentId || '') === String(payment.id)) {
+        await documentWrite('subscriptions', String(order.uid), {
+          status: 'inactive',
+          providerStatus: String(payment.status),
+          revokedAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+      }
+    }
+
     if (approved && order.uid) {
       const subscriptionId = String(order.uid);
       const existing = await documentGet('subscriptions', subscriptionId);
