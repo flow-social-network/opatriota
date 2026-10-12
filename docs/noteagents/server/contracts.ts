@@ -17,6 +17,7 @@ export interface WorkspaceAdapter { read(path: string): Promise<string>; write(p
 export interface BrowserAdapter { open(url: string): Promise<void>; snapshot(): Promise<unknown>; screenshot(path: string): Promise<void>; click(selector: string): Promise<void>; fill(selector: string, value: string): Promise<void> }
 export interface GitAdapter { status(): Promise<unknown>; diff(): Promise<string>; commit(message: string): Promise<string>; createBranch(name: string): Promise<void>; push(): Promise<void>; createPullRequest(title: string, body: string): Promise<string> }
 export interface DeployAdapter { preview(project: Project): Promise<{ url: string }>; production(project: Project): Promise<{ url: string }> }
-export interface DatabaseAdapter { schema(): Promise<unknown>; query<T>(sql: string, params?: unknown[]): Promise<T[]>; migrate(sql: string): Promise<void> }
+export interface DatabaseAdapter { schema(): Promise<unknown>; query<T>(sql: string, params?: unknown[]): Promise<T[]>; migrate(sql: string): Promise<void>; health(): Promise<{ connected: boolean; serverTime?: string }> }
+export interface ProjectRepository { getOrCreateLocalProject(): Promise<Project>; saveRun(run: AgentRun): Promise<AgentRun>; saveMessage(projectId: string, role: LlmMessage['role'] | 'tool', content: string, model: string, attachments?: unknown[]): Promise<void> }
 export const now = () => new Date().toISOString()
 export const id = (prefix: string) => `${prefix}_${crypto.randomUUID()}`

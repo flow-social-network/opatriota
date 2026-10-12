@@ -31,7 +31,7 @@ create table if not exists messages (
 );
 
 create table if not exists agent_runs (
-  id uuid primary key default gen_random_uuid(),
+  id text primary key,
   project_id uuid not null references projects(id) on delete cascade,
   agent_name text not null,
   status text not null check (status in ('queued', 'running', 'completed', 'failed', 'cancelled')),
