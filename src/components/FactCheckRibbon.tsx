@@ -42,7 +42,7 @@ export const FactCheckRibbon: React.FC<FactCheckRibbonProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
           
           {/* 1. FAÇA A CHECAGEM CALLOUT (2 cols on lg) */}
-          <div className="lg:col-span-3 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-[#D9DEE7] pb-6 lg:pb-0 lg:pr-6">
+          <div className="order-last lg:col-span-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5 border-t border-[#D9DEE7] pt-5">
             <div>
               <div className="w-12 h-12 rounded-full bg-[#0B2345] text-white flex items-center justify-center mb-3 shadow-xs">
                 <Search className="w-5 h-5 text-white" />
@@ -55,7 +55,7 @@ export const FactCheckRibbon: React.FC<FactCheckRibbonProps> = ({
               </p>
             </div>
 
-            <div className="mt-4">
+            <div className="sm:shrink-0">
               <button
                 onClick={onOpenHub}
                 className="inline-flex items-center gap-1.5 bg-[#0B2345] hover:bg-[#0B5FFF] text-white text-[11px] font-bold px-3.5 py-2 rounded transition-all shadow-xs cursor-pointer active:scale-95"
