@@ -550,7 +550,8 @@ export default async function handler(req: Req, res: Res) {
     if (path === 'system/status' && method === 'GET') {
       if (!requireRole(identity, ADMINS, res)) return;
       const rawStatus = await documentGet('systemStatus', 'current');
-      if (rawStatus && rawStatus.lastCheck &&
+      if (rawStatus && rawStatus.verification === 'live-probe' && rawStatus.lastCheck &&
+          Number.isFinite(Date.parse(String(rawStatus.lastCheck))) &&
           Date.now() - Date.parse(String(rawStatus.lastCheck)) < 5 * 60 * 1000) {
         return json(res, 200, rawStatus);
       }
