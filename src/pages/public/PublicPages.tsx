@@ -27,14 +27,21 @@ import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 // ─── Archive ───
 export function ArchivePage() {
   const navigate = useNavigate();
-  const { articles, categories, authors } = useData();
+  const { articles, categories, authors, dataLoading, dataErrors } = useData();
+  const publicArticles = articles.filter((article) => {
+    const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+    const status = String((article as any).status || '').trim().toLowerCase();
+    return editorialStatus === 'PUBLICADA' && ['', 'publicada', 'publicado', 'published'].includes(status);
+  });
+  if (dataLoading) return <PageLoading label="Carregando arquivo editorial…" />;
+  if (dataErrors['/articles']) return <PageDataError message={dataErrors['/articles']} />;
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <ArchivePageView
-        articles={articles}
-        categories={categories}
-        authors={authors}
-        onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
+        articles={publicArticles}
+        categories={categories.filter((category) => category.active !== false)}
+        authors={authors.filter((author) => author.active !== false)}
+        onSelectArticle={(article) => navigate(`/noticia/${article.slug}`)}
         onNavigateHome={() => navigate('/')}
       />
     </div>
@@ -103,11 +110,17 @@ export function PlansPage() {
 // ─── Fact-Check Hub ───
 export function FactCheckPage() {
   const navigate = useNavigate();
-  const { factChecks } = useData();
+  const { factChecks, dataLoading, dataErrors } = useData();
+  const publicFactChecks = factChecks.filter((item: any) => {
+    const status = String(item.status || '').trim().toLowerCase();
+    return item.published !== false && !['rascunho', 'draft', 'revisao', 'review', 'despublicada', 'unpublished'].includes(status);
+  });
+  if (dataLoading) return <PageLoading label="Carregando checagens…" />;
+  if (dataErrors['/fact-checks']) return <PageDataError message={dataErrors['/fact-checks']} />;
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <FactCheckHub
-        factChecks={factChecks}
+        factChecks={publicFactChecks}
         onBack={() => navigate('/')}
         onOpenItem={() => navigate('/verificacao')}
       />
@@ -119,11 +132,16 @@ export function FactCheckPage() {
 export function NotFound() {
   const navigate = useNavigate();
   const { articles, categories } = useData();
+  const publicArticles = articles.filter((article) => {
+    const editorialStatus = String(article.editorialStatus || '').trim().toUpperCase();
+    const status = String((article as any).status || '').trim().toLowerCase();
+    return editorialStatus === 'PUBLICADA' && ['', 'publicada', 'publicado', 'published'].includes(status);
+  });
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <NotFoundPageView
-        categories={categories}
-        recentArticles={articles.slice(0, 4)}
+        categories={categories.filter((category) => category.active !== false)}
+        recentArticles={publicArticles.slice(0, 4)
         onNavigateHome={() => navigate('/')}
         onSelectCategory={(cat) => navigate(cat === 'todos' ? '/' : `/categoria/${cat}`)}
         onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}
@@ -139,9 +157,9 @@ export function AuthorPage() {
   const navigate = useNavigate();
   const { authors, articles, dataLoading, dataErrors } = useData();
 
-  const author = authors.find(a =>
-    a.slug === slug || a.id === slug || a.name.toLowerCase().replace(/\s+/g, '-') === slug
-  );
+  const author = authors.find((item) => item.active !== false && (
+    item.slug === slug || item.id === slug || item.name.toLowerCase().replace(/\s+/g, '-') === slug
+  ));
 
   if (dataLoading && !author) return <PageLoading label="Carregando perfil de autoria…" />;
   if (!author && (dataErrors['/authors'] || dataErrors['/articles'])) {
