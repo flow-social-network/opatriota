@@ -545,7 +545,10 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
             </div>
             <p className="px-3 pt-6 pb-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Fluxo editorial</p>
             <div className="flex flex-col gap-1 text-[12px] font-semibold text-[#52677a]">
-              {['Agenda Editorial', 'Fila de Revisão', 'Aprovação Final', 'Relatórios', 'Configurações', 'Integrações (APIs)'].map((label) => <button key={label} onClick={() => handleTabChange('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left"><CheckCircle className="size-4 text-[#7b9bb5]" />{label}</button>)}
+              <button type="button" onClick={() => { setStatusFilter('AGENDADA'); handleTabChange('materias'); }} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Agenda editorial</button>
+              <button type="button" onClick={() => { setStatusFilter('EM REVISÃO'); handleTabChange('materias'); }} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Fila de revisão</button>
+              <button type="button" onClick={() => { setStatusFilter('APROVADA'); handleTabChange('materias'); }} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Aprovação final</button>
+              <button type="button" onClick={() => handleTabChange('fontes')} className="flex items-center gap-3 rounded-md px-3 py-2 text-left hover:bg-[#f3f8fc]"><CheckCircle className="size-4 text-[#7b9bb5]" />Integrações e fontes</button>
             </div>
           </nav>
           <div className="border-t border-[#e1ebf3] p-3 text-[11px] text-[#52677a]">{currentUser.name}<div className="text-[10px] text-[#8ba0b2]">{currentUser.role.replace('_', ' ')}</div></div>
@@ -553,7 +556,14 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
         <main className="min-w-0 flex-1">
           <header className="h-[74px] border-b border-[#c7d9ea] bg-white px-4 md:px-7 flex items-center justify-between gap-4">
             <div><p className="text-[11px] font-bold text-[#8195a8]">O PATRIOTA / REDAÇÃO</p><h1 className="text-lg font-black text-[#153d61]">{activeTab === 'painel' ? 'Painel Principal' : navigation.find((item) => item.id === activeTab)?.label || 'Redação'}</h1></div>
-            <div className="flex items-center gap-3"><div className="hidden md:flex h-9 w-64 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center px-3 text-xs text-[#8aa0b2]">Buscar matérias, pautas, autores...</div><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova</button><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
+            <div className="flex items-center gap-3"><input
+              type="search"
+              aria-label="Buscar matérias"
+              value={searchQuery}
+              onChange={(event) => { setSearchQuery(event.target.value); if (activeTab !== 'materias') handleTabChange('materias'); }}
+              placeholder="Buscar matérias…"
+              className="hidden md:block h-9 w-64 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] px-3 text-xs text-[#153d61] placeholder:text-[#8aa0b2] focus:outline-none focus:ring-2 focus:ring-[#0875bd]/30"
+            /><button onClick={handleOpenCreate} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa]"><Plus className="size-4" /> Nova</button><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
           </header>
           {feedbackMsg && <div className={`px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'}`}><AlertTriangle className="size-4" /><span>{feedbackMsg.text}</span></div>}
           <div className="mx-auto max-w-[1440px] px-4 py-5 md:px-7">
