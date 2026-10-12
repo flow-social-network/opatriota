@@ -21,7 +21,6 @@ import { WebPushConfig, PushNotificationCampaign, PushSubscriber } from '../../t
 import { 
   subscribeToWebPush, 
   getStoredPushToken, 
-  showLocalPushNotification,
   getPushPermissionStatus,
   isPushNotificationSupported
 } from '../../services/webPushService';
@@ -52,6 +51,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
   const [campaignUrl, setCampaignUrl] = useState('/');
   const [isSending, setIsSending] = useState(false);
   const [campaigns, setCampaigns] = useState<PushNotificationCampaign[]>([]);
+  const [campaignsError, setCampaignsError] = useState<string | null>(null);
 
   useEffect(() => {
     setConfigState(webPushConfig);
@@ -61,17 +61,19 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
     isPushNotificationSupported().then(setIsSupportedState);
     setPermissionState(getPushPermissionStatus());
     setStoredToken(getStoredPushToken());
-    void api.get<PushNotificationCampaign[]>('/admin/push-campaigns').then(setCampaigns).catch(error => {
-      console.error('Falha ao carregar campanhas persistidas:', error);
-    });
+    void api.get<PushNotificationCampaign[]>('/admin/push-campaigns')
+      .then((items) => { setCampaigns(items); setCampaignsError(null); })
+      .catch((error) => {
+        console.error('Falha ao carregar campanhas persistidas:', error);
+        setCampaignsError(error instanceof Error ? error.message : 'Não foi possível consultar o histórico no servidor.');
+      });
   }, []);
 
   const handleSaveConfig = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdateWebPushConfig(configState);
-    setFeedback({ type: 'success', message: 'Configurações de Web Push salvas com sucesso!' });
-    if (onShowToast) onShowToast('Configurações de Web Push atualizadas.');
-    setTimeout(() => setFeedback(null), 4000);
+    setFeedback(null);
+    // A confirmação de persistência vem do serviço que grava a configuração no backend.
   };
 
   const handleTestSubscription = async () => {
@@ -111,6 +113,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
         url: campaignUrl.trim() || '/'
       });
       setCampaigns(current => [campaign, ...current]);
+      setCampaignsError(null);
       setCampaignTitle('');
       setCampaignBody('');
       setCampaignUrl('/');
@@ -118,7 +121,7 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
       setFeedback({ type: campaign.failedCount ? 'error' : 'success', message });
       if (onShowToast) onShowToast(message);
     } catch (err: any) {
-      setFeedback({ type: 'error', message: 'Falha no disparo do alerta push.' });
+      setFeedback({ type: 'error', message: err instanceof Error ? err.message : 'Falha no disparo do alerta push.' });
     } finally {
       setIsSending(false);
       setTimeout(() => setFeedback(null), 5000);
@@ -423,9 +426,13 @@ export const PushNotificationManager: React.FC<PushNotificationManagerProps> = (
           </span>
         </div>
 
-        {campaigns.length === 0 ? (
+        {campaignsError ? (
+          <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+            Não foi possível consultar o histórico de campanhas: {campaignsError}
+          </div>
+        ) : campaigns.length === 0 ? (
           <div className="p-8 text-center text-xs text-[#5D6673]">
-            Nenhum alerta transmitido ainda. Utilize o formulário acima para disparar o primeiro plantão.
+            Nenhuma campanha registrada no servidor. O histórico será exibido após a primeira operação confirmada.
           </div>
         ) : (
           <div className="overflow-x-auto">
