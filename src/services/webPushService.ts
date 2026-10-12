@@ -138,7 +138,7 @@ export async function subscribeToWebPush(customVapidKey?: string): Promise<{
         id: `push-${Date.now()}`,
         token: currentToken,
         subscribedAt: new Date().toISOString(),
-        userAgent: navigator.userAgent.slice(0, 150),
+        userAgent: ua.slice(0, 150),
         deviceType,
         active: true,
         vapidPublicKey: vapidKey,
@@ -182,31 +182,5 @@ export function getStoredPushToken(): string | null {
     return localStorage.getItem(LOCAL_PUSH_TOKEN_KEY);
   } catch (e) {
     return null;
-  }
-}
-
-/**
- * Dispatches a simulated local broadcast notification if permission is granted
- */
-export async function showLocalPushNotification(title: string, options?: NotificationOptions): Promise<boolean> {
-  if (typeof window === 'undefined' || !('Notification' in window)) return false;
-  if (Notification.permission !== 'granted') return false;
-
-  try {
-    if ('serviceWorker' in navigator) {
-      const reg = await navigator.serviceWorker.getRegistration();
-      if (reg) {
-        await reg.showNotification(title, {
-          icon: '/favicon.ico',
-          badge: '/favicon.ico',
-          ...options
-        });
-        return true;
-      }
-    }
-    new Notification(title, options);
-    return true;
-  } catch (e) {
-    return false;
   }
 }
