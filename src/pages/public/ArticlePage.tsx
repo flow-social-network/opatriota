@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ArticleView } from '../../components/ArticleView';
 import { NotFoundPageView } from '../../components/pages/NotFoundPageView';
 import { useData } from '../../app/contexts/DataContext';
@@ -9,11 +9,19 @@ import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const { articles, categories, toggleCategory } = useArticleNavigation();
   const { currentUser, toggleBookmark } = useAuth();
   const { dataLoading, dataErrors } = useData();
 
-  const article = articles.find((item) => item.slug === slug || item.id === slug);
+  const candidateArticle = articles.find((item) => item.slug === slug || item.id === slug);
+  const previewRequested = new URLSearchParams(location.search).get('preview') === '1';
+  const canPreviewDraft = Boolean(previewRequested && currentUser &&
+    ['jornalista', 'revisor', 'editor', 'editor_chefe', 'administrador'].includes(String(currentUser.role)));
+  const candidateStatus = String((candidateArticle as any)?.status || '').trim().toLowerCase();
+  const candidateIsPublic = String(candidateArticle?.editorialStatus || '').trim().toUpperCase() === 'PUBLICADA' &&
+    ['', 'publicada', 'publicado', 'published'].includes(candidateStatus);
+  const article = candidateArticle && (candidateIsPublic || canPreviewDraft) ? candidateArticle : undefined;
   const isPremiumLocked = Boolean((article as any)?.premiumLocked);
 
   useSeoMetadata({
