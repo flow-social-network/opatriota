@@ -38,10 +38,10 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
           <Link to="/" aria-label="O Patriota" className="transition-opacity hover:opacity-90">
             <Logo size="lg" variant="footer" />
           </Link>
-          <Link to="/" className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-[#FFCC29]">
-            <ArrowLeft className="h-4 w-4" />
-            Voltar ao site
-          </Link>
+          <a href="/" className="inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-semibold text-white hover:bg-white/10 hover:text-[#FFCC29] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FFCC29]">
+            <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+            <span>Voltar ao site</span>
+          </a>
         </div>
       </header>
 
