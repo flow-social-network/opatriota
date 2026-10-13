@@ -987,8 +987,8 @@ export const Header: React.FC<HeaderProps> = ({
                               <button
                                 key={sub.slug}
                                 onClick={() => {
-                                  setActiveDropdownSlug(null);
-                                  onSelectCategory(sub.slug as CategorySlug);
+    setActiveDropdownSlug(null);
+    onNavigatePage?.(sub.slug === item.slug ? `/categoria/${item.slug}` : `/categoria/${item.slug}/${sub.slug}`);
                                 }}
                                 className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#1E293B] hover:text-[#0B5FFF] hover:bg-[#F1F5F9] transition flex items-center justify-between group cursor-pointer"
                                 role="menuitem"

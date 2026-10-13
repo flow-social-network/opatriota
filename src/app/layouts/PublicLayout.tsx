@@ -56,7 +56,7 @@ export function PublicLayout() {
       case 'checagem': return navigate('/verificacao');
       default: break;
     }
-    if (slug.startsWith('categoria/')) return navigate(`/categoria/${slug.replace('categoria/', '')}`);
+    if (slug.startsWith('categoria/')) return navigate(`/${slug}`);
     if (categories.some(c => c.slug === slug)) return navigate(`/categoria/${slug}`);
     if (pages.some(p => p.slug === slug) || [
       'sobre-o-patriota', 'principios-editoriais', 'expediente', 'fontes-e-metodologia',

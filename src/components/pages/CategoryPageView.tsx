@@ -45,8 +45,6 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   // Filter published articles for this category or matching subcategory/tags
-  const now = Date.now();
-  const fortyEightHoursAgo = now - 48 * 60 * 60 * 1000;
   const normalizedSubcategory = subcategory?.toLowerCase().replace(/-/g, ' ').trim();
   const categoryArticles = articles
     .filter((a) => {
@@ -80,11 +78,11 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
 
     return false;
     })
-    .filter((article) => {
-      const timestamp = Date.parse(article.originalPublishedAt || article.publishedAt);
-      return Number.isNaN(timestamp) || timestamp >= fortyEightHoursAgo;
-    })
-    .sort((a, b) => Date.parse(b.originalPublishedAt || b.publishedAt) - Date.parse(a.originalPublishedAt || a.publishedAt));
+    .sort((a, b) => {
+      const aTime = Date.parse(a.originalPublishedAt || a.publishedAt);
+      const bTime = Date.parse(b.originalPublishedAt || b.publishedAt);
+      return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+    });
 
   // Uma editoria vazia deve permanecer honesta: nunca misture matérias de outras editorias.
   const effectiveArticles = categoryArticles;
