@@ -149,7 +149,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
       load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),
       load<InstitutionalPage[]>('/pages', setPages),
       load<CategoryDetail[]>('/categories', (apiCategories) => {
-        if (apiCategories?.length) setCategories(apiCategories);
+        if (!apiCategories?.length) return;
+        setCategories(() => {
+          const apiBySlug = new Map(apiCategories.map((category) => [category.slug, category]));
+          const merged = INITIAL_CATEGORIES.map((category) => apiBySlug.get(category.slug) || category);
+          for (const category of apiCategories) {
+            if (!INITIAL_CATEGORIES.some((initial) => initial.slug === category.slug)) merged.push(category);
+          }
+          return merged;
+        });
       }),
       load<AuthorDetail[]>('/authors', setAuthors),
       load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),
