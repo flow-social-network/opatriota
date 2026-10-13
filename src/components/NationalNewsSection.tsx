@@ -81,7 +81,7 @@ export const NationalNewsSection: React.FC<NationalNewsSectionProps> = ({
         </div>
 
         {/* Right Sidebar: Lateral Ad Slot + Trending Briefs (4 cols) */}
-        <aside className="lg:col-span-4 space-y-6">
+        <aside className="lg:col-span-4 space-y-4 lg:sticky lg:top-20 lg:self-start">
           
           {/* Lateral Advertising Slot (300x250) */}
           <div className="bg-white p-2 rounded-lg border border-[#D9DEE7] shadow-2xs">

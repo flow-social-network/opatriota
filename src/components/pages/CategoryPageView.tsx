@@ -367,7 +367,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
             </main>
 
             {/* Sidebar Column (4 cols) */}
-            <aside className="lg:col-span-4 space-y-6">
+            <aside className="lg:col-span-4 space-y-4 lg:sticky lg:top-20 lg:self-start">
               
               {/* Popular News in Portal */}
               <div className="bg-white border border-[#D9DEE7] rounded-lg p-5 shadow-xs">
