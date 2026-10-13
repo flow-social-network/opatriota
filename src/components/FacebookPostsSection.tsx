@@ -119,7 +119,7 @@ export const FacebookPostsSection: React.FC<FacebookPostsSectionProps> = ({ post
 
   return (
     <section className="my-8 select-none" aria-label="Publicações do Facebook">
-      <div className="bg-white border border-[#D9DEE7] rounded-xl p-5 shadow-2xs">
+      <div className="bg-white border border-[#D9DEE7] rounded-xl p-4 shadow-2xs">
         {/* Section Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 mb-4 border-b border-[#F1F3F5]">
           {/* Left: FB Logo + Title + Subtitle */}
@@ -172,8 +172,8 @@ export const FacebookPostsSection: React.FC<FacebookPostsSectionProps> = ({ post
           </div>
         </div>
 
-        {/* Responsive Grid of Cards: 6 cards on desktop (lg/xl), 3 on md, 1-2 on mobile */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3.5 items-stretch">
+        {/* Fila horizontal rotativa para manter a seção compacta e liberar espaço para publicidade abaixo */}
+        <div className="flex w-full gap-3.5 overflow-x-auto pb-1 snap-x snap-mandatory [scrollbar-width:thin]">
           {facebookFeed.map((post, idx) => (
             <article 
               key={post.id}
@@ -184,7 +184,7 @@ export const FacebookPostsSection: React.FC<FacebookPostsSectionProps> = ({ post
                   window.open(post.postUrl, '_blank', 'noopener,noreferrer');
                 }
               }}
-              className="bg-white border border-[#D9DEE7] rounded-lg overflow-hidden flex flex-col justify-between hover:shadow-md hover:border-[#1877F2] transition-all duration-300 group cursor-pointer"
+              className="w-[min(260px,82vw)] shrink-0 snap-start bg-white border border-[#D9DEE7] rounded-lg overflow-hidden flex flex-col justify-between hover:shadow-md hover:border-[#1877F2] transition-all duration-300 group cursor-pointer"
             >
               <div>
                 {/* Card Header: Avatar + Page Name + Time + Menu */}
