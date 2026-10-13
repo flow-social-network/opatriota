@@ -10,6 +10,15 @@ import { signInWithEmail, registerWithEmail, requestPasswordReset } from '../../
 import { 
   User,
   BookOpen,
+  Search,
+  Menu,
+  Newspaper,
+  Users,
+  Video,
+  Headphones,
+  Mail,
+  Settings,
+  HelpCircle,
   CreditCard, 
   Bookmark, 
   Bell, 
@@ -262,25 +271,16 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-[#F7F8FA] text-[#17202A] select-none py-4 sm:py-6">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6">
-        
-        {/* Top Breadcrumb & Return to Portal */}
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-5 pb-3 border-b border-[#D9DEE7]">
-          <button
-            onClick={onBackToHome}
-            className="flex items-center gap-2 text-xs font-bold text-[#0B2345] hover:text-[#0B5FFF] transition cursor-pointer"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>VOLTAR PARA A HOMEPAGE</span>
-          </button>
-
-          <div className="flex items-center gap-2 text-xs text-[#5D6673]">
-            <span>Área Exclusiva do Leitor & Assinante</span>
-            <span>•</span>
-            <span className="font-semibold text-[#0B2345]">O Patriota</span>
-          </div>
+    <div className="min-h-screen bg-[#F1F7FC] text-[#17202A] select-none">
+      <header className="sticky top-0 z-30 bg-gradient-to-r from-[#061D40] via-[#0A3470] to-[#05658C] text-white shadow-lg">
+        <div className="mx-auto flex h-[86px] max-w-[1780px] items-center gap-5 px-4 lg:px-7">
+          <div className="flex min-w-[245px] items-center gap-3"><img src="/pwa-icon-192.svg" alt="O Patriota" className="h-14 w-14 rounded-full border-2 border-white/80 bg-[#FFCC29] p-1 object-contain" /><div><div className="font-serif text-3xl font-black leading-none tracking-tight">O PATRIOTA</div><div className="mt-1 text-[9px] font-bold uppercase tracking-[.16em] text-white/80">Informação com liberdade, por um Brasil mais forte</div></div></div>
+          <div className="hidden max-w-2xl flex-1 items-center rounded-lg bg-white/95 px-4 py-2.5 text-[#49617F] md:flex"><Search className="mr-3 h-5 w-5 text-[#0B5FFF]" /><input aria-label="Buscar na Área do Leitor" placeholder="Buscar matérias, colunas, autores..." className="w-full bg-transparent text-sm outline-none" /></div>
+          <div className="ml-auto flex items-center gap-4"><button aria-label="Notificações" onClick={() => setCurrentSubpage('notificacoes')} className="relative rounded-full p-2 hover:bg-white/10"><Bell className="h-6 w-6" /><span className="absolute right-0 top-0 rounded-full bg-[#EF2B2D] px-1.5 text-[10px] font-black">3</span></button><div className="hidden items-center gap-3 border-l border-white/20 pl-4 sm:flex"><img src={currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'} alt="" className="h-12 w-12 rounded-full border-2 border-white object-cover" /><div><b className="block text-sm">{currentUser?.name || 'Leitor'}</b><span className="text-xs text-white/75">Leitor Premium</span></div></div><button onClick={onLogout} aria-label="Sair" className="rounded p-2 hover:bg-white/10"><LogOut className="h-5 w-5" /></button></div>
         </div>
+      </header>
+      <div className="mx-auto flex max-w-[1780px]">
+        <div className="max-w-[1440px] flex-1 px-4 py-5 sm:px-6 lg:px-7">
 
         {/* IF USER NOT LOGGED IN: SHOW AUTHENTICATION PAGES */}
         {!currentUser ? (
@@ -355,10 +355,10 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
           </div>
         ) : (
           /* IF USER IS LOGGED IN: SHOW DASHBOARD WITH SIDEBAR NAVIGATION */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          <div className="grid grid-cols-1 gap-5 items-start lg:grid-cols-[255px_minmax(0,1fr)]">
             
             {/* LEFT SIDEBAR: PROFILE SUMMARY & NAVIGATION */}
-            <aside className="lg:col-span-3 bg-white p-4 sm:p-5 rounded border border-[#D9DEE7] shadow-xs space-y-5">
+            <aside className="lg:sticky lg:top-[106px] bg-white p-3 sm:p-4 rounded-xl border border-[#D9E6F5] shadow-sm space-y-4">
               {/* User Avatar & Name */}
               <div className="flex items-center gap-3 pb-4 border-b border-[#D9DEE7]">
                 <img
@@ -387,7 +387,12 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                   { id: 'dashboard', label: 'Painel Geral', icon: User },
                   { id: 'jornal', label: 'Ler o Jornal Digital', icon: BookOpen },
                   { id: 'assinatura', label: 'Minha Assinatura', icon: Sparkles },
-                  { id: 'pagamentos', label: 'Histórico de Pagamentos', icon: CreditCard },
+                  { id: 'pagamentos', label: 'Forma de Pagamento', icon: CreditCard },
+                  { id: 'editorias', label: 'Editorias', icon: Newspaper },
+                  { id: 'colunistas', label: 'Colunistas', icon: Users },
+                  { id: 'videos', label: 'Vídeos', icon: Video },
+                  { id: 'podcasts', label: 'Podcasts', icon: Headphones },
+                  { id: 'newsletter', label: 'Newsletter', icon: Mail },
                   { id: 'favoritos', label: `Notícias Salvas (${currentUser.bookmarks.length})`, icon: Bookmark },
                   { id: 'perfil', label: 'Dados Cadastrais', icon: User },
                   { id: 'notificacoes', label: 'Preferências de Alertas', icon: Bell },
@@ -425,7 +430,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
             </aside>
 
             {/* RIGHT CONTENT: SELECTED SUBPAGE */}
-            <main className="lg:col-span-9 bg-white p-4 sm:p-6 rounded border border-[#D9DEE7] shadow-xs">
+            <main className="min-w-0 rounded-xl bg-transparent">
               
               {/* SUBPAGE: JORNAL DIGITAL */}
               {currentSubpage === 'jornal' && (
@@ -509,6 +514,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
           </div>
         )}
 
+        </div>
       </div>
     </div>
   );
