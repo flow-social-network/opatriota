@@ -284,7 +284,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   return (
     <div className="min-h-screen bg-[#F5F7FB] text-[#17202A] select-none pb-16">
       {/* Top Admin Bar */}
-      <div className="sticky top-0 z-30 bg-[#07172E]/95 backdrop-blur-xl text-white px-4 sm:px-6 py-3.5 border-b border-white/10 shadow-lg flex items-center justify-between">
+      <div className="fixed inset-x-0 top-0 z-50 min-h-[74px] bg-[#07172E]/95 backdrop-blur-xl text-white px-4 sm:px-6 py-3.5 border-b border-white/10 shadow-lg flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -324,15 +324,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* Main Admin Container */}
-      <div className="w-full px-4 py-6 lg:px-6">
+      <div className="w-full px-4 pb-6 pt-[98px] lg:px-6">
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className="order-2 h-fit rounded-2xl border border-[#1D5278] bg-gradient-to-b from-[#062E50] to-[#031B32] p-2 text-white shadow-xl xl:order-1 xl:sticky xl:top-4">
+        <aside className="order-2 rounded-2xl border border-[#1D5278] bg-gradient-to-b from-[#062E50] to-[#031B32] p-2 text-white shadow-xl xl:order-1 xl:fixed xl:bottom-0 xl:left-0 xl:top-[74px] xl:z-40 xl:w-[340px] xl:overflow-y-auto xl:rounded-none xl:border-l-0 xl:border-b-0 xl:border-t-0">
           <div className="mb-3 flex items-center gap-3 px-3 py-3"><img src="/pwa-icon-192.svg" alt="O Patriota" className="h-12 w-12 rounded-full bg-[#FFCC29] p-1" /><div><p className="font-serif text-xl font-black">O PATRIOTA</p><p className="text-[8px] uppercase tracking-widest text-white/70">Painel administrativo</p></div></div>
           <div className="space-y-1">
             {menuGroups.map((group) => { const Icon = group.icon; return <details key={group.label} open={false} className="group rounded-xl border border-white/15 bg-white/[.03] open:bg-white/[.06]"><summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-3 font-bold [&::-webkit-details-marker]:hidden"><span className={`flex h-10 w-10 items-center justify-center rounded-lg ${group.color}`}><Icon className="h-5 w-5" /></span><span className="flex-1">{group.label}</span><ChevronUp className="h-5 w-5 transition-transform group-open:rotate-180" /></summary><div className="space-y-0.5 px-2 pb-2">{group.items.map((item) => { const ItemIcon = item.icon; return <button key={`${group.label}-${item.label}`} onClick={() => onNavigate && ['conteudo', 'jornal-digital', 'editorial', 'multimidia', 'financeiro', 'usuarios', 'relatorios', 'configuracoes'].includes(item.tab) ? onNavigate(item.tab) : setActiveTab(item.tab as Parameters<typeof setActiveTab>[0])} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/85 hover:bg-[#087CF0]/40 hover:text-white cursor-pointer"><ItemIcon className="h-4 w-4 shrink-0" /><span className="flex-1">{item.label}</span>{item.badge ? <span className="rounded-full bg-[#D9233E] px-2 py-0.5 text-[10px] font-black">{item.badge}</span> : null}</button>; })}</div></details>; })}
           </div>
         </aside>
-        <section className="order-1 min-w-0 xl:order-2">
+        <section className="order-1 min-w-0 xl:order-2 xl:col-start-2">
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#16803C]">Centro de comando</p>
