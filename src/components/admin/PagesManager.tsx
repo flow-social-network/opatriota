@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { InstitutionalPage, PageModelType, PageStatus } from '../../types';
+import { sanitizeHtml } from '../../utils/sanitizeHtml';
 import { 
   FileText, 
   Plus, 
@@ -36,6 +37,7 @@ export const PagesManager: React.FC<PagesManagerProps> = ({
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [activeTab, setActiveTab] = useState<'conteudo' | 'seo' | 'localizacao'>('conteudo');
   const [formError, setFormError] = useState<string | null>(null);
+  const [editorMode, setEditorMode] = useState<'visual' | 'html'>('visual');
 
   const filteredPages = pages.filter((p) => {
     if (filterStatus !== 'todos' && p.status !== filterStatus) return false;
@@ -272,18 +274,37 @@ export const PagesManager: React.FC<PagesManagerProps> = ({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-xs font-bold text-[#0B2345]">
-                    Conteúdo da Página (HTML / Gutenberg Blocks) *
-                  </label>
-                  <span className="text-[11px] text-[#717E8E]">
-                    Suporta tags HTML semânticas como &lt;section&gt;, &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;
-                  </span>
+                    Conteúdo da Página *
+                    </label>
+                    <div className="flex items-center gap-1 rounded-t-lg border border-b-0 border-[#D9DEE7] bg-[#F8FAFC] p-2">
+                      {(['visual', 'html'] as const).map((mode) => (
+                        <button key={mode} type="button" onClick={() => setEditorMode(mode)} className={`rounded px-3 py-1.5 text-[11px] font-bold ${editorMode === mode ? 'bg-[#0B2345] text-white' : 'text-[#64748B] hover:bg-white'}`}>
+                          {mode === 'visual' ? 'Editor visual' : 'Código avançado'}
+                        </button>
+                      ))}
+                      {editorMode === 'visual' && (
+                        <span className="ml-auto text-[11px] text-[#717E8E]">Selecione o texto para aplicar formatação</span>
+                      )}
+                    </div>
+                    {editorMode === 'visual' ? (
+                      <div
+                        contentEditable
+                        suppressContentEditableWarning
+                        role="textbox"
+                        aria-label="Conteúdo da página"
+                        dangerouslySetInnerHTML={{ __html: sanitizeHtml(editingPage.content) }}
+                        onInput={(event) => setEditingPage({ ...editingPage, content: event.currentTarget.innerHTML })}
+                        className="min-h-[280px] w-full rounded-b-lg border border-[#D9DEE7] bg-white p-4 text-sm leading-7 text-[#17202A] focus:outline-none focus:ring-2 focus:ring-[#0B5FFF]/20 [&_h2]:mb-3 [&_h2]:mt-5 [&_h2]:text-xl [&_h2]:font-bold [&_p]:mb-3"
+                      />
+                    ) : (
+                      <textarea
+                        rows={12}
+                        value={editingPage.content}
+                        onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
+                        className="w-full rounded-b-lg border border-[#D9DEE7] bg-[#F8FAFC] p-3 font-mono text-xs text-[#17202A] focus:outline-none focus:border-[#0B5FFF]"
+                      />
+                    )}
                 </div>
-                <textarea
-                  rows={12}
-                  value={editingPage.content}
-                  onChange={(e) => setEditingPage({ ...editingPage, content: e.target.value })}
-                  className="w-full text-xs font-mono border border-[#D9DEE7] rounded p-3 text-[#17202A] focus:outline-none focus:border-[#0B5FFF] bg-[#F8FAFC]"
-                />
               </div>
 
               <div>
