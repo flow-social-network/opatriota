@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Article, CategorySlug } from '../../types';
 import { CategoryDetail } from '../../types';
 import { Breadcrumbs } from './Breadcrumbs';
+import { PatriotaAdCard } from '../ads/PatriotaAdCard';
 import { 
   Search, 
   Filter, 
@@ -187,6 +188,10 @@ export const SearchPageView: React.FC<SearchPageViewProps> = ({
               Exibindo página <strong className="text-[#0B2345]">{currentPage}</strong> de {totalPages}
             </div>
           </div>
+        </div>
+
+        <div className="mb-6 flex justify-end">
+          <PatriotaAdCard variant={6} className="w-full max-w-[320px]" />
         </div>
 
         {/* Results List */}

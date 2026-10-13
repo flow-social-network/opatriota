@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Article, AuthorDetail } from '../../types';
 import { Breadcrumbs } from './Breadcrumbs';
+import { PatriotaAdCard } from '../ads/PatriotaAdCard';
 import { 
   Mail, 
   Globe, 
@@ -133,6 +134,10 @@ export const AuthorPageView: React.FC<AuthorPageViewProps> = ({
             </div>
           </div>
         </header>
+
+        <div className="mb-6 flex justify-end">
+          <PatriotaAdCard variant={5} className="w-full max-w-[320px]" />
+        </div>
 
         {/* Author Articles Section */}
         <section>
