@@ -10,7 +10,7 @@ const AD_IMAGES = [
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-05-05-Uw2LCtYP2WZKoHqmL5ZHrHgshgNgZG.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-05-16-ZcxWsqZNmIxxR1tog4QucuVmsJJ289.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-05-25-dAi7IcVxVpNDh2RGoWtzgyZXs8B2YC.png',
-  'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-5wLA2vrcRVwy1ybocmaRlMViwG41kh.png',
+  'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-17-21-SA2E5bWdwDsciYMYj1NDBRJ7VdmK0G.png',
 ] as const;
 
 interface PatriotaAdCardProps {
@@ -28,7 +28,7 @@ export function PatriotaAdCard({ variant = 0, className = '' }: PatriotaAdCardPr
       <img
         src={AD_IMAGES[variant]}
         alt="Anuncie sua marca no O Patriota"
-        className={`block w-full object-contain ${variant === 8 ? 'h-48 sm:h-56 lg:h-64 bg-[#0B2345]' : 'h-auto object-cover'}`}
+        className={`block w-full object-contain ${variant === 8 ? 'h-20 sm:h-24 lg:h-28 bg-[#0B2345]' : 'h-auto object-cover'}`}
         loading="lazy"
       />
     </a>
