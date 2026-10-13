@@ -345,7 +345,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div>
             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#16803C]">Centro de comando</p>
             <h1 className="text-3xl font-black tracking-tight text-[#07172E] sm:text-4xl">Painel administrativo</h1>
-            <p className="mt-2 max-w-2xl text-sm text-[#64748B]">Monitore a operação editorial, organize fontes e mantenha o portal pronto para publicar.</p>
+            <p className="mt-2 max-w-2xl text-sm text-[#64748B]">Administre usuários, permissões, integrações, segurança, finanças e a saúde geral da plataforma.</p>
           </div>
           <div className="flex items-center gap-2 rounded-2xl border border-[#DCE3ED] bg-white px-4 py-3 shadow-sm">
             <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E8F7ED] text-[#16803C]"><CheckCircle2 className="h-5 w-5" /></span>
@@ -353,8 +353,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="mb-8 flex gap-1 overflow-x-auto rounded-2xl border border-[#DCE3ED] bg-white p-1.5 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        {/* Navegação administrativa complementar — o fluxo editorial pertence exclusivamente ao painel da redação. */}
+        <div className="mb-8 flex gap-2 overflow-x-auto rounded-2xl border border-[#DCE3ED] bg-white p-2 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {['usuarios', 'jornal-digital', 'financeiro', 'relatorios', 'integracoes', 'configuracoes', 'seguranca', 'suporte'].map((section) => <button key={section} onClick={() => onNavigate?.(section)} className="whitespace-nowrap rounded-xl px-3 py-2 text-xs font-bold text-[#52677A] hover:bg-[#EAF3FF] hover:text-[#0B5FFF]">{section.replace('-', ' ')}</button>)}
+        </div>
+        <div className="hidden">
           <button
             onClick={() => setActiveTab('painel')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
@@ -476,7 +479,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
         </div>
 
-        {/* TAB 1: PAINEL GERAL */}
+        {/* TAB 1: VISÃO ADMINISTRATIVA */}
         {activeTab === 'painel' && (
           <AdminOverviewTab
             sources={sources}
