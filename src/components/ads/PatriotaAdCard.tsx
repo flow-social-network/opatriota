@@ -10,7 +10,7 @@ const AD_IMAGES = [
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-05-05-Uw2LCtYP2WZKoHqmL5ZHrHgshgNgZG.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-05-16-ZcxWsqZNmIxxR1tog4QucuVmsJJ289.png',
   'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-05-25-dAi7IcVxVpNDh2RGoWtzgyZXs8B2YC.png',
-  'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-17-21-SA2E5bWdwDsciYMYj1NDBRJ7VdmK0G.png',
+  'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-17-21-eiQvJFBrhdBP65VBteXaBulrZKI2XX.png',
 ] as const;
 
 interface PatriotaAdCardProps {
