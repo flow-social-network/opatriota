@@ -1,5 +1,6 @@
 import React from 'react';
 import { Article, AdSlotConfig, AdSenseGlobalConfig } from '../types';
+import { PatriotaAdCard } from './ads/PatriotaAdCard';
 import { AdSlot } from './ads/AdSlot';
 import { Newspaper, ArrowRight, Flame } from 'lucide-react';
 
@@ -92,6 +93,8 @@ export const NationalNewsSection: React.FC<NationalNewsSectionProps> = ({
               className="my-0"
             />
           </div>
+
+          <PatriotaAdCard variant={1} />
 
           {/* Quick Trending Bulletins */}
           <div className="bg-white p-5 rounded-lg border border-[#D9DEE7] shadow-2xs">

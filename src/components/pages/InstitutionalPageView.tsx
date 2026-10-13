@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { InstitutionalPage } from '../../types';
 import { api } from '../../services/apiClient';
 import { Breadcrumbs } from './Breadcrumbs';
+import { PatriotaAdCard } from '../ads/PatriotaAdCard';
 import { sanitizeHtml } from '../../utils/sanitizeHtml';
 import { 
   Calendar, 
@@ -164,7 +165,8 @@ export const InstitutionalPageView: React.FC<InstitutionalPageViewProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Left Column: Sticky Index / TOC & Related Links (4 cols) */}
-          <aside className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 order-2 lg:order-1">
+          <aside className="lg:col-span-4 space-y-4 lg:sticky lg:top-20 order-2 lg:order-1">
+            <PatriotaAdCard variant={3} />
             
             {/* Table of Contents */}
             {page.toc && page.toc.length > 0 && (

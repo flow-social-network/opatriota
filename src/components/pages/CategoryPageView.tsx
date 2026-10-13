@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Article, CategorySlug } from '../../types';
 import { CategoryDetail } from '../../types';
 import { Breadcrumbs } from './Breadcrumbs';
+import { PatriotaAdCard } from '../ads/PatriotaAdCard';
 import { 
   Calendar, 
   Clock, 
@@ -368,6 +369,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
 
             {/* Sidebar Column (4 cols) */}
             <aside className="lg:col-span-4 space-y-4 lg:sticky lg:top-20 lg:self-start">
+              <PatriotaAdCard variant={2} />
               
               {/* Popular News in Portal */}
               <div className="bg-white border border-[#D9DEE7] rounded-lg p-5 shadow-xs">
