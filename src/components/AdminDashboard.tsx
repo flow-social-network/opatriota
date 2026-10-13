@@ -260,9 +260,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     : queueItems.filter(i => i.editorialStatus === queueFilter);
 
   return (
-    <div className="min-h-screen bg-[#F1F3F5] text-[#17202A] select-none pb-16">
+    <div className="min-h-screen bg-[#F5F7FB] text-[#17202A] select-none pb-16">
       {/* Top Admin Bar */}
-      <div className="bg-[#07172E] text-white px-6 py-3 border-b border-[#0B2345] flex items-center justify-between">
+      <div className="sticky top-0 z-30 bg-[#07172E]/95 backdrop-blur-xl text-white px-4 sm:px-6 py-3.5 border-b border-white/10 shadow-lg flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -303,12 +303,24 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {/* Main Admin Container */}
       <div className="max-w-[1360px] mx-auto px-4 py-8">
+        <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#16803C]">Centro de comando</p>
+            <h1 className="text-3xl font-black tracking-tight text-[#07172E] sm:text-4xl">Painel administrativo</h1>
+            <p className="mt-2 max-w-2xl text-sm text-[#64748B]">Monitore a operação editorial, organize fontes e mantenha o portal pronto para publicar.</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-2xl border border-[#DCE3ED] bg-white px-4 py-3 shadow-sm">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E8F7ED] text-[#16803C]"><CheckCircle2 className="h-5 w-5" /></span>
+            <div><p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Status do sistema</p><p className="text-sm font-bold text-[#16803C]">Operação normal</p></div>
+          </div>
+        </div>
+
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 border-b border-[#D9DEE7] pb-2">
+        <div className="mb-8 flex gap-1 overflow-x-auto rounded-2xl border border-[#DCE3ED] bg-white p-1.5 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button
             onClick={() => setActiveTab('painel')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'painel' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'painel' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -318,7 +330,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('fila')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'fila' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'fila' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <GitPullRequest className="w-4 h-4" />
@@ -328,7 +340,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('fontes')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'fontes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'fontes' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Rss className="w-4 h-4" />
@@ -338,7 +350,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('dedup')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'dedup' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'dedup' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -348,7 +360,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('identidade')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'identidade' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'identidade' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Palette className="w-4 h-4 text-[#0B5FFF]" />
@@ -358,7 +370,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('redes')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'redes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'redes' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Share2 className="w-4 h-4 text-[#16803C]" />
@@ -368,7 +380,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('publicidade')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'publicidade' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'publicidade' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Megaphone className="w-4 h-4 text-[#FFCC29]" />
@@ -378,7 +390,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('push')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'push' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'push' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Bell className="w-4 h-4 text-[#0B5FFF]" />
@@ -388,7 +400,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('usuarios')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'usuarios' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'usuarios' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Users className="w-4 h-4 text-[#0B5FFF]" />
@@ -398,7 +410,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('permissoes')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'permissoes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'permissoes' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Shield className="w-4 h-4 text-[#FFCC29]" />
