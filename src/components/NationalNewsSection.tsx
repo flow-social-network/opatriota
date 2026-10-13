@@ -131,6 +131,10 @@ export const NationalNewsSection: React.FC<NationalNewsSectionProps> = ({
         </aside>
 
       </div>
+
+      <div className="mt-6 w-full">
+        <PatriotaAdCard variant={8} className="w-full" />
+      </div>
     </section>
   );
 };
