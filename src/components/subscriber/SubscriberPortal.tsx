@@ -8,7 +8,8 @@ import {
 import { api } from '../../services/apiClient';
 import { signInWithEmail, registerWithEmail, requestPasswordReset } from '../../services/firebaseAuthService';
 import { 
-  User, 
+  User,
+  BookOpen,
   CreditCard, 
   Bookmark, 
   Bell, 
@@ -27,6 +28,7 @@ import { SubscriberFavoritesTab } from './SubscriberFavoritesTab';
 import { SubscriberProfileTab } from './SubscriberProfileTab';
 import { SubscriberNotificationsTab } from './SubscriberNotificationsTab';
 import { SubscriberPrivacyTab } from './SubscriberPrivacyTab';
+import { SubscriberJournalTab } from './SubscriberJournalTab';
 
 interface SubscriberPortalProps {
   currentUser: UserSession | null;
@@ -383,6 +385,7 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
               <nav className="space-y-1 text-xs">
                 {[
                   { id: 'dashboard', label: 'Painel Geral', icon: User },
+                  { id: 'jornal', label: 'Ler o Jornal Digital', icon: BookOpen },
                   { id: 'assinatura', label: 'Minha Assinatura', icon: Sparkles },
                   { id: 'pagamentos', label: 'Histórico de Pagamentos', icon: CreditCard },
                   { id: 'favoritos', label: `Notícias Salvas (${currentUser.bookmarks.length})`, icon: Bookmark },
@@ -424,6 +427,15 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
             {/* RIGHT CONTENT: SELECTED SUBPAGE */}
             <main className="lg:col-span-9 bg-white p-4 sm:p-6 rounded border border-[#D9DEE7] shadow-xs">
               
+              {/* SUBPAGE: JORNAL DIGITAL */}
+              {currentSubpage === 'jornal' && (
+                <SubscriberJournalTab
+                  articles={articles}
+                  onSelectArticle={onSelectArticle}
+                  onBack={() => setCurrentSubpage('dashboard')}
+                />
+              )}
+
               {/* SUBPAGE: DASHBOARD GERAL */}
               {currentSubpage === 'dashboard' && (
                 <SubscriberDashboardTab
