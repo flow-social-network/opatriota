@@ -95,12 +95,12 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
   ];
 
   // Identifica artigos reais do banco ou utiliza os dados fiéis à imagem de referência
-  const mainLead = articles.find(a => a.category === 'politica' && a.id !== 'art-policia-metro-divergem-paulista') || referenceLeadArticle;
-  const secondary1 = articles.find(a => a.id === 'art-policia-metro-divergem-paulista' || a.slug === 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista') || referenceSecondaryArticles[0];
-  const secondary2 = articles.find(a => a.category === 'seguranca') || referenceSecondaryArticles[1];
-  const secondary3 = articles.find(a => a.category === 'mundo') || referenceSecondaryArticles[2];
+  const mainLead = articles.find((article) => article.id === 'art-rs-zucco-flavio-porto-alegre' || article.tags?.includes('Rio Grande do Sul')) || referenceLeadArticle;
+  const secondary1 = articles.find((article) => article.id === 'art-rs-zucco-flavio-porto-alegre') || referenceSecondaryArticles[1];
+  const secondary2 = articles.find((article) => article.category === 'seguranca' && !article.tags?.includes('Eleições 2026')) || referenceSecondaryArticles[1];
+  const secondary3 = articles.find((article) => article.category === 'brasil' && article.id !== 'art-rs-zucco-flavio-porto-alegre') || referenceSecondaryArticles[2];
 
-  const secondaryList = [secondary1, secondary2, secondary3];
+  const secondaryList = [secondary1, secondary2, secondary3].filter((article, index, list) => list.findIndex((candidate) => candidate.id === article.id) === index);
 
   return (
     <section className="mb-12 select-none" aria-label="Cobertura Regional do Rio Grande do Sul">
@@ -121,7 +121,7 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
 
         {/* Link Ver todas → */}
         <button
-          onClick={() => onSelectCategory?.('brasil')}
+          onClick={() => onSelectCategory?.('rio-grande-do-sul')}
           className="text-[#0284C7] hover:text-[#0369A1] font-bold text-xs sm:text-sm flex items-center gap-1 transition-colors cursor-pointer group"
         >
           <span>Ver todas</span>

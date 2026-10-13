@@ -325,6 +325,40 @@ export const INITIAL_MEDIA_ITEMS: MediaItem[] = [
 
 export const INITIAL_ARTICLES: Article[] = [
   {
+    id: 'art-rs-zucco-flavio-porto-alegre',
+    slug: 'zucco-articula-agenda-de-flavio-bolsonaro-em-porto-alegre-para-14-de-outubro',
+    title: 'Zucco articula agenda de Flávio Bolsonaro em Porto Alegre para 14 de outubro',
+    subtitle: 'Visita do candidato à Presidência está confirmada para quarta-feira; participação de Jorginho Mello e Sergio Moro ainda era articulada, segundo informações divulgadas em 10 de outubro.',
+    kicker: 'RIO GRANDE DO SUL',
+    category: 'brasil',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'alta',
+    content: `PORTO ALEGRE (RS) — O governador eleito do Rio Grande do Sul, Luciano Zucco (PL), confirmou a presença do senador e candidato à Presidência da República Flávio Bolsonaro (PL) no Estado na próxima quarta-feira, 14 de outubro. A visita integra a mobilização política para o segundo turno das eleições presidenciais, marcado para 25 de outubro.
+
+A informação foi divulgada em 10 de outubro, em reportagens do Correio do Povo e de GZH. Conforme as publicações, a programação ainda estava sendo definida, e os detalhes sobre horários, locais e formato das atividades seriam anunciados posteriormente.
+
+Zucco articula a mobilização estadual em apoio à candidatura de Flávio Bolsonaro. A estratégia busca ampliar a votação do candidato na região Sul durante a etapa final da disputa presidencial.
+
+Também estava em articulação a participação de Jorginho Mello, governador reeleito de Santa Catarina, e Sergio Moro, governador eleito do Paraná. Até a publicação das informações consultadas, não havia confirmação definitiva de que ambos participariam do evento de Porto Alegre.
+
+A programação operacional, incluindo endereço, horário, formato da atividade e procedimentos de credenciamento para a imprensa, ainda deveria ser divulgada. O Patriota Brasil acompanhará os anúncios oficiais e atualizará a reportagem quando houver novas confirmações.
+
+Nota editorial: reportagem elaborada com base em informações publicadas em 10 de outubro de 2026. A participação de Jorginho Mello e Sergio Moro não deve ser apresentada como confirmada sem nova evidência.`,
+    author: 'Redação O Patriota RS',
+    authorRole: 'Correspondente Regional RS',
+    sourceName: 'Correio do Povo e GZH',
+    sourceUrl: 'https://www.correiodopovo.com.br',
+    sourcesConsulted: ['Correio do Povo', 'GZH', 'Jornal do Comércio'],
+    publishedAt: '10 de outubro de 2026 às 18:00',
+    updatedAt: '10 de outubro de 2026 às 18:00',
+    readTimeMinutes: 4,
+    imageUrl: 'https://scontent.fpoa13-1.fna.fbcdn.net/v/t39.30808-6/843884102_122098053351508218_7994297666146208319_n.jpg?stp=dst-jpg_tt6&cstp=mx1080x711&ctp=p180x540&_nc_cat=110&_nc_map=urlgen_bucketless&ccb=1-7&_nc_sid=833d8c&_nc_ohc=KRxEt28URekQ7kNvwHLPchT&_nc_oc=AdqSZPlgnIOIMdp8PJEbDxUZQMUD9tw2Te036dy5ZNuajifH4AsxusoJiwEkBTJ9DOXbecSx8h7T7eqBzbmXyaAm&_nc_zt=23&_nc_ht=scontent.fpoa13-1.fna&_nc_gid=UJFk5spMoeFo9epVQ3MSJg&_nc_ss=7b2a8&oh=00_AQOVnUQjXuZXUOOwihVzcdNZm0h69aOpvkgRg6-kSXnYWw&oe=6AD3DB31',
+    imageCaption: 'Agenda política no Rio Grande do Sul.',
+    imageCredits: 'Imagem fornecida para a cobertura regional',
+    tags: ['Rio Grande do Sul', 'Porto Alegre', 'Flávio Bolsonaro', 'Eleições 2026', 'PL'],
+  },
+  {
     id: 'art-economia-orcamento-pressao-2026',
     slug: 'orcamento-sob-pressao-r-105-5-bilhoes-em-despesas-pressionam-o-orcamento-federal',
     title: 'Orçamento sob pressão: R$ 105,5 bilhões em despesas pressionam o orçamento federal',
