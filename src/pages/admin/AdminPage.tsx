@@ -4,6 +4,7 @@ import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { AdminDashboard } from '../../components/AdminDashboard';
 import AdvertisingPage from './AdvertisingPage';
+import AdminModulePage from './AdminModulePage';
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -60,6 +61,11 @@ export default function AdminPage() {
   };
 
   const initialTab = (section && tabMapping[section]) || 'painel';
+  const completeModules = ['conteudo', 'jornal-digital', 'editorial', 'multimidia', 'financeiro', 'usuarios', 'relatorios', 'configuracoes'];
+
+  if (section && completeModules.includes(section)) {
+    return <AdminModulePage />;
+  }
 
   if (initialTab === 'publicidade') {
     return <AdvertisingPage onBack={() => navigate('/admin')} />;
@@ -76,6 +82,7 @@ export default function AdminPage() {
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}
+      onNavigate={(nextSection) => navigate(`/admin/${nextSection}`)}
     />
   );
 }
