@@ -1,6 +1,7 @@
 {
   "name": "opatriota-brasil",
   "private": true,
+  "packageManager": "pnpm@10.4.1",
   "version": "0.1.0",
   "type": "module",
   "workspaces": [
