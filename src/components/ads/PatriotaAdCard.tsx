@@ -28,7 +28,7 @@ export function PatriotaAdCard({ variant = 0, className = '' }: PatriotaAdCardPr
       <img
         src={AD_IMAGES[variant]}
         alt="Anuncie sua marca no O Patriota"
-        className="block h-auto w-full object-cover"
+        className={`block w-full object-contain ${variant === 8 ? 'h-48 sm:h-56 lg:h-64 bg-[#0B2345]' : 'h-auto object-cover'}`}
         loading="lazy"
       />
     </a>
