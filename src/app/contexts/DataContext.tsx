@@ -7,6 +7,7 @@ import {
   DEFAULT_PORTAL_SETTINGS,
 } from '../../services/siteConfigService';
 import {
+  INITIAL_ARTICLES,
   INITIAL_FACT_CHECKS,
   INITIAL_RSS_SOURCES,
   INITIAL_EDITORIAL_QUEUE,
@@ -89,7 +90,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const currentUser = auth?.currentUser ?? null;
   const { showToast } = useToast();
 
-  const [articles, setArticles] = useState<Article[]>([]);
+  // Seed editorial existente do portal. A API substitui estes registros quando houver dados persistidos.
+  const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
   const [factChecks, setFactChecks] = useState<FactCheckItem[]>(INITIAL_FACT_CHECKS);
   const [sources, setSources] = useState<RssSource[]>(INITIAL_RSS_SOURCES);
   const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>(INITIAL_EDITORIAL_QUEUE);
@@ -131,7 +133,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
     void Promise.all([
       load<SubscriptionPlan[]>('/plans', setSubscriptionPlans),
       load<Article[]>('/articles', (apiArticles) => {
-        setArticles(Array.isArray(apiArticles) ? apiArticles : []);
+        // Dados já publicados permanecem visíveis se a API responder vazia durante a inicialização.
+        // Quando houver registros persistidos, eles passam a ser a fonte principal.
+        if (Array.isArray(apiArticles) && apiArticles.length > 0) setArticles(apiArticles);
       }, Boolean(currentUser?.id)),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
       load<RssSource[]>('/editorial/sources', setSources, true),
