@@ -31,7 +31,14 @@ import {
   Globe,
   Compass,
   Menu,
-  Search
+  Search,
+  ChevronDown,
+  LayoutDashboard,
+  WalletCards,
+  Users,
+  BarChart3,
+  Settings,
+  CheckCircle2
 } from 'lucide-react';
 import { NewsroomOverviewTab } from './NewsroomOverviewTab';
 import { NewsroomArticlesTab } from './NewsroomArticlesTab';
@@ -74,6 +81,7 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
 }) => {
   // Navigation tabs in newsroom
   const [activeTab, setActiveTab] = useState<'painel' | 'materias' | 'editor' | 'fontes' | 'midia' | 'paginas' | 'categorias' | 'menus'>('painel');
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({ Inicio: true, Conteúdo: true, 'Jornal Digital': false, Editorial: false, Multimídia: false, Financeiro: false, Usuários: false, Relatórios: false, Configurações: false });
 
   // Article filters
   const [statusFilter, setStatusFilter] = useState<string>('TODAS');
@@ -529,46 +537,45 @@ export const NewsroomDashboard: React.FC<NewsroomDashboardProps> = ({
   });
 
   const navigation = [
-    { id: 'painel', label: 'Painel', icon: SlidersHorizontal },
+    { id: 'painel', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'materias', label: 'Matérias', icon: FileText },
     { id: 'editor', label: 'Nova Matéria', icon: Plus },
     { id: 'fontes', label: 'Fontes e Contatos', icon: BookOpen },
-    { id: 'midia', label: 'Mídia (Imagens/Vídeos)', icon: ImageIcon },
+    { id: 'midia', label: 'Mídia e Arquivos', icon: ImageIcon },
     { id: 'paginas', label: 'Páginas', icon: Globe },
     { id: 'categorias', label: 'Editorias', icon: Compass },
     { id: 'menus', label: 'Menus', icon: Menu },
+  ];
+  const navigationGroups = [
+    { label: 'Início', icon: LayoutDashboard, items: navigation.slice(0, 1) },
+    { label: 'Conteúdo', icon: FileText, items: navigation.slice(1, 7) },
+    { label: 'Jornal Digital', icon: BookOpen, items: [{ id: 'paginas', label: 'Edições e Páginas', icon: Globe }] },
+    { label: 'Editorial', icon: CheckCircle2, items: [{ id: 'materias', label: 'Fluxo Editorial', icon: CheckCircle2 }] },
+    { label: 'Multimídia', icon: ImageIcon, items: [{ id: 'midia', label: 'Vídeos e Podcasts', icon: ImageIcon }] },
+    { label: 'Financeiro', icon: WalletCards, items: [{ id: 'painel', label: 'Assinaturas e Pagamentos', icon: WalletCards }] },
+    { label: 'Usuários', icon: Users, items: [{ id: 'painel', label: 'Equipe e Permissões', icon: Users }] },
+    { label: 'Relatórios', icon: BarChart3, items: [{ id: 'painel', label: 'Desempenho Editorial', icon: BarChart3 }] },
+    { label: 'Configurações', icon: Settings, items: [{ id: 'menus', label: 'Configurações Gerais', icon: Settings }] },
   ];
 
   return (
     <div className="min-h-screen bg-[#eef5fb] text-[#17202A] select-none">
       <div className="flex min-h-screen">
-        <aside className="fixed inset-y-0 left-0 z-40 hidden w-56 shrink-0 flex-col bg-white border-r border-[#c7d9ea] lg:flex">
-          <div className="h-[74px] bg-[#e8f3fc] border-b border-[#c7d9ea] px-4 flex items-center gap-2 text-[#153d61]">
-            <div className="size-9 rounded-md bg-[#0875bd] flex items-center justify-center text-white font-black shadow-sm">OP</div>
-            <div><div className="text-[13px] font-black leading-tight">O PATRIOTA BRASIL</div><div className="text-[9px] text-[#55718a]">Sistema da Redação</div></div>
-          </div>
-          <nav className="flex-1 overflow-y-auto p-3" aria-label="Navegação da redação">
-            <p className="px-3 py-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Redação</p>
-            <div className="flex flex-col gap-1">
-              {navigation.map((item) => {
-                const Icon = item.icon;
-                const active = activeTab === item.id;
-                return <button key={item.id} disabled={item.id === 'editor' && !canManageContent} onClick={() => { setActiveTab(item.id as any); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex items-center gap-3 rounded-md px-3 py-2.5 text-left text-[12px] font-semibold transition ${active ? 'bg-[#e2f0ff] text-[#0564aa] border-l-2 border-[#0875bd]' : 'text-[#52677a] hover:bg-[#f3f8fc]'} ${item.id === 'editor' && !canManageContent ? 'cursor-not-allowed opacity-50' : ''}`}><Icon className="size-4" />{item.label}</button>;
-              })}
-            </div>
-            <p className="px-3 pt-6 pb-3 text-[10px] font-black uppercase tracking-widest text-[#8297aa]">Administração</p>
-            <button onClick={() => setActiveTab('painel')} className="flex items-center gap-3 rounded-md px-3 py-2 hover:bg-[#f3f8fc] text-left text-[12px] font-semibold text-[#52677a]"><SlidersHorizontal className="size-4 text-[#7b9bb5]" />Configurações</button>
+        <aside className="fixed inset-y-0 left-0 z-40 hidden w-[286px] shrink-0 flex-col bg-gradient-to-b from-[#062F51] to-[#031A2E] text-white shadow-2xl lg:flex">
+          <div className="border-b border-white/15 px-4 py-4"><div className="flex items-center gap-3"><div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#0875bd] text-xl font-black shadow-sm">OP</div><div><div className="font-serif text-[18px] font-black leading-tight">O PATRIOTA</div><div className="text-[9px] uppercase tracking-widest text-white/60">Painel da redação</div></div></div></div>
+          <nav className="flex-1 overflow-y-auto p-2" aria-label="Navegação da redação">
+            <div className="space-y-1">{navigationGroups.map((group) => { const GroupIcon = group.icon; const open = expandedGroups[group.label]; return <div key={group.label} className="rounded-xl border border-white/15 bg-white/[.03]"><button type="button" onClick={() => setExpandedGroups((current) => ({ ...current, [group.label]: !current[group.label] }))} className="flex w-full items-center gap-3 px-3 py-3 text-left font-bold"><span className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0875bd] text-white"><GroupIcon className="size-4" /></span><span className="flex-1 text-[13px]">{group.label}</span><ChevronDown className={`size-4 transition-transform ${open ? 'rotate-180' : ''}`} /></button>{open && <div className="space-y-0.5 px-2 pb-2">{group.items.map((item) => { const Icon = item.icon; const active = activeTab === item.id; return <button key={`${group.label}-${item.id}-${item.label}`} disabled={item.id === 'editor' && !canManageContent} onClick={() => { setActiveTab(item.id as any); setEditingArticle(null); if (item.id === 'editor') handleOpenCreate(); }} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-[11px] font-semibold transition ${active ? 'bg-[#0875bd] text-white' : 'text-white/75 hover:bg-white/10 hover:text-white'} ${item.id === 'editor' && !canManageContent ? 'cursor-not-allowed opacity-50' : ''}`}><Icon className="size-4" />{item.label}</button>; })}</div>}</div>; })}</div>
           </nav>
-          <div className="border-t border-[#e1ebf3] p-3 text-[11px] text-[#52677a]">{currentUser.name}<div className="text-[10px] text-[#8ba0b2]">{currentUser.role.replace('_', ' ')}</div></div>
+          <div className="border-t border-white/15 p-3 text-[11px] text-white/75">{currentUser.name}<div className="text-[10px] text-white/50">{currentUser.role.replace('_', ' ')}</div></div>
         </aside>
-        <main className="min-w-0 flex-1 lg:ml-56">
-          <header className="fixed inset-x-0 top-0 z-30 h-[74px] border-b border-[#c7d9ea] bg-white/95 px-4 backdrop-blur md:px-7 lg:left-56 flex items-center justify-between gap-4">
+        <main className="min-w-0 flex-1 lg:ml-[286px]">
+          <header className="fixed inset-x-0 top-0 z-30 h-[74px] border-b border-[#c7d9ea] bg-white/95 px-4 backdrop-blur md:px-7 lg:left-[286px] flex items-center justify-between gap-4">
             <div><p className="text-[11px] font-bold text-[#8195a8]">O PATRIOTA / REDAÇÃO</p><h1 className="text-lg font-black text-[#153d61]">{activeTab === 'painel' ? 'Painel Principal' : navigation.find((item) => item.id === activeTab)?.label || 'Redação'}</h1></div>
             <div className="flex items-center gap-3"><label className="hidden md:flex h-9 w-72 rounded-md bg-[#f1f6fa] border border-[#d7e5ef] items-center gap-2 px-3 text-xs text-[#8aa0b2]"><Search className="size-4 shrink-0 text-[#0875bd]" aria-hidden="true" /><input aria-label="Buscar na redação" placeholder="Buscar matérias, pautas, autores..." className="min-w-0 flex-1 bg-transparent outline-none placeholder:text-[#8aa0b2]" /></label><button onClick={handleOpenCreate} disabled={!canManageContent} className="flex items-center gap-1.5 rounded-md bg-[#0875bd] px-3 py-2 text-xs font-bold text-white hover:bg-[#0564aa] disabled:cursor-not-allowed disabled:opacity-50"><Plus className="size-4" /> Nova matéria</button><div className="hidden sm:block text-right"><div className="text-xs font-bold text-[#153d61]">{currentUser.name}</div><div className="text-[10px] text-[#7b91a4]">{currentUser.role.replace('_', ' ')}</div></div><div className="size-9 rounded-full bg-[#d9eafa] text-[#0875bd] flex items-center justify-center text-xs font-black">{currentUser.name.slice(0, 2).toUpperCase()}</div></div>
           </header>
           {!canManageContent && <div className="mt-[74px] border-b border-[#f0c36d] bg-[#fff7e6] px-6 py-2 text-xs font-semibold text-[#8a5a00]">Modo técnico: consulta e manutenção da redação. Conteúdo, aprovação e publicação são administrados no painel administrativo.</div>}
           {feedbackMsg && <div className={`${canManageContent ? 'mt-[74px]' : ''} px-6 py-2.5 text-xs font-semibold flex items-center gap-2 ${feedbackMsg.type === 'error' ? 'bg-[#FEF3F2] text-[#B42318] border-b border-[#B42318]/30' : 'bg-[#EBF7EE] text-[#16803C] border-b border-[#16803C]/30'}`}><AlertTriangle className="size-4" /><span>{feedbackMsg.text}</span></div>}
-          <div className={`mx-auto max-w-[1440px] px-4 pb-5 md:px-7 ${canManageContent ? 'pt-[94px]' : 'pt-[86px]'}`}>
+          <div className={`w-full px-4 pb-5 md:px-7 ${canManageContent ? 'pt-[94px]' : 'pt-[86px]'}`}>
 
         {/* TAB 1: PAINEL GERAL & MÉTRICAS */}
         {activeTab === 'painel' && (
