@@ -134,10 +134,11 @@ export async function provisionEditorialAdmin(password: string) {
 
 export function sessionCookie(token: string) {
   const isProduction = process.env.NODE_ENV === 'production';
-  const domain = isProduction ? '; Domain=.opatriota.sbs' : '';
+  // Cookie host-only: o preview da Vercel e o domínio de produção são hosts diferentes.
+  // Fixar `.opatriota.sbs` faria o navegador rejeitar a sessão no preview.
   const sameSite = isProduction ? 'None' : 'Lax';
   const secure = isProduction ? '; Secure' : '';
-  return `opatriota_editorial_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=${sameSite}${domain}${secure}; Max-Age=43200`;
+  return `opatriota_editorial_session=${encodeURIComponent(token)}; Path=/; HttpOnly; SameSite=${sameSite}${secure}; Max-Age=43200`;
 }
 
 export function readSessionCookie(cookieHeader: string | undefined) {

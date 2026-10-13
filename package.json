@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "test": "pnpm test:header",
     "test:header": "node --import tsx scripts/test-header-contract.ts",
+    "test:qa:navigation": "node --import tsx scripts/qa-navigation.ts",
     "noteagents:server": "node --env-file-if-exists=docs/noteagents/.env.local --import tsx docs/noteagents/server/http-server.ts",
     "noteagents:web": "vite --config docs/noteagents/vite.config.ts",
     "noteagents:mcp": "node --import tsx docs/noteagents/mcp/server.ts",
@@ -55,7 +56,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "concurrently": "^10.0.6",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.0",
     "tailwindcss": "^4.3.3",
     "tsx": "^4.21.0",
     "typescript": "^7.0.2"

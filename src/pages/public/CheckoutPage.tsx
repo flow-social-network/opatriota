@@ -18,7 +18,7 @@ export default function CheckoutPage() {
       selectedPlanId={planId}
       currentUser={currentUser}
       onBack={() => navigate('/planos')}
-      onOpenAccount={(sub) => navigate(sub === 'entrar' ? '/minha-conta?tab=entrar' : '/minha-conta')}
+      onOpenAccount={(sub) => navigate(sub === 'entrar' ? '/leitor?tab=entrar' : '/leitor')}
     />
   );
 }

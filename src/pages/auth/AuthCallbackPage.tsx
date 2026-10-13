@@ -15,7 +15,7 @@ export default function AuthCallbackPage() {
         } else if (['jornalista', 'revisor', 'editor', 'editor_chefe'].includes(currentUser.role)) {
           navigate('/redacao');
         } else {
-          navigate('/minha-conta');
+          navigate('/leitor');
         }
       } else {
         navigate('/login');

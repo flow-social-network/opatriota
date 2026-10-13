@@ -12,6 +12,7 @@ import { AdminDedupTab } from './admin/AdminDedupTab';
 import { AdminExportTab } from './admin/AdminExportTab';
 import { UsersPage } from '../pages/admin/UsersPage';
 import { PermissionsPage } from '../pages/admin/PermissionsPage';
+import { IntegrationsManager } from './admin/IntegrationsManager';
 import { DEFAULT_WEBPUSH_CONFIG } from '../services/siteConfigService';
 import JSZip from 'jszip';
 import { 
@@ -28,7 +29,19 @@ import {
   Megaphone,
   Bell,
   Users,
-  Shield
+  Shield,
+  ChevronUp,
+  Home,
+  FilePenLine,
+  BookOpen,
+  FileText,
+  PlaySquare,
+  WalletCards,
+  BarChart3,
+  Settings,
+  LifeBuoy,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -41,6 +54,8 @@ interface AdminDashboardProps {
   portalSettings: PortalSettings;
   onSavePortalSettings: (newSettings: PortalSettings) => void;
   initialTab?: string;
+  currentSection?: string;
+  onNavigate?: (section: string) => void;
 }
 
 export const AdminDashboard: React.FC<AdminDashboardProps> = ({
@@ -52,9 +67,11 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onSyncResult,
   portalSettings,
   onSavePortalSettings,
-  initialTab = 'painel'
+  initialTab = 'painel',
+  currentSection,
+  onNavigate
 }) => {
-  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes'>(
+  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes' | 'integracoes'>(
     (initialTab as any) || 'painel'
   );
   const [isSyncing, setIsSyncing] = useState(false);
@@ -259,10 +276,25 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     ? queueItems
     : queueItems.filter(i => i.editorialStatus === queueFilter);
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sectionMatches = (target: string) => (currentSection || 'painel') === target || (target === 'painel' && initialTab === 'painel');
+  const menuGroups = [
+    { label: 'Início', icon: Home, color: 'bg-[#087CF0]', items: [{ label: 'Dashboard', section: 'painel', icon: SlidersHorizontal }] },
+    { label: 'Usuários e Permissões', icon: Users, color: 'bg-[#F4A900]', items: [{ label: 'Usuários', section: 'usuarios', icon: Users }, { label: 'Papéis e Permissões', section: 'usuarios', icon: Shield }, { label: 'Convites e Acessos', section: 'usuarios', icon: Users }] },
+    { label: 'Gestão Editorial', icon: FilePenLine, color: 'bg-[#5935D8]', items: [{ label: 'Conteúdo', section: 'conteudo', icon: FileText }, { label: 'Editorias', section: 'conteudo', icon: Layers }, { label: 'Comentários', section: 'conteudo', icon: FileText }, { label: 'Mídia e Arquivos', section: 'multimidia', icon: FileText }] },
+    { label: 'Jornal Digital', icon: BookOpen, color: 'bg-[#087CF0]', items: [{ label: 'Edições', section: 'jornal-digital', icon: BookOpen }, { label: 'Páginas e Modelos', section: 'jornal-digital', icon: FileText }, { label: 'Publicação e Agenda', section: 'jornal-digital', icon: CheckCircle2 }] },
+    { label: 'Financeiro', icon: WalletCards, color: 'bg-[#11B981]', items: [{ label: 'Assinaturas', section: 'financeiro', icon: WalletCards }, { label: 'Pagamentos', section: 'financeiro', icon: WalletCards }, { label: 'Doações', section: 'financeiro', icon: WalletCards }, { label: 'Reembolsos e Estornos', section: 'financeiro', icon: RefreshCw }] },
+    { label: 'Relatórios e Métricas', icon: BarChart3, color: 'bg-[#0BB7C7]', items: [{ label: 'Desempenho Editorial', section: 'relatorios', icon: BarChart3 }, { label: 'Audiência', section: 'relatorios', icon: Users }, { label: 'Exportar Dados', section: 'relatorios', icon: Download }] },
+    { label: 'Integrações', icon: SlidersHorizontal, color: 'bg-[#0D8B8B]', items: [{ label: 'Provedores e Serviços', section: 'integracoes', icon: SlidersHorizontal }, { label: 'E-mail e Analytics', section: 'integracoes', icon: Bell }] },
+    { label: 'Configurações', icon: Settings, color: 'bg-slate-400', items: [{ label: 'Geral', section: 'configuracoes', icon: Settings }, { label: 'Site e Publicação', section: 'configuracoes', icon: Settings }, { label: 'Preferências', section: 'configuracoes', icon: SlidersHorizontal }] },
+    { label: 'Segurança e Auditoria', icon: Shield, color: 'bg-[#40516B]', items: [{ label: 'Segurança', section: 'seguranca', icon: Shield }, { label: 'Logs e Auditoria', section: 'seguranca', icon: FileText }] },
+    { label: 'Sistema e Suporte', icon: LifeBuoy, color: 'bg-[#64748B]', items: [{ label: 'Ajuda e Suporte', section: 'suporte', icon: LifeBuoy }, { label: 'Sobre o Sistema', section: 'suporte', icon: FileText }] },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#F1F3F5] text-[#17202A] select-none pb-16">
+    <div className="min-h-screen bg-[#F5F7FB] text-[#17202A] select-none pb-16">
       {/* Top Admin Bar */}
-      <div className="bg-[#07172E] text-white px-6 py-3 border-b border-[#0B2345] flex items-center justify-between">
+      <div className="fixed inset-x-0 top-0 z-50 min-h-[74px] bg-[#07172E]/95 backdrop-blur-xl text-white px-4 sm:px-6 py-3.5 border-b border-white/10 shadow-lg flex items-center justify-between">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
@@ -302,13 +334,34 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* Main Admin Container */}
-      <div className="max-w-[1360px] mx-auto px-4 py-8">
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8 border-b border-[#D9DEE7] pb-2">
+      <div className="w-full px-4 pb-6 pt-[98px] lg:px-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className={`order-2 rounded-2xl border border-[#1D5278] bg-gradient-to-b from-[#062E50] to-[#031B32] p-2 text-white shadow-xl xl:order-1 xl:fixed xl:bottom-0 xl:left-0 xl:top-[74px] xl:z-40 xl:overflow-y-auto xl:rounded-none xl:border-l-0 xl:border-b-0 xl:border-t-0 ${sidebarCollapsed ? 'xl:w-[82px]' : 'xl:w-[300px]'}`}>
+          <div className={`mb-3 flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} gap-3 px-3 py-3`}><div className="flex items-center gap-3"><img src="/patriota-logo.png" alt="Logotipo O Patriota" className="h-11 w-11 rounded-full border border-[#FFCC29] bg-white object-cover shadow-sm" />{!sidebarCollapsed && <div><p className="font-serif text-xl font-black">O PATRIOTA</p><p className="text-[8px] uppercase tracking-widest text-white/70">Painel administrativo</p></div>}</div><button type="button" aria-label={sidebarCollapsed ? 'Expandir menu' : 'Minimizar menu'} onClick={() => setSidebarCollapsed((value) => !value)} className="rounded-lg p-2 hover:bg-white/10">{sidebarCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}</button></div>
+          <div className="space-y-1">{menuGroups.map((group) => { const Icon = group.icon; return <details key={group.label} open={!sidebarCollapsed && group.label === 'Início'} className="group rounded-xl border border-white/15 bg-white/[.03] open:bg-white/[.06]"><summary className={`flex cursor-pointer list-none items-center gap-3 px-3 py-3 font-bold [&::-webkit-details-marker]:hidden ${sidebarCollapsed ? 'justify-center' : ''}`} title={sidebarCollapsed ? group.label : undefined}><span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${group.color}`}><Icon className="h-5 w-5" /></span>{!sidebarCollapsed && <><span className="flex-1 text-sm">{group.label}</span><ChevronUp className="h-4 w-4 transition-transform group-open:rotate-180" /></>}</summary>{!sidebarCollapsed && <div className="space-y-0.5 px-2 pb-2">{group.items.map((item) => { const ItemIcon = item.icon; const active = sectionMatches(item.section); return <button key={`${group.label}-${item.label}`} aria-current={active ? 'page' : undefined} onClick={() => onNavigate ? onNavigate(item.section) : undefined} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm cursor-pointer ${active ? 'bg-[#087CF0] text-white' : 'text-white/85 hover:bg-[#087CF0]/40 hover:text-white'}`}><ItemIcon className="h-4 w-4 shrink-0" /><span className="flex-1">{item.label}</span></button>; })}</div>}</details>; })}</div>
+        </aside>
+        <section className="order-1 min-w-0 xl:order-2 xl:col-start-2">
+        <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#16803C]">Centro de comando</p>
+            <h1 className="text-3xl font-black tracking-tight text-[#07172E] sm:text-4xl">Painel administrativo</h1>
+            <p className="mt-2 max-w-2xl text-sm text-[#64748B]">Administre usuários, permissões, integrações, segurança, finanças e a saúde geral da plataforma.</p>
+          </div>
+          <div className="flex items-center gap-2 rounded-2xl border border-[#DCE3ED] bg-white px-4 py-3 shadow-sm">
+            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#E8F7ED] text-[#16803C]"><CheckCircle2 className="h-5 w-5" /></span>
+            <div><p className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Status do sistema</p><p className="text-sm font-bold text-[#16803C]">Operação normal</p></div>
+          </div>
+        </div>
+
+        {/* Navegação administrativa complementar — o fluxo editorial pertence exclusivamente ao painel da redação. */}
+        <div className="mb-8 flex gap-2 overflow-x-auto rounded-2xl border border-[#DCE3ED] bg-white p-2 shadow-sm [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {['usuarios', 'jornal-digital', 'financeiro', 'relatorios', 'integracoes', 'configuracoes', 'seguranca', 'suporte'].map((section) => <button key={section} onClick={() => onNavigate?.(section)} className="whitespace-nowrap rounded-xl px-3 py-2 text-xs font-bold text-[#52677A] hover:bg-[#EAF3FF] hover:text-[#0B5FFF]">{section.replace('-', ' ')}</button>)}
+        </div>
+        <div className="hidden">
           <button
             onClick={() => setActiveTab('painel')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'painel' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'painel' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <SlidersHorizontal className="w-4 h-4" />
@@ -318,7 +371,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('fila')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'fila' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'fila' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <GitPullRequest className="w-4 h-4" />
@@ -328,7 +381,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('fontes')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'fontes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'fontes' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Rss className="w-4 h-4" />
@@ -338,7 +391,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('dedup')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'dedup' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'dedup' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Layers className="w-4 h-4" />
@@ -348,7 +401,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('identidade')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'identidade' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'identidade' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Palette className="w-4 h-4 text-[#0B5FFF]" />
@@ -358,7 +411,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('redes')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'redes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'redes' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Share2 className="w-4 h-4 text-[#16803C]" />
@@ -368,7 +421,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('publicidade')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'publicidade' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'publicidade' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Megaphone className="w-4 h-4 text-[#FFCC29]" />
@@ -378,7 +431,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('push')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'push' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'push' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Bell className="w-4 h-4 text-[#0B5FFF]" />
@@ -388,7 +441,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('usuarios')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'usuarios' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'usuarios' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Users className="w-4 h-4 text-[#0B5FFF]" />
@@ -398,11 +451,21 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <button
             onClick={() => setActiveTab('permissoes')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
-              activeTab === 'permissoes' ? 'bg-white text-[#0B2345] border-t-2 border-[#0B2345] shadow-xs' : 'text-[#5D6673] hover:bg-white/50'
+              activeTab === 'permissoes' ? 'bg-white text-[#0B2345] shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
             }`}
           >
             <Shield className="w-4 h-4 text-[#FFCC29]" />
             <span>Permissões (RBAC)</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('integracoes')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'integracoes' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
+            }`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Integrações</span>
           </button>
 
           <button
@@ -416,7 +479,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
         </div>
 
-        {/* TAB 1: PAINEL GERAL */}
+        {/* TAB 1: VISÃO ADMINISTRATIVA */}
         {activeTab === 'painel' && (
           <AdminOverviewTab
             sources={sources}
@@ -483,6 +546,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           />
         )}
 
+        {activeTab === 'integracoes' && <IntegrationsManager />}
+
         {/* TAB 7: CENTRAL DE PUBLICIDADE & ADSENSE */}
         {activeTab === 'publicidade' && (
           <AdsManager
@@ -539,6 +604,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         )}
 
+        </section>
+        </div>
       </div>
     </div>
   );

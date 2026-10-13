@@ -90,6 +90,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const currentUser = auth?.currentUser ?? null;
   const { showToast } = useToast();
 
+  // Seed editorial existente do portal. A API substitui estes registros quando houver dados persistidos.
   const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
   const [factChecks, setFactChecks] = useState<FactCheckItem[]>(INITIAL_FACT_CHECKS);
   const [sources, setSources] = useState<RssSource[]>(INITIAL_RSS_SOURCES);
@@ -132,23 +133,25 @@ export function DataProvider({ children }: { children: ReactNode }) {
     void Promise.all([
       load<SubscriptionPlan[]>('/plans', setSubscriptionPlans),
       load<Article[]>('/articles', (apiArticles) => {
-        setArticles(() => {
-          if (!apiArticles || !apiArticles.length) return INITIAL_ARTICLES;
-          const apiMap = new Map(apiArticles.map(a => [a.id, a]));
-          const merged = INITIAL_ARTICLES.map(initial => apiMap.get(initial.id) || initial);
-          for (const apiArt of apiArticles) {
-            if (!INITIAL_ARTICLES.some(init => init.id === apiArt.id)) {
-              merged.push(apiArt);
-            }
-          }
-          return merged;
-        });
-      }),
+        // Dados já publicados permanecem visíveis se a API responder vazia durante a inicialização.
+        // Quando houver registros persistidos, eles passam a ser a fonte principal.
+        if (Array.isArray(apiArticles) && apiArticles.length > 0) setArticles(apiArticles);
+      }, Boolean(currentUser?.id)),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
       load<RssSource[]>('/editorial/sources', setSources, true),
       load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),
       load<InstitutionalPage[]>('/pages', setPages),
-      load<CategoryDetail[]>('/categories', setCategories),
+      load<CategoryDetail[]>('/categories', (apiCategories) => {
+        if (!apiCategories?.length) return;
+        setCategories(() => {
+          const apiBySlug = new Map(apiCategories.map((category) => [category.slug, category]));
+          const merged = INITIAL_CATEGORIES.map((category) => apiBySlug.get(category.slug) || category);
+          for (const category of apiCategories) {
+            if (!INITIAL_CATEGORIES.some((initial) => initial.slug === category.slug)) merged.push(category);
+          }
+          return merged;
+        });
+      }),
       load<AuthorDetail[]>('/authors', setAuthors),
       load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),
     ]).finally(() => { if (active) setDataLoading(false); });

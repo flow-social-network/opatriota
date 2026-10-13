@@ -673,11 +673,10 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
                 <form onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }} className="flex w-[180px] xl:w-[205px] flex-none min-w-0 bg-white border border-[#CBD5E1] rounded overflow-hidden h-5 shadow-xs focus-within:border-[#0B2345] transition-colors">
                   <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="min-w-0 w-full px-1.5 py-0.5 text-[10px] text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
-                  <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-1.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-3 h-3 text-white" /></button>
+                  <button type="submit" aria-label="Buscar" title="Buscar" className="min-w-7 bg-[#0B1E36] hover:bg-[#0284C7] text-white px-1.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-3.5 h-3.5 text-white" strokeWidth={2.5} /></button>
                 </form>
                 <div className="flex shrink-0 items-center gap-1.5 text-[10px] text-[#0B2345]">
-                  {currentUser ? <button type="button" onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-1 font-bold whitespace-nowrap"><img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="size-5 rounded-full object-cover" /><span className="max-w-[88px] truncate">{currentUser.name}</span><span>⌄</span></button> : <button type="button" onClick={() => { window.location.assign('/login'); }} className="font-bold whitespace-nowrap">Entrar</button>}
-                  <span className="bg-[#16A34A] text-white font-black text-[8px] px-1 py-0.5 rounded">DIGITAL</span>
+                  {currentUser ? <button type="button" onClick={() => setUserDropdownOpen(!userDropdownOpen)} className="flex items-center gap-1 font-bold whitespace-nowrap"><img src={currentUser.avatarUrl || displayAvatar} alt={currentUser.name} className="size-5 rounded-full object-cover" /><span className="max-w-[88px] truncate">{currentUser.name}</span><span>⌄</span></button> : <button type="button" onClick={() => { window.location.assign('/login'); }} className="inline-flex min-h-7 items-center rounded border border-[#0B5FFF] bg-white px-2.5 font-bold whitespace-nowrap text-[#0B2345] hover:bg-[#0B5FFF] hover:text-white transition-colors cursor-pointer">Entrar</button>}
                   <button type="button" onClick={() => onNavigatePage?.('anuncie-conosco')} className="border border-[#0B5FFF] text-[#0B5FFF] rounded px-1.5 py-0.5 text-[9px] font-black whitespace-nowrap">Anuncie</button>
                 </div>
               </div>
@@ -987,8 +986,8 @@ export const Header: React.FC<HeaderProps> = ({
                               <button
                                 key={sub.slug}
                                 onClick={() => {
-                                  setActiveDropdownSlug(null);
-                                  onSelectCategory(sub.slug as CategorySlug);
+    setActiveDropdownSlug(null);
+    onNavigatePage?.(sub.slug === item.slug ? `/categoria/${item.slug}` : `/categoria/${item.slug}/${sub.slug}`);
                                 }}
                                 className="w-full text-left px-3.5 py-2 text-xs font-semibold text-[#1E293B] hover:text-[#0B5FFF] hover:bg-[#F1F5F9] transition flex items-center justify-between group cursor-pointer"
                                 role="menuitem"

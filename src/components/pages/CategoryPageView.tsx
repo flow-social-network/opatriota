@@ -19,6 +19,7 @@ import {
 
 interface CategoryPageViewProps {
   category: CategoryDetail;
+  subcategory?: string;
   articles: Article[];
   allCategories: CategoryDetail[];
   onSelectArticle: (article: Article) => void;
@@ -31,6 +32,7 @@ const ITEMS_PER_PAGE = 6;
 
 export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
   category,
+  subcategory,
   articles,
   allCategories,
   onSelectArticle,
@@ -43,8 +45,15 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   // Filter published articles for this category or matching subcategory/tags
-  const categoryArticles = articles.filter((a) => {
+  const normalizedSubcategory = subcategory?.toLowerCase().replace(/-/g, ' ').trim();
+  const categoryArticles = articles
+    .filter((a) => {
     if (a.editorialStatus && a.editorialStatus !== 'PUBLICADA') return false;
+    if (normalizedSubcategory) {
+      const articleSubcategory = (a.subcategory || '').toLowerCase().replace(/-/g, ' ').trim();
+      const articleTags = (a.tags || []).map((tag) => tag.toLowerCase().replace(/-/g, ' ').trim());
+      if (articleSubcategory !== normalizedSubcategory && !articleTags.includes(normalizedSubcategory)) return false;
+    }
     if (a.category === category.slug) return true;
 
     const slugNorm = category.slug.toLowerCase().replace(/-/g, ' ');
@@ -68,7 +77,12 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
     if (['relacoes-internacionais', 'america-latina', 'conflitos-internacionais', 'diplomacia'].includes(category.slug) && a.category === 'mundo') return true;
 
     return false;
-  });
+    })
+    .sort((a, b) => {
+      const aTime = Date.parse(a.originalPublishedAt || a.publishedAt);
+      const bTime = Date.parse(b.originalPublishedAt || b.publishedAt);
+      return (Number.isNaN(bTime) ? 0 : bTime) - (Number.isNaN(aTime) ? 0 : aTime);
+    });
 
   // Uma editoria vazia deve permanecer honesta: nunca misture matérias de outras editorias.
   const effectiveArticles = categoryArticles;
@@ -131,7 +145,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
             EDITORIA OFICIAL
           </div>
           <h1 className="font-serif text-3xl md:text-5xl font-black text-white tracking-tight mb-3">
-            {category.name}
+            {subcategory ? `${subcategory} — ${category.name}` : category.name}
           </h1>
           <p className="text-sm md:text-base text-white/90 max-w-3xl leading-relaxed">
             {category.description}
@@ -156,7 +170,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
               Nenhuma matéria publicada nesta editoria no momento
             </h2>
             <p className="text-sm text-[#5D6673] mb-6 leading-relaxed">
-              Nossa redação está em processo de apuração para novas reportagens na seção de <strong>{category.name}</strong>. Enquanto isso, consulte as últimas notícias de outras áreas ou faça uma pesquisa.
+              Não encontramos novas matérias nesta editoria nas últimas 48 horas. Consulte o arquivo histórico ou volte mais tarde para acompanhar novas publicações em <strong>{subcategory ? `${subcategory} — ` : ''}{category.name}</strong>.
             </p>
             <form 
               onSubmit={(e) => {
@@ -262,7 +276,7 @@ export const CategoryPageView: React.FC<CategoryPageViewProps> = ({
                 <section>
                   <div className="flex items-center justify-between border-b-2 border-[#0B2345] pb-2 mb-6">
                     <h3 className="font-serif font-bold text-lg text-[#0B2345] uppercase tracking-wider">
-                      Mais Notícias de {category.name}
+                      Mais Notícias de {subcategory ? `${subcategory} — ` : ''}{category.name}
                     </h3>
                     <span className="text-xs text-[#717E8E]">
                       Página {currentPage} de {totalPages}

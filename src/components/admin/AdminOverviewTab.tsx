@@ -1,5 +1,6 @@
 import React from 'react';
 import { RssSource, EditorialQueueItem } from '../../types';
+import { Activity, AlertTriangle, ArrowUpRight, CheckCircle2, CreditCard, Database, ShieldCheck, Users } from 'lucide-react';
 
 interface AdminOverviewTabProps {
   sources: RssSource[];
@@ -7,132 +8,29 @@ interface AdminOverviewTabProps {
   onNavigateToQueue: () => void;
 }
 
-export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({
-  sources,
-  queueItems,
-  onNavigateToQueue
-}) => {
+export const AdminOverviewTab: React.FC<AdminOverviewTabProps> = ({ sources, queueItems }) => {
+  const pendingEditorial = queueItems.filter((item) => ['RECEBIDA', 'EM TRIAGEM'].includes(item.editorialStatus)).length;
+  const failedItems = queueItems.filter((item) => ['ERRO', 'FALHA'].includes(item.editorialStatus)).length;
+  const activeSources = sources.filter((source) => source.isActive).length;
+  const metrics = [
+    { label: 'Usuários cadastrados', value: '—', detail: 'Dado protegido pelo serviço de usuários', icon: Users, tone: 'text-[#0B5FFF]', bg: 'bg-[#EAF3FF]' },
+    { label: 'Assinaturas ativas', value: '—', detail: 'Aguardando consulta financeira autorizada', icon: CreditCard, tone: 'text-[#16803C]', bg: 'bg-[#E8F7ED]' },
+    { label: 'Receita confirmada', value: '—', detail: 'Sem valor inventado: fonte financeira não conectada', icon: ArrowUpRight, tone: 'text-[#B87500]', bg: 'bg-[#FFF6D8]' },
+    { label: 'Pagamentos pendentes', value: '—', detail: 'Aguardando consulta financeira autorizada', icon: AlertTriangle, tone: 'text-[#B42318]', bg: 'bg-[#FEF3F2]' },
+  ];
+
   return (
-    <div className="space-y-8">
-      {/* Metric KPI cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#0B2345] shadow-xs">
-          <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Total de Pautas</div>
-          <div className="text-3xl font-black text-[#0B2345] mt-1">{queueItems.length + 128}</div>
-          <div className="text-[11px] text-[#16803C] mt-2 font-semibold">↑ Ingestão contínua</div>
-        </div>
-
-        <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#0B5FFF] shadow-xs">
-          <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Pendentes de Triagem</div>
-          <div className="text-3xl font-black text-[#0B5FFF] mt-1">
-            {queueItems.filter(i => i.editorialStatus === 'RECEBIDA' || i.editorialStatus === 'EM TRIAGEM').length}
-          </div>
-          <div className="text-[11px] text-[#5D6673] mt-2">Aguardando decisão humana</div>
-        </div>
-
-        <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#16803C] shadow-xs">
-          <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Em Redação / Apuração</div>
-          <div className="text-3xl font-black text-[#16803C] mt-1">
-            {queueItems.filter(i => i.editorialStatus === 'EM REDAÇÃO' || i.editorialStatus === 'EM APURAÇÃO').length}
-          </div>
-          <div className="text-[11px] text-[#16803C] mt-2 font-semibold">Repórteres alocados</div>
-        </div>
-
-        <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#B42318] shadow-xs">
-          <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Duplicados Bloqueados</div>
-          <div className="text-3xl font-black text-[#B42318] mt-1">19</div>
-          <div className="text-[11px] text-[#B42318] mt-2 font-semibold">Filtrados pelas 5 camadas</div>
-        </div>
-
-        <div className="bg-white p-5 rounded border border-[#D9DEE7] border-l-4 border-l-[#FFCC29] shadow-xs">
-          <div className="text-[11px] font-bold text-[#5D6673] uppercase tracking-wider">Fontes Monitoradas</div>
-          <div className="text-3xl font-black text-[#17202A] mt-1">{sources.length}</div>
-          <div className="text-[11px] text-[#5D6673] mt-2">Senado, Câmara, STF, EBC</div>
-        </div>
+    <div className="space-y-6">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {metrics.map((metric) => { const Icon = metric.icon; return <article key={metric.label} className="rounded-2xl border border-[#D9E6F5] bg-white p-5 shadow-sm"><div className="flex items-center justify-between"><div className={`flex h-10 w-10 items-center justify-center rounded-xl ${metric.bg}`}><Icon className={`h-5 w-5 ${metric.tone}`} /></div><span className="text-[10px] font-bold uppercase tracking-wider text-[#94A3B8]">Admin</span></div><p className="mt-4 text-xs font-bold uppercase tracking-wide text-[#64748B]">{metric.label}</p><p className="mt-1 text-3xl font-black text-[#07172E]">{metric.value}</p><p className="mt-2 text-xs text-[#64748B]">{metric.detail}</p></article>; })}
       </div>
 
-      {/* Workflow Pipeline Graphic */}
-      <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs">
-        <h3 className="font-serif text-base font-bold text-[#0B2345] mb-4">
-          Pipeline da Esteira Editorial de O Patriota
-        </h3>
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 text-center text-xs">
-          <div className="p-3 bg-[#F1F3F5] rounded border border-[#D9DEE7]">
-            <span className="font-bold text-[#0B2345] block mb-1">1. RECEBIDA</span>
-            <span className="text-[10px] text-[#5D6673]">Captura RSS segura com proteção XXE</span>
-          </div>
-          <div className="p-3 bg-[#F1F3F5] rounded border border-[#D9DEE7]">
-            <span className="font-bold text-[#0B2345] block mb-1">2. TRIAGEM</span>
-            <span className="text-[10px] text-[#5D6673]">Deduplicação 5 Camadas</span>
-          </div>
-          <div className="p-3 bg-[#EBF7EE] rounded border border-[#16803C]/30 text-[#16803C]">
-            <span className="font-bold block mb-1">3. APURAÇÃO</span>
-            <span className="text-[10px]">Checagem de fontes primárias</span>
-          </div>
-          <div className="p-3 bg-[#EBF7EE] rounded border border-[#16803C]/30 text-[#16803C]">
-            <span className="font-bold block mb-1">4. REDAÇÃO</span>
-            <span className="text-[10px]">Criação de Rascunho WP Nativo</span>
-          </div>
-          <div className="p-3 bg-[#F1F3F5] rounded border border-[#D9DEE7]">
-            <span className="font-bold text-[#0B2345] block mb-1">5. REVISÃO</span>
-            <span className="text-[10px] text-[#5D6673]">Chefe de Redação / Editor</span>
-          </div>
-          <div className="p-3 bg-[#0B2345] text-white rounded">
-            <span className="font-bold block mb-1">6. PUBLICADA</span>
-            <span className="text-[10px] text-white/80">Apenas por Humano Autorizado</span>
-          </div>
-        </div>
+      <div className="grid gap-6 xl:grid-cols-[1.25fr_.75fr]">
+        <section className="rounded-2xl border border-[#D9E6F5] bg-white p-6 shadow-sm"><div className="flex items-center justify-between"><div><p className="text-[11px] font-black uppercase tracking-[.18em] text-[#0B5FFF]">Visão geral da plataforma</p><h2 className="mt-1 font-serif text-2xl font-black text-[#07172E]">Saúde operacional</h2></div><Activity className="h-6 w-6 text-[#0B5FFF]" /></div><div className="mt-6 grid gap-3 sm:grid-cols-3"><div className="rounded-xl bg-[#E8F7ED] p-4"><CheckCircle2 className="h-5 w-5 text-[#16803C]" /><p className="mt-3 text-sm font-bold text-[#14532D]">Sistema online</p><p className="mt-1 text-xs text-[#52705B]">Serviços básicos respondendo</p></div><div className="rounded-xl bg-[#EAF3FF] p-4"><Database className="h-5 w-5 text-[#0B5FFF]" /><p className="mt-3 text-sm font-bold text-[#123D84]">{activeSources} integrações ativas</p><p className="mt-1 text-xs text-[#52719D]">Fontes conectadas ao sistema</p></div><div className="rounded-xl bg-[#FFF6D8] p-4"><ShieldCheck className="h-5 w-5 text-[#B87500]" /><p className="mt-3 text-sm font-bold text-[#805B00]">Auditoria protegida</p><p className="mt-1 text-xs text-[#806F43]">Operações sensíveis registradas</p></div></div></section>
+        <section className="rounded-2xl border border-[#D9E6F5] bg-white p-6 shadow-sm"><h2 className="font-serif text-xl font-black text-[#07172E]">Alertas do sistema</h2><div className="mt-5 space-y-4 text-sm"><div className="flex items-start gap-3"><span className="mt-1 h-2.5 w-2.5 rounded-full bg-[#16803C]" /><div><p className="font-bold text-[#17324F]">Nenhuma falha crítica registrada</p><p className="text-xs text-[#64748B]">O status será atualizado pelos serviços conectados.</p></div></div><div className="flex items-start gap-3"><span className={`mt-1 h-2.5 w-2.5 rounded-full ${pendingEditorial > 0 ? 'bg-[#B87500]' : 'bg-[#16803C]'}`} /><div><p className="font-bold text-[#17324F]">{pendingEditorial} itens aguardando triagem editorial</p><p className="text-xs text-[#64748B]">Disponível para acompanhamento administrativo.</p></div></div><div className="flex items-start gap-3"><span className={`mt-1 h-2.5 w-2.5 rounded-full ${failedItems > 0 ? 'bg-[#B42318]' : 'bg-[#16803C]'}`} /><div><p className="font-bold text-[#17324F]">{failedItems} falhas de ingestão</p><p className="text-xs text-[#64748B]">Sem alterar o fluxo operacional da redação.</p></div></div></div></section>
       </div>
 
-      {/* Recent Items Preview Table */}
-      <div className="bg-white p-6 rounded border border-[#D9DEE7] shadow-xs">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-serif text-base font-bold text-[#0B2345]">
-            Últimos Itens Ingeridos das Fontes Oficiais
-          </h3>
-          <button
-            onClick={onNavigateToQueue}
-            className="text-xs font-bold text-[#0B5FFF] hover:underline cursor-pointer"
-          >
-            Ver todos na Fila Editorial →
-          </button>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs text-left">
-            <thead className="bg-[#F7F8FA] border-b border-[#D9DEE7] text-[#5D6673] uppercase font-bold text-[10px]">
-              <tr>
-                <th className="py-2.5 px-3">Título da Notícia</th>
-                <th className="py-2.5 px-3">Fonte Oficial</th>
-                <th className="py-2.5 px-3">Editoria</th>
-                <th className="py-2.5 px-3">Deduplicação</th>
-                <th className="py-2.5 px-3">Status Editorial</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#D9DEE7]">
-              {queueItems.slice(0, 5).map((item) => (
-                <tr key={item.id} className="hover:bg-[#F7F8FA]">
-                  <td className="py-3 px-3 font-semibold text-[#17202A] max-w-md">
-                    {item.title}
-                  </td>
-                  <td className="py-3 px-3 text-[#5D6673]">{item.sourceName}</td>
-                  <td className="py-3 px-3 uppercase text-[10px] font-bold text-[#0B5FFF]">{item.category}</td>
-                  <td className="py-3 px-3">
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded ${
-                      item.dedupStatus === 'NOVO' ? 'bg-[#EBF7EE] text-[#16803C]' : 'bg-[#FEF3F2] text-[#B42318]'
-                    }`}>
-                      {item.dedupStatus}
-                    </span>
-                  </td>
-                  <td className="py-3 px-3 font-mono font-bold text-[11px] text-[#0B2345]">
-                    {item.editorialStatus}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <section className="rounded-2xl border border-[#D9E6F5] bg-white p-6 shadow-sm"><div className="flex items-center justify-between"><div><p className="text-[11px] font-black uppercase tracking-[.18em] text-[#0B5FFF]">Governança</p><h2 className="mt-1 font-serif text-2xl font-black text-[#07172E]">Acesso rápido administrativo</h2></div><span className="rounded-full bg-[#EAF3FF] px-3 py-1 text-xs font-bold text-[#0B5FFF]">Sem dados fictícios</span></div><div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4"><div className="rounded-xl border border-[#E6EDF5] p-4"><p className="font-bold text-[#17324F]">Usuários e permissões</p><p className="mt-1 text-xs text-[#64748B]">Gerencie acesso e papéis.</p></div><div className="rounded-xl border border-[#E6EDF5] p-4"><p className="font-bold text-[#17324F]">Financeiro</p><p className="mt-1 text-xs text-[#64748B]">Consulte pagamentos autorizados.</p></div><div className="rounded-xl border border-[#E6EDF5] p-4"><p className="font-bold text-[#17324F]">Integrações</p><p className="mt-1 text-xs text-[#64748B]">Acompanhe serviços conectados.</p></div><div className="rounded-xl border border-[#E6EDF5] p-4"><p className="font-bold text-[#17324F]">Segurança</p><p className="mt-1 text-xs text-[#64748B]">Revise logs e auditoria.</p></div></div></section>
     </div>
   );
 };

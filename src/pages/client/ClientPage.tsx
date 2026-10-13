@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { SubscriberPortal } from '../../components/subscriber/SubscriberPortal';
 import { useData } from '../../app/contexts/DataContext';
 import { useAuth } from '../../app/contexts/AuthContext';
@@ -7,10 +7,16 @@ import { useAuth } from '../../app/contexts/AuthContext';
 export default function ClientPage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { subpage: routeSubpage } = useParams<{ subpage?: string }>();
   const { currentUser, setCurrentUser } = useAuth();
   const { articles } = useData();
 
-  const subpage = searchParams.get('tab') || 'dashboard';
+  const subpage = routeSubpage || searchParams.get('tab') || 'dashboard';
+
+  if (!currentUser) {
+    const nextPath = routeSubpage ? `/leitor/${routeSubpage}` : '/leitor';
+    return <Navigate to={`/auth/login?next=${encodeURIComponent(nextPath)}`} replace />;
+  }
 
   return (
     <div className="flex-1">

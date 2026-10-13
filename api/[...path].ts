@@ -3,10 +3,11 @@ import { createHash } from 'node:crypto';
 import { put } from '@vercel/blob';
 import {
   json, newId, readBody, validEmail, verifyFirebaseIdToken
-} from './_lib/billing';
-import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
-import { handleCors } from './_lib/cors';
-import { authenticateEditorialUser, authenticatePublicUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, registerPublicUser, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
+} from './_lib/billing.js';
+import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage.js';
+import { listIntegrations, saveIntegration, testIntegration } from './_lib/integrations.js';
+import { handleCors } from './_lib/cors.js';
+import { authenticateEditorialUser, authenticatePublicUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, registerPublicUser, revokeEditorialSession, sessionCookie } from './_lib/neonAuth.js';
 
 type Req = IncomingMessage & { method?: string; headers: Record<string, string | string[] | undefined>; body?: unknown };
 type Res = ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void };
@@ -71,18 +72,16 @@ function publicRecords(collection: string, records: any[]): any[] {
   return records;
 }
 function collectionFor(path: string): { collection: string; id?: string } | null {
-  const match = path.match(/^(articles|categories|authors|pages|fact-checks|columnists|media|comments|activities|notifications|editorial\/sources|editorial\/queue|editorial\/agenda|editorial\/pautas|editorial\/ideias|editorial\/contatos)\/([^/]+)$/);
-  if (match) {
-    const collName = match[1]
-      .replace('fact-checks', 'factChecks')
-      .replace('editorial/sources', 'editorialSources')
-      .replace('editorial/queue', 'editorialQueue')
-      .replace('editorial/agenda', 'editorialAgenda')
-      .replace('editorial/pautas', 'editorialPautas')
-      .replace('editorial/ideias', 'editorialIdeas')
-      .replace('editorial/contatos', 'editorialContacts');
-    return { collection: collName, id: decodeURIComponent(match[2]) };
-  }
+  const collectionAliases: Record<string, string> = {
+    articles: 'articles', categories: 'categories', authors: 'authors', pages: 'pages',
+    'fact-checks': 'factChecks', columnists: 'columnists', media: 'media', comments: 'editorialComments',
+    activities: 'activities', notifications: 'notifications',
+    'editorial/sources': 'editorialSources', 'editorial/queue': 'editorialQueue',
+    'editorial/agenda': 'editorialAgenda', 'editorial/pautas': 'editorialPautas',
+    'editorial/ideias': 'editorialIdeas', 'editorial/contatos': 'editorialContacts',
+  };
+  const base = Object.keys(collectionAliases).sort((a, b) => b.length - a.length).find((candidate) => path === candidate || path.startsWith(`${candidate}/`));
+  if (base && path !== base) return { collection: collectionAliases[base], id: decodeURIComponent(path.slice(base.length + 1)) };
   const root: Record<string, string> = {
     articles: 'articles', categories: 'categories', authors: 'authors', pages: 'pages',
     'fact-checks': 'factChecks', columnists: 'columnists', media: 'media', comments: 'editorialComments',
@@ -99,13 +98,17 @@ export default async function handler(req: Req, res: Res) {
   const method = req.method || 'GET';
   const path = routeName(req.url || '/');
   try {
+    if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
     const identity = await getIdentity(req).catch(error => {
       if (String(error?.message || '').includes('not configured')) throw error;
       throw new Error('Invalid Firebase ID token');
     });
-    if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
 
-    if (path === 'auth/register' && method === 'POST') {
+
+  if (path === 'admin/integrations' && method === 'GET') { if (!requireRole(identity, ADMINS, res)) return; return json(res, 200, { integrations: await listIntegrations() }); }
+  if (path === 'admin/integrations' && method === 'POST') { const body = cleanObject(await readBody(req)); if (!requireRole(identity, ADMINS, res)) return; const id = String(body.id || '') as Parameters<typeof saveIntegration>[0]['id']; if (!['ai','payments','email','analytics','social','media','auth'].includes(id)) return json(res, 400, { error: 'INVALID_INTEGRATION' }); return json(res, 200, await saveIntegration({ ...body, id }, identity!.uid)); }
+  if (path.match(/^admin\/integrations\/[^/]+\/test$/) && method === 'POST') { if (!requireRole(identity, ADMINS, res)) return; const id = path.split('/')[2] as Parameters<typeof testIntegration>[0]; return json(res, 200, await testIntegration(id)); }
+  if (path === 'auth/register' && method === 'POST') {
       const body = cleanObject(await readBody(req));
       const name = String(body.name || '').trim();
       const email = String(body.email || '').trim().toLowerCase();
@@ -263,10 +266,9 @@ export default async function handler(req: Req, res: Res) {
       const token = header.startsWith('Bearer ') ? header.slice(7).trim() : readSessionCookie(cookie);
       if (token) await revokeEditorialSession(token);
       const isProduction = process.env.NODE_ENV === 'production';
-      const domain = isProduction ? '; Domain=.opatriota.sbs' : '';
-      const sameSite = isProduction ? 'None' : 'Lax';
-      const secure = isProduction ? '; Secure' : '';
-      res.setHeader('Set-Cookie', `opatriota_editorial_session=; Path=/; HttpOnly; SameSite=${sameSite}${domain}${secure}; Max-Age=0`);
+  const sameSite = isProduction ? 'None' : 'Lax';
+  const secure = isProduction ? '; Secure' : '';
+  res.setHeader('Set-Cookie', `opatriota_editorial_session=; Path=/; HttpOnly; SameSite=${sameSite}${secure}; Max-Age=0`);
       return json(res, 200, { success: true });
     }
     if (path === 'plans' && method === 'GET') return json(res, 200, [
@@ -741,12 +743,17 @@ export default async function handler(req: Req, res: Res) {
     const isEditorial = resource.collection.startsWith('editorial');
     const required = isEditorial ? STAFF : resource.collection === 'articles' ? CONTENT_MANAGERS : resource.collection === 'pages' || resource.collection === 'categories' ? CONTENT_MANAGERS : ADMINS;
 
-    if (method === 'GET' && !resource.id) {
-      if (isEditorial && !requireRole(identity, STAFF, res)) return;
-      let records = await documentList(resource.collection);
-      if (!isEditorial) records = publicRecords(resource.collection, records);
-      return json(res, 200, records);
-    }
+  if (method === 'GET' && !resource.id) {
+  if (isEditorial && !requireRole(identity, STAFF, res)) return;
+  let records = await documentList(resource.collection);
+  if (resource.collection === 'articles') {
+    // O portal público vê somente publicadas; a redação autenticada vê sua base editorial completa.
+    if (!identity || !STAFF.has(identity.role)) records = publicRecords(resource.collection, records);
+  } else if (!isEditorial) {
+    records = publicRecords(resource.collection, records);
+  }
+  return json(res, 200, records);
+  }
     if (method === 'GET' && resource.id) {
       const record = await documentGet(resource.collection, resource.id);
       if (!record) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });

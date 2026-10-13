@@ -20,7 +20,7 @@ export default function ClientLoginPage() {
   const { loginWithEmail, loginWithGoogle } = useAuth();
 
   const searchParams = new URLSearchParams(location.search);
-  const nextUrl = searchParams.get('next') || '/minha-conta';
+  const nextUrl = searchParams.get('next') || '/leitor';
 
   const [identifier, setIdentifier] = useState('marcos@email.com');
   const [password, setPassword] = useState('123456');

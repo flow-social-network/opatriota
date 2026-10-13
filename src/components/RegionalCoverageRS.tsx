@@ -94,13 +94,32 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
     }
   ];
 
-  // Identifica artigos reais do banco ou utiliza os dados fiéis à imagem de referência
-  const mainLead = articles.find(a => a.category === 'politica' && a.id !== 'art-policia-metro-divergem-paulista') || referenceLeadArticle;
-  const secondary1 = articles.find(a => a.id === 'art-policia-metro-divergem-paulista' || a.slug === 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista') || referenceSecondaryArticles[0];
-  const secondary2 = articles.find(a => a.category === 'seguranca') || referenceSecondaryArticles[1];
-  const secondary3 = articles.find(a => a.category === 'mundo') || referenceSecondaryArticles[2];
+  const regionalArticles = articles
+    .filter((article) => {
+      const tags = article.tags?.map((tag) => tag.toLowerCase()) || [];
+      return tags.some((tag) => tag.includes('rio grande do sul') || tag === 'rs' || tag.includes('porto alegre')) || article.category === 'rio-grande-do-sul';
+    })
+    .filter((article) => article.editorialStatus === 'PUBLICADA' || !article.editorialStatus)
+    .sort((a, b) => {
+      const aTime = Date.parse(a.updatedAt || a.publishedAt || '') || 0;
+      const bTime = Date.parse(b.updatedAt || b.publishedAt || '') || 0;
+      return bTime - aTime;
+    });
 
-  const secondaryList = [secondary1, secondary2, secondary3];
+  const regionalQueue = regionalArticles.length ? regionalArticles : [
+    referenceLeadArticle,
+    ...referenceSecondaryArticles.filter((article) => !article.tags?.includes('Eleições 2026')),
+  ];
+  const [activeRegionalIndex, setActiveRegionalIndex] = React.useState(0);
+  React.useEffect(() => {
+    if (regionalQueue.length < 2) return;
+    const interval = window.setInterval(() => setActiveRegionalIndex((current) => (current + 1) % regionalQueue.length), 9000);
+    return () => window.clearInterval(interval);
+  }, [regionalQueue.length]);
+  const activeRegionalArticle = regionalQueue[activeRegionalIndex % regionalQueue.length];
+  const secondaryList = regionalQueue
+    .filter((article) => article.id !== activeRegionalArticle.id)
+    .slice(0, 3);
 
   return (
     <section className="mb-12 select-none" aria-label="Cobertura Regional do Rio Grande do Sul">
@@ -121,7 +140,7 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
 
         {/* Link Ver todas → */}
         <button
-          onClick={() => onSelectCategory?.('brasil')}
+          onClick={() => onSelectCategory?.('rio-grande-do-sul')}
           className="text-[#0284C7] hover:text-[#0369A1] font-bold text-xs sm:text-sm flex items-center gap-1 transition-colors cursor-pointer group"
         >
           <span>Ver todas</span>
@@ -134,27 +153,27 @@ export const RegionalCoverageRS: React.FC<RegionalCoverageRSProps> = ({
         
         {/* Main Regional Lead (7 cols) - Card com imagem grande e texto sobreposto */}
         <article 
-          onClick={() => onSelectArticle(mainLead)}
+          onClick={() => onSelectArticle(activeRegionalArticle)}
           className="lg:col-span-7 relative rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-all min-h-[380px] sm:min-h-[420px] flex flex-col justify-end bg-slate-900 border border-[#D9DEE7]"
         >
           <img
-            src={mainLead.imageUrl || '/images/hero_congresso.jpg'}
-            alt={mainLead.title}
+            src={activeRegionalArticle.imageUrl || '/images/hero_congresso.jpg'}
+            alt={activeRegionalArticle.title}
             className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 opacity-90"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent" />
 
           <div className="relative z-10 p-6 sm:p-8 text-white">
             <span className="bg-[#0284C7] text-white text-[10px] sm:text-[11px] font-black px-2.5 py-1 uppercase tracking-wider rounded-md shadow-sm inline-block mb-3">
-              {mainLead.kicker || 'POLÍTICA'}
+              {activeRegionalArticle.kicker || 'RIO GRANDE DO SUL'}
             </span>
 
             <h3 className="font-serif text-2xl sm:text-3xl font-black text-white leading-tight mb-2.5 drop-shadow-sm group-hover:text-blue-200 transition-colors">
-              {mainLead.title}
+              {activeRegionalArticle.title}
             </h3>
 
             <p className="text-white/90 text-xs sm:text-sm leading-relaxed max-w-xl line-clamp-2 sm:line-clamp-3">
-              {mainLead.subtitle}
+              {activeRegionalArticle.subtitle}
             </p>
           </div>
         </article>
