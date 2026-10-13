@@ -153,6 +153,13 @@ async function postgresWrite(collection: string, documentId: string, fields: Rec
   );
 }
 
+async function postgresGetFromPrimary(collection: string, documentId: string) {
+  const pool = await getPostgresPool();
+  const result = await pool.query('SELECT document_id, data FROM public.opatriota_documents WHERE collection_name = $1 AND document_id = $2', [collection, documentId]);
+  const row = result.rows[0];
+  return row ? { id: row.document_id, ...decodeJsonObject(row.data) } : null;
+}
+
 async function postgresList(collection: string) {
   const pool = await getPostgresReadPool();
   const result = await pool.query('SELECT document_id, data FROM public.opatriota_documents WHERE collection_name = $1 ORDER BY updated_at DESC', [collection]);
@@ -167,7 +174,13 @@ async function postgresDelete(collection: string, documentId: string) {
 export async function documentGet(collection: string, documentId: string): Promise<any | null> {
   const provider = getDatabaseProvider();
   if (provider === 'firestore') return firestoreGet(collection, documentId);
-  if (provider === 'postgres') return postgresGet(collection, documentId);
+  if (provider === 'postgres') {
+    try { return await postgresGet(collection, documentId); }
+    catch (error) {
+      if (!getPostgresReadConnectionUrls().length) throw error;
+      return postgresGetFromPrimary(collection, documentId);
+    }
+  }
 
   if (provider === 'mysql') {
     const pool = await getMysqlPool();
@@ -232,7 +245,15 @@ export async function documentWrite(
 export async function documentList(collection: string): Promise<any[]> {
   const provider = getDatabaseProvider();
   if (provider === 'firestore') return firestoreList(collection);
-  if (provider === 'postgres') return postgresList(collection);
+  if (provider === 'postgres') {
+    try { return await postgresList(collection); }
+    catch (error) {
+      if (!getPostgresReadConnectionUrls().length) throw error;
+      const pool = await getPostgresPool();
+      const result = await pool.query('SELECT document_id, data FROM public.opatriota_documents WHERE collection_name = $1 ORDER BY updated_at DESC', [collection]);
+      return result.rows.map((row) => ({ id: row.document_id, ...decodeJsonObject(row.data) }));
+    }
+  }
 
   if (provider === 'mysql') {
     const pool = await getMysqlPool();

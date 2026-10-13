@@ -71,18 +71,16 @@ function publicRecords(collection: string, records: any[]): any[] {
   return records;
 }
 function collectionFor(path: string): { collection: string; id?: string } | null {
-  const match = path.match(/^(articles|categories|authors|pages|fact-checks|columnists|media|comments|activities|notifications|editorial\/sources|editorial\/queue|editorial\/agenda|editorial\/pautas|editorial\/ideias|editorial\/contatos)\/([^/]+)$/);
-  if (match) {
-    const collName = match[1]
-      .replace('fact-checks', 'factChecks')
-      .replace('editorial/sources', 'editorialSources')
-      .replace('editorial/queue', 'editorialQueue')
-      .replace('editorial/agenda', 'editorialAgenda')
-      .replace('editorial/pautas', 'editorialPautas')
-      .replace('editorial/ideias', 'editorialIdeas')
-      .replace('editorial/contatos', 'editorialContacts');
-    return { collection: collName, id: decodeURIComponent(match[2]) };
-  }
+  const collectionAliases: Record<string, string> = {
+    articles: 'articles', categories: 'categories', authors: 'authors', pages: 'pages',
+    'fact-checks': 'factChecks', columnists: 'columnists', media: 'media', comments: 'editorialComments',
+    activities: 'activities', notifications: 'notifications',
+    'editorial/sources': 'editorialSources', 'editorial/queue': 'editorialQueue',
+    'editorial/agenda': 'editorialAgenda', 'editorial/pautas': 'editorialPautas',
+    'editorial/ideias': 'editorialIdeas', 'editorial/contatos': 'editorialContacts',
+  };
+  const base = Object.keys(collectionAliases).sort((a, b) => b.length - a.length).find((candidate) => path === candidate || path.startsWith(`${candidate}/`));
+  if (base && path !== base) return { collection: collectionAliases[base], id: decodeURIComponent(path.slice(base.length + 1)) };
   const root: Record<string, string> = {
     articles: 'articles', categories: 'categories', authors: 'authors', pages: 'pages',
     'fact-checks': 'factChecks', columnists: 'columnists', media: 'media', comments: 'editorialComments',
@@ -99,11 +97,11 @@ export default async function handler(req: Req, res: Res) {
   const method = req.method || 'GET';
   const path = routeName(req.url || '/');
   try {
+    if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
     const identity = await getIdentity(req).catch(error => {
       if (String(error?.message || '').includes('not configured')) throw error;
       throw new Error('Invalid Firebase ID token');
     });
-    if (path === 'health' && method === 'GET') return json(res, 200, { status: 'ok', service: 'o-patriota-api', timestamp: new Date().toISOString() });
 
     if (path === 'auth/register' && method === 'POST') {
       const body = cleanObject(await readBody(req));
