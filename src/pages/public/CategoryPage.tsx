@@ -6,7 +6,7 @@ import { useData } from '../../app/contexts/DataContext';
 import { useSeoMetadata } from '../../hooks/useSeoMetadata';
 
 export default function CategoryPage({ defaultCategory }: { defaultCategory?: string }) {
-  const { slug } = useParams<{ slug: string }>();
+  const { slug, subcategory } = useParams<{ slug: string; subcategory?: string }>();
   const navigate = useNavigate();
   const { articles, categories } = useData();
 
@@ -14,9 +14,9 @@ export default function CategoryPage({ defaultCategory }: { defaultCategory?: st
   let category = categories.find(c => c.slug === activeSlug);
 
   useSeoMetadata({
-    title: category ? `Notícias de ${category.name}` : undefined,
+    title: category ? `${subcategory ? `${subcategory} — ` : ''}Notícias de ${category.name}` : undefined,
     description: category?.description || `Acompanhe as principais notícias sobre ${category?.name} no portal O Patriota.`,
-    pathname: category ? `/categoria/${category.slug}` : undefined,
+    pathname: category ? `/categoria/${category.slug}${subcategory ? `/${subcategory}` : ''}` : undefined,
   });
 
   if (!category) {
@@ -38,6 +38,7 @@ export default function CategoryPage({ defaultCategory }: { defaultCategory?: st
     <div className="max-w-[1360px] mx-auto px-4 py-8">
       <CategoryPageView
         category={category}
+        subcategory={subcategory}
         articles={articles}
         allCategories={categories}
         onSelectArticle={(a) => navigate(`/noticia/${a.slug}`)}

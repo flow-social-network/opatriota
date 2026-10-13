@@ -142,7 +142,8 @@ export const router = createBrowserRouter([
     children: [
       { path: '/', element: <HomePage /> },
       { path: '/noticia/:slug', element: <ArticlePage /> },
-      { path: '/categoria/:slug', element: <CategoryPage /> },
+      { path: '/categoria/:slug/:subcategory', element: <CategoryPage /> },
+  { path: '/categoria/:slug', element: <CategoryPage /> },
       { path: '/autor/:slug', element: <AuthorPage /> },
       { path: '/busca', element: <SearchPage /> },
       { path: '/arquivo', element: <ArchivePage /> },

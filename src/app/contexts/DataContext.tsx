@@ -148,7 +148,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
       load<RssSource[]>('/editorial/sources', setSources, true),
       load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),
       load<InstitutionalPage[]>('/pages', setPages),
-      load<CategoryDetail[]>('/categories', setCategories),
+      load<CategoryDetail[]>('/categories', (apiCategories) => {
+        if (apiCategories?.length) setCategories(apiCategories);
+      }),
       load<AuthorDetail[]>('/authors', setAuthors),
       load<SiteMenuConfig>('/site-settings/menu', setMenuConfig),
     ]).finally(() => { if (active) setDataLoading(false); });
