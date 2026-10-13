@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { Article, CategorySlug } from '../../types';
 import { CategoryDetail, AuthorDetail } from '../../types';
 import { Breadcrumbs } from './Breadcrumbs';
+import { PatriotaAdCard } from '../ads/PatriotaAdCard';
 import { 
   Archive, 
   Calendar, 
@@ -178,6 +179,10 @@ export const ArchivePageView: React.FC<ArchivePageViewProps> = ({
             </div>
           </div>
         </header>
+
+        <div className="mb-6 flex justify-end">
+          <PatriotaAdCard variant={4} className="w-full max-w-[320px]" />
+        </div>
 
         {/* Results List */}
         {filteredArticles.length === 0 ? (

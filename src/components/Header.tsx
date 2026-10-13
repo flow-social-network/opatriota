@@ -672,7 +672,6 @@ export const Header: React.FC<HeaderProps> = ({
                   {socialIconsConfig.filter(({ platform }) => ['facebook', 'instagram', 'youtube', 'x', 'linkedin', 'telegram'].includes(platform)).map((soc) => <a key={soc.platform} href={soc.url} target="_blank" rel="noopener noreferrer" aria-label={soc.name} title={soc.name} className={`inline-flex size-[18px] shrink-0 items-center justify-center overflow-hidden rounded-full ${soc.bgColor} hover:scale-105 transition-transform [&>svg]:size-3`}>{soc.icon}</a>)}
                 </div>
                 <form onSubmit={(e) => { e.preventDefault(); onSearchSubmit(headerSearchQuery.trim()); }} className="flex w-[180px] xl:w-[205px] flex-none min-w-0 bg-white border border-[#CBD5E1] rounded overflow-hidden h-5 shadow-xs focus-within:border-[#0B2345] transition-colors">
-                  <Search className="w-3 h-3 text-[#94A3B8] ml-1.5 shrink-0" />
                   <input type="text" placeholder="Buscar notícias, análises, vídeos..." value={headerSearchQuery} onChange={(e) => { setHeaderSearchQuery(e.target.value); onSearchChange(e.target.value); }} className="min-w-0 w-full px-1.5 py-0.5 text-[10px] text-[#0F172A] placeholder-[#94A3B8] focus:outline-none" />
                   <button type="submit" aria-label="Buscar" className="bg-[#0B1E36] hover:bg-[#0284C7] text-white px-1.5 h-full flex items-center justify-center transition-colors cursor-pointer"><Search className="w-3 h-3 text-white" /></button>
                 </form>
@@ -775,8 +774,8 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {/* Manifesto institucional direito da referência */}
-              <div className="absolute right-9 top-1/2 -translate-y-1/2 border-r-4 border-[#16A34A] pr-7 text-right hidden xl:block">
-                <p className="text-[16px] font-black tracking-[0.18em] leading-relaxed text-[#0B2345]">FATOS<br />IDEIAS<br />PESSOAS<br />SOLUÇÕES<br /><span className="text-[#16A34A]">PELO BRASIL</span></p>
+              <div className="absolute right-7 top-1/2 -translate-y-1/2 border-r-4 border-[#16A34A] pr-5 text-right hidden xl:block">
+                <p className="text-[13px] font-black tracking-[0.14em] leading-[1.08] text-[#0B2345]">FATOS<br />IDEIAS<br />PESSOAS<br />SOLUÇÕES<br /><span className="text-[#16A34A]">PELO BRASIL</span></p>
               </div>
 
               {/* Linha Centralizada: Sino Notificação + Usuário */}
@@ -1006,16 +1005,7 @@ export const Header: React.FC<HeaderProps> = ({
                 })}
               </div>
 
-              {/* Right Button: APOIE O JORNAL */}
-              <div className="py-2 pl-2 shrink-0">
-                <button
-                  onClick={onOpenSupport}
-                  className="bg-[#15803D] hover:bg-[#166534] text-white text-[13px] leading-[1.2] font-semibold uppercase tracking-wide px-3 py-2 rounded-md transition-all shadow-xs flex items-center gap-1.5 cursor-pointer active:scale-95 whitespace-nowrap"
-                >
-                  <Heart className="w-4 h-4 fill-white text-white" />
-                  <span>APOIE O JORNAL</span>
-                </button>
-              </div>
+
             </div>
           </nav>
         </div>

@@ -51,6 +51,20 @@ export const AdSlot: React.FC<AdSlotProps> = ({
               data-full-width-responsive="true"
             />
           </div>
+        ) : position === 'HOME_SIDEBAR_NATIONAL' ? (
+          <a
+            href="/anuncie"
+            aria-label="Anuncie no O Patriota"
+            className="block w-full overflow-hidden rounded-lg border border-[#D9DEE7] bg-white shadow-xs transition hover:border-[#0B5FFF]"
+          >
+            <img
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-05-41-HumqJV9oaimTYt2EhKPHJAtfxvoQsf.png"
+              alt="Anuncie no O Patriota"
+              width={663}
+              height={547}
+              className="block h-auto w-full object-contain"
+            />
+          </a>
         ) : (
           /* High-fidelity editorial placeholder banner in test/demo mode (avoids CLS layout shift) */
           <div 

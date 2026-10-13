@@ -1,2 +1,0 @@
-import { Terminal } from 'lucide-react'
-export default function CliPage(){return <div className="module-page"><header><p className="panel-breadcrumb">Workspace / CLI</p><h1>CLI</h1><p>Informações e operações da CLI NoteAgents.</p></header><section className="module-card"><Terminal size={28}/><h2>CLI não configurada</h2><p>Instale e conecte a CLI para executar operações localmente.</p></section></div>}

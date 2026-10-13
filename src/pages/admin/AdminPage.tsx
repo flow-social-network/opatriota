@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useAuth } from '../../app/contexts/AuthContext';
 import { useData } from '../../app/contexts/DataContext';
 import { AdminDashboard } from '../../components/AdminDashboard';
+import AdvertisingPage from './AdvertisingPage';
 
 export default function AdminPage() {
   const navigate = useNavigate();
@@ -59,6 +60,10 @@ export default function AdminPage() {
   };
 
   const initialTab = (section && tabMapping[section]) || 'painel';
+
+  if (initialTab === 'publicidade') {
+    return <AdvertisingPage onBack={() => navigate('/admin')} />;
+  }
 
   return (
     <AdminDashboard

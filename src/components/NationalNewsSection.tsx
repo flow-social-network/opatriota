@@ -1,5 +1,6 @@
 import React from 'react';
 import { Article, AdSlotConfig, AdSenseGlobalConfig } from '../types';
+import { PatriotaAdCard } from './ads/PatriotaAdCard';
 import { AdSlot } from './ads/AdSlot';
 import { Newspaper, ArrowRight, Flame } from 'lucide-react';
 
@@ -81,7 +82,7 @@ export const NationalNewsSection: React.FC<NationalNewsSectionProps> = ({
         </div>
 
         {/* Right Sidebar: Lateral Ad Slot + Trending Briefs (4 cols) */}
-        <aside className="lg:col-span-4 space-y-6">
+        <aside className="lg:col-span-4 space-y-4 lg:sticky lg:top-20 lg:self-start">
           
           {/* Lateral Advertising Slot (300x250) */}
           <div className="bg-white p-2 rounded-lg border border-[#D9DEE7] shadow-2xs">
@@ -92,6 +93,8 @@ export const NationalNewsSection: React.FC<NationalNewsSectionProps> = ({
               className="my-0"
             />
           </div>
+
+          <PatriotaAdCard variant={1} />
 
           {/* Quick Trending Bulletins */}
           <div className="bg-white p-5 rounded-lg border border-[#D9DEE7] shadow-2xs">
@@ -127,6 +130,10 @@ export const NationalNewsSection: React.FC<NationalNewsSectionProps> = ({
 
         </aside>
 
+      </div>
+
+      <div className="mt-6 w-full">
+        <PatriotaAdCard variant={8} className="w-full" />
       </div>
     </section>
   );

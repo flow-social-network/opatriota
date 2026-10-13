@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { api } from '../../services/apiClient';
+
+type PublishedAd = { id: string; title: string; imageUrl: string; destinationUrl: string; placement: string };
 import { AdPosition, AdSpaceConfig, GoogleAdSenseConfig } from '../../types';
 
 interface AdBannerProps {
@@ -16,6 +19,21 @@ export const AdBanner: React.FC<AdBannerProps> = ({
   className = '',
   onNavigateAdvertise
 }) => {
+  const [publishedAd, setPublishedAd] = useState<PublishedAd | null>(null);
+  const placement = position === 'HOME_TOP_BANNER' ? 'top_banner' : position.includes('SIDEBAR') ? 'sidebar' : position === 'HOME_PRE_FOOTER' ? 'bottom_banner' : 'middle_banner';
+
+  useEffect(() => {
+    let active = true;
+    void api.get<PublishedAd[]>(`/advertising/ads?placement=${placement}`, { timeoutMs: 8000 }).then((items) => {
+      if (active) setPublishedAd(items[0] || null);
+    }).catch(() => { if (active) setPublishedAd(null); });
+    return () => { active = false; };
+  }, [placement]);
+
+  useEffect(() => {
+    if (publishedAd) void api.post('/advertising/events', { advertisementId: publishedAd.id, eventType: 'impression', placement }).catch(() => undefined);
+  }, [publishedAd, placement]);
+
   // If ad position not found or explicitly deactivated, do not render anything
   if (!adSpace || !adSpace.active) {
     return null;
@@ -51,7 +69,11 @@ export const AdBanner: React.FC<AdBannerProps> = ({
 
       {/* Ad Container Box */}
       <div className={`relative bg-[#F1F3F5] border border-dashed border-[#CBD5E1] rounded overflow-hidden flex flex-col items-center justify-center text-center p-3 transition-colors ${getDimensionClasses()}`}>
-        {isLiveAdSense ? (
+        {publishedAd ? (
+          <a href={publishedAd.destinationUrl} target="_blank" rel="noopener noreferrer sponsored" className="block h-full w-full" onClick={() => { void api.post('/advertising/events', { advertisementId: publishedAd.id, eventType: 'click', placement }); }}>
+            <img src={publishedAd.imageUrl} alt={publishedAd.title} className="h-full w-full object-cover" loading="lazy" />
+          </a>
+        ) : isLiveAdSense ? (
           <div className="w-full h-full flex items-center justify-center">
             {/* Live Google AdSense Block */}
             <ins 

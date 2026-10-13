@@ -673,9 +673,21 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
         </main>
 
         {/* Sidebar: Related Stories & Editorial Notice (4 cols on lg) */}
-        <aside className="lg:col-span-4 space-y-8">
+        <aside className="lg:col-span-4 space-y-4 lg:sticky lg:top-20 lg:self-start">
+          <a
+            href="/anuncie"
+            aria-label="Anuncie no O Patriota"
+            className="block overflow-hidden rounded border border-[#D9DEE7] bg-white shadow-xs"
+          >
+            <img
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Captura%20de%20tela%20de%202026-10-12%2021-00-16-O30M1wKHF1ogRkCzK6CtzCEsnwBVew.png"
+              alt="Anuncie no O Patriota"
+              className="block h-auto w-full object-contain"
+            />
+          </a>
+
           {/* Related Stories */}
-          <div className="bg-white p-5 rounded border border-[#D9DEE7] shadow-xs">
+          <div className="bg-white p-4 rounded border border-[#D9DEE7] shadow-xs">
             <h3 className="font-serif text-base font-bold text-[#0B2345] border-b border-[#D9DEE7] pb-3 mb-4">
               MATÉRIAS RELACIONADAS
             </h3>
@@ -684,7 +696,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
                 <article
                   key={rel.id}
                   onClick={() => onSelectArticle(rel)}
-                  className="py-3 flex gap-3 cursor-pointer group"
+                  className="py-2.5 flex gap-3 cursor-pointer group"
                 >
                   <div className="w-16 h-14 rounded overflow-hidden shrink-0 border border-[#D9DEE7] bg-slate-100">
                     <img src={rel.imageUrl} alt={rel.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
@@ -701,7 +713,7 @@ export const ArticleView: React.FC<ArticleViewProps> = ({
           </div>
 
           {/* Fact Check Banner */}
-          <div className="bg-[#0B2345] text-white p-5 rounded border border-[#07172E] shadow-xs">
+          <div className="bg-[#0B2345] text-white p-4 rounded border border-[#07172E] shadow-xs">
             <h4 className="font-serif text-sm font-bold text-white mb-2">AGÊNCIA DE CHECAGEM</h4>
             <p className="text-xs text-white/80 leading-relaxed mb-4">
               Recebeu uma mensagem duvidosa nas redes sociais? Nossa equipe verifica documentos oficiais para esclarecer o que é fato e o que é boato.

@@ -1,5 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createHash } from 'node:crypto';
+import { put } from '@vercel/blob';
 import {
   json, newId, readBody, validEmail, verifyFirebaseIdToken
 } from './_lib/billing';
@@ -135,6 +136,67 @@ export default async function handler(req: Req, res: Res) {
       if (token) await revokeEditorialSession(token);
       res.setHeader('Set-Cookie', 'opatriota_editorial_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0');
       return json(res, 200, { success: true });
+    }
+
+    if (path === 'advertising/ads' && method === 'GET') {
+      const placement = String(new URL(req.url || '/', 'https://api.local').searchParams.get('placement') || '');
+      const now = Date.now();
+      const ads = await documentList('advertisements');
+      return json(res, 200, ads.filter((ad) => ad.status === 'published' && (!placement || ad.placement === placement) && (!ad.startsAt || Date.parse(ad.startsAt) <= now) && (!ad.endsAt || Date.parse(ad.endsAt) >= now)).sort((a, b) => Number(a.displayOrder || 0) - Number(b.displayOrder || 0)).map(({ internalDescription, createdBy, updatedBy, ...publicAd }) => publicAd));
+    }
+    if (path === 'advertising/events' && method === 'POST') {
+      const body = cleanObject(await readBody(req));
+      const adId = String(body.advertisementId || '').trim();
+      const eventType = String(body.eventType || '');
+      if (!adId || !['impression', 'click'].includes(eventType)) return json(res, 400, { error: 'INVALID_AD_EVENT', message: 'Evento publicitário inválido.' });
+      const ad = await documentGet('advertisements', adId);
+      if (!ad) return json(res, 404, { error: 'AD_NOT_FOUND', message: 'Anúncio não encontrado.' });
+      await documentWrite('advertisementEvents', newId(), { advertisementId: adId, eventType, placement: String(body.placement || ad.placement).slice(0, 80), occurredAt: new Date().toISOString(), anonymousSessionId: String(body.sessionId || '').slice(0, 160) }, false);
+      return json(res, 202, { accepted: true });
+    }
+    if (path === 'admin/advertising/ads' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      return json(res, 200, (await documentList('advertisements')).sort((a, b) => String(b.updatedAt || '').localeCompare(String(a.updatedAt || ''))));
+    }
+    if (path === 'admin/advertising/ads' && method === 'POST') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const body = cleanObject(await readBody(req));
+      const title = String(body.title || '').trim().slice(0, 160);
+      const placement = String(body.placement || '').trim().slice(0, 80);
+      const imageUrl = String(body.imageUrl || '').trim();
+      const destinationUrl = String(body.destinationUrl || '').trim();
+      if (!title || !imageUrl || !['top_banner', 'sidebar', 'middle_banner', 'bottom_banner'].includes(placement)) return json(res, 400, { error: 'INVALID_ADVERTISEMENT', message: 'Título, imagem e posição são obrigatórios.' });
+      try { const destination = new URL(destinationUrl); if (!['http:', 'https:'].includes(destination.protocol)) throw new Error(); } catch { return json(res, 400, { error: 'INVALID_DESTINATION_URL', message: 'Informe uma URL de destino válida.' }); }
+      const id = newId(); const now = new Date().toISOString();
+      const ad = { id, title, internalDescription: String(body.internalDescription || '').trim().slice(0, 1000), imageUrl, destinationUrl, placement, status: ['draft', 'published', 'paused', 'archived'].includes(String(body.status)) ? String(body.status) : 'draft', displayOrder: Math.max(0, Math.min(9999, Number(body.displayOrder) || 0)), startsAt: body.startsAt ? String(body.startsAt) : null, endsAt: body.endsAt ? String(body.endsAt) : null, createdBy: identity!.uid, updatedBy: identity!.uid, createdAt: now, updatedAt: now };
+      await documentWrite('advertisements', id, ad, false);
+      return json(res, 201, ad);
+    }
+    if (path.match(/^admin\/advertising\/ads\/[^/]+$/) && (method === 'PATCH' || method === 'DELETE')) {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const id = decodeURIComponent(path.split('/').pop() || ''); const current = await documentGet('advertisements', id);
+      if (!current) return json(res, 404, { error: 'AD_NOT_FOUND', message: 'Anúncio não encontrado.' });
+      if (method === 'DELETE') { await documentWrite('advertisements', id, { ...current, status: 'archived', updatedAt: new Date().toISOString(), updatedBy: identity!.uid }, false); return json(res, 200, { success: true }); }
+      const body = cleanObject(await readBody(req)); const next = { ...current, ...body, id, updatedAt: new Date().toISOString(), updatedBy: identity!.uid };
+      if (body.destinationUrl !== undefined) { try { const u = new URL(String(body.destinationUrl)); if (!['http:', 'https:'].includes(u.protocol)) throw new Error(); } catch { return json(res, 400, { error: 'INVALID_DESTINATION_URL', message: 'URL de destino inválida.' }); } }
+      if (body.status !== undefined && !['draft', 'published', 'paused', 'archived'].includes(String(body.status))) return json(res, 400, { error: 'INVALID_AD_STATUS', message: 'Status inválido.' });
+      await documentWrite('advertisements', id, next, false); return json(res, 200, next);
+    }
+    if (path === 'admin/advertising/upload' && method === 'POST') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const body = cleanObject(await readBody(req)); const dataUrl = String(body.dataUrl || ''); const match = dataUrl.match(/^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=]+)$/);
+      if (!match) return json(res, 400, { error: 'INVALID_IMAGE', message: 'Envie JPG, PNG ou WebP em formato válido.' });
+      const buffer = Buffer.from(match[2], 'base64'); if (buffer.length > 8 * 1024 * 1024) return json(res, 413, { error: 'IMAGE_TOO_LARGE', message: 'A imagem deve ter no máximo 8 MB.' });
+      const signatureOk = (match[1] === 'image/png' && buffer.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10]))) || (match[1] === 'image/jpeg' && buffer.subarray(0, 3).equals(Buffer.from([255,216,255]))) || (match[1] === 'image/webp' && buffer.subarray(8, 12).toString() === 'WEBP');
+      if (!signatureOk) return json(res, 400, { error: 'INVALID_IMAGE_CONTENT', message: 'O conteúdo do arquivo não corresponde ao formato informado.' });
+      const ext = match[1] === 'image/jpeg' ? 'jpg' : match[1].split('/')[1]; const blob = await put(`advertisements/${newId()}.${ext}`, buffer, { access: 'public', contentType: match[1], addRandomSuffix: false });
+      return json(res, 201, { url: blob.url });
+    }
+    if (path === 'admin/advertising/metrics' && method === 'GET') {
+      if (!requireRole(identity, ADMINS, res)) return;
+      const events = await documentList('advertisementEvents'); const metrics = new Map<string, { impressions: number; clicks: number }>();
+      events.forEach((event) => { const value = metrics.get(event.advertisementId) || { impressions: 0, clicks: 0 }; event.eventType === 'click' ? value.clicks++ : value.impressions++; metrics.set(event.advertisementId, value); });
+      return json(res, 200, [...metrics.entries()].map(([advertisementId, counts]) => ({ advertisementId, ...counts })));
     }
 
     if (path === 'advertising/inquiries' && method === 'POST') {
