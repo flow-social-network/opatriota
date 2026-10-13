@@ -50,7 +50,7 @@ export default function ClientRegisterPage() {
     setLoading(true);
     try {
       await register(name, email, password);
-      navigate('/minha-conta');
+      navigate('/leitor');
     } catch (err: any) {
       setErrorMessage(err?.message || 'Falha ao realizar cadastro.');
     } finally {

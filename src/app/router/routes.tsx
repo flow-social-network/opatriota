@@ -136,6 +136,12 @@ export const router = createBrowserRouter([
     ],
   },
 
+  // ─── ÁREA DO LEITOR (PAINEL INDEPENDENTE DO SITE) ───
+  { path: '/leitor', element: <ClientPage /> },
+  { path: '/leitor/:subpage', element: <ClientPage /> },
+  { path: '/minha-conta', element: <Navigate to="/leitor" replace /> },
+  { path: '/minha-conta/:subpage', element: <Navigate to="/leitor" replace /> },
+
   // ─── PORTAL PÚBLICO (COM CABEÇALHO E RODAPÉ INSTITUCIONAL) ───
   {
     element: <PublicLayout />,
@@ -159,10 +165,6 @@ export const router = createBrowserRouter([
       { path: '/opiniao/:slug', element: <ArticlePage /> },
       { path: '/editorial', element: <Navigate to="/categoria/opiniao" replace /> },
       { path: '/editorial/:slug', element: <ArticlePage /> },
-
-      // Área do assinante
-      { path: '/minha-conta', element: <ClientPage /> },
-      { path: '/minha-conta/:subpage', element: <ClientPage /> },
 
       // Atalho de receitas
       { path: '/receitas', element: <Navigate to="/categoria/receita" replace /> },

@@ -68,8 +68,8 @@ export default function ArticlePage() {
         relatedArticles={articles.filter(a => a.id !== article.id)}
         currentUser={currentUser}
         onToggleBookmark={(id) => void toggleBookmark(id)}
-        onOpenSubscribe={() => navigate('/minha-conta?tab=assinatura')}
-        onOpenLogin={() => navigate('/minha-conta?tab=entrar')}
+        onOpenSubscribe={() => navigate('/leitor/assinatura')}
+        onOpenLogin={() => navigate('/auth/login?next=/leitor')}
         onSelectAuthor={(name) => navigate(`/autor/${encodeURIComponent(name)}`)}
       />
     </div>
