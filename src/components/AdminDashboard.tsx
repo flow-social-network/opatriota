@@ -29,7 +29,16 @@ import {
   Megaphone,
   Bell,
   Users,
-  Shield
+  Shield,
+  ChevronUp,
+  Home,
+  FilePenLine,
+  BookOpen,
+  FileText,
+  PlaySquare,
+  WalletCards,
+  BarChart3,
+  Settings
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -260,6 +269,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     ? queueItems
     : queueItems.filter(i => i.editorialStatus === queueFilter);
 
+  const menuGroups = [
+    { label: 'Início', icon: Home, color: 'bg-[#087CF0]', items: [{ label: 'Dashboard', tab: 'painel', icon: SlidersHorizontal }, { label: 'Minha Tarefa', tab: 'fila', icon: GitPullRequest, badge: queueItems.length }, { label: 'Notificações', tab: 'push', icon: Bell, badge: 3 }, { label: 'Agenda Editorial', tab: 'painel', icon: FileText }] },
+    { label: 'Conteúdo', icon: FilePenLine, color: 'bg-slate-200 text-[#19314D]', items: [{ label: 'Matérias', tab: 'fila', icon: FileText }, { label: 'Pautas', tab: 'fila', icon: GitPullRequest }, { label: 'Editorias', tab: 'identidade', icon: Layers }, { label: 'Colunistas', tab: 'usuarios', icon: Users }, { label: 'Tags e SEO', tab: 'identidade', icon: SlidersHorizontal }, { label: 'Mídia e Arquivos', tab: 'redes', icon: FileText }, { label: 'Comentários', tab: 'fila', icon: FileText }] },
+    { label: 'Jornal Digital', icon: BookOpen, color: 'bg-[#087CF0]', items: [{ label: 'Edições', tab: 'painel', icon: FileText }, { label: 'Criar Edição', tab: 'identidade', icon: FilePenLine }, { label: 'Páginas', tab: 'identidade', icon: FileText }, { label: 'Modelos de Página', tab: 'identidade', icon: BookOpen }, { label: 'Sumário', tab: 'painel', icon: FileText }, { label: 'Revisão e Aprovação', tab: 'fila', icon: CheckCircle2 }, { label: 'Publicação e Agendamento', tab: 'painel', icon: FileText }, { label: 'Edições Publicadas', tab: 'painel', icon: BookOpen }] },
+    { label: 'Editorial', icon: FileText, color: 'bg-[#5935D8]', items: [{ label: 'Em Rascunho', tab: 'fila', icon: FilePenLine, badge: 4 }, { label: 'Em Revisão', tab: 'fila', icon: RefreshCw, badge: 7 }, { label: 'Aprovadas', tab: 'fila', icon: CheckCircle2, badge: 12 }, { label: 'Programadas', tab: 'fila', icon: FileText, badge: 3 }, { label: 'Publicadas', tab: 'painel', icon: CheckCircle2 }, { label: 'Lixeira', tab: 'dedup', icon: FileText }] },
+    { label: 'Multimídia', icon: PlaySquare, color: 'bg-[#F3263C]', items: [{ label: 'Vídeos', tab: 'redes', icon: PlaySquare }, { label: 'Podcasts', tab: 'redes', icon: Bell }, { label: 'Galerias de Fotos', tab: 'redes', icon: FileText }, { label: 'Banco de Mídia', tab: 'redes', icon: FileText }, { label: 'Transmissões ao Vivo', tab: 'redes', icon: Bell }] },
+    { label: 'Financeiro', icon: WalletCards, color: 'bg-[#11B981]', items: [{ label: 'Assinaturas', tab: 'usuarios', icon: WalletCards }, { label: 'Doações', tab: 'usuarios', icon: WalletCards }, { label: 'Pagamentos', tab: 'usuarios', icon: WalletCards }, { label: 'Relatórios Financeiros', tab: 'download', icon: BarChart3 }] },
+    { label: 'Usuários', icon: Users, color: 'bg-[#F4A900]', items: [{ label: 'Equipe da Redação', tab: 'usuarios', icon: Users }, { label: 'Autores e Colunistas', tab: 'usuarios', icon: Users }, { label: 'Papéis e Permissões', tab: 'permissoes', icon: Shield }, { label: 'Usuários', tab: 'usuarios', icon: Users }, { label: 'Convites e Acessos', tab: 'usuarios', icon: Users }] },
+    { label: 'Relatórios', icon: BarChart3, color: 'bg-[#0BB7C7]', items: [{ label: 'Desempenho Editorial', tab: 'painel', icon: BarChart3 }, { label: 'Matérias Mais Lidas', tab: 'painel', icon: BarChart3 }, { label: 'Audiência', tab: 'painel', icon: Users }, { label: 'Exportar Dados', tab: 'download', icon: Download }] },
+    { label: 'Configurações', icon: Settings, color: 'bg-slate-400', items: [{ label: 'Geral', tab: 'integracoes', icon: Settings }, { label: 'Site e Publicação', tab: 'identidade', icon: Settings }, { label: 'Integrações', tab: 'integracoes', icon: SlidersHorizontal }, { label: 'Segurança', tab: 'permissoes', icon: Shield }, { label: 'Logs e Auditoria', tab: 'download', icon: FileText }] },
+  ];
+
   return (
     <div className="min-h-screen bg-[#F5F7FB] text-[#17202A] select-none pb-16">
       {/* Top Admin Bar */}
@@ -303,7 +324,15 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       )}
 
       {/* Main Admin Container */}
-      <div className="max-w-[1360px] mx-auto px-4 py-8">
+      <div className="w-full px-4 py-6 lg:px-6">
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
+        <aside className="order-2 h-fit rounded-2xl border border-[#1D5278] bg-gradient-to-b from-[#062E50] to-[#031B32] p-2 text-white shadow-xl xl:order-1 xl:sticky xl:top-4">
+          <div className="mb-3 flex items-center gap-3 px-3 py-3"><img src="/pwa-icon-192.svg" alt="O Patriota" className="h-12 w-12 rounded-full bg-[#FFCC29] p-1" /><div><p className="font-serif text-xl font-black">O PATRIOTA</p><p className="text-[8px] uppercase tracking-widest text-white/70">Painel administrativo</p></div></div>
+          <div className="space-y-1">
+            {menuGroups.map((group) => { const Icon = group.icon; return <details key={group.label} open={false} className="group rounded-xl border border-white/15 bg-white/[.03] open:bg-white/[.06]"><summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-3 font-bold [&::-webkit-details-marker]:hidden"><span className={`flex h-10 w-10 items-center justify-center rounded-lg ${group.color}`}><Icon className="h-5 w-5" /></span><span className="flex-1">{group.label}</span><ChevronUp className="h-5 w-5 transition-transform group-open:rotate-180" /></summary><div className="space-y-0.5 px-2 pb-2">{group.items.map((item) => { const ItemIcon = item.icon; return <button key={`${group.label}-${item.label}`} onClick={() => setActiveTab(item.tab as Parameters<typeof setActiveTab>[0])} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/85 hover:bg-[#087CF0]/40 hover:text-white cursor-pointer"><ItemIcon className="h-4 w-4 shrink-0" /><span className="flex-1">{item.label}</span>{item.badge ? <span className="rounded-full bg-[#D9233E] px-2 py-0.5 text-[10px] font-black">{item.badge}</span> : null}</button>; })}</div></details>; })}
+          </div>
+        </aside>
+        <section className="order-1 min-w-0 xl:order-2">
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="mb-2 text-[11px] font-bold uppercase tracking-[0.22em] text-[#16803C]">Centro de comando</p>
@@ -564,6 +593,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </div>
         )}
 
+        </section>
+        </div>
       </div>
     </div>
   );
