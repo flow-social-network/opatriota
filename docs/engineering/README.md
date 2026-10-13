@@ -1,29 +1,33 @@
-# Engenharia — O Patriota
+# O Patriota — documentação de engenharia
 
-Documentação baseada no repositório atual. O sistema é um React/Vite com Vercel Functions em `api/`, contratos TypeScript em `packages/contracts` e persistência híbrida em Neon/document store/Blob conforme o módulo.
+Esta documentação descreve o CMS jornalístico real, seus limites atuais e os contratos necessários para evolução sem mocks silenciosos.
 
-## Estado
-- Autenticação editorial/admin: implementada no backend; teste E2E depende de conta autorizada e navegador funcional.
-- Artigos: contratos e rotas existem; cobertura ponta a ponta ainda parcial.
-- Financeiro: adaptadores Efi/Mercado Pago existem; sandbox e webhook precisam de evidência operacional.
-- Mídia: Blob está configurado para alguns fluxos; biblioteca editorial completa ainda é lacuna.
-- Conteúdo estático: `src/data/mockData.ts` e `src/data/pagesData.ts` são fontes demonstrativas/legado e não devem ser tratados como persistência de CMS.
+## Comece por aqui
 
-## Documentos
-- [Arquitetura](system-architecture.md)
-- [Inventário de contratos](contracts-inventory.md)
-- [API](api-reference.md)
-- [Modelo de dados](data-model.md)
-- [Autenticação](authentication-and-authorization.md)
-- [Fluxo editorial](editorial-workflow.md)
-- [Jornal digital](digital-newspaper.md)
-- [Mídia](media-management.md)
-- [Assinaturas e pagamentos](subscriptions-and-payments.md)
-- [Integrações](external-integrations.md)
-- [Auditoria de mocks](fallbacks-and-mocks-audit.md)
-- [Lacunas](implementation-gaps.md)
-- [Roadmap](implementation-roadmap.md)
-- [Estratégia de testes](test-strategy.md)
-- [Rastreabilidade](traceability-matrix.md)
+- [Referência completa do CMS](./cms-complete-reference.md)
+- [Arquitetura do sistema](./system-architecture.md)
+- [API completa](./api-complete-reference.md)
+- [API existente](./api-reference.md)
+- [Banco de dados completo](./database-complete-reference.md)
+- [Modelo de dados](./data-model.md)
+- [Autenticação e autorização](./authentication-and-authorization.md)
+- [Fluxo editorial](./editorial-workflow.md)
+- [Jornal digital](./digital-newspaper.md)
+- [Gestão de mídia](./media-management.md)
+- [Assinaturas e pagamentos](./subscriptions-and-payments.md)
+- [Integrações externas](./external-integrations.md)
+- [Operações e segurança](./operations-security-runbook.md)
 
-Classificações são baseadas em código e testes executados, não somente na existência de componentes.
+## Qualidade e rastreabilidade
+
+- [Inventário de contratos](./contracts-inventory.md)
+- [Estratégia de testes](./test-strategy.md)
+- [Matriz de rastreabilidade](./traceability-matrix.md)
+- [Auditoria de mocks e fallbacks](./fallbacks-and-mocks-audit.md)
+- [Lacunas reais](./implementation-gaps.md)
+- [Roadmap de implementação](./implementation-roadmap.md)
+- [Relatório QA](./QA-REPORT.md)
+
+## Regra de honestidade
+
+Tela existente não significa funcionalidade concluída. Um módulo só pode ser marcado como concluído quando a API, persistência, autorização, validação, auditoria, testes e evidência de recarregamento estiverem funcionando.
