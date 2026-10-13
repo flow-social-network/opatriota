@@ -4,9 +4,8 @@ import { ArticleImage } from './ArticleImage';
 import { 
   Play, 
   Calendar, 
-  MessageSquare, 
-  Clock, 
-  Video, 
+  MessageSquare,
+  Video,
   ArrowRight 
 } from 'lucide-react';
 
@@ -30,17 +29,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   ).slice(0, 4);
 
   const currentLead = carouselArticles[activeSlide] || articles[0];
-
-  // Real-time breaking news items
-  const breakingNews = [
-    { time: '11:20', title: 'Polícia e Metrô divergem sobre danos após ato pró-Lula na Paulista', slug: 'policia-e-metro-divergem-sobre-danos-apos-ato-pro-lula-na-avenida-paulista' },
-    { time: '12:00', title: 'Editorial O Patriota: Protesto é direito; depredação é crime, seja de quem for', slug: 'protesto-e-direito-depredacao-e-crime' },
-    { time: '10:00', title: 'Editorial em Vídeo: Protestar é direito, vandalismo não! Veja a apuração', slug: 'protestar-e-direito-vandalismo-nao' },
-    { time: '14:32', title: 'Congresso analisa pacote para reduzir custo do trabalho e gerar empregos', slug: 'congresso-avanca-em-propostas-para-gerar-empregos-e-reduzir-o-custo-do-trabalho' },
-    { time: '13:15', title: 'Governo do RS e Porto Alegre aceleram obras de proteção contra cheias', slug: 'governo-do-rs-e-porto-alegre-aceleram-obras-de-diques-e-protecao-contra-cheias' },
-    { time: '12:48', title: 'Dólar fecha em queda e bolsa tem alta com expectativa de reformas', slug: 'mercado-reage-positivamente-a-novas-medidas-economicas' },
-    { time: '11:05', title: 'STF retoma julgamentos de temas econômicos relevantes', slug: 'congresso-avanca-em-propostas-para-gerar-empregos-e-reduzir-o-custo-do-trabalho' },
-  ];
 
   // Featured videos list matching reference design
   const featuredVideo = {
@@ -97,8 +85,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section className="mb-10 select-none" aria-label="Destaques Principais">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         
-        {/* COLUMN 1: Main Visual Lead Carousel (~45% / 5.5 cols -> lg:col-span-5 xl:col-span-6) */}
-        <div className="lg:col-span-6 flex flex-col">
+        {/* Destaque visual principal ocupa o espaço liberado pela coluna duplicada de últimas notícias. */}
+        <div className="lg:col-span-8 flex flex-col">
           <div 
             onClick={() => onSelectArticle(currentLead)}
             className="relative group overflow-hidden rounded-lg border border-[#D9DEE7] bg-[#0B2345] cursor-pointer shadow-sm flex-1 min-h-[420px] xl:min-h-[460px] flex flex-col justify-end"
@@ -152,63 +140,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </div>
 
-        {/* COLUMN 2: Últimas Notícias (~27% / 3 cols -> lg:col-span-3) */}
-        <div className="lg:col-span-3 flex flex-col">
-          <div className="bg-white border border-[#D9DEE7] rounded-lg p-4 flex-1 flex flex-col justify-between shadow-2xs">
-            <div>
-              {/* Header */}
-              <div className="flex items-center justify-between pb-3 mb-3 border-b-2 border-[#0B2345]">
-                <h2 className="font-serif text-base font-black text-[#0B2345] tracking-tight">
-                  Últimas Notícias
-                </h2>
-                <button
-                  onClick={() => onNavigateCategory && onNavigateCategory('todos')}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[#0B5FFF] hover:text-[#0B2345] uppercase tracking-wider transition-colors cursor-pointer"
-                >
-                  <span>VER TODAS</span>
-                  <ArrowRight className="w-3 h-3" />
-                </button>
-              </div>
-
-              {/* Timestamped List */}
-              <ul className="space-y-3.5 text-xs divide-y divide-[#F1F3F5]">
-                {breakingNews.map((item, idx) => (
-                  <li 
-                    key={idx} 
-                    onClick={() => {
-                      const found = articles.find(a => a.slug === item.slug) || articles[idx % articles.length];
-                      if (found) onSelectArticle(found);
-                    }}
-                    className={`group cursor-pointer flex items-start gap-2.5 ${idx > 0 ? 'pt-3' : ''}`}
-                  >
-                    <div className="flex items-center gap-1.5 shrink-0 pt-0.5">
-                      <span className="w-2 h-2 rounded-full bg-[#DC2626] shrink-0" />
-                      <span className="font-bold text-[#DC2626] text-[11px] font-mono">
-                        {item.time}
-                      </span>
-                    </div>
-                    <p className="text-[#17202A] group-hover:text-[#0B5FFF] transition-colors leading-snug font-medium line-clamp-2">
-                      {item.title}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Bottom link */}
-            <div className="pt-3 border-t border-[#F1F3F5] text-center">
-              <button
-                onClick={() => onNavigateCategory && onNavigateCategory('todos')}
-                className="text-xs font-bold text-[#0B5FFF] hover:underline cursor-pointer"
-              >
-                Ver mais notícias →
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* COLUMN 3: Vídeos em Destaque (~28% / 3 cols -> lg:col-span-3) */}
-        <div className="lg:col-span-3 flex flex-col">
+        {/* Vídeos em destaque ocupam a coluna lateral restante. */}
+        <div className="lg:col-span-4 flex flex-col">
           <div className="bg-white border border-[#D9DEE7] rounded-lg p-4 flex-1 flex flex-col justify-between shadow-2xs">
             <div>
               {/* Header */}
