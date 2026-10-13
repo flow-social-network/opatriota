@@ -38,6 +38,7 @@ import { SubscriberProfileTab } from './SubscriberProfileTab';
 import { SubscriberNotificationsTab } from './SubscriberNotificationsTab';
 import { SubscriberPrivacyTab } from './SubscriberPrivacyTab';
 import { SubscriberJournalTab } from './SubscriberJournalTab';
+import { SubscriberFeaturePage } from './SubscriberFeaturePage';
 
 interface SubscriberPortalProps {
   currentUser: UserSession | null;
@@ -273,14 +274,14 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
   return (
     <div className="min-h-screen bg-[#F1F7FC] text-[#17202A] select-none">
       <header className="sticky top-0 z-30 bg-gradient-to-r from-[#061D40] via-[#0A3470] to-[#05658C] text-white shadow-lg">
-        <div className="mx-auto flex h-[86px] max-w-[1780px] items-center gap-5 px-4 lg:px-7">
+        <div className="flex h-[86px] w-full items-center gap-5 px-4 lg:px-7">
           <div className="flex min-w-[245px] items-center gap-3"><img src="/pwa-icon-192.svg" alt="O Patriota" className="h-14 w-14 rounded-full border-2 border-white/80 bg-[#FFCC29] p-1 object-contain" /><div><div className="font-serif text-3xl font-black leading-none tracking-tight">O PATRIOTA</div><div className="mt-1 text-[9px] font-bold uppercase tracking-[.16em] text-white/80">Informação com liberdade, por um Brasil mais forte</div></div></div>
           <div className="hidden max-w-2xl flex-1 items-center rounded-lg bg-white/95 px-4 py-2.5 text-[#49617F] md:flex"><Search className="mr-3 h-5 w-5 text-[#0B5FFF]" /><input aria-label="Buscar na Área do Leitor" placeholder="Buscar matérias, colunas, autores..." className="w-full bg-transparent text-sm outline-none" /></div>
           <div className="ml-auto flex items-center gap-4"><button aria-label="Notificações" onClick={() => setCurrentSubpage('notificacoes')} className="relative rounded-full p-2 hover:bg-white/10"><Bell className="h-6 w-6" /><span className="absolute right-0 top-0 rounded-full bg-[#EF2B2D] px-1.5 text-[10px] font-black">3</span></button><div className="hidden items-center gap-3 border-l border-white/20 pl-4 sm:flex"><img src={currentUser?.avatarUrl || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'} alt="" className="h-12 w-12 rounded-full border-2 border-white object-cover" /><div><b className="block text-sm">{currentUser?.name || 'Leitor'}</b><span className="text-xs text-white/75">Leitor Premium</span></div></div><button onClick={onLogout} aria-label="Sair" className="rounded p-2 hover:bg-white/10"><LogOut className="h-5 w-5" /></button></div>
         </div>
       </header>
-      <div className="mx-auto flex max-w-[1780px]">
-        <div className="max-w-[1440px] flex-1 px-4 py-5 sm:px-6 lg:px-7">
+      <div className="flex w-full">
+        <div className="w-full px-3 py-5 sm:px-5 lg:px-7">
 
         {/* IF USER NOT LOGGED IN: SHOW AUTHENTICATION PAGES */}
         {!currentUser ? (
@@ -446,6 +447,17 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                 <SubscriberDashboardTab
                   currentUser={currentUser}
                   bookmarkedArticles={bookmarkedArticles}
+                  onSelectArticle={onSelectArticle}
+                  onNavigate={setCurrentSubpage}
+                />
+              )}
+
+              {/* PÁGINAS COMPLETAS DO PAINEL */}
+              {['editorias', 'colunistas', 'videos', 'podcasts', 'newsletter'].includes(currentSubpage) && (
+                <SubscriberFeaturePage
+                  page={currentSubpage}
+                  currentUser={currentUser}
+                  articles={articles}
                   onSelectArticle={onSelectArticle}
                   onNavigate={setCurrentSubpage}
                 />
