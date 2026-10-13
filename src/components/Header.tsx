@@ -982,7 +982,7 @@ export const Header: React.FC<HeaderProps> = ({
                               {item.label} — SEÇÕES
                             </span>
                           </div>
-                          <div className="py-1 max-h-72 overflow-y-auto">
+                          <div className="py-1 max-h-72 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                             {item.subcategories!.map((sub) => (
                               <button
                                 key={sub.slug}
@@ -1085,7 +1085,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* CORPO DA GAVETA: LISTA COMPLETA DE EDITORIAS E SERVIÇOS */}
-              <div className="flex-1 overflow-y-auto divide-y divide-slate-100">
+              <div className="flex-1 overflow-y-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden divide-y divide-slate-100">
                 {/* 1. Editorias Principais com Chevrons */}
                 <div className="px-2 py-1.5 space-y-0.5">
                   {mobileDrawerMenuItems.map((item) => {
