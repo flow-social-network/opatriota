@@ -12,6 +12,7 @@ import { AdminDedupTab } from './admin/AdminDedupTab';
 import { AdminExportTab } from './admin/AdminExportTab';
 import { UsersPage } from '../pages/admin/UsersPage';
 import { PermissionsPage } from '../pages/admin/PermissionsPage';
+import { IntegrationsManager } from './admin/IntegrationsManager';
 import { DEFAULT_WEBPUSH_CONFIG } from '../services/siteConfigService';
 import JSZip from 'jszip';
 import { 
@@ -54,7 +55,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   onSavePortalSettings,
   initialTab = 'painel'
 }) => {
-  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes'>(
+  const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes' | 'integracoes'>(
     (initialTab as any) || 'painel'
   );
   const [isSyncing, setIsSyncing] = useState(false);
@@ -418,6 +419,16 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('integracoes')}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
+              activeTab === 'integracoes' ? 'bg-[#07172E] text-white shadow-md' : 'text-[#64748B] hover:bg-[#F1F5F9] hover:text-[#07172E]'
+            }`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            <span>Integrações</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab('download')}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-t font-bold text-xs transition cursor-pointer ${
               activeTab === 'download' ? 'bg-white text-[#16803C] border-t-2 border-[#16803C] shadow-xs' : 'text-[#16803C] hover:bg-white/50'
@@ -494,6 +505,8 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             }}
           />
         )}
+
+        {activeTab === 'integracoes' && <IntegrationsManager />}
 
         {/* TAB 7: CENTRAL DE PUBLICIDADE & ADSENSE */}
         {activeTab === 'publicidade' && (

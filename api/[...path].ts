@@ -5,6 +5,7 @@ import {
   json, newId, readBody, validEmail, verifyFirebaseIdToken
 } from './_lib/billing';
 import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
+import { listIntegrations, saveIntegration, testIntegration } from './_lib/integrations';
 import { handleCors } from './_lib/cors';
 import { authenticateEditorialUser, authenticatePublicUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, registerPublicUser, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
 
@@ -103,7 +104,11 @@ export default async function handler(req: Req, res: Res) {
       throw new Error('Invalid Firebase ID token');
     });
 
-    if (path === 'auth/register' && method === 'POST') {
+
+  if (path === 'admin/integrations' && method === 'GET') { if (!requireRole(identity, ADMINS, res)) return; return json(res, 200, { integrations: await listIntegrations() }); }
+  if (path === 'admin/integrations' && method === 'POST') { const body = cleanObject(await readBody(req)); if (!requireRole(identity, ADMINS, res)) return; const id = String(body.id || '') as Parameters<typeof saveIntegration>[0]['id']; if (!['ai','payments','email','analytics','social','media','auth'].includes(id)) return json(res, 400, { error: 'INVALID_INTEGRATION' }); return json(res, 200, await saveIntegration({ ...body, id }, identity!.uid)); }
+  if (path.match(/^admin\/integrations\/[^/]+\/test$/) && method === 'POST') { if (!requireRole(identity, ADMINS, res)) return; const id = path.split('/')[2] as Parameters<typeof testIntegration>[0]; return json(res, 200, await testIntegration(id)); }
+  if (path === 'auth/register' && method === 'POST') {
       const body = cleanObject(await readBody(req));
       const name = String(body.name || '').trim();
       const email = String(body.email || '').trim().toLowerCase();
