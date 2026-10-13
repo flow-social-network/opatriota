@@ -7,7 +7,6 @@ import {
   DEFAULT_PORTAL_SETTINGS,
 } from '../../services/siteConfigService';
 import {
-  INITIAL_ARTICLES,
   INITIAL_FACT_CHECKS,
   INITIAL_RSS_SOURCES,
   INITIAL_EDITORIAL_QUEUE,
@@ -90,7 +89,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const currentUser = auth?.currentUser ?? null;
   const { showToast } = useToast();
 
-  const [articles, setArticles] = useState<Article[]>(INITIAL_ARTICLES);
+  const [articles, setArticles] = useState<Article[]>([]);
   const [factChecks, setFactChecks] = useState<FactCheckItem[]>(INITIAL_FACT_CHECKS);
   const [sources, setSources] = useState<RssSource[]>(INITIAL_RSS_SOURCES);
   const [queueItems, setQueueItems] = useState<EditorialQueueItem[]>(INITIAL_EDITORIAL_QUEUE);
@@ -132,18 +131,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
     void Promise.all([
       load<SubscriptionPlan[]>('/plans', setSubscriptionPlans),
       load<Article[]>('/articles', (apiArticles) => {
-        setArticles(() => {
-          if (!apiArticles || !apiArticles.length) return INITIAL_ARTICLES;
-          const apiMap = new Map(apiArticles.map(a => [a.id, a]));
-          const merged = INITIAL_ARTICLES.map(initial => apiMap.get(initial.id) || initial);
-          for (const apiArt of apiArticles) {
-            if (!INITIAL_ARTICLES.some(init => init.id === apiArt.id)) {
-              merged.push(apiArt);
-            }
-          }
-          return merged;
-        });
-      }),
+        setArticles(Array.isArray(apiArticles) ? apiArticles : []);
+      }, Boolean(currentUser?.id)),
       load<FactCheckItem[]>('/fact-checks', setFactChecks),
       load<RssSource[]>('/editorial/sources', setSources, true),
       load<EditorialQueueItem[]>('/editorial/queue', setQueueItems, true),

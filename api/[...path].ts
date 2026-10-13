@@ -743,12 +743,17 @@ export default async function handler(req: Req, res: Res) {
     const isEditorial = resource.collection.startsWith('editorial');
     const required = isEditorial ? STAFF : resource.collection === 'articles' ? CONTENT_MANAGERS : resource.collection === 'pages' || resource.collection === 'categories' ? CONTENT_MANAGERS : ADMINS;
 
-    if (method === 'GET' && !resource.id) {
-      if (isEditorial && !requireRole(identity, STAFF, res)) return;
-      let records = await documentList(resource.collection);
-      if (!isEditorial) records = publicRecords(resource.collection, records);
-      return json(res, 200, records);
-    }
+  if (method === 'GET' && !resource.id) {
+  if (isEditorial && !requireRole(identity, STAFF, res)) return;
+  let records = await documentList(resource.collection);
+  if (resource.collection === 'articles') {
+    // O portal público vê somente publicadas; a redação autenticada vê sua base editorial completa.
+    if (!identity || !STAFF.has(identity.role)) records = publicRecords(resource.collection, records);
+  } else if (!isEditorial) {
+    records = publicRecords(resource.collection, records);
+  }
+  return json(res, 200, records);
+  }
     if (method === 'GET' && resource.id) {
       const record = await documentGet(resource.collection, resource.id);
       if (!record) return json(res, 404, { error: 'NOT_FOUND', message: 'Registro não encontrado.' });

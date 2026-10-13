@@ -1,6 +1,6 @@
 # Lacunas reais
 
-1. Testes E2E autenticados de redação, admin e leitor ainda não verificados.
+1. Testes E2E autenticados de redação, admin e leitor ainda não verificados; Playwright continua dependente de biblioteca nativa do ambiente.
 2. Biblioteca de mídia editorial completa (upload + metadados + associação + reabertura) ainda não comprovada.
 3. Páginas institucionais e jornal digital precisam de CRUD/preview/publicação persistentes comprovados.
 4. Histórico de versões e imutabilidade de edição publicada precisam de contrato explícito.
