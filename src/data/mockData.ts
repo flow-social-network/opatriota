@@ -325,6 +325,44 @@ export const INITIAL_MEDIA_ITEMS: MediaItem[] = [
 
 export const INITIAL_ARTICLES: Article[] = [
   {
+    id: 'art-economia-orcamento-pressao-2026',
+    slug: 'orcamento-sob-pressao-r-105-5-bilhoes-em-despesas-pressionam-o-orcamento-federal',
+    title: 'Orçamento sob pressão: R$ 105,5 bilhões em despesas pressionam o orçamento federal',
+    subtitle: 'Levantamentos da Instituição Fiscal Independente e do Tesouro Nacional mostram o peso de compromissos acumulados e da revisão do déficit projetado para 2026.',
+    kicker: 'ALERTA FISCAL',
+    category: 'economia',
+    accessLevel: 'aberto',
+    editorialStatus: 'PUBLICADA',
+    priority: 'alta',
+    content: `O orçamento federal enfrenta uma pressão que merece atenção: despesas de anos anteriores continuam disputando espaço com os gastos do exercício atual. Levantamento da Instituição Fiscal Independente (IFI), órgão ligado ao Senado Federal, destacou um estoque de R$ 105,5 bilhões em restos a pagar, valor que representa um desafio para a execução do orçamento de 2026.
+
+Os chamados restos a pagar são despesas empenhadas em exercícios anteriores, mas que não foram pagas até o encerramento do ano. Dependendo da situação, o pagamento pode ocorrer posteriormente, desde que sejam respeitadas as regras orçamentárias e financeiras.
+
+O estoque compete com os recursos disponíveis para despesas do exercício corrente. Isso não significa automaticamente que todas as despesas serão canceladas ou que haverá um corte de igual valor em determinada política pública, mas reduz o espaço para novas despesas quando há limitação de caixa.
+
+A situação fiscal ganhou novo sinal de alerta em setembro, quando o governo elevou a previsão de déficit primário efetivo de 2026 para R$ 80,9 bilhões, ante R$ 52 bilhões previstos anteriormente. Na mesma revisão, a necessidade de contenção de despesas foi estimada em R$ 16,1 bilhões.
+
+Outro dado divulgado pelo Tesouro Nacional aponta estoque total de restos a pagar de R$ 391,5 bilhões para 2026. Esse número abrange diferentes tipos de despesas e não deve ser confundido com os R$ 105,5 bilhões destacados pela IFI.
+
+A Saúde merece atenção especial porque depende de financiamento contínuo para manter o SUS, hospitais, medicamentos e programas públicos. Os dados citados, porém, não permitem afirmar que R$ 105,5 bilhões foram retirados diretamente da Saúde ou que esse valor inteiro deixou de ser pago. É necessário acompanhar a execução detalhada do orçamento, os pagamentos efetivados e eventuais bloqueios.
+
+A combinação entre restos a pagar, resultado primário, contingenciamentos e execução orçamentária permitirá dimensionar o impacto concreto sobre investimentos e serviços públicos. O governo deve explicar como pretende administrar esses compromissos, enquanto os órgãos de fiscalização devem continuar monitorando a execução do orçamento.`,
+    author: 'Redação O Patriota',
+    authorId: 'usr-redacao',
+    authorRole: 'Redação',
+    publishedAt: '13 de outubro de 2026 às 09:00',
+    updatedAt: '13 de outubro de 2026 às 09:00',
+    readTimeMinutes: 5,
+    imageUrl: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-oLYFRoMi8AMF5quXhBaTC3A6cgQzZT.png',
+    imageCaption: 'Ilustração sobre a pressão fiscal e o orçamento federal.',
+    imageCredits: 'O Patriota / imagem editorial',
+    sourceName: 'IFI/Senado Federal, Tesouro Nacional e CNN Brasil',
+    sourceUrl: 'https://www12.senado.leg.br/ifi',
+    sourcesConsulted: ['Instituição Fiscal Independente — Senado Federal', 'Tesouro Nacional — restos a pagar', 'CNN Brasil — projeções fiscais de 2026'],
+    tags: ['Economia', 'Orçamento', 'Contas Públicas', 'Restos a Pagar', 'Déficit Primário', 'Saúde'],
+    auditLog: [{ id: 'aud-economia-2026-1', timestamp: '13/10/2026 09:00', userName: 'Redação O Patriota', userRole: 'editor_chefe', action: 'Publicação autorizada de destaque econômico com fontes identificadas' }]
+  },
+  {
     id: 'art-video-protestar-direito',
     slug: 'protestar-e-direito-vandalismo-nao',
     title: 'PROTESTAR É DIREITO, VANDALISMO NÃO!',
