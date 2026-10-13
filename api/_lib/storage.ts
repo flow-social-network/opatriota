@@ -9,6 +9,7 @@ export type DatabaseProvider = 'firestore' | 'postgres' | 'mysql' | 'local_disk'
 
 let mysqlPool: Promise<MysqlPool> | undefined;
 let postgresPool: Promise<PostgresPool> | undefined;
+let postgresReadPool: Promise<PostgresPool> | undefined;
 
 const DATA_DIR = join(process.cwd(), '.data');
 const DATA_FILE = join(DATA_DIR, 'store.json');
@@ -87,33 +88,44 @@ function getPostgresConnectionUrls(): string[] {
   ].filter((value, index, urls): value is string => Boolean(value) && urls.indexOf(value) === index);
 }
 
+async function createPostgresPool(connectionUrls: string[], poolLabel: string): Promise<PostgresPool> {
+  if (!connectionUrls.length) throw new Error(`${poolLabel} não configurado`);
+  const { Pool } = await import('pg');
+  let lastError: unknown;
+  for (const connectionString of connectionUrls) {
+    const candidate = new Pool({ connectionString, max: Number(process.env.POSTGRES_POOL_MAX || 10), idleTimeoutMillis: 30000 });
+    try {
+      const client = await candidate.connect();
+      client.release();
+      return candidate;
+    } catch (error) {
+      lastError = error;
+      await candidate.end().catch(() => undefined);
+    }
+  }
+  throw lastError instanceof Error ? lastError : new Error(`Nenhuma conexão PostgreSQL disponível para ${poolLabel}`);
+}
+
 async function getPostgresPool(): Promise<PostgresPool> {
   const connectionUrls = getPostgresConnectionUrls();
   if (!connectionUrls.length) throw new Error('DATABASE_URL or POSTGRES_URL is required when DATABASE_PROVIDER=postgres');
-  if (!postgresPool) {
-    postgresPool = (async () => {
-      const { Pool } = await import('pg');
-      let lastError: unknown;
-
-      for (const connectionString of connectionUrls) {
-        const candidate = new Pool({ connectionString, max: Number(process.env.POSTGRES_POOL_MAX || 10) });
-        try {
-          const client = await candidate.connect();
-          client.release();
-          return candidate;
-        } catch (error) {
-          lastError = error;
-          await candidate.end().catch(() => undefined);
-        }
-      }
-
-      throw lastError instanceof Error ? lastError : new Error('Nenhuma conexão PostgreSQL disponível');
-    })().catch((error) => {
-      postgresPool = undefined;
-      throw error;
-    });
-  }
+  if (!postgresPool) postgresPool = createPostgresPool(connectionUrls, 'principal').catch((error) => { postgresPool = undefined; throw error; });
   return postgresPool;
+}
+
+function getPostgresReadConnectionUrls(): string[] {
+  return [
+    process.env.DATABASE_READ_REPLICA_URL,
+    process.env.NEON_READ_DATABASE_URL,
+    process.env.READ_DATABASE_URL,
+  ].filter((value, index, urls): value is string => Boolean(value) && urls.indexOf(value) === index);
+}
+
+async function getPostgresReadPool(): Promise<PostgresPool> {
+  const readUrls = getPostgresReadConnectionUrls();
+  if (!readUrls.length) return getPostgresPool();
+  if (!postgresReadPool) postgresReadPool = createPostgresPool(readUrls, 'réplica de leitura').catch((error) => { postgresReadPool = undefined; throw error; });
+  return postgresReadPool;
 }
 
 function decodeJsonObject(value: unknown): Record<string, any> {
@@ -124,7 +136,7 @@ function decodeJsonObject(value: unknown): Record<string, any> {
 }
 
 async function postgresGet(collection: string, documentId: string) {
-  const pool = await getPostgresPool();
+  const pool = await getPostgresReadPool();
   const result = await pool.query('SELECT document_id, data FROM public.opatriota_documents WHERE collection_name = $1 AND document_id = $2', [collection, documentId]);
   const row = result.rows[0];
   return row ? { id: row.document_id, ...decodeJsonObject(row.data) } : null;
@@ -142,7 +154,7 @@ async function postgresWrite(collection: string, documentId: string, fields: Rec
 }
 
 async function postgresList(collection: string) {
-  const pool = await getPostgresPool();
+  const pool = await getPostgresReadPool();
   const result = await pool.query('SELECT document_id, data FROM public.opatriota_documents WHERE collection_name = $1 ORDER BY updated_at DESC', [collection]);
   return result.rows.map((row) => ({ id: row.document_id, ...decodeJsonObject(row.data) }));
 }
