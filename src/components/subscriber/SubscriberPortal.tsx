@@ -418,16 +418,6 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
                 })}
               </nav>
 
-              {/* Logout Button */}
-              <div className="pt-4 border-t border-[#D9DEE7]">
-                <button
-                  onClick={onLogout}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-bold text-[#B42318] hover:bg-[#FEF3F2] rounded transition cursor-pointer"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span>ENCERRAR SESSÃO</span>
-                </button>
-              </div>
             </aside>
 
             {/* RIGHT CONTENT: SELECTED SUBPAGE */}
@@ -528,6 +518,17 @@ export const SubscriberPortal: React.FC<SubscriberPortalProps> = ({
 
         </div>
       </div>
+      <footer className="border-t border-[#D7E5F2] bg-white px-4 py-3 text-xs text-[#5D7189] sm:px-7">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <p>© 2026 O PATRIOTA · Área do Leitor</p>
+          <nav aria-label="Links do sistema" className="flex flex-wrap gap-x-4 gap-y-1">
+            <a href="/" className="hover:text-[#0B5FFF]">Voltar ao site</a>
+            <a href="/termos-de-uso" className="hover:text-[#0B5FFF]">Termos de uso</a>
+            <a href="/politica-de-privacidade" className="hover:text-[#0B5FFF]">Privacidade</a>
+            <button type="button" onClick={onLogout} className="font-semibold text-[#B42318] hover:text-[#8F1D13]">Sair da conta</button>
+          </nav>
+        </div>
+      </footer>
     </div>
   );
 };
