@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Article } from '../types';
 import { ArticleImage } from './ArticleImage';
 import { 
@@ -29,6 +29,14 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   ).slice(0, 4);
 
   const currentLead = carouselArticles[activeSlide] || articles[0];
+
+  useEffect(() => {
+    if (carouselArticles.length < 2) return;
+    const interval = window.setInterval(() => {
+      setActiveSlide((current) => (current + 1) % carouselArticles.length);
+    }, 8000);
+    return () => window.clearInterval(interval);
+  }, [carouselArticles.length]);
 
   // Featured videos list matching reference design
   const featuredVideo = {
