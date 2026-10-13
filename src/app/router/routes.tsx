@@ -87,6 +87,7 @@ export const router = createBrowserRouter([
 
   // 2. Redação Jornalística
   { path: '/auth/login/redacao', element: <LazyAuth><NewsroomLoginPage /></LazyAuth> },
+  { path: '/auth/redacao/login', element: <Navigate to="/auth/login/redacao" replace /> },
   { path: '/redacao/login', element: <Navigate to="/auth/login/redacao" replace /> },
   { path: '/auth/esqueci-a-senha/redacao', element: <LazyAuth><NewsroomForgotPasswordPage /></LazyAuth> },
   { path: '/redacao/esqueci-a-senha', element: <Navigate to="/auth/esqueci-a-senha/redacao" replace /> },
