@@ -61,7 +61,7 @@ export default function AdminPage() {
   };
 
   const initialTab = (section && tabMapping[section]) || 'painel';
-  const completeModules = ['conteudo', 'jornal-digital', 'editorial', 'multimidia', 'financeiro', 'usuarios', 'relatorios', 'configuracoes'];
+  const completeModules = ['conteudo', 'jornal-digital', 'editorial', 'multimidia', 'financeiro', 'usuarios', 'relatorios', 'integracoes', 'configuracoes', 'seguranca', 'suporte'];
 
   if (section && completeModules.includes(section)) {
     return <AdminModulePage />;
@@ -82,7 +82,8 @@ export default function AdminPage() {
       portalSettings={portalSettings}
       onSavePortalSettings={savePortalSettings}
       initialTab={initialTab}
-      onNavigate={(nextSection) => navigate(`/admin/${nextSection}`)}
+      currentSection={section || 'painel'}
+      onNavigate={(nextSection) => navigate(nextSection === 'painel' ? '/admin' : `/admin/${nextSection}`)}
     />
   );
 }

@@ -38,7 +38,10 @@ import {
   PlaySquare,
   WalletCards,
   BarChart3,
-  Settings
+  Settings,
+  LifeBuoy,
+  Menu,
+  X
 } from 'lucide-react';
 
 interface AdminDashboardProps {
@@ -51,6 +54,7 @@ interface AdminDashboardProps {
   portalSettings: PortalSettings;
   onSavePortalSettings: (newSettings: PortalSettings) => void;
   initialTab?: string;
+  currentSection?: string;
   onNavigate?: (section: string) => void;
 }
 
@@ -64,6 +68,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
   portalSettings,
   onSavePortalSettings,
   initialTab = 'painel',
+  currentSection,
   onNavigate
 }) => {
   const [activeTab, setActiveTab] = useState<'painel' | 'fila' | 'fontes' | 'dedup' | 'identidade' | 'redes' | 'publicidade' | 'push' | 'download' | 'usuarios' | 'permissoes' | 'integracoes'>(
@@ -271,14 +276,19 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     ? queueItems
     : queueItems.filter(i => i.editorialStatus === queueFilter);
 
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sectionMatches = (target: string) => (currentSection || 'painel') === target || (target === 'painel' && initialTab === 'painel');
   const menuGroups = [
-    { label: 'Visão geral', icon: Home, color: 'bg-[#087CF0]', items: [{ label: 'Dashboard administrativo', tab: 'painel', icon: SlidersHorizontal }, { label: 'Central de alertas', tab: 'push', icon: Bell, badge: 3 }, { label: 'Atividade do sistema', tab: 'download', icon: BarChart3 }] },
-    { label: 'Gestão de conteúdo', icon: FilePenLine, color: 'bg-[#5935D8]', items: [{ label: 'Materiais publicados', tab: 'conteudo', icon: FileText }, { label: 'Editorias e categorias', tab: 'conteudo', icon: Layers }, { label: 'Autores e colunistas', tab: 'usuarios', icon: Users }, { label: 'Mídia e arquivos', tab: 'multimidia', icon: FileText }] },
-    { label: 'Jornal digital', icon: BookOpen, color: 'bg-[#087CF0]', items: [{ label: 'Edições', tab: 'jornal-digital', icon: BookOpen }, { label: 'Modelos de página', tab: 'jornal-digital', icon: FileText }, { label: 'Publicação', tab: 'jornal-digital', icon: CheckCircle2 }] },
-    { label: 'Assinaturas e cobrança', icon: WalletCards, color: 'bg-[#11B981]', items: [{ label: 'Planos de assinatura', tab: 'financeiro', icon: WalletCards }, { label: 'Pagamentos', tab: 'financeiro', icon: WalletCards }, { label: 'Doações', tab: 'financeiro', icon: WalletCards }, { label: 'Reembolsos e estornos', tab: 'financeiro', icon: RefreshCw }] },
-    { label: 'Usuários e acesso', icon: Users, color: 'bg-[#F4A900]', items: [{ label: 'Usuários', tab: 'usuarios', icon: Users }, { label: 'Papéis e permissões', tab: 'usuarios', icon: Shield }, { label: 'Convites e acessos', tab: 'usuarios', icon: Users }] },
-    { label: 'Relatórios', icon: BarChart3, color: 'bg-[#0BB7C7]', items: [{ label: 'Indicadores do portal', tab: 'relatorios', icon: BarChart3 }, { label: 'Audiência', tab: 'relatorios', icon: Users }, { label: 'Exportar dados', tab: 'relatorios', icon: Download }] },
-    { label: 'Configurações do sistema', icon: Settings, color: 'bg-slate-400', items: [{ label: 'Geral', tab: 'configuracoes', icon: Settings }, { label: 'Site e publicação', tab: 'configuracoes', icon: Settings }, { label: 'Integrações', tab: 'configuracoes', icon: SlidersHorizontal }, { label: 'Segurança e auditoria', tab: 'configuracoes', icon: Shield }] },
+    { label: 'Início', icon: Home, color: 'bg-[#087CF0]', items: [{ label: 'Dashboard', section: 'painel', icon: SlidersHorizontal }] },
+    { label: 'Usuários e Permissões', icon: Users, color: 'bg-[#F4A900]', items: [{ label: 'Usuários', section: 'usuarios', icon: Users }, { label: 'Papéis e Permissões', section: 'usuarios', icon: Shield }, { label: 'Convites e Acessos', section: 'usuarios', icon: Users }] },
+    { label: 'Gestão Editorial', icon: FilePenLine, color: 'bg-[#5935D8]', items: [{ label: 'Conteúdo', section: 'conteudo', icon: FileText }, { label: 'Editorias', section: 'conteudo', icon: Layers }, { label: 'Comentários', section: 'conteudo', icon: FileText }, { label: 'Mídia e Arquivos', section: 'multimidia', icon: FileText }] },
+    { label: 'Jornal Digital', icon: BookOpen, color: 'bg-[#087CF0]', items: [{ label: 'Edições', section: 'jornal-digital', icon: BookOpen }, { label: 'Páginas e Modelos', section: 'jornal-digital', icon: FileText }, { label: 'Publicação e Agenda', section: 'jornal-digital', icon: CheckCircle2 }] },
+    { label: 'Financeiro', icon: WalletCards, color: 'bg-[#11B981]', items: [{ label: 'Assinaturas', section: 'financeiro', icon: WalletCards }, { label: 'Pagamentos', section: 'financeiro', icon: WalletCards }, { label: 'Doações', section: 'financeiro', icon: WalletCards }, { label: 'Reembolsos e Estornos', section: 'financeiro', icon: RefreshCw }] },
+    { label: 'Relatórios e Métricas', icon: BarChart3, color: 'bg-[#0BB7C7]', items: [{ label: 'Desempenho Editorial', section: 'relatorios', icon: BarChart3 }, { label: 'Audiência', section: 'relatorios', icon: Users }, { label: 'Exportar Dados', section: 'relatorios', icon: Download }] },
+    { label: 'Integrações', icon: SlidersHorizontal, color: 'bg-[#0D8B8B]', items: [{ label: 'Provedores e Serviços', section: 'integracoes', icon: SlidersHorizontal }, { label: 'E-mail e Analytics', section: 'integracoes', icon: Bell }] },
+    { label: 'Configurações', icon: Settings, color: 'bg-slate-400', items: [{ label: 'Geral', section: 'configuracoes', icon: Settings }, { label: 'Site e Publicação', section: 'configuracoes', icon: Settings }, { label: 'Preferências', section: 'configuracoes', icon: SlidersHorizontal }] },
+    { label: 'Segurança e Auditoria', icon: Shield, color: 'bg-[#40516B]', items: [{ label: 'Segurança', section: 'seguranca', icon: Shield }, { label: 'Logs e Auditoria', section: 'seguranca', icon: FileText }] },
+    { label: 'Sistema e Suporte', icon: LifeBuoy, color: 'bg-[#64748B]', items: [{ label: 'Ajuda e Suporte', section: 'suporte', icon: LifeBuoy }, { label: 'Sobre o Sistema', section: 'suporte', icon: FileText }] },
   ];
 
   return (
@@ -326,11 +336,9 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
       {/* Main Admin Container */}
       <div className="w-full px-4 pb-6 pt-[98px] lg:px-6">
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[340px_minmax(0,1fr)]">
-        <aside className="order-2 rounded-2xl border border-[#1D5278] bg-gradient-to-b from-[#062E50] to-[#031B32] p-2 text-white shadow-xl xl:order-1 xl:fixed xl:bottom-0 xl:left-0 xl:top-[74px] xl:z-40 xl:w-[340px] xl:overflow-y-auto xl:rounded-none xl:border-l-0 xl:border-b-0 xl:border-t-0">
-          <div className="mb-3 flex items-center gap-3 px-3 py-3"><img src="/pwa-icon-192.svg" alt="O Patriota" className="h-12 w-12 rounded-full bg-[#FFCC29] p-1" /><div><p className="font-serif text-xl font-black">O PATRIOTA</p><p className="text-[8px] uppercase tracking-widest text-white/70">Painel administrativo</p></div></div>
-          <div className="space-y-1">
-            {menuGroups.map((group) => { const Icon = group.icon; return <details key={group.label} open={false} className="group rounded-xl border border-white/15 bg-white/[.03] open:bg-white/[.06]"><summary className="flex cursor-pointer list-none items-center gap-3 px-3 py-3 font-bold [&::-webkit-details-marker]:hidden"><span className={`flex h-10 w-10 items-center justify-center rounded-lg ${group.color}`}><Icon className="h-5 w-5" /></span><span className="flex-1">{group.label}</span><ChevronUp className="h-5 w-5 transition-transform group-open:rotate-180" /></summary><div className="space-y-0.5 px-2 pb-2">{group.items.map((item) => { const ItemIcon = item.icon; return <button key={`${group.label}-${item.label}`} onClick={() => onNavigate && ['conteudo', 'jornal-digital', 'editorial', 'multimidia', 'financeiro', 'usuarios', 'relatorios', 'configuracoes'].includes(item.tab) ? onNavigate(item.tab) : setActiveTab(item.tab as Parameters<typeof setActiveTab>[0])} className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm text-white/85 hover:bg-[#087CF0]/40 hover:text-white cursor-pointer"><ItemIcon className="h-4 w-4 shrink-0" /><span className="flex-1">{item.label}</span>{item.badge ? <span className="rounded-full bg-[#D9233E] px-2 py-0.5 text-[10px] font-black">{item.badge}</span> : null}</button>; })}</div></details>; })}
-          </div>
+        <aside className={`order-2 rounded-2xl border border-[#1D5278] bg-gradient-to-b from-[#062E50] to-[#031B32] p-2 text-white shadow-xl xl:order-1 xl:fixed xl:bottom-0 xl:left-0 xl:top-[74px] xl:z-40 xl:overflow-y-auto xl:rounded-none xl:border-l-0 xl:border-b-0 xl:border-t-0 ${sidebarCollapsed ? 'xl:w-[82px]' : 'xl:w-[300px]'}`}>
+          <div className={`mb-3 flex items-center ${sidebarCollapsed ? 'justify-center' : 'justify-between'} gap-3 px-3 py-3`}><div className="flex items-center gap-3"><img src="/pwa-icon-192.svg" alt="O Patriota" className="h-11 w-11 rounded-full bg-[#FFCC29] p-1" />{!sidebarCollapsed && <div><p className="font-serif text-xl font-black">O PATRIOTA</p><p className="text-[8px] uppercase tracking-widest text-white/70">Painel administrativo</p></div>}</div><button type="button" aria-label={sidebarCollapsed ? 'Expandir menu' : 'Minimizar menu'} onClick={() => setSidebarCollapsed((value) => !value)} className="rounded-lg p-2 hover:bg-white/10">{sidebarCollapsed ? <Menu className="h-5 w-5" /> : <X className="h-5 w-5" />}</button></div>
+          <div className="space-y-1">{menuGroups.map((group) => { const Icon = group.icon; return <details key={group.label} open={!sidebarCollapsed && group.label === 'Início'} className="group rounded-xl border border-white/15 bg-white/[.03] open:bg-white/[.06]"><summary className={`flex cursor-pointer list-none items-center gap-3 px-3 py-3 font-bold [&::-webkit-details-marker]:hidden ${sidebarCollapsed ? 'justify-center' : ''}`} title={sidebarCollapsed ? group.label : undefined}><span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${group.color}`}><Icon className="h-5 w-5" /></span>{!sidebarCollapsed && <><span className="flex-1 text-sm">{group.label}</span><ChevronUp className="h-4 w-4 transition-transform group-open:rotate-180" /></>}</summary>{!sidebarCollapsed && <div className="space-y-0.5 px-2 pb-2">{group.items.map((item) => { const ItemIcon = item.icon; const active = sectionMatches(item.section); return <button key={`${group.label}-${item.label}`} aria-current={active ? 'page' : undefined} onClick={() => onNavigate ? onNavigate(item.section) : undefined} className={`flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left text-sm cursor-pointer ${active ? 'bg-[#087CF0] text-white' : 'text-white/85 hover:bg-[#087CF0]/40 hover:text-white'}`}><ItemIcon className="h-4 w-4 shrink-0" /><span className="flex-1">{item.label}</span></button>; })}</div>}</details>; })}</div>
         </aside>
         <section className="order-1 min-w-0 xl:order-2 xl:col-start-2">
         <div className="mb-7 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">

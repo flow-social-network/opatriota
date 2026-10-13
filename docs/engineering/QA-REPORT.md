@@ -52,6 +52,15 @@
 
 Não foi criado bootstrap de contas neste turno porque a implementação de autenticação existente precisa ser auditada antes de inserir usuários ou alterar banco. Não há credenciais gravadas no código nem expostas nos logs.
 
+## Correção do menu administrativo — 2026-10-13
+
+- Categorias oficiais implementadas: Início; Usuários e Permissões; Gestão Editorial; Jornal Digital; Financeiro; Relatórios e Métricas; Integrações; Configurações; Segurança e Auditoria; Sistema e Suporte.
+- Entradas editoriais duplicadas foram removidas do menu administrativo; continuam apenas no painel `/redacao`.
+- Grupos são recolhíveis, a navegação marca o item ativo e o menu pode ser minimizado para uma coluna de ícones.
+- Todas as opções apontam para rotas existentes: `/admin`, `/admin/conteudo`, `/admin/jornal-digital`, `/admin/financeiro`, `/admin/usuarios`, `/admin/relatorios`, `/admin/integracoes`, `/admin/configuracoes`, `/admin/seguranca` e `/admin/suporte`.
+- TypeScript, build Vite e `git diff --check`: PASSED.
+- Teste autenticado de cada ação e persistência: BLOCKED sem navegador executável e conta administrativa de teste. O código não marca essas operações como confirmadas.
+
 ## Bloqueio externo preciso
 
 O teste E2E não iniciou porque o Chromium headless encontrou `libnspr4.so` ausente no ambiente Linux. A instalação do navegador foi concluída. Para reproduzir quando a dependência estiver disponível: `pnpm test:qa:navigation`.
