@@ -774,8 +774,8 @@ export const Header: React.FC<HeaderProps> = ({
               </button>
 
               {/* Manifesto institucional direito da referência */}
-              <div className="absolute right-9 top-1/2 -translate-y-1/2 border-r-4 border-[#16A34A] pr-7 text-right hidden xl:block">
-                <p className="text-[16px] font-black tracking-[0.18em] leading-relaxed text-[#0B2345]">FATOS<br />IDEIAS<br />PESSOAS<br />SOLUÇÕES<br /><span className="text-[#16A34A]">PELO BRASIL</span></p>
+              <div className="absolute right-7 top-1/2 -translate-y-1/2 border-r-4 border-[#16A34A] pr-5 text-right hidden xl:block">
+                <p className="text-[13px] font-black tracking-[0.14em] leading-[1.08] text-[#0B2345]">FATOS<br />IDEIAS<br />PESSOAS<br />SOLUÇÕES<br /><span className="text-[#16A34A]">PELO BRASIL</span></p>
               </div>
 
               {/* Linha Centralizada: Sino Notificação + Usuário */}
