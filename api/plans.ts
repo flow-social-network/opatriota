@@ -1,6 +1,6 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
-import { CATALOG, json } from './_lib/billing';
-import { handleCors } from './_lib/cors';
+import { CATALOG, json } from './_lib/billing.js';
+import { handleCors } from './_lib/cors.js';
 
 export default function handler(req: IncomingMessage & { method?: string; headers: any }, res: ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void }) {
   if (handleCors(req, res)) return;

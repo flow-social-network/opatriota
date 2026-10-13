@@ -1,5 +1,5 @@
 import { createCipheriv, createDecipheriv, createHash, randomBytes } from 'node:crypto';
-import { documentGet, documentList, documentWrite } from './storage';
+import { documentGet, documentList, documentWrite } from './storage.js';
 
 export type IntegrationKey = 'ai' | 'payments' | 'email' | 'analytics' | 'social' | 'media' | 'auth';
 export type IntegrationConfig = { id: IntegrationKey; provider: string; model?: string; environment?: 'sandbox' | 'production'; enabled: boolean; settings: Record<string, string>; updatedAt: string; updatedBy?: string; lastTest?: { ok: boolean; message: string; at: string } };

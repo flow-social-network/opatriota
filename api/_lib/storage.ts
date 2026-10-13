@@ -1,9 +1,9 @@
 import type { Pool as MysqlPool } from 'mysql2/promise';
 import type { Pool as PostgresPool } from 'pg';
-import { firestoreDelete, firestoreGet, firestoreList, firestoreWrite } from './billing';
+import { firestoreDelete, firestoreGet, firestoreList, firestoreWrite } from './billing.js';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { getInitialSeedData } from './seedData';
+import { getInitialSeedData } from './seedData.js';
 
 export type DatabaseProvider = 'firestore' | 'postgres' | 'mysql' | 'local_disk';
 

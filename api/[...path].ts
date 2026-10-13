@@ -3,11 +3,11 @@ import { createHash } from 'node:crypto';
 import { put } from '@vercel/blob';
 import {
   json, newId, readBody, validEmail, verifyFirebaseIdToken
-} from './_lib/billing';
-import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage';
-import { listIntegrations, saveIntegration, testIntegration } from './_lib/integrations';
-import { handleCors } from './_lib/cors';
-import { authenticateEditorialUser, authenticatePublicUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, registerPublicUser, revokeEditorialSession, sessionCookie } from './_lib/neonAuth';
+} from './_lib/billing.js';
+import { documentDelete, documentGet, documentList, documentWrite } from './_lib/storage.js';
+import { listIntegrations, saveIntegration, testIntegration } from './_lib/integrations.js';
+import { handleCors } from './_lib/cors.js';
+import { authenticateEditorialUser, authenticatePublicUser, editorialUserToSession, getEditorialIdentity, readSessionCookie, registerPublicUser, revokeEditorialSession, sessionCookie } from './_lib/neonAuth.js';
 
 type Req = IncomingMessage & { method?: string; headers: Record<string, string | string[] | undefined>; body?: unknown };
 type Res = ServerResponse & { statusCode: number; setHeader(name: string, value: string): void; end(body?: string): void };
